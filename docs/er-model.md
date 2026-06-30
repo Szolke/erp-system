@@ -45,6 +45,7 @@ Státusz: tervezet (v1) — a Laravel migrations/modellek ez alapján készülne
 | invoice_header_text, invoice_footer_text | text nullable | bizonylatfejléc/lábléc |
 | base_currency | char(3) default `HUF` | |
 | is_active | boolean default true | |
+| nav_environment | enum(`test`,`production`) default `test` | melyik `company_nav_credentials.environment` sort használja a `SendInvoiceToNavJob` — utólag, 2026-06-30-án adva hozzá |
 | timestamps | | |
 
 Index: unique(`tax_number`).
@@ -270,3 +271,6 @@ Index: (`company_id`,`created_at`); (`auditable_type`,`auditable_id`).
 2. `partners` egyedi `tax_number` kényszerítve legyen-e cégen belül? (Jelenleg csak index, nem unique, mert
    magánszemély partnernek nincs adószáma.)
 3. Riport/raktárkészlet modul a jövőben épül majd a `products` táblára — ebben a körben nem készül tábla rá.
+
+> A megvalósítás tényleges állapota (kész lépések, ismert hiányosságok, demo bejelentkezés)
+> a [progress.md](progress.md)-ben — ez a doksi a *tervet* írja le, a progress.md a *tényt*.

@@ -1,5 +1,13 @@
 # Munkamódszer és projekt-kontextus
 
+## Indulás előtt — mindig olvasd el ezt is
+- [docs/progress.md](docs/progress.md): mit csináltunk eddig (lépésenként, commit-hash-ekkel),
+  mi van hátra, architekturális konvenciók, ismert nyitott pontok, demo bejelentkezés.
+  Egy-egy nagyobb lépés (commit-csoport) végén EZT A FÁJLT IS FRISSÍTSD — ez tartja a
+  következő munkamenetet (vagy kontextus-vesztés utáni folytatást) gyorsan tájékozottnak,
+  anélkül hogy a git logból/kódból kelljen visszafejteni az állapotot.
+- [docs/er-model.md](docs/er-model.md): a tábla-/mezőszintű adatmodell terve.
+
 ## Kommunikáció
 - Magyar nyelven kommunikálj, érthetően; technikai zsargon esetén adj rövid magyarázatot.
 - Mielőtt parancsot futtatsz vagy fájlt módosítasz, írd le röviden, mit és miért csinálsz.

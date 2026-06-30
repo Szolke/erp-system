@@ -90,6 +90,12 @@ export default function InvoiceCreatePage() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+
+    if (items.some((item) => !item.product_id)) {
+      setError('Minden tételhez kötelező terméket választani.')
+      return
+    }
+
     setSaving(true)
     try {
       const payload = {

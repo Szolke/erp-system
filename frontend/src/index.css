@@ -89,17 +89,28 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .detail-label { font-size: 11px; font-weight: 600; color: var(--color-muted); text-transform: uppercase; }
 .detail-value { font-size: 14px; }
 
-/* ── ProductComboBox ─────────────────────────────────────────── */
-.product-combobox { position: relative; }
-.product-dropdown { position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: #fff; border: 1px solid var(--color-border); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,.12); z-index: 100; list-style: none; margin: 0; padding: 4px 0; max-height: 260px; overflow-y: auto; min-width: 280px; }
-.product-dropdown li { display: flex; align-items: baseline; gap: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; }
-.product-dropdown li:hover { background: #f1f5f9; }
-.pd-sku { font-weight: 600; color: var(--color-muted); font-size: 11px; white-space: nowrap; }
-.pd-name { flex: 1; color: var(--color-text); }
-.pd-price { color: var(--color-muted); font-size: 11px; white-space: nowrap; }
+/* ── ProductComboBox (Select2-like) ──────────────────────────── */
+.sp-trigger { display: flex; align-items: center; border: 1px solid var(--color-border); border-radius: 5px; background: #fff; padding: 6px 8px; cursor: pointer; min-height: 36px; gap: 6px; user-select: none; }
+.sp-trigger:hover { border-color: #94a3b8; }
+.sp-trigger.is-open { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+.sp-value { display: flex; align-items: center; gap: 6px; flex: 1; overflow: hidden; }
+.sp-val-sku { font-weight: 700; color: var(--color-primary); font-size: 11px; white-space: nowrap; flex-shrink: 0; background: #dbeafe; padding: 1px 5px; border-radius: 3px; }
+.sp-val-name { color: var(--color-text); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sp-placeholder { flex: 1; color: #94a3b8; font-size: 13px; }
+.sp-icons { display: flex; align-items: center; gap: 4px; flex-shrink: 0; margin-left: auto; }
+.sp-clear { background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 16px; line-height: 1; padding: 0 2px; }
+.sp-clear:hover { color: var(--color-danger); }
+.sp-arrow { font-size: 10px; color: #94a3b8; }
 
-.product-selected-chip { display: flex; align-items: center; gap: 6px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 5px; padding: 5px 8px; font-size: 13px; }
-.chip-sku { font-weight: 700; color: var(--color-primary); font-size: 11px; white-space: nowrap; }
-.chip-name { flex: 1; color: var(--color-text); }
-.chip-clear { background: none; border: none; cursor: pointer; color: var(--color-muted); font-size: 16px; line-height: 1; padding: 0 2px; flex-shrink: 0; }
-.chip-clear:hover { color: var(--color-danger); }
+.sp-dropdown { background: #fff; border: 1px solid var(--color-border); border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,.12); overflow: hidden; min-width: 260px; }
+.sp-search-wrap { padding: 8px; border-bottom: 1px solid var(--color-border); }
+.sp-search-input { width: 100%; padding: 6px 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 13px; box-sizing: border-box; }
+.sp-search-input:focus { outline: none; border-color: var(--color-primary); }
+.sp-status { padding: 10px 12px; font-size: 13px; color: var(--color-muted); }
+.sp-list { list-style: none; margin: 0; padding: 4px 0; max-height: 240px; overflow-y: auto; }
+.sp-option { display: flex; align-items: baseline; gap: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; }
+.sp-option:hover, .sp-option.is-selected { background: #f1f5f9; }
+.sp-option.is-selected .sp-opt-name { font-weight: 600; color: var(--color-primary); }
+.sp-opt-sku { font-size: 11px; font-weight: 600; color: var(--color-muted); white-space: nowrap; min-width: 60px; }
+.sp-opt-name { flex: 1; color: var(--color-text); }
+.sp-opt-price { font-size: 11px; color: var(--color-muted); white-space: nowrap; }

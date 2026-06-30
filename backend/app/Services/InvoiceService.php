@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\DocumentType;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentStatus;
+use App\Jobs\SendInvoiceToNavJob;
 use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\User;
@@ -48,7 +49,11 @@ class InvoiceService
             $this->createItems($invoice, $data['items']);
             $this->updateTotals($invoice, $exchangeRate);
 
-            return $invoice->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
+            $loaded = $invoice->refresh()->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
+
+            SendInvoiceToNavJob::dispatch($invoice->id, 'CREATE');
+
+            return $loaded;
         });
     }
 
@@ -113,7 +118,11 @@ class InvoiceService
 
             $this->updateTotals($storno, (float) $storno->exchange_rate);
 
-            return $storno->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
+            $loaded = $storno->refresh()->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
+
+            SendInvoiceToNavJob::dispatch($storno->id, 'STORNO');
+
+            return $loaded;
         });
     }
 

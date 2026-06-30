@@ -3,19 +3,31 @@ import { useNavigate, Link } from 'react-router-dom'
 import { invoices } from '../../api/invoices'
 import { partners } from '../../api/partners'
 import client from '../../api/client'
+import ProductComboBox from '../../components/ProductComboBox'
 
 const today = () => new Date().toISOString().split('T')[0]
 const plus30 = () => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0] }
 
-const emptyItem = () => ({ description: '', quantity: 1, unit: 'db', unit_price: '', vat_rate_id: '', discount_percent: '' })
+const emptyItem = (defaultVatId = '') => ({
+  product_id: null,
+  description: '',
+  quantity: 1,
+  unit: 'db',
+  unit_price: '',
+  vat_rate_id: defaultVatId,
+  discount_percent: '',
+})
 
 export default function InvoiceCreatePage() {
   const navigate = useNavigate()
   const [partnerList, setPartnerList] = useState([])
   const [vatRates, setVatRates] = useState([])
   const [payMethods, setPayMethods] = useState([])
+  const [defaultVatId, setDefaultVatId] = useState('')
   const [form, setForm] = useState({
-    partner_id: '', payment_method_id: '', issue_date: today(), fulfillment_date: today(), due_date: plus30(), currency: 'HUF', notes: '',
+    partner_id: '', payment_method_id: '',
+    issue_date: today(), fulfillment_date: today(), due_date: plus30(),
+    currency: 'HUF', notes: '',
   })
   const [items, setItems] = useState([emptyItem()])
   const [error, setError] = useState('')
@@ -30,15 +42,37 @@ export default function InvoiceCreatePage() {
       setPartnerList(p.data.data ?? [])
       setVatRates(v.data.data ?? [])
       setPayMethods(m.data.data ?? [])
-      if (v.data.data?.[0]) setItems([{ ...emptyItem(), vat_rate_id: v.data.data[0].id }])
+      const firstVat = v.data.data?.[0]?.id ?? ''
+      setDefaultVatId(firstVat)
+      setItems([emptyItem(firstVat)])
       if (m.data.data?.[0]) setForm((f) => ({ ...f, payment_method_id: m.data.data[0].id }))
     })
   }, [])
 
   function setField(k, v) { setForm((f) => ({ ...f, [k]: v })) }
-  function setItem(i, k, v) { setItems((it) => it.map((item, idx) => idx === i ? { ...item, [k]: v } : item)) }
-  function addItem() { setItems((it) => [...it, { ...emptyItem(), vat_rate_id: vatRates[0]?.id ?? '' }]) }
-  function removeItem(i) { setItems((it) => it.filter((_, idx) => idx !== i)) }
+
+  function setItem(i, k, v) {
+    setItems((it) => it.map((item, idx) => idx === i ? { ...item, [k]: v } : item))
+  }
+
+  function handleProductSelect(i, product) {
+    setItems((it) => it.map((item, idx) => idx === i ? {
+      ...item,
+      product_id: product.id,
+      description: product.name,
+      unit: product.unit,
+      unit_price: product.base_price,
+      vat_rate_id: product.vat_rate_id,
+    } : item))
+  }
+
+  function addItem() {
+    setItems((it) => [...it, emptyItem(defaultVatId)])
+  }
+
+  function removeItem(i) {
+    setItems((it) => it.filter((_, idx) => idx !== i))
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -48,6 +82,7 @@ export default function InvoiceCreatePage() {
       const payload = {
         ...form,
         items: items.map((item) => ({
+          ...(item.product_id ? { product_id: item.product_id } : {}),
           description: item.description,
           quantity: Number(item.quantity),
           unit: item.unit,
@@ -117,23 +152,62 @@ export default function InvoiceCreatePage() {
           <table className="items-table mt-4">
             <thead>
               <tr>
-                <th style={{ width: '35%' }}>Megnevezés</th>
-                <th>Me.</th><th>Mennyiség</th><th>Egységár</th><th>ÁFA</th><th>Kedv. %</th><th></th>
+                <th style={{ width: '30%' }}>Termék / Megnevezés</th>
+                <th>Me.</th>
+                <th>Mennyiség</th>
+                <th>Egységár</th>
+                <th>ÁFA</th>
+                <th>Kedv. %</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {items.map((item, i) => (
                 <tr key={i}>
-                  <td><input value={item.description} onChange={(e) => setItem(i, 'description', e.target.value)} required /></td>
-                  <td><input value={item.unit} onChange={(e) => setItem(i, 'unit', e.target.value)} style={{ width: 60 }} /></td>
-                  <td><input type="number" step="0.001" value={item.quantity} onChange={(e) => setItem(i, 'quantity', e.target.value)} style={{ width: 80 }} required /></td>
-                  <td><input type="number" step="0.01" value={item.unit_price} onChange={(e) => setItem(i, 'unit_price', e.target.value)} style={{ width: 100 }} required /></td>
                   <td>
-                    <select value={item.vat_rate_id} onChange={(e) => setItem(i, 'vat_rate_id', e.target.value)} required style={{ width: 120 }}>
+                    <ProductComboBox
+                      description={item.description}
+                      onDescriptionChange={(val) => setItem(i, 'description', val)}
+                      onSelect={(product) => handleProductSelect(i, product)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={item.unit}
+                      onChange={(e) => setItem(i, 'unit', e.target.value)}
+                      style={{ width: 60 }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number" step="0.001" value={item.quantity}
+                      onChange={(e) => setItem(i, 'quantity', e.target.value)}
+                      style={{ width: 80 }} required
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number" step="0.01" value={item.unit_price}
+                      onChange={(e) => setItem(i, 'unit_price', e.target.value)}
+                      style={{ width: 100 }} required
+                    />
+                  </td>
+                  <td>
+                    <select
+                      value={item.vat_rate_id}
+                      onChange={(e) => setItem(i, 'vat_rate_id', e.target.value)}
+                      required style={{ width: 120 }}
+                    >
                       {vatRates.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
                     </select>
                   </td>
-                  <td><input type="number" step="0.01" value={item.discount_percent} onChange={(e) => setItem(i, 'discount_percent', e.target.value)} style={{ width: 70 }} placeholder="0" /></td>
+                  <td>
+                    <input
+                      type="number" step="0.01" value={item.discount_percent}
+                      onChange={(e) => setItem(i, 'discount_percent', e.target.value)}
+                      style={{ width: 70 }} placeholder="0"
+                    />
+                  </td>
                   <td>
                     {items.length > 1 && (
                       <button type="button" className="btn btn-danger btn-sm" onClick={() => removeItem(i)}>×</button>
@@ -147,7 +221,9 @@ export default function InvoiceCreatePage() {
         </div>
 
         <div className="flex">
-          <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? 'Mentés…' : 'Számla kiállítása'}</button>
+          <button className="btn btn-primary" type="submit" disabled={saving}>
+            {saving ? 'Mentés…' : 'Számla kiállítása'}
+          </button>
           <Link to="/invoices" className="btn btn-secondary">Mégsem</Link>
         </div>
       </form>

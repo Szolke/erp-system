@@ -2,19 +2,25 @@
 
 namespace Database\Seeders;
 
+use App\Enums\PartnerType;
 use App\Enums\PermissionEffect;
+use App\Enums\ProductType;
 use App\Models\Company;
 use App\Models\Group;
+use App\Models\Partner;
 use App\Models\Permission;
+use App\Models\Product;
 use App\Models\User;
 use App\Models\UserPermissionOverride;
+use App\Models\VatRate;
 use Illuminate\Database\Seeder;
 
 /**
  * Reproducible sandbox data for manually exercising auth/RBAC/company-switch
- * against the SPA: one company, the Test User as a member with a "Pénzügy"
- * group (invoice.view + invoice.create), plus one allow and one deny
- * override to demonstrate that per-user overrides win over group grants.
+ * against the SPA: one company, the Test User in two groups ("Pénzügy" for
+ * invoice.view/create, "Törzsadatkezelő" for product/partner/company rights),
+ * plus one allow and one deny override on top to demonstrate that per-user
+ * overrides win over group grants.
  */
 class DemoDataSeeder extends Seeder
 {
@@ -52,6 +58,22 @@ class DemoDataSeeder extends Seeder
         );
         $group->users()->syncWithoutDetaching([$user->id]);
 
+        // Second group on purpose: exercises multi-group membership (the
+        // resolver must union permissions across all of the user's groups).
+        $masterDataGroup = Group::query()->updateOrCreate(
+            ['company_id' => $company->id, 'name' => 'Törzsadatkezelő'],
+            ['description' => 'Termékek, partnerek és cégadatok karbantartása']
+        );
+
+        $masterDataGroup->permissions()->sync(
+            Permission::query()->whereIn('key', [
+                'product.view', 'product.create', 'product.edit', 'product.delete',
+                'partner.view', 'partner.create', 'partner.edit', 'partner.delete',
+                'company.view', 'company.manage',
+            ])->pluck('id')
+        );
+        $masterDataGroup->users()->syncWithoutDetaching([$user->id]);
+
         $invoiceCancel = Permission::query()->where('key', 'invoice.cancel')->first();
         $invoiceView = Permission::query()->where('key', 'invoice.view')->first();
 
@@ -65,6 +87,31 @@ class DemoDataSeeder extends Seeder
         UserPermissionOverride::query()->updateOrCreate(
             ['user_id' => $user->id, 'company_id' => $company->id, 'permission_id' => $invoiceView->id],
             ['effect' => PermissionEffect::Deny]
+        );
+
+        $normalVatRate = VatRate::query()->where('nav_code', '0.27')->first();
+
+        Product::query()->updateOrCreate(
+            ['company_id' => $company->id, 'sku' => 'TERM-001'],
+            [
+                'name' => 'Tanácsadás',
+                'unit' => 'óra',
+                'type' => ProductType::Service,
+                'vat_rate_id' => $normalVatRate->id,
+                'base_price' => 15000,
+                'base_currency' => 'HUF',
+            ]
+        );
+
+        Partner::query()->updateOrCreate(
+            ['company_id' => $company->id, 'name' => 'Teszt Vevő Kft.'],
+            [
+                'type' => PartnerType::Customer,
+                'billing_postal_code' => '1010',
+                'billing_city' => 'Budapest',
+                'billing_address_line' => 'Vevő utca 2.',
+                'default_currency' => 'HUF',
+            ]
         );
     }
 }

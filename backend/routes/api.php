@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Api\ActiveCompanyController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\PartnerController;
+use App\Http\Controllers\Api\ProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])
@@ -13,6 +16,13 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/active-company', [ActiveCompanyController::class, 'update']);
 
-    // Company-scoped resource routes (products, partners, invoices, ...) go here
-    // in later phases — they rely on this group's company.context middleware.
+    Route::get('/company', [CompanyController::class, 'show']);
+    Route::put('/company', [CompanyController::class, 'update']);
+
+    Route::apiResource('products', ProductController::class);
+    Route::apiResource('partners', PartnerController::class);
+
+    // Further company-scoped resource routes (invoices, receipts, ...) go
+    // here in later phases — they rely on this group's company.context
+    // middleware.
 });

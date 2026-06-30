@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\AuditLogger;
 use App\Services\PermissionChecker;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
@@ -26,8 +27,11 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        $user = $request->user();
+        app(AuditLogger::class)->log('auth.login', null, $user->id);
+
         return response()->json([
-            'user' => $request->user(),
+            'user' => $user,
         ]);
     }
 

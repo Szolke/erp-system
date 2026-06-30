@@ -45,11 +45,11 @@ class ReceiptController extends Controller
         );
     }
 
-    public function cancel(Receipt $receipt)
+    public function cancel(Receipt $receipt, Request $request)
     {
         $this->authorize('receipt.cancel');
 
-        $storno = $this->receiptService->cancel($receipt);
+        $storno = $this->receiptService->cancel($receipt, $request->user());
 
         return ReceiptResource::make($storno)->response()->setStatusCode(201);
     }

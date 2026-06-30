@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ActiveCompanyController;
+use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\InvoiceController;
@@ -33,6 +34,8 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     Route::apiResource('invoices', InvoiceController::class)->only(['index', 'store', 'show']);
     Route::post('invoices/{invoice}/cancel', [InvoiceController::class, 'cancel']);
+    Route::get('audit-logs', [AuditLogController::class, 'index']);
+
     Route::get('invoices/{invoice}/payments', [PaymentController::class, 'index']);
     Route::post('invoices/{invoice}/payments', [PaymentController::class, 'store']);
     Route::post('invoices/{invoice}/simplepay', [SimplePayController::class, 'start']);

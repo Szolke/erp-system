@@ -106,7 +106,7 @@ class DemoDataSeeder extends Seeder
             Permission::query()->whereIn('key', [
                 'product.view', 'product.create', 'product.edit', 'product.delete',
                 'partner.view', 'partner.create', 'partner.edit', 'partner.delete',
-                'company.view', 'company.manage',
+                'company.view', 'company.manage', 'audit.view',
             ])->pluck('id')
         );
         $masterDataGroup->users()->syncWithoutDetaching([$user->id]);

@@ -15,7 +15,10 @@ use Illuminate\Validation\ValidationException;
 
 class InvoiceService
 {
-    public function __construct(private InvoiceNumberGenerator $numberGenerator) {}
+    public function __construct(
+        private InvoiceNumberGenerator $numberGenerator,
+        private AuditLogger $auditLogger,
+    ) {}
 
     public function create(Company $company, array $data, User $creator): Invoice
     {
@@ -50,6 +53,13 @@ class InvoiceService
             $this->updateTotals($invoice, $exchangeRate);
 
             $loaded = $invoice->refresh()->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
+
+            $this->auditLogger->log('invoice.create', $company->id, $creator->id, $invoice, null, [
+                'invoice_number' => $invoice->invoice_number,
+                'partner_id' => $invoice->partner_id,
+                'gross_total' => $invoice->gross_total,
+                'currency' => $invoice->currency,
+            ]);
 
             SendInvoiceToNavJob::dispatch($invoice->id, 'CREATE');
 
@@ -119,6 +129,12 @@ class InvoiceService
             $this->updateTotals($storno, (float) $storno->exchange_rate);
 
             $loaded = $storno->refresh()->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
+
+            $this->auditLogger->log('invoice.cancel', $invoice->company_id, $actor->id, $invoice, [
+                'invoice_number' => $invoice->invoice_number,
+            ], [
+                'storno_invoice_number' => $storno->invoice_number,
+            ]);
 
             SendInvoiceToNavJob::dispatch($storno->id, 'STORNO');
 

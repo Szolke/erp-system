@@ -17,7 +17,10 @@ use Illuminate\Validation\ValidationException;
  */
 class ReceiptService
 {
-    public function __construct(private InvoiceNumberGenerator $numberGenerator) {}
+    public function __construct(
+        private InvoiceNumberGenerator $numberGenerator,
+        private AuditLogger $auditLogger,
+    ) {}
 
     public function create(Company $company, array $data, User $creator): Receipt
     {
@@ -47,11 +50,18 @@ class ReceiptService
             $this->createItems($receipt, $data['items']);
             $this->updateTotals($receipt);
 
-            return $receipt->refresh()->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
+            $loaded = $receipt->refresh()->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
+
+            $this->auditLogger->log('receipt.create', $company->id, $creator->id, $receipt, null, [
+                'receipt_number' => $receipt->receipt_number,
+                'gross_total' => $receipt->gross_total,
+            ]);
+
+            return $loaded;
         });
     }
 
-    public function cancel(Receipt $receipt): Receipt
+    public function cancel(Receipt $receipt, ?User $actor = null): Receipt
     {
         if ($receipt->status === ReceiptStatus::Storno) {
             throw ValidationException::withMessages(['receipt' => ['Egy sztornó nyugta nem sztornózható.']]);
@@ -61,7 +71,7 @@ class ReceiptService
             throw ValidationException::withMessages(['receipt' => ['A nyugta már sztornózva van.']]);
         }
 
-        return DB::transaction(function () use ($receipt) {
+        return DB::transaction(function () use ($receipt, $actor) {
             $receipt->load('items');
 
             [$series, $receiptNumber] = $this->numberGenerator->next(
@@ -98,7 +108,15 @@ class ReceiptService
 
             $this->updateTotals($storno);
 
-            return $storno->refresh()->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
+            $loaded = $storno->refresh()->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
+
+            $this->auditLogger->log('receipt.cancel', $receipt->company_id, $actor?->id, $receipt, [
+                'receipt_number' => $receipt->receipt_number,
+            ], [
+                'storno_receipt_number' => $storno->receipt_number,
+            ]);
+
+            return $loaded;
         });
     }
 

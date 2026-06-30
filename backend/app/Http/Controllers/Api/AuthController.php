@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\PermissionChecker;
+use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -39,14 +41,15 @@ class AuthController extends Controller
         return response()->noContent();
     }
 
-    public function me(Request $request)
+    public function me(Request $request, PermissionChecker $permissionChecker, CurrentCompany $currentCompany)
     {
         $user = $request->user();
 
         return response()->json([
             'user' => $user,
             'companies' => $user->companies()->get(['companies.id', 'companies.name'])->makeHidden('pivot'),
-            'active_company_id' => $request->session()->get('current_company_id'),
+            'active_company_id' => $currentCompany->id(),
+            'permissions' => $permissionChecker->effectivePermissionKeys($user, $currentCompany->id()),
         ]);
     }
 }

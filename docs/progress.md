@@ -5,7 +5,7 @@
 > git logból/kódból kelljen visszafejtse, hol tartunk — itt egyben megtalálja.
 > Részletes tábla-/mezőszintű terv: [er-model.md](er-model.md).
 
-Utolsó frissítés: 2026-06-30, a 9. lépés (fizetések + SimplePay) után.
+Utolsó frissítés: 2026-06-30, a 10-11. lépés (audit log + frontend) után.
 
 ## Kész lépések
 
@@ -22,12 +22,15 @@ Utolsó frissítés: 2026-06-30, a 9. lépés (fizetések + SimplePay) után.
 | — | Queue worker + scheduler ténylegesen fut a konténerben (supervisor) | `backend/docker/8.5/supervisord.conf` | `99628b0` |
 | — | NAV teszt/éles kapcsoló cégenként (`companies.nav_environment`) | migráció + `SendInvoiceToNavJob` | `e5cdd84` |
 | 9 | Kézi fizetésrögzítés + SimplePay (start + IPN, HMAC-SHA384 aláírással) | `PaymentController`, `SimplePayController`, `SimplePayIpnController`, `SimplePayClient` | `0aa316e` |
+| 10 | Audit log: `AuditLogger` service, bekötve login/invoice/receipt/company műveletekbe; `GET /api/audit-logs` | `AuditLogger`, `AuditLogController` | `5d5cd6e` |
+| 11 | React SPA frontend: login, company-switcher, számla/nyugta/partner/termék listák+CRUD+detail, cégbeállítás (nav_environment toggle), audit napló nézet | `frontend/src/` teljes SPA | `db01b86` |
 
-## Még hátravan (eredeti terv szerint)
+## Még hátravan
 
-- **10. Audit log** — observer/event listener érzékeny műveletekhez (sztornó, jogosultság-módosítás). A `audit_logs` tábla és `AuditLog` modell már létezik (1-2. lépés), de **semmi nem ír bele még**.
-- **11. Frontend** — a React SPA (`frontend/`) still csak a Vite-default scaffold, semmilyen API-hívás nincs bekötve (auth, company-switcher, törzsadat CRUD UI-k, számla kiállítás folyamat mind hiányzik).
-- PDF-generálás (számla/nyugta bizonylat) — szándékosan kihagyva eddig, lásd "Nyitott pontok".
+- **PDF-generálás** (számla/nyugta bizonylat) — `pdf_path` mező van az invoices/receipts táblában, de sem könyvtár (pl. barryvdh/laravel-dompdf), sem template, sem controller-endpoint nincs hozzá.
+- **RBAC management UI/API** — a csoportok és user-override-ok CRUD-ja API-n keresztül (jelenleg csak seederből/tinkerből kezelhető). A `groups`, `group_permissions`, `user_group`, `user_permission_overrides` táblák és modellek léteznek.
+- **Cég-onboarding** — `CompanyController` csak az aktív céget kezeli, új cég létrehozása + első felhasználó hozzárendelése nincs megépítve.
+- **Frontend finomítás** — a jelenlegi frontend funkcionális első változat; szükséges lehet: hibakezelés bővítése, pagination kezelés (csak az első oldal jelenik meg), lapozó UI, Toast-értesítések sikeres/hibás műveletekre, SimplePay fizetés indítás gomb InvoiceDetailPage-ből.
 
 ## Architekturális konvenciók (amit egy új munkamenetnek tudnia kell)
 

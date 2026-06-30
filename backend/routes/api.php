@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReceiptController;
 use App\Http\Controllers\Api\SimplePayController;
 use App\Http\Controllers\Api\SimplePayIpnController;
+use App\Models\PaymentMethod;
+use App\Models\VatRate;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])
@@ -24,6 +26,10 @@ Route::post('/simplepay/ipn', [SimplePayIpnController::class, 'handle']);
 
 Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
+
+    // Global catalog lookups (no write, no tenant scoping needed)
+    Route::get('/vat-rates', fn () => response()->json(['data' => VatRate::where('is_active', true)->get()]));
+    Route::get('/payment-methods', fn () => response()->json(['data' => PaymentMethod::where('is_active', true)->get()]));
     Route::put('/active-company', [ActiveCompanyController::class, 'update']);
 
     Route::get('/company', [CompanyController::class, 'show']);

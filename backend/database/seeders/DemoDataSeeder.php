@@ -75,19 +75,29 @@ class DemoDataSeeder extends Seeder
         $masterDataGroup->users()->syncWithoutDetaching([$user->id]);
 
         $invoiceCancel = Permission::query()->where('key', 'invoice.cancel')->first();
-        $invoiceView = Permission::query()->where('key', 'invoice.view')->first();
+        $docSeriesManage = Permission::query()->where('key', 'document_series.manage')->first();
 
-        // Demonstrates an override granting a right the group doesn't have...
+        // Demonstrates an override granting a right the group doesn't have:
+        // invoice.cancel is not in "Pénzügy", but an explicit allow grants it.
         UserPermissionOverride::query()->updateOrCreate(
             ['user_id' => $user->id, 'company_id' => $company->id, 'permission_id' => $invoiceCancel->id],
             ['effect' => PermissionEffect::Allow]
         );
 
-        // ...and one revoking a right the group does have.
+        // Demonstrates a deny override: document_series.manage is blocked
+        // explicitly (the group doesn't grant it either, so this is redundant
+        // from an access-control perspective but exercises the deny path).
         UserPermissionOverride::query()->updateOrCreate(
-            ['user_id' => $user->id, 'company_id' => $company->id, 'permission_id' => $invoiceView->id],
+            ['user_id' => $user->id, 'company_id' => $company->id, 'permission_id' => $docSeriesManage->id],
             ['effect' => PermissionEffect::Deny]
         );
+
+        // Remove any stale invoice.view deny override that blocks testing.
+        UserPermissionOverride::query()
+            ->where('user_id', $user->id)
+            ->where('company_id', $company->id)
+            ->whereHas('permission', fn ($q) => $q->where('key', 'invoice.view'))
+            ->delete();
 
         $normalVatRate = VatRate::query()->where('nav_code', '0.27')->first();
 

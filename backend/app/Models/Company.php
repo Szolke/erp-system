@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\NavEnvironment;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'name', 'tax_number', 'eu_tax_number', 'registration_number',
     'postal_code', 'city', 'address_line', 'country_code',
     'email', 'phone', 'logo_path', 'invoice_header_text', 'invoice_footer_text',
-    'base_currency', 'is_active',
+    'base_currency', 'is_active', 'nav_environment',
 ])]
 class Company extends Model
 {
@@ -22,6 +23,7 @@ class Company extends Model
     {
         return [
             'is_active' => 'boolean',
+            'nav_environment' => NavEnvironment::class,
         ];
     }
 

@@ -26,6 +26,7 @@ class CompanyResource extends JsonResource
             'invoice_footer_text' => $this->invoice_footer_text,
             'base_currency' => $this->base_currency,
             'is_active' => $this->is_active,
+            'nav_environment' => $this->nav_environment,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

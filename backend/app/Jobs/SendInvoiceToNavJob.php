@@ -36,7 +36,12 @@ class SendInvoiceToNavJob implements ShouldQueue
         $invoice = Invoice::with(['company.navCredentials', 'partner', 'paymentMethod', 'items.vatRate'])
             ->findOrFail($this->invoiceId);
 
+        // Uses whichever environment the company is currently switched to
+        // (companies.nav_environment) rather than just "the first active
+        // credential" — a company can have both a test and a production
+        // credential row at once, switching between them deliberately.
         $credential = $invoice->company->navCredentials()
+            ->where('environment', $invoice->company->nav_environment)
             ->where('is_active', true)
             ->first();
 

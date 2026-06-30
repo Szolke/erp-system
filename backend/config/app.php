@@ -54,6 +54,10 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // React SPA origin — used to build redirect URLs handed to external
+    // services (e.g. SimplePay's post-payment return URL).
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5174'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

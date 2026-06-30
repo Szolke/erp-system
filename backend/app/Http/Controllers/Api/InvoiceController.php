@@ -33,8 +33,8 @@ class InvoiceController extends Controller
             ->with('partner')
             ->when($request->string('search')->trim()->isNotEmpty(), function ($query) use ($request) {
                 $search = $request->string('search')->trim()->value();
-                $query->where(fn ($q) => $q->where('invoice_number', 'like', "%{$search}%")
-                    ->orWhereHas('partner', fn ($q2) => $q2->where('name', 'like', "%{$search}%")));
+                $query->where(fn ($q) => $q->where('invoice_number', 'ilike', "%{$search}%")
+                    ->orWhereHas('partner', fn ($q2) => $q2->where('name', 'ilike', "%{$search}%")));
             })
             ->orderByDesc('issue_date')
             ->orderByDesc('id')

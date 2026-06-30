@@ -18,8 +18,8 @@ class PartnerController extends Controller
         $partners = Partner::query()
             ->when($request->string('search')->trim()->isNotEmpty(), function ($query) use ($request) {
                 $search = $request->string('search')->trim()->value();
-                $query->where(fn ($q) => $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('tax_number', 'like', "%{$search}%"));
+                $query->where(fn ($q) => $q->where('name', 'ilike', "%{$search}%")
+                    ->orWhere('tax_number', 'ilike', "%{$search}%"));
             })
             ->orderBy('name')
             ->paginate(20);

@@ -19,8 +19,8 @@ class ProductController extends Controller
             ->with('vatRate')
             ->when($request->string('search')->trim()->isNotEmpty(), function ($query) use ($request) {
                 $search = $request->string('search')->trim()->value();
-                $query->where(fn ($q) => $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('sku', 'like', "%{$search}%"));
+                $query->where(fn ($q) => $q->where('name', 'ilike', "%{$search}%")
+                    ->orWhere('sku', 'ilike', "%{$search}%"));
             })
             ->orderBy('name')
             ->paginate(20);

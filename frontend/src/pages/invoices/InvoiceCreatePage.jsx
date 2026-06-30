@@ -59,10 +59,23 @@ export default function InvoiceCreatePage() {
     setItems((it) => it.map((item, idx) => idx === i ? {
       ...item,
       product_id: product.id,
+      _product: product,           // csak megjelenítéshez (nem megy az API-ba)
       description: product.name,
       unit: product.unit,
       unit_price: product.base_price,
       vat_rate_id: product.vat_rate_id,
+    } : item))
+  }
+
+  function handleProductClear(i) {
+    setItems((it) => it.map((item, idx) => idx === i ? {
+      ...item,
+      product_id: null,
+      _product: null,
+      description: '',
+      unit: 'db',
+      unit_price: '',
+      vat_rate_id: defaultVatId,
     } : item))
   }
 
@@ -166,9 +179,9 @@ export default function InvoiceCreatePage() {
                 <tr key={i}>
                   <td>
                     <ProductComboBox
-                      description={item.description}
-                      onDescriptionChange={(val) => setItem(i, 'description', val)}
+                      selectedProduct={item._product ?? null}
                       onSelect={(product) => handleProductSelect(i, product)}
+                      onClear={() => handleProductClear(i)}
                     />
                   </td>
                   <td>

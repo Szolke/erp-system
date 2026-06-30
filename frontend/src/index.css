@@ -97,3 +97,9 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .pd-sku { font-weight: 600; color: var(--color-muted); font-size: 11px; white-space: nowrap; }
 .pd-name { flex: 1; color: var(--color-text); }
 .pd-price { color: var(--color-muted); font-size: 11px; white-space: nowrap; }
+
+.product-selected-chip { display: flex; align-items: center; gap: 6px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 5px; padding: 5px 8px; font-size: 13px; }
+.chip-sku { font-weight: 700; color: var(--color-primary); font-size: 11px; white-space: nowrap; }
+.chip-name { flex: 1; color: var(--color-text); }
+.chip-clear { background: none; border: none; cursor: pointer; color: var(--color-muted); font-size: 16px; line-height: 1; padding: 0 2px; flex-shrink: 0; }
+.chip-clear:hover { color: var(--color-danger); }

@@ -54,7 +54,9 @@ class DemoDataSeeder extends Seeder
         );
 
         $group->permissions()->sync(
-            Permission::query()->whereIn('key', ['invoice.view', 'invoice.create'])->pluck('id')
+            Permission::query()->whereIn('key', [
+                'invoice.view', 'invoice.create', 'receipt.view', 'receipt.create', 'receipt.cancel',
+            ])->pluck('id')
         );
         $group->users()->syncWithoutDetaching([$user->id]);
 

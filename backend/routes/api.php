@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ReceiptController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])
@@ -26,7 +27,9 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::apiResource('invoices', InvoiceController::class)->only(['index', 'store', 'show']);
     Route::post('invoices/{invoice}/cancel', [InvoiceController::class, 'cancel']);
 
-    // Further company-scoped resource routes (receipts, payments, ...) go
-    // here in later phases — they rely on this group's company.context
-    // middleware.
+    Route::apiResource('receipts', ReceiptController::class)->only(['index', 'store', 'show']);
+    Route::post('receipts/{receipt}/cancel', [ReceiptController::class, 'cancel']);
+
+    // Further company-scoped resource routes (payments, ...) go here in
+    // later phases — they rely on this group's company.context middleware.
 });

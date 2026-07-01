@@ -30,7 +30,7 @@ export default function ReceiptDetailPage() {
           {can('receipt.cancel') && receipt.status === 'issued' && (
             <button className="btn btn-danger" onClick={handleCancel}>Sztornó</button>
           )}
-          <Link to="/receipts" className="btn btn-secondary">← Vissza</Link>
+          <Link to="/documents" className="btn btn-secondary">← Vissza</Link>
         </div>
       </div>
       <div className="card">

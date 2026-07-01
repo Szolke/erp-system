@@ -72,7 +72,7 @@ export default function InvoiceDetailPage() {
           {canCancel && (
             <button className="btn btn-danger" onClick={handleCancel}>Sztornó</button>
           )}
-          <Link to="/invoices" className="btn btn-secondary">← Vissza</Link>
+          <Link to="/documents" className="btn btn-secondary">← Vissza</Link>
         </div>
       </div>
 

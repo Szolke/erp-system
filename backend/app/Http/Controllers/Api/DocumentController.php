@@ -22,7 +22,7 @@ class DocumentController extends Controller
 
         $typeFilter = $request->string('type')->trim()->value();
         $search     = $request->string('search')->trim()->value();
-        $perPage    = 20;
+        $perPage    = $this->perPage($request);
         $page       = max(1, (int) $request->get('page', 1));
 
         // Determine which tables to query based on permission + type filter

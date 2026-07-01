@@ -23,7 +23,7 @@ class ProductController extends Controller
                     ->orWhere('sku', 'ilike', "%{$search}%"));
             })
             ->orderBy('name')
-            ->paginate(20);
+            ->paginate($this->perPage($request));
 
         return ProductResource::collection($products);
     }

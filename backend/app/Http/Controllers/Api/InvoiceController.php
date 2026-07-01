@@ -38,7 +38,7 @@ class InvoiceController extends Controller
             })
             ->orderByDesc('issue_date')
             ->orderByDesc('id')
-            ->paginate(20);
+            ->paginate($this->perPage($request));
 
         return InvoiceResource::collection($invoices);
     }

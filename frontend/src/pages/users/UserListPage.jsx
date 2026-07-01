@@ -2,21 +2,23 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { users as usersApi } from '../../api/users'
+import PerPageSelector from '../../components/PerPageSelector'
 
 export default function UserListPage() {
   const { can } = useAuth()
-  const [list, setList]       = useState([])
-  const [search, setSearch]   = useState('')
-  const [loading, setLoading] = useState(true)
+  const [list, setList]         = useState([])
+  const [search, setSearch]     = useState('')
+  const [loading, setLoading]   = useState(true)
+  const [perPage, setPerPage]   = useState(20)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm]       = useState({ name: '', email: '', password: '' })
-  const [formErr, setFormErr] = useState('')
-  const [saving, setSaving]   = useState(false)
+  const [form, setForm]         = useState({ name: '', email: '', password: '' })
+  const [formErr, setFormErr]   = useState('')
+  const [saving, setSaving]     = useState(false)
 
-  async function load(q = '') {
+  async function load(q = '', pp = 20) {
     setLoading(true)
     try {
-      const res = await usersApi.list(q ? { search: q } : undefined)
+      const res = await usersApi.list(q || pp !== 20 ? { search: q || undefined, per_page: pp } : undefined)
       setList(res.data.data ?? res.data ?? [])
     } finally { setLoading(false) }
   }
@@ -27,7 +29,12 @@ export default function UserListPage() {
     const v = e.target.value
     setSearch(v)
     clearTimeout(window._userSearchTimer)
-    window._userSearchTimer = setTimeout(() => load(v), 300)
+    window._userSearchTimer = setTimeout(() => load(v, perPage), 300)
+  }
+
+  function handlePerPage(value) {
+    setPerPage(value)
+    load(search, value)
   }
 
   async function handleCreate(e) {
@@ -38,7 +45,7 @@ export default function UserListPage() {
       await usersApi.create(form)
       setForm({ name: '', email: '', password: '' })
       setShowForm(false)
-      load(search)
+      load(search, perPage)
     } catch (err) {
       const errs = err.response?.data?.errors
       setFormErr(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? 'Hiba')
@@ -47,13 +54,13 @@ export default function UserListPage() {
 
   async function handleToggleActive(user) {
     await usersApi.update(user.id, { is_active: !user.is_active })
-    load(search)
+    load(search, perPage)
   }
 
   async function handleRemove(user) {
     if (!confirm(`Eltávolítja ${user.name} felhasználót a cégtől?`)) return
     await usersApi.remove(user.id)
-    load(search)
+    load(search, perPage)
   }
 
   const canManage = can('user.manage')
@@ -98,6 +105,7 @@ export default function UserListPage() {
 
       <div className="search-row">
         <input placeholder="Keresés névben / e-mailben…" value={search} onChange={handleSearch} />
+        <PerPageSelector value={perPage} onChange={handlePerPage} />
       </div>
 
       {loading ? (

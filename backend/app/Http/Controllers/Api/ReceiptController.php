@@ -23,7 +23,7 @@ class ReceiptController extends Controller
             ->with('partner')
             ->orderByDesc('issue_date')
             ->orderByDesc('id')
-            ->paginate(20);
+            ->paginate($this->perPage($request));
 
         return ReceiptResource::collection($receipts);
     }

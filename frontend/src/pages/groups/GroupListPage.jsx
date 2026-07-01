@@ -2,22 +2,29 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { groups as groupsApi } from '../../api/groups'
+import PerPageSelector from '../../components/PerPageSelector'
 
 export default function GroupListPage() {
   const { can } = useAuth()
-  const [list, setList]       = useState([])
-  const [loading, setLoading] = useState(true)
+  const [list, setList]         = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [perPage, setPerPage]   = useState(20)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm]       = useState({ name: '', description: '' })
-  const [formErr, setFormErr] = useState('')
-  const [saving, setSaving]   = useState(false)
+  const [form, setForm]         = useState({ name: '', description: '' })
+  const [formErr, setFormErr]   = useState('')
+  const [saving, setSaving]     = useState(false)
 
-  async function load() {
+  async function load(pp = 20) {
     setLoading(true)
     try {
-      const res = await groupsApi.list()
+      const res = await groupsApi.list({ per_page: pp })
       setList(res.data.data ?? [])
     } finally { setLoading(false) }
+  }
+
+  function handlePerPage(value) {
+    setPerPage(value)
+    load(value)
   }
 
   useEffect(() => { load() }, [])
@@ -30,7 +37,7 @@ export default function GroupListPage() {
       await groupsApi.create(form)
       setForm({ name: '', description: '' })
       setShowForm(false)
-      load()
+      load(perPage)
     } catch (err) {
       const errs = err.response?.data?.errors
       setFormErr(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? 'Hiba')
@@ -41,7 +48,7 @@ export default function GroupListPage() {
     if (!confirm(`Törli a(z) „${group.name}" csoportot?`)) return
     try {
       await groupsApi.remove(group.id)
-      load()
+      load(perPage)
     } catch (err) {
       alert(err.response?.data?.message ?? 'Hiba')
     }
@@ -79,6 +86,10 @@ export default function GroupListPage() {
           </form>
         </div>
       )}
+
+      <div className="search-row">
+        <PerPageSelector value={perPage} onChange={handlePerPage} />
+      </div>
 
       {loading ? (
         <p className="text-muted">Betöltés…</p>

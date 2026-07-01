@@ -3,28 +3,35 @@ import { Link } from 'react-router-dom'
 import { invoices } from '../../api/invoices'
 import { useAuth } from '../../contexts/AuthContext'
 import { PaymentStatusBadge, InvoiceStatusBadge } from '../../components/StatusBadge'
+import PerPageSelector from '../../components/PerPageSelector'
 
 export default function InvoiceListPage() {
   const { can } = useAuth()
-  const [data, setData] = useState(null)
-  const [search, setSearch] = useState('')
+  const [data, setData]       = useState(null)
+  const [search, setSearch]   = useState('')
   const [loading, setLoading] = useState(true)
+  const [perPage, setPerPage] = useState(20)
 
-  async function load(s) {
+  async function load(s, pp) {
     setLoading(true)
     try {
-      const res = await invoices.list({ search: s || undefined })
+      const res = await invoices.list({ search: s || undefined, per_page: pp })
       setData(res.data)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { load('') }, [])
+  useEffect(() => { load('', 20) }, [])
 
   function handleSearch(e) {
     e.preventDefault()
-    load(search)
+    load(search, perPage)
+  }
+
+  function handlePerPage(value) {
+    setPerPage(value)
+    load(search, value)
   }
 
   return (
@@ -38,6 +45,7 @@ export default function InvoiceListPage() {
       <form className="search-row" onSubmit={handleSearch}>
         <input placeholder="Számlaszám vagy partner neve…" value={search} onChange={(e) => setSearch(e.target.value)} />
         <button className="btn btn-secondary" type="submit">Keresés</button>
+        <PerPageSelector value={perPage} onChange={handlePerPage} />
       </form>
       {loading ? <p className="text-muted">Betöltés…</p> : (
         <table>

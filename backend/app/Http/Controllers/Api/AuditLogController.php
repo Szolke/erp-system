@@ -24,7 +24,7 @@ class AuditLogController extends Controller
                 $query->where('action', $request->string('action')->trim()->value());
             })
             ->orderByDesc('created_at')
-            ->paginate(50);
+            ->paginate($this->perPage($request, 50));
 
         return AuditLogResource::collection($logs);
     }

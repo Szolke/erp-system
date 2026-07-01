@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { documents } from '../../api/documents'
 import { useAuth } from '../../contexts/AuthContext'
 import { DocumentTypeBadge, InvoiceStatusBadge, PaymentStatusBadge } from '../../components/StatusBadge'
+import PerPageSelector from '../../components/PerPageSelector'
 
 const TYPE_FILTERS = [
   { value: '',               label: 'Összes' },
@@ -18,13 +19,15 @@ export default function DocumentListPage() {
   const [loading, setLoading] = useState(true)
   const [type, setType]       = useState('')
   const [search, setSearch]   = useState('')
+  const [perPage, setPerPage] = useState(20)
 
-  async function load(t, s) {
+  async function load(t, s, pp) {
     setLoading(true)
     try {
       const res = await documents.list({
-        type:   t || undefined,
-        search: s || undefined,
+        type:     t || undefined,
+        search:   s || undefined,
+        per_page: pp,
       })
       setData(res.data)
     } finally {
@@ -32,16 +35,21 @@ export default function DocumentListPage() {
     }
   }
 
-  useEffect(() => { load('', '') }, [])
+  useEffect(() => { load('', '', 20) }, [])
 
   function handleTypeChange(value) {
     setType(value)
-    load(value, search)
+    load(value, search, perPage)
   }
 
   function handleSearch(e) {
     e.preventDefault()
-    load(type, search)
+    load(type, search, perPage)
+  }
+
+  function handlePerPage(value) {
+    setPerPage(value)
+    load(type, search, value)
   }
 
   function docLink(doc) {
@@ -87,6 +95,7 @@ export default function DocumentListPage() {
           onChange={(e) => setSearch(e.target.value)}
         />
         <button className="btn btn-secondary" type="submit">Keresés</button>
+        <PerPageSelector value={perPage} onChange={handlePerPage} />
       </form>
 
       {loading ? (

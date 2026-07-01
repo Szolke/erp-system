@@ -22,7 +22,7 @@ class PartnerController extends Controller
                     ->orWhere('tax_number', 'ilike', "%{$search}%"));
             })
             ->orderBy('name')
-            ->paginate(20);
+            ->paginate($this->perPage($request));
 
         return PartnerResource::collection($partners);
     }

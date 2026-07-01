@@ -27,7 +27,7 @@ class UserController extends Controller
                 $q->where(fn ($q2) => $q2->where('name', 'ilike', "%{$s}%")->orWhere('email', 'ilike', "%{$s}%"));
             })
             ->orderBy('name')
-            ->paginate(min($request->integer('per_page', 25), 200));
+            ->paginate($this->perPage($request));
 
         return response()->json($users);
     }

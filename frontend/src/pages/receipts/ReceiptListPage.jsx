@@ -2,21 +2,39 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { receipts } from '../../api/receipts'
 import { useAuth } from '../../contexts/AuthContext'
+import PerPageSelector from '../../components/PerPageSelector'
 
 export default function ReceiptListPage() {
   const { can } = useAuth()
-  const [data, setData] = useState(null)
+  const [data, setData]       = useState(null)
   const [loading, setLoading] = useState(true)
+  const [perPage, setPerPage] = useState(20)
 
-  useEffect(() => {
-    receipts.list().then((res) => { setData(res.data); setLoading(false) })
-  }, [])
+  async function load(pp) {
+    setLoading(true)
+    try {
+      const res = await receipts.list({ per_page: pp })
+      setData(res.data)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { load(20) }, [])
+
+  function handlePerPage(value) {
+    setPerPage(value)
+    load(value)
+  }
 
   return (
     <div>
       <div className="page-header">
         <h1 className="page-title">Nyugták</h1>
         {can('receipt.create') && <Link to="/receipts/new" className="btn btn-primary">+ Új nyugta</Link>}
+      </div>
+      <div className="search-row">
+        <PerPageSelector value={perPage} onChange={handlePerPage} />
       </div>
       {loading ? <p className="text-muted">Betöltés…</p> : (
         <table>
@@ -33,6 +51,7 @@ export default function ReceiptListPage() {
           </tbody>
         </table>
       )}
+      {data && <p className="text-muted mt-4">Összesen: {data.meta?.total} db</p>}
     </div>
   )
 }

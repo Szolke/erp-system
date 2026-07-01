@@ -13,13 +13,15 @@ class GroupController extends Controller
 {
     public function __construct(private CurrentCompany $currentCompany) {}
 
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('group.view');
 
-        $groups = Group::withCount(['users', 'permissions'])->orderBy('name')->get();
+        $groups = Group::withCount(['users', 'permissions'])
+            ->orderBy('name')
+            ->paginate($this->perPage($request));
 
-        return response()->json(['data' => $groups]);
+        return response()->json($groups);
     }
 
     public function store(Request $request)

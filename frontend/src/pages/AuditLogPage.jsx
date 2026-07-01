@@ -1,26 +1,37 @@
 import { useEffect, useState } from 'react'
 import { company as companyApi } from '../api/company'
+import PerPageSelector from '../components/PerPageSelector'
 
 export default function AuditLogPage() {
-  const [data, setData] = useState(null)
-  const [action, setAction] = useState('')
+  const [data, setData]       = useState(null)
+  const [action, setAction]   = useState('')
   const [loading, setLoading] = useState(true)
+  const [perPage, setPerPage] = useState(50)
 
-  async function load(a) {
+  async function load(a, pp) {
     setLoading(true)
-    const res = await companyApi.auditLogs({ action: a || undefined })
-    setData(res.data)
-    setLoading(false)
+    try {
+      const res = await companyApi.auditLogs({ action: a || undefined, per_page: pp })
+      setData(res.data)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  useEffect(() => { load('') }, [])
+  useEffect(() => { load('', 50) }, [])
+
+  function handlePerPage(value) {
+    setPerPage(value)
+    load(action, value)
+  }
 
   return (
     <div>
       <div className="page-header"><h1 className="page-title">Audit napló</h1></div>
-      <form className="search-row" onSubmit={(e) => { e.preventDefault(); load(action) }}>
+      <form className="search-row" onSubmit={(e) => { e.preventDefault(); load(action, perPage) }}>
         <input placeholder="Szűrés művelet szerint (pl. invoice.cancel)" value={action} onChange={(e) => setAction(e.target.value)} />
         <button className="btn btn-secondary" type="submit">Szűrés</button>
+        <PerPageSelector value={perPage} onChange={handlePerPage} />
       </form>
       {loading ? <p className="text-muted">Betöltés…</p> : (
         <table>

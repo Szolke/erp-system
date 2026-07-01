@@ -2,26 +2,36 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { products } from '../../api/products'
 import { useAuth } from '../../contexts/AuthContext'
+import PerPageSelector from '../../components/PerPageSelector'
 
 export default function ProductListPage() {
   const { can } = useAuth()
-  const [data, setData] = useState(null)
-  const [search, setSearch] = useState('')
+  const [data, setData]       = useState(null)
+  const [search, setSearch]   = useState('')
   const [loading, setLoading] = useState(true)
+  const [perPage, setPerPage] = useState(20)
 
-  async function load(s) {
+  async function load(s, pp) {
     setLoading(true)
-    const res = await products.list({ search: s || undefined })
-    setData(res.data)
-    setLoading(false)
+    try {
+      const res = await products.list({ search: s || undefined, per_page: pp })
+      setData(res.data)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  useEffect(() => { load('') }, [])
+  useEffect(() => { load('', 20) }, [])
 
   async function handleDelete(id) {
     if (!confirm('Biztosan törli?')) return
     await products.destroy(id)
-    load(search)
+    load(search, perPage)
+  }
+
+  function handlePerPage(value) {
+    setPerPage(value)
+    load(search, value)
   }
 
   return (
@@ -30,9 +40,10 @@ export default function ProductListPage() {
         <h1 className="page-title">Termékek / Szolgáltatások</h1>
         {can('product.create') && <Link to="/products/new" className="btn btn-primary">+ Új tétel</Link>}
       </div>
-      <form className="search-row" onSubmit={(e) => { e.preventDefault(); load(search) }}>
+      <form className="search-row" onSubmit={(e) => { e.preventDefault(); load(search, perPage) }}>
         <input placeholder="Név vagy cikkszám…" value={search} onChange={(e) => setSearch(e.target.value)} />
         <button className="btn btn-secondary" type="submit">Keresés</button>
+        <PerPageSelector value={perPage} onChange={handlePerPage} />
       </form>
       {loading ? <p className="text-muted">Betöltés…</p> : (
         <table>
@@ -55,6 +66,7 @@ export default function ProductListPage() {
           </tbody>
         </table>
       )}
+      {data && <p className="text-muted mt-4">Összesen: {data.meta?.total} db</p>}
     </div>
   )
 }

@@ -27,6 +27,7 @@ Utolsó frissítés: 2026-07-01, a 12. lépés (RBAC UI + bizonylat-beállítás
 | 12a | RBAC management UI: felhasználó-lista/detail (csoporttag-kezelés + per-jog override toggle), csoport-lista/detail (jogosultság-jelölők + tagok), sidebar menüpontok | `UserListPage`, `UserDetailPage`, `GroupListPage`, `GroupDetailPage`, `UserController`, `GroupController` | — |
 | 12b | Bizonylat-sorszámtartományok: külön sorozat sztornókhoz (`invoice_storno`/`receipt_storno`), szám-formátum ÉÉÉÉDÉHH (pl. 202606), beállítások oldal (`/settings/document-series`), `Sorszámtartományok` sidebar menü | `DocumentType`, `InvoiceNumberGenerator`, `InvoiceService::cancel`, `ReceiptService::cancel`, `DocumentSeriesController`, `DocumentSeriesSettingsPage` | — |
 | 12c | Kis UX javítások: deviza legördülő (HUF/EUR) InvoiceCreate + ProductForm; mértékegység legördülő ProductForm; fizetési dátum szélesebb; fizetési mód select (InvoiceDetail) | `InvoiceCreatePage`, `ProductFormPage`, `InvoiceDetailPage` | — |
+| 12d | Egységes bizonylatlista: `GET /api/documents` UNION ALL endpoint (számla + nyugta + sztornók), típusszűrő pill-gombok, keresés, `DocumentTypeBadge`; sidebar "Bizonylatok" váltja a különálló Számlák/Nyugták menüt | `DocumentController`, `DocumentListPage`, `StatusBadge`, `Layout`, `App` | `e611aef` |
 
 ## Még hátravan
 

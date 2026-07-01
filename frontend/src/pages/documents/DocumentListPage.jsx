@@ -15,41 +15,62 @@ const TYPE_FILTERS = [
 
 export default function DocumentListPage() {
   const { can } = useAuth()
-  const [data, setData]       = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [type, setType]       = useState('')
-  const [search, setSearch]   = useState('')
-  const [perPage, setPerPage] = useState(20)
+  const [data, setData]         = useState(null)
+  const [loading, setLoading]   = useState(true)
+  const [type, setType]         = useState('')
+  const [search, setSearch]     = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo]     = useState('')
+  const [perPage, setPerPage]   = useState(20)
 
-  async function load(t, s, pp) {
+  async function load({ t, s, df, dt, pp } = {}) {
+    const params = {
+      type:      (t  ?? type)     || undefined,
+      search:    (s  ?? search)   || undefined,
+      date_from: (df ?? dateFrom) || undefined,
+      date_to:   (dt ?? dateTo)   || undefined,
+      per_page:  pp ?? perPage,
+    }
     setLoading(true)
     try {
-      const res = await documents.list({
-        type:     t || undefined,
-        search:   s || undefined,
-        per_page: pp,
-      })
+      const res = await documents.list(params)
       setData(res.data)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { load('', '', 20) }, [])
+  useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleTypeChange(value) {
     setType(value)
-    load(value, search, perPage)
+    load({ t: value })
   }
 
   function handleSearch(e) {
     e.preventDefault()
-    load(type, search, perPage)
+    load()
+  }
+
+  function handleDateFrom(value) {
+    setDateFrom(value)
+    load({ df: value })
+  }
+
+  function handleDateTo(value) {
+    setDateTo(value)
+    load({ dt: value })
   }
 
   function handlePerPage(value) {
     setPerPage(value)
-    load(type, search, value)
+    load({ pp: value })
+  }
+
+  function clearDates() {
+    setDateFrom('')
+    setDateTo('')
+    load({ df: '', dt: '' })
   }
 
   function docLink(doc) {
@@ -61,6 +82,8 @@ export default function DocumentListPage() {
   const visibleFilters = TYPE_FILTERS.filter(
     (f) => !f.needsPerm || can(f.needsPerm)
   )
+
+  const hasDateFilter = dateFrom || dateTo
 
   return (
     <div>
@@ -95,6 +118,15 @@ export default function DocumentListPage() {
           onChange={(e) => setSearch(e.target.value)}
         />
         <button className="btn btn-secondary" type="submit">Keresés</button>
+        <span className="date-range">
+          <label>Dátumtól</label>
+          <input type="date" value={dateFrom} onChange={(e) => handleDateFrom(e.target.value)} />
+          <label>Dátumig</label>
+          <input type="date" value={dateTo} onChange={(e) => handleDateTo(e.target.value)} />
+          {hasDateFilter && (
+            <button type="button" className="btn-link date-clear" onClick={clearDates}>✕</button>
+          )}
+        </span>
         <PerPageSelector value={perPage} onChange={handlePerPage} />
       </form>
 

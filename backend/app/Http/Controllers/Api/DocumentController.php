@@ -22,6 +22,8 @@ class DocumentController extends Controller
 
         $typeFilter = $request->string('type')->trim()->value();
         $search     = $request->string('search')->trim()->value();
+        $dateFrom   = $request->string('date_from')->trim()->value();
+        $dateTo     = $request->string('date_to')->trim()->value();
         $perPage    = $this->perPage($request);
         $page       = max(1, (int) $request->get('page', 1));
 
@@ -62,6 +64,13 @@ class DocumentController extends Controller
                 );
             }
 
+            if ($dateFrom !== '') {
+                $q->whereDate('invoices.issue_date', '>=', $dateFrom);
+            }
+            if ($dateTo !== '') {
+                $q->whereDate('invoices.issue_date', '<=', $dateTo);
+            }
+
             $parts[]  = "({$q->toSql()})";
             $bindings = array_merge($bindings, $q->getBindings());
         }
@@ -94,6 +103,13 @@ class DocumentController extends Controller
                     ->where('receipts.receipt_number', 'ilike', "%{$search}%")
                     ->orWhere('partners.name', 'ilike', "%{$search}%")
                 );
+            }
+
+            if ($dateFrom !== '') {
+                $q->whereDate('receipts.issue_date', '>=', $dateFrom);
+            }
+            if ($dateTo !== '') {
+                $q->whereDate('receipts.issue_date', '<=', $dateTo);
             }
 
             $parts[]  = "({$q->toSql()})";

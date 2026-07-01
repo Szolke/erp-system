@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ActiveCompanyController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\DocumentSeriesController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\InvoiceController;
@@ -41,6 +42,9 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     Route::apiResource('products', ProductController::class);
     Route::apiResource('partners', PartnerController::class);
+
+    // Bizonylatok — egységes lista (számla + nyugta + sztornók)
+    Route::get('documents', [DocumentController::class, 'index']);
 
     Route::apiResource('invoices', InvoiceController::class)->only(['index', 'store', 'show']);
     Route::post('invoices/{invoice}/cancel', [InvoiceController::class, 'cancel']);

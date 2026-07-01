@@ -19,6 +19,7 @@ import UserDetailPage from './pages/users/UserDetailPage'
 import GroupListPage from './pages/groups/GroupListPage'
 import GroupDetailPage from './pages/groups/GroupDetailPage'
 import DocumentSeriesSettingsPage from './pages/settings/DocumentSeriesSettingsPage'
+import DocumentListPage from './pages/documents/DocumentListPage'
 
 export default function App() {
   return (
@@ -32,7 +33,8 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/invoices" replace />} />
+        <Route index element={<Navigate to="/documents" replace />} />
+        <Route path="documents" element={<DocumentListPage />} />
         <Route path="invoices" element={<InvoiceListPage />} />
         <Route path="invoices/new" element={<InvoiceCreatePage />} />
         <Route path="invoices/:id" element={<InvoiceDetailPage />} />

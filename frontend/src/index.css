@@ -69,6 +69,13 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .badge-inv-issued { background: #dbeafe; color: #1d4ed8; }
 .badge-inv-storno { background: #f3f4f6; color: #6b7280; }
 .badge-inv-draft { background: #fef3c7; color: #b45309; }
+.badge-type-invoice { background: #dbeafe; color: #1d4ed8; }
+.badge-type-invoice-storno { background: #f3f4f6; color: #6b7280; }
+.badge-type-receipt { background: #d1fae5; color: #065f46; }
+.badge-type-receipt-storno { background: #f0fdf4; color: #9ca3af; }
+.type-filter { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.type-filter button { padding: 4px 12px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); font-size: 12px; cursor: pointer; color: var(--color-muted); }
+.type-filter button.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
 
 .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--color-bg); }
 .login-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 36px 32px; width: 340px; }

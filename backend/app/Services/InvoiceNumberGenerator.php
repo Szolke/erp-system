@@ -37,7 +37,7 @@ class InvoiceNumberGenerator
             $series->next_number = $number + 1;
             $series->save();
 
-            return [$series, sprintf('%s-%d-%06d', $series->prefix, $year, $number)];
+            return [$series, sprintf('%s-%s-%06d', $series->prefix, now()->format('Ym'), $number)];
         });
     }
 

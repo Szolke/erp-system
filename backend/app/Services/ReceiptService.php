@@ -75,7 +75,7 @@ class ReceiptService
             $receipt->load('items');
 
             [$series, $receiptNumber] = $this->numberGenerator->next(
-                $receipt->company_id, DocumentType::Receipt, 'NY'
+                $receipt->company_id, DocumentType::ReceiptStorno, 'NYSZT'
             );
 
             $storno = Receipt::create([

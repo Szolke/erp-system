@@ -88,7 +88,7 @@ class InvoiceService
             $invoice->load('items');
 
             [$series, $invoiceNumber] = $this->numberGenerator->next(
-                $invoice->company_id, DocumentType::Invoice
+                $invoice->company_id, DocumentType::InvoiceStorno, 'SZSZT'
             );
 
             $storno = Invoice::create([

@@ -1,0 +1,10 @@
+import client from './client'
+
+export const users = {
+  list:          (params)       => client.get('/api/users', { params }),
+  get:           (id)           => client.get(`/api/users/${id}`),
+  create:        (data)         => client.post('/api/users', data),
+  update:        (id, data)     => client.put(`/api/users/${id}`, data),
+  remove:        (id)           => client.delete(`/api/users/${id}`),
+  syncOverrides: (id, overrides) => client.put(`/api/users/${id}/overrides`, { overrides }),
+}

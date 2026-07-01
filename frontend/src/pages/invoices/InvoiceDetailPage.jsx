@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { invoices as invoiceApi } from '../../api/invoices'
+import client from '../../api/client'
 import { useAuth } from '../../contexts/AuthContext'
 import { PaymentStatusBadge, InvoiceStatusBadge } from '../../components/StatusBadge'
+
+const todayStr = () => new Date().toISOString().split('T')[0]
 
 export default function InvoiceDetailPage() {
   const { id } = useParams()
@@ -10,14 +13,22 @@ export default function InvoiceDetailPage() {
   const { can } = useAuth()
   const [invoice, setInvoice] = useState(null)
   const [payments, setPayments] = useState([])
+  const [payMethods, setPayMethods] = useState([])
   const [loading, setLoading] = useState(true)
-  const [payForm, setPayForm] = useState({ payment_method_id: '', amount: '', paid_at: new Date().toISOString().split('T')[0] })
+  const [payForm, setPayForm] = useState({ payment_method_id: '', amount: '', paid_at: todayStr() })
   const [payError, setPayError] = useState('')
 
   async function load() {
-    const [invRes, payRes] = await Promise.all([invoiceApi.get(id), invoiceApi.payments(id)])
+    const [invRes, payRes, pmRes] = await Promise.all([
+      invoiceApi.get(id),
+      invoiceApi.payments(id),
+      client.get('/api/payment-methods'),
+    ])
     setInvoice(invRes.data.data)
     setPayments(payRes.data.data ?? [])
+    const methods = pmRes.data.data ?? []
+    setPayMethods(methods)
+    if (methods.length) setPayForm((f) => (f.payment_method_id ? f : { ...f, payment_method_id: methods[0].id }))
     setLoading(false)
   }
 
@@ -35,7 +46,7 @@ export default function InvoiceDetailPage() {
     try {
       await invoiceApi.addPayment(id, payForm)
       await load()
-      setPayForm({ payment_method_id: '', amount: '', paid_at: new Date().toISOString().split('T')[0] })
+      setPayForm((f) => ({ payment_method_id: f.payment_method_id, amount: '', paid_at: todayStr() }))
     } catch (err) {
       setPayError(err.response?.data?.message ?? 'Hiba')
     }
@@ -116,18 +127,20 @@ export default function InvoiceDetailPage() {
           </table>
         )}
         {canPay && (
-          <form onSubmit={handleAddPayment} style={{ display: 'flex', gap: 10, marginTop: 16, alignItems: 'flex-end' }}>
+          <form onSubmit={handleAddPayment} style={{ display: 'flex', gap: 10, marginTop: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div className="form-group" style={{ margin: 0 }}>
               <label>Összeg</label>
-              <input type="number" step="0.01" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} required style={{ width: 120 }} />
+              <input type="number" step="0.01" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} required style={{ width: 130 }} />
             </div>
             <div className="form-group" style={{ margin: 0 }}>
-              <label>Mód (ID)</label>
-              <input type="number" value={payForm.payment_method_id} onChange={(e) => setPayForm({ ...payForm, payment_method_id: e.target.value })} required style={{ width: 60 }} placeholder="1" />
+              <label>Fizetési mód</label>
+              <select value={payForm.payment_method_id} onChange={(e) => setPayForm({ ...payForm, payment_method_id: e.target.value })} required style={{ width: 160 }}>
+                {payMethods.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+              </select>
             </div>
             <div className="form-group" style={{ margin: 0 }}>
               <label>Dátum</label>
-              <input type="date" value={payForm.paid_at} onChange={(e) => setPayForm({ ...payForm, paid_at: e.target.value })} required style={{ width: 140 }} />
+              <input type="date" value={payForm.paid_at} onChange={(e) => setPayForm({ ...payForm, paid_at: e.target.value })} required style={{ width: 170 }} />
             </div>
             <button className="btn btn-primary" type="submit">Rögzítés</button>
             {payError && <span className="form-error">{payError}</span>}

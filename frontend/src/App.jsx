@@ -14,6 +14,11 @@ import ProductListPage from './pages/products/ProductListPage'
 import ProductFormPage from './pages/products/ProductFormPage'
 import CompanyPage from './pages/CompanyPage'
 import AuditLogPage from './pages/AuditLogPage'
+import UserListPage from './pages/users/UserListPage'
+import UserDetailPage from './pages/users/UserDetailPage'
+import GroupListPage from './pages/groups/GroupListPage'
+import GroupDetailPage from './pages/groups/GroupDetailPage'
+import DocumentSeriesSettingsPage from './pages/settings/DocumentSeriesSettingsPage'
 
 export default function App() {
   return (
@@ -42,6 +47,11 @@ export default function App() {
         <Route path="products/:id/edit" element={<ProductFormPage />} />
         <Route path="company" element={<CompanyPage />} />
         <Route path="audit-logs" element={<AuditLogPage />} />
+        <Route path="users" element={<UserListPage />} />
+        <Route path="users/:id" element={<UserDetailPage />} />
+        <Route path="groups" element={<GroupListPage />} />
+        <Route path="groups/:id" element={<GroupDetailPage />} />
+        <Route path="settings/document-series" element={<DocumentSeriesSettingsPage />} />
       </Route>
     </Routes>
   )

@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\ActiveCompanyController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\DocumentSeriesController;
+use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\PaymentController;
@@ -11,7 +13,9 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReceiptController;
 use App\Http\Controllers\Api\SimplePayController;
 use App\Http\Controllers\Api\SimplePayIpnController;
+use App\Http\Controllers\Api\UserController;
 use App\Models\PaymentMethod;
+use App\Models\Permission;
 use App\Models\VatRate;
 use Illuminate\Support\Facades\Route;
 
@@ -48,4 +52,21 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     Route::apiResource('receipts', ReceiptController::class)->only(['index', 'store', 'show']);
     Route::post('receipts/{receipt}/cancel', [ReceiptController::class, 'cancel']);
+
+    // Felhasználók
+    Route::apiResource('users', UserController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::put('users/{user}/overrides', [UserController::class, 'syncOverrides']);
+
+    // Csoportok
+    Route::apiResource('groups', GroupController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::put('groups/{group}/permissions', [GroupController::class, 'syncPermissions']);
+    Route::post('groups/{group}/members', [GroupController::class, 'addMember']);
+    Route::delete('groups/{group}/members/{user}', [GroupController::class, 'removeMember']);
+
+    // Jogosultságok katalógusa
+    Route::get('/permissions', fn () => response()->json(['data' => Permission::orderBy('module')->orderBy('key')->get()]));
+
+    // Beállítások — bizonylat-sorszámtartományok
+    Route::get('settings/document-series', [DocumentSeriesController::class, 'index']);
+    Route::put('settings/document-series/{documentSeries}', [DocumentSeriesController::class, 'update']);
 });

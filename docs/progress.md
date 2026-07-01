@@ -5,7 +5,7 @@
 > git logból/kódból kelljen visszafejtse, hol tartunk — itt egyben megtalálja.
 > Részletes tábla-/mezőszintű terv: [er-model.md](er-model.md).
 
-Utolsó frissítés: 2026-06-30, a 10-11. lépés (audit log + frontend) után.
+Utolsó frissítés: 2026-07-01, a 12. lépés (RBAC UI + bizonylat-beállítások) után.
 
 ## Kész lépések
 
@@ -24,11 +24,14 @@ Utolsó frissítés: 2026-06-30, a 10-11. lépés (audit log + frontend) után.
 | 9 | Kézi fizetésrögzítés + SimplePay (start + IPN, HMAC-SHA384 aláírással) | `PaymentController`, `SimplePayController`, `SimplePayIpnController`, `SimplePayClient` | `0aa316e` |
 | 10 | Audit log: `AuditLogger` service, bekötve login/invoice/receipt/company műveletekbe; `GET /api/audit-logs` | `AuditLogger`, `AuditLogController` | `5d5cd6e` |
 | 11 | React SPA frontend: login, company-switcher, számla/nyugta/partner/termék listák+CRUD+detail, cégbeállítás (nav_environment toggle), audit napló nézet | `frontend/src/` teljes SPA | `db01b86` |
+| 12a | RBAC management UI: felhasználó-lista/detail (csoporttag-kezelés + per-jog override toggle), csoport-lista/detail (jogosultság-jelölők + tagok), sidebar menüpontok | `UserListPage`, `UserDetailPage`, `GroupListPage`, `GroupDetailPage`, `UserController`, `GroupController` | — |
+| 12b | Bizonylat-sorszámtartományok: külön sorozat sztornókhoz (`invoice_storno`/`receipt_storno`), szám-formátum ÉÉÉÉDÉHH (pl. 202606), beállítások oldal (`/settings/document-series`), `Sorszámtartományok` sidebar menü | `DocumentType`, `InvoiceNumberGenerator`, `InvoiceService::cancel`, `ReceiptService::cancel`, `DocumentSeriesController`, `DocumentSeriesSettingsPage` | — |
+| 12c | Kis UX javítások: deviza legördülő (HUF/EUR) InvoiceCreate + ProductForm; mértékegység legördülő ProductForm; fizetési dátum szélesebb; fizetési mód select (InvoiceDetail) | `InvoiceCreatePage`, `ProductFormPage`, `InvoiceDetailPage` | — |
 
 ## Még hátravan
 
 - **PDF-generálás** (számla/nyugta bizonylat) — `pdf_path` mező van az invoices/receipts táblában, de sem könyvtár (pl. barryvdh/laravel-dompdf), sem template, sem controller-endpoint nincs hozzá.
-- **RBAC management UI/API** — a csoportok és user-override-ok CRUD-ja API-n keresztül (jelenleg csak seederből/tinkerből kezelhető). A `groups`, `group_permissions`, `user_group`, `user_permission_overrides` táblák és modellek léteznek.
+- **RBAC management UI/API** — **KÉSZ** (12a. lépés). Felhasználók és csoportok kezelése UI-ból elérhető.
 - **Cég-onboarding** — `CompanyController` csak az aktív céget kezeli, új cég létrehozása + első felhasználó hozzárendelése nincs megépítve.
 - **Frontend finomítás** — a jelenlegi frontend funkcionális első változat; szükséges lehet: hibakezelés bővítése, pagination kezelés (csak az első oldal jelenik meg), lapozó UI, Toast-értesítések sikeres/hibás műveletekre, SimplePay fizetés indítás gomb InvoiceDetailPage-ből.
 
@@ -45,7 +48,8 @@ Utolsó frissítés: 2026-06-30, a 10-11. lépés (audit log + frontend) után.
 
 - `test@example.com` / `password`
 - Aktív cég: "Demo Kft." (tax_number `11111111142` — **kötőjelek nélkül, lásd nyitott pont lent**)
-- A demo user 2 csoportban van ("Pénzügy": invoice/receipt/payment jogok; "Törzsadatkezelő": product/partner/company jogok), plusz 2 explicit override (`invoice.cancel` allow, `document_series.manage` deny) — RBAC-teszteléshez.
+- A demo user 2 csoportban van ("Pénzügy": invoice/receipt/payment jogok; "Törzsadatkezelő": product/partner/company/user/group/document_series jogok), plusz 1 explicit override (`invoice.cancel` allow) — RBAC-teszteléshez.
+- Bizonylat-sorozatok: `SZ` (számla), `NY` (nyugta), `SZSZT` (sztornó számla), `NYSZT` (sztornó nyugta). Formátum: `PREFIX-ÉÉÉÉHH-000001`.
 
 ## Nyitott pontok / ismert hiányosságok
 

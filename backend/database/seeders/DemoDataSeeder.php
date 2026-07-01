@@ -2,12 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Enums\DocumentType;
 use App\Enums\NavEnvironment;
 use App\Enums\PartnerType;
 use App\Enums\PermissionEffect;
 use App\Enums\ProductType;
 use App\Models\Company;
 use App\Models\CompanyNavCredential;
+use App\Models\DocumentSeries;
 use App\Models\Group;
 use App\Models\Partner;
 use App\Models\Permission;
@@ -107,12 +109,14 @@ class DemoDataSeeder extends Seeder
                 'product.view', 'product.create', 'product.edit', 'product.delete',
                 'partner.view', 'partner.create', 'partner.edit', 'partner.delete',
                 'company.view', 'company.manage', 'audit.view',
+                'user.view', 'user.manage',
+                'group.view', 'group.manage', 'permission.override',
+                'document_series.manage',
             ])->pluck('id')
         );
         $masterDataGroup->users()->syncWithoutDetaching([$user->id]);
 
         $invoiceCancel = Permission::query()->where('key', 'invoice.cancel')->first();
-        $docSeriesManage = Permission::query()->where('key', 'document_series.manage')->first();
 
         // Demonstrates an override granting a right the group doesn't have:
         // invoice.cancel is not in "Pénzügy", but an explicit allow grants it.
@@ -121,20 +125,26 @@ class DemoDataSeeder extends Seeder
             ['effect' => PermissionEffect::Allow]
         );
 
-        // Demonstrates a deny override: document_series.manage is blocked
-        // explicitly (the group doesn't grant it either, so this is redundant
-        // from an access-control perspective but exercises the deny path).
-        UserPermissionOverride::query()->updateOrCreate(
-            ['user_id' => $user->id, 'company_id' => $company->id, 'permission_id' => $docSeriesManage->id],
-            ['effect' => PermissionEffect::Deny]
-        );
-
-        // Remove any stale invoice.view deny override that blocks testing.
+        // Remove any stale deny overrides that would block access to functional areas.
         UserPermissionOverride::query()
             ->where('user_id', $user->id)
             ->where('company_id', $company->id)
-            ->whereHas('permission', fn ($q) => $q->where('key', 'invoice.view'))
+            ->whereHas('permission', fn ($q) => $q->whereIn('key', ['invoice.view', 'document_series.manage']))
+            ->where('effect', PermissionEffect::Deny)
             ->delete();
+
+        // Bizonylat-sorszámtartományok: mind a 4 típus alapértelmezett beállítással
+        foreach ([
+            [DocumentType::Invoice,       'SZ'],
+            [DocumentType::Receipt,       'NY'],
+            [DocumentType::InvoiceStorno, 'SZSZT'],
+            [DocumentType::ReceiptStorno, 'NYSZT'],
+        ] as [$type, $prefix]) {
+            DocumentSeries::withoutGlobalScope('company')->firstOrCreate(
+                ['company_id' => $company->id, 'document_type' => $type->value],
+                ['prefix' => $prefix, 'reset_yearly' => true, 'next_number' => 1]
+            );
+        }
 
         $normalVatRate = VatRate::query()->where('nav_code', '0.27')->first();
 

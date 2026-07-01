@@ -157,7 +157,10 @@ export default function InvoiceCreatePage() {
             </div>
             <div className="form-group">
               <label>Deviza</label>
-              <input value={form.currency} onChange={(e) => setField('currency', e.target.value)} maxLength={3} required />
+              <select value={form.currency} onChange={(e) => setField('currency', e.target.value)} required>
+                <option value="HUF">HUF</option>
+                <option value="EUR">EUR</option>
+              </select>
             </div>
           </div>
           <div className="form-group">

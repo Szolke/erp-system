@@ -3,12 +3,15 @@ import { useAuth } from '../contexts/AuthContext'
 import CompanySwitcher from './CompanySwitcher'
 
 const navItems = [
-  { to: '/invoices', label: 'Számlák', perm: 'invoice.view' },
-  { to: '/receipts', label: 'Nyugták', perm: 'receipt.view' },
-  { to: '/partners', label: 'Partnerek', perm: 'partner.view' },
-  { to: '/products', label: 'Termékek', perm: 'product.view' },
-  { to: '/company', label: 'Cégbeállítások', perm: 'company.view' },
-  { to: '/audit-logs', label: 'Audit napló', perm: 'audit.view' },
+  { to: '/invoices',   label: 'Számlák',         perm: 'invoice.view' },
+  { to: '/receipts',   label: 'Nyugták',          perm: 'receipt.view' },
+  { to: '/partners',   label: 'Partnerek',        perm: 'partner.view' },
+  { to: '/products',   label: 'Termékek',         perm: 'product.view' },
+  { to: '/users',      label: 'Felhasználók',     perm: 'user.view' },
+  { to: '/groups',     label: 'Csoportok',        perm: 'group.view' },
+  { to: '/company',                   label: 'Cégbeállítások',          perm: 'company.view' },
+  { to: '/audit-logs',               label: 'Audit napló',             perm: 'audit.view' },
+  { to: '/settings/document-series', label: 'Sorszámtartományok',      perm: 'document_series.manage' },
 ]
 
 export default function Layout() {

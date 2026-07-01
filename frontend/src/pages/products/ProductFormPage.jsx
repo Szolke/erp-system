@@ -5,6 +5,24 @@ import client from '../../api/client'
 
 const empty = { sku: '', name: '', description: '', unit: 'db', type: 'product', vat_rate_id: '', base_price: '', base_currency: 'HUF', is_active: true }
 
+const UNITS = [
+  { value: 'db',    label: 'db – darab' },
+  { value: 'kg',    label: 'kg – kilogramm' },
+  { value: 'g',     label: 'g – gramm' },
+  { value: 'l',     label: 'l – liter' },
+  { value: 'ml',    label: 'ml – milliliter' },
+  { value: 'm',     label: 'm – méter' },
+  { value: 'm²',    label: 'm² – négyzetméter' },
+  { value: 'm³',    label: 'm³ – köbméter' },
+  { value: 'km',    label: 'km – kilométer' },
+  { value: 'óra',   label: 'óra' },
+  { value: 'nap',   label: 'nap' },
+  { value: 'hét',   label: 'hét' },
+  { value: 'hónap', label: 'hónap' },
+  { value: 'csomag',label: 'csomag' },
+  { value: 'készlet',label: 'készlet' },
+]
+
 export default function ProductFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -53,7 +71,12 @@ export default function ProductFormPage() {
             </select>
           </div>
           <div className="form-group" style={{ gridColumn: '1/-1' }}><label>Megnevezés</label><input value={form.name} onChange={(e) => setField('name', e.target.value)} required /></div>
-          <div className="form-group"><label>Mértékegység</label><input value={form.unit} onChange={(e) => setField('unit', e.target.value)} required /></div>
+          <div className="form-group">
+            <label>Mértékegység</label>
+            <select value={form.unit} onChange={(e) => setField('unit', e.target.value)} required>
+              {UNITS.map((u) => <option key={u.value} value={u.value}>{u.label}</option>)}
+            </select>
+          </div>
           <div className="form-group">
             <label>ÁFA kulcs</label>
             <select value={form.vat_rate_id} onChange={(e) => setField('vat_rate_id', e.target.value)} required>
@@ -61,7 +84,13 @@ export default function ProductFormPage() {
             </select>
           </div>
           <div className="form-group"><label>Alapár</label><input type="number" step="0.01" value={form.base_price} onChange={(e) => setField('base_price', e.target.value)} required /></div>
-          <div className="form-group"><label>Deviza</label><input value={form.base_currency} onChange={(e) => setField('base_currency', e.target.value)} maxLength={3} required /></div>
+          <div className="form-group">
+            <label>Deviza</label>
+            <select value={form.base_currency} onChange={(e) => setField('base_currency', e.target.value)} required>
+              <option value="HUF">HUF</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
         </div>
         <div className="flex">
           <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? 'Mentés…' : 'Mentés'}</button>

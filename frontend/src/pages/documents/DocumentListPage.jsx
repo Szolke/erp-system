@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { DocumentTypeBadge, InvoiceStatusBadge, PaymentStatusBadge } from '../../components/StatusBadge'
 import PerPageSelector from '../../components/PerPageSelector'
+import Pagination from '../../components/Pagination'
 
 export default function DocumentListPage() {
   const { can }  = useAuth()
@@ -19,6 +20,7 @@ export default function DocumentListPage() {
   const [currency, setCurrency]             = useState('')
   const [paymentStatus, setPaymentStatus]   = useState('')
   const [perPage, setPerPage]               = useState(20)
+  const [page, setPage]                     = useState(1)
 
   const TYPE_FILTERS = [
     { value: '',               label: t('document.type_all') },
@@ -28,7 +30,7 @@ export default function DocumentListPage() {
     { value: 'receipt_storno', label: t('document.type_rec_st'),   needsPerm: 'receipt.view' },
   ]
 
-  async function load({ t: tp, s, df, dt, cur, ps, pp } = {}) {
+  async function load({ t: tp, s, df, dt, cur, ps, pp, pg } = {}) {
     const params = {
       type:           (tp  ?? type)          || undefined,
       search:         (s   ?? search)        || undefined,
@@ -37,6 +39,7 @@ export default function DocumentListPage() {
       currency:       (cur ?? currency)      || undefined,
       payment_status: (ps  ?? paymentStatus) || undefined,
       per_page:       pp ?? perPage,
+      page:           pg ?? page,
     }
     setLoading(true)
     try {
@@ -50,19 +53,19 @@ export default function DocumentListPage() {
   useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleTypeChange(value) {
-    setType(value); setSearch('')
+    setType(value); setSearch(''); setPage(1)
     const clearedPs = (value === 'receipt' || value === 'receipt_storno') ? '' : paymentStatus
     if (clearedPs !== paymentStatus) setPaymentStatus('')
-    load({ t: value, s: '', ps: clearedPs })
+    load({ t: value, s: '', ps: clearedPs, pg: 1 })
   }
-  function clearSearch()           { setSearch(''); load({ s: '' }) }
-  function handleDateFrom(value)   { setDateFrom(value); load({ df: value }) }
-  function handleDateTo(value)     { setDateTo(value); load({ dt: value }) }
-  function clearDates()            { setDateFrom(''); setDateTo(''); load({ df: '', dt: '' }) }
-  function handleCurrency(value)   { setCurrency(value); load({ cur: value }) }
-  function handlePaymentStatus(v)  { setPaymentStatus(v); load({ ps: v }) }
-  function handlePerPage(value)    { setPerPage(value); load({ pp: value }) }
-  function handleSearch(e)         { e.preventDefault(); load() }
+  function clearSearch()           { setSearch(''); setPage(1); load({ s: '', pg: 1 }) }
+  function handleDateFrom(value)   { setDateFrom(value); setPage(1); load({ df: value, pg: 1 }) }
+  function handleDateTo(value)     { setDateTo(value); setPage(1); load({ dt: value, pg: 1 }) }
+  function clearDates()            { setDateFrom(''); setDateTo(''); setPage(1); load({ df: '', dt: '', pg: 1 }) }
+  function handleCurrency(value)   { setCurrency(value); setPage(1); load({ cur: value, pg: 1 }) }
+  function handlePaymentStatus(v)  { setPaymentStatus(v); setPage(1); load({ ps: v, pg: 1 }) }
+  function handlePerPage(value)    { setPerPage(value); setPage(1); load({ pp: value, pg: 1 }) }
+  function handleSearch(e)         { e.preventDefault(); setPage(1); load({ pg: 1 }) }
 
   function docLink(doc) {
     return doc.model_type === 'invoice' ? `/invoices/${doc.id}` : `/receipts/${doc.id}`
@@ -162,6 +165,7 @@ export default function DocumentListPage() {
       )}
 
       {data && <p className="text-muted mt-4">{t('common.total')}: {data.meta?.total} {t('common.pieces')}</p>}
+      <Pagination meta={data?.meta} onChange={(p) => { setPage(p); load({ pg: p }) }} />
     </div>
   )
 }

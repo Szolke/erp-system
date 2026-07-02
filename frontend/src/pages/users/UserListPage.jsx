@@ -4,24 +4,28 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { users as usersApi } from '../../api/users'
 import PerPageSelector from '../../components/PerPageSelector'
+import Pagination from '../../components/Pagination'
+import { useToast } from '../../contexts/ToastContext'
 
 export default function UserListPage() {
   const { can } = useAuth()
   const { t } = useTranslation()
-  const [list, setList]         = useState([])
+  const toast = useToast()
+  const [data, setData]         = useState(null)
   const [search, setSearch]     = useState('')
   const [loading, setLoading]   = useState(true)
   const [perPage, setPerPage]   = useState(20)
+  const [page, setPage]         = useState(1)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm]         = useState({ name: '', email: '', password: '' })
   const [formErr, setFormErr]   = useState('')
   const [saving, setSaving]     = useState(false)
 
-  async function load(q = '', pp = 20) {
+  async function load(q = '', pp = 20, pg = 1) {
     setLoading(true)
     try {
-      const res = await usersApi.list(q || pp !== 20 ? { search: q || undefined, per_page: pp } : undefined)
-      setList(res.data.data ?? res.data ?? [])
+      const res = await usersApi.list({ search: q || undefined, per_page: pp, page: pg })
+      setData(res.data)
     } finally { setLoading(false) }
   }
 
@@ -29,14 +33,14 @@ export default function UserListPage() {
 
   function handleSearch(e) {
     const v = e.target.value
-    setSearch(v)
+    setSearch(v); setPage(1)
     clearTimeout(window._userSearchTimer)
-    window._userSearchTimer = setTimeout(() => load(v, perPage), 300)
+    window._userSearchTimer = setTimeout(() => load(v, perPage, 1), 300)
   }
 
   function handlePerPage(value) {
-    setPerPage(value)
-    load(search, value)
+    setPerPage(value); setPage(1)
+    load(search, value, 1)
   }
 
   async function handleCreate(e) {
@@ -47,24 +51,32 @@ export default function UserListPage() {
       await usersApi.create(form)
       setForm({ name: '', email: '', password: '' })
       setShowForm(false)
-      load(search, perPage)
+      toast(t('common.saved'), 'success')
+      load(search, perPage, page)
     } catch (err) {
       const errs = err.response?.data?.errors
-      setFormErr(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? 'Hiba')
+      setFormErr(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? t('common.error'))
     } finally { setSaving(false) }
   }
 
   async function handleToggleActive(user) {
     await usersApi.update(user.id, { is_active: !user.is_active })
-    load(search, perPage)
+    toast(t('common.saved'), 'success')
+    load(search, perPage, page)
   }
 
   async function handleRemove(user) {
     if (!confirm(`Eltávolítja ${user.name} felhasználót a cégtől?`)) return
-    await usersApi.remove(user.id)
-    load(search, perPage)
+    try {
+      await usersApi.remove(user.id)
+      toast(t('common.saved'), 'success')
+      load(search, perPage, page)
+    } catch (err) {
+      toast(err.response?.data?.message ?? t('common.error'), 'error')
+    }
   }
 
+  const list = data?.data ?? []
   const canManage = can('user.manage')
 
   return (
@@ -159,6 +171,8 @@ export default function UserListPage() {
           </tbody>
         </table>
       )}
+      {data && <p className="text-muted mt-4">{t('common.total')}: {data.meta?.total} {t('common.pieces')}</p>}
+      <Pagination meta={data?.meta} onChange={(p) => { setPage(p); load(search, perPage, p) }} />
     </div>
   )
 }

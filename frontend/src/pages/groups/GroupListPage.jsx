@@ -4,29 +4,33 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { groups as groupsApi } from '../../api/groups'
 import PerPageSelector from '../../components/PerPageSelector'
+import Pagination from '../../components/Pagination'
+import { useToast } from '../../contexts/ToastContext'
 
 export default function GroupListPage() {
   const { can } = useAuth()
   const { t } = useTranslation()
-  const [list, setList]         = useState([])
+  const toast = useToast()
+  const [data, setData]         = useState(null)
   const [loading, setLoading]   = useState(true)
   const [perPage, setPerPage]   = useState(20)
+  const [page, setPage]         = useState(1)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm]         = useState({ name: '', description: '' })
   const [formErr, setFormErr]   = useState('')
   const [saving, setSaving]     = useState(false)
 
-  async function load(pp = 20) {
+  async function load(pp = 20, pg = 1) {
     setLoading(true)
     try {
-      const res = await groupsApi.list({ per_page: pp })
-      setList(res.data.data ?? [])
+      const res = await groupsApi.list({ per_page: pp, page: pg })
+      setData(res.data)
     } finally { setLoading(false) }
   }
 
   function handlePerPage(value) {
-    setPerPage(value)
-    load(value)
+    setPerPage(value); setPage(1)
+    load(value, 1)
   }
 
   useEffect(() => { load() }, [])
@@ -39,10 +43,11 @@ export default function GroupListPage() {
       await groupsApi.create(form)
       setForm({ name: '', description: '' })
       setShowForm(false)
-      load(perPage)
+      toast(t('common.saved'), 'success')
+      load(perPage, page)
     } catch (err) {
       const errs = err.response?.data?.errors
-      setFormErr(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? 'Hiba')
+      setFormErr(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? t('common.error'))
     } finally { setSaving(false) }
   }
 
@@ -50,12 +55,14 @@ export default function GroupListPage() {
     if (!confirm(`Törli a(z) „${group.name}" csoportot?`)) return
     try {
       await groupsApi.remove(group.id)
-      load(perPage)
+      toast(t('group.deleted'), 'success')
+      load(perPage, page)
     } catch (err) {
-      alert(err.response?.data?.message ?? 'Hiba')
+      toast(err.response?.data?.message ?? t('common.error'), 'error')
     }
   }
 
+  const list = data?.data ?? []
   const canManage = can('group.manage')
 
   return (
@@ -130,6 +137,8 @@ export default function GroupListPage() {
           </tbody>
         </table>
       )}
+      {data && <p className="text-muted mt-4">{t('common.total')}: {data.meta?.total} {t('common.pieces')}</p>}
+      <Pagination meta={data?.meta} onChange={(p) => { setPage(p); load(perPage, p) }} />
     </div>
   )
 }

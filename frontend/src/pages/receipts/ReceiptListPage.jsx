@@ -4,6 +4,7 @@ import { receipts } from '../../api/receipts'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import PerPageSelector from '../../components/PerPageSelector'
+import Pagination from '../../components/Pagination'
 
 export default function ReceiptListPage() {
   const { can } = useAuth()
@@ -11,22 +12,23 @@ export default function ReceiptListPage() {
   const [data, setData]       = useState(null)
   const [loading, setLoading] = useState(true)
   const [perPage, setPerPage] = useState(20)
+  const [page, setPage]       = useState(1)
 
-  async function load(pp) {
+  async function load(pp, pg) {
     setLoading(true)
     try {
-      const res = await receipts.list({ per_page: pp })
+      const res = await receipts.list({ per_page: pp, page: pg })
       setData(res.data)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { load(20) }, [])
+  useEffect(() => { load(20, 1) }, [])
 
   function handlePerPage(value) {
-    setPerPage(value)
-    load(value)
+    setPerPage(value); setPage(1)
+    load(value, 1)
   }
 
   return (
@@ -54,6 +56,7 @@ export default function ReceiptListPage() {
         </table>
       )}
       {data && <p className="text-muted mt-4">{t('common.total')}: {data.meta?.total} {t('common.pieces')}</p>}
+      <Pagination meta={data?.meta} onChange={(p) => { setPage(p); load(perPage, p) }} />
     </div>
   )
 }

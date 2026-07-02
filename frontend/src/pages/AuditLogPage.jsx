@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { company as companyApi } from '../api/company'
 import PerPageSelector from '../components/PerPageSelector'
+import Pagination from '../components/Pagination'
 import { useTranslation } from '../contexts/TranslationContext'
 
 export default function AuditLogPage() {
@@ -9,28 +10,29 @@ export default function AuditLogPage() {
   const [action, setAction]   = useState('')
   const [loading, setLoading] = useState(true)
   const [perPage, setPerPage] = useState(50)
+  const [page, setPage]       = useState(1)
 
-  async function load(a, pp) {
+  async function load(a, pp, pg) {
     setLoading(true)
     try {
-      const res = await companyApi.auditLogs({ action: a || undefined, per_page: pp })
+      const res = await companyApi.auditLogs({ action: a || undefined, per_page: pp, page: pg })
       setData(res.data)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { load('', 50) }, [])
+  useEffect(() => { load('', 50, 1) }, [])
 
   function handlePerPage(value) {
-    setPerPage(value)
-    load(action, value)
+    setPerPage(value); setPage(1)
+    load(action, value, 1)
   }
 
   return (
     <div>
       <div className="page-header"><h1 className="page-title">{t('audit.title')}</h1></div>
-      <form className="search-row" onSubmit={(e) => { e.preventDefault(); load(action, perPage) }}>
+      <form className="search-row" onSubmit={(e) => { e.preventDefault(); setPage(1); load(action, perPage, 1) }}>
         <input placeholder="Szűrés művelet szerint (pl. invoice.cancel)" value={action} onChange={(e) => setAction(e.target.value)} />
         <button className="btn btn-secondary" type="submit">{t('common.search')}</button>
         <PerPageSelector value={perPage} onChange={handlePerPage} />
@@ -53,6 +55,7 @@ export default function AuditLogPage() {
         </table>
       )}
       {data && <p className="text-muted mt-4">{t('common.total')}: {data.meta?.total} {t('common.pieces')}</p>}
+      <Pagination meta={data?.meta} onChange={(p) => { setPage(p); load(action, perPage, p) }} />
     </div>
   )
 }

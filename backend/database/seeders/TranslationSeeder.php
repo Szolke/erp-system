@@ -59,6 +59,8 @@ class TranslationSeeder extends Seeder
             ['common', 'language',    'Nyelv',                'Language',           'Sprache'],
             ['common', 'pieces',      'db',                   'pcs',                'Stk.'],
             ['common', 'storno',      'Sztornó',              'Cancel',             'Stornieren'],
+            ['common', 'prev_page',   '← Előző',             '← Prev',             '← Zurück'],
+            ['common', 'next_page',   'Következő →',          'Next →',             'Weiter →'],
 
             // ── Bejelentkezés ─────────────────────────────────────────
             ['auth', 'title',         'Bejelentkezés',        'Login',              'Anmelden'],
@@ -142,6 +144,11 @@ class TranslationSeeder extends Seeder
             ['receipt', 'st_issued',       'Kiállított',                        'Issued',                            'Ausgestellt'],
             ['receipt', 'st_storno',       'Sztornózott',                       'Cancelled',                         'Storniert'],
             ['receipt', 'submit',          'Nyugta kiállítása',                 'Issue receipt',                     'Quittung ausstellen'],
+
+            // ── Toast visszajelzések ──────────────────────────────────
+            ['partner',  'deleted',  'Partner törölve.',  'Partner deleted.',  'Partner gelöscht.'],
+            ['product',  'deleted',  'Termék törölve.',   'Product deleted.',  'Produkt gelöscht.'],
+            ['group',    'deleted',  'Csoport törölve.',  'Group deleted.',    'Gruppe gelöscht.'],
 
             // ── Partner ───────────────────────────────────────────────
             ['partner', 'title',           'Partnerek',                         'Partners',                          'Partner'],

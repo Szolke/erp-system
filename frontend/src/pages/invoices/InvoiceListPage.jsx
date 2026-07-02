@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { PaymentStatusBadge, InvoiceStatusBadge } from '../../components/StatusBadge'
 import PerPageSelector from '../../components/PerPageSelector'
+import Pagination from '../../components/Pagination'
 
 export default function InvoiceListPage() {
   const { can } = useAuth()
@@ -13,27 +14,29 @@ export default function InvoiceListPage() {
   const [search, setSearch]   = useState('')
   const [loading, setLoading] = useState(true)
   const [perPage, setPerPage] = useState(20)
+  const [page, setPage]       = useState(1)
 
-  async function load(s, pp) {
+  async function load(s, pp, pg) {
     setLoading(true)
     try {
-      const res = await invoices.list({ search: s || undefined, per_page: pp })
+      const res = await invoices.list({ search: s || undefined, per_page: pp, page: pg })
       setData(res.data)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { load('', 20) }, [])
+  useEffect(() => { load('', 20, 1) }, [])
 
   function handleSearch(e) {
     e.preventDefault()
-    load(search, perPage)
+    setPage(1)
+    load(search, perPage, 1)
   }
 
   function handlePerPage(value) {
-    setPerPage(value)
-    load(search, value)
+    setPerPage(value); setPage(1)
+    load(search, value, 1)
   }
 
   return (
@@ -72,6 +75,7 @@ export default function InvoiceListPage() {
         </table>
       )}
       {data && <p className="text-muted mt-4">{t('common.total')}: {data.meta?.total} {t('common.pieces')}</p>}
+      <Pagination meta={data?.meta} onChange={(p) => { setPage(p); load(search, perPage, p) }} />
     </div>
   )
 }

@@ -99,9 +99,9 @@ export default function TranslationPage() {
             {rows.map((row) => {
               const k = rowKey(row)
               return (
-                <tr key={k} style={isDirty(row) ? { background: '#fffbeb' } : {}}>
-                  <td><span className="badge" style={{ background: '#f1f5f9', color: '#475569' }}>{row.namespace}</span></td>
-                  <td style={{ fontFamily: 'monospace', fontSize: 12, color: '#475569' }}>{row.key}</td>
+                <tr key={k} style={isDirty(row) ? { background: 'var(--color-warning-bg)' } : {}}>
+                  <td><span className="badge" style={{ background: 'var(--color-surface-alt)', color: 'var(--color-muted)' }}>{row.namespace}</span></td>
+                  <td style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--color-muted)' }}>{row.key}</td>
                   {['hu', 'en', 'de'].map((loc) => (
                     <td key={loc}>
                       <input

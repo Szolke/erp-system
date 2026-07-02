@@ -160,7 +160,7 @@ export default function CustomFieldsPage() {
             )}
 
             {editing && (
-              <div className="card" style={{ background: '#f8fafc', marginTop: 8 }}>
+              <div className="card" style={{ background: 'var(--color-surface-alt)', marginTop: 8 }}>
                 {error && <div className="alert-error mb-4">{error}</div>}
                 <form onSubmit={handleSave}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>

@@ -26,6 +26,8 @@ class TranslationSeeder extends Seeder
             ['nav', 'custom_fields', 'Egyéni mezők',         'Custom fields',      'Benutzerdefinierte Felder'],
             ['nav', 'simplepay',      'SimplePay',            'SimplePay',          'SimplePay'],
             ['nav', 'collapse',       'Összecsukás',          'Collapse',           'Einklappen'],
+            ['nav', 'dark_mode',      'Sötét mód',            'Dark mode',          'Dunkler Modus'],
+            ['nav', 'light_mode',     'Világos mód',          'Light mode',         'Heller Modus'],
             ['nav', 'logout',         'Kijelentkezés',        'Logout',             'Abmelden'],
 
             // ── Közös gombok / állapotok ──────────────────────────────

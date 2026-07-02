@@ -7,9 +7,9 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 
 const EFFECT_LABELS = {
-  allow: { label: 'Engedélyezve', bg: '#dcfce7', color: '#15803d' },
-  deny:  { label: 'Tiltva',       bg: '#fee2e2', color: '#b91c1c' },
-  null:  { label: 'Nincs felülírás', bg: '#f1f5f9', color: '#64748b' },
+  allow: { label: 'Engedélyezve', bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
+  deny:  { label: 'Tiltva',       bg: 'var(--color-danger-bg)',  color: 'var(--color-danger)' },
+  null:  { label: 'Nincs felülírás', bg: 'var(--color-surface-alt)', color: 'var(--color-muted)' },
 }
 
 function EffectToggle({ effect, onChange, disabled }) {
@@ -150,7 +150,7 @@ export default function UserDetailPage() {
 
       {error && <div className="alert-error mb-4">{error}</div>}
       {saved && (
-        <div style={{ background: '#dcfce7', color: '#15803d', padding: '10px 12px', borderRadius: 5, fontSize: 13, marginBottom: 16 }}>
+        <div className="alert-success" style={{ fontSize: 13, marginBottom: 16 }}>
           Felülírások mentve.
         </div>
       )}

@@ -66,7 +66,7 @@ function SeriesRow({ series, onSaved, t }) {
         {preview(prefix, series.next_number)}
       </td>
       <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-        {saved && <span style={{ color: '#15803d', fontSize: 12, marginRight: 10 }}>✓ {t('common.save')}</span>}
+        {saved && <span style={{ color: 'var(--color-success-text)', fontSize: 12, marginRight: 10 }}>✓ {t('common.save')}</span>}
         <button
           className="btn btn-primary btn-sm"
           onClick={handleSave}

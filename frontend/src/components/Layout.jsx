@@ -7,7 +7,7 @@ import {
   FileText, Users2, Package,
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders,
   Settings2, ChevronDown, ChevronRight, ChevronLeft,
-  LogOut,
+  LogOut, Moon, Sun,
 } from 'lucide-react'
 
 const SETTINGS_PATHS = ['/users', '/groups', '/company', '/audit-logs', '/settings']
@@ -24,8 +24,23 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen]   = useState(
     () => localStorage.getItem('sidebarOpen') !== 'false'
   )
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem('theme') ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  )
 
   useEffect(() => { if (isInSettings) setSettingsOpen(true) }, [isInSettings])
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
+
+  function toggleTheme() {
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark'
+      localStorage.setItem('theme', next)
+      return next
+    })
+  }
 
   function toggleSidebar() {
     setSidebarOpen((prev) => {
@@ -114,7 +129,7 @@ export default function Layout() {
           )}
         </nav>
 
-        {/* Nyelvváltó */}
+        {/* Nyelvváltó + témaváltó */}
         <div className={`lang-switcher${collapsed ? ' lang-switcher--collapsed' : ''}`}>
           {SUPPORTED.map((loc) => (
             <button key={loc}
@@ -124,6 +139,13 @@ export default function Layout() {
               {loc.toUpperCase()}
             </button>
           ))}
+          <button
+            className="theme-toggle-btn"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? t('nav.light_mode') : t('nav.dark_mode')}
+          >
+            {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
+          </button>
         </div>
 
         <button className="sidebar-toggle" onClick={toggleSidebar}

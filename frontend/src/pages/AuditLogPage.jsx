@@ -43,7 +43,7 @@ export default function AuditLogPage() {
               <tr key={log.id}>
                 <td style={{ whiteSpace: 'nowrap' }}>{log.created_at}</td>
                 <td>{log.user?.name ?? '—'}</td>
-                <td><code style={{ fontSize: 11, background: '#f1f5f9', padding: '2px 6px', borderRadius: 3 }}>{log.action}</code></td>
+                <td><code style={{ fontSize: 11, background: 'var(--color-surface-alt)', color: 'var(--color-text)', padding: '2px 6px', borderRadius: 3 }}>{log.action}</code></td>
                 <td>{log.auditable_type ? `${log.auditable_type.split('\\').pop()}#${log.auditable_id}` : '—'}</td>
                 <td style={{ fontSize: 11 }}>{log.old_values ? JSON.stringify(log.old_values) : '—'}</td>
                 <td style={{ fontSize: 11 }}>{log.new_values ? JSON.stringify(log.new_values) : '—'}</td>

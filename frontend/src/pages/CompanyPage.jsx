@@ -47,9 +47,7 @@ function GeneralSettingsSection({ can }) {
       <h2 style={{ margin: '0 0 16px', fontSize: '1.1rem' }}>{t('settings.title')}</h2>
       {error && <div className="alert-error mb-4">{error}</div>}
       {success && (
-        <div className="mb-4" style={{ background: '#dcfce7', color: '#15803d', padding: '10px 12px', borderRadius: 5 }}>
-          {t('common.saved')}
-        </div>
+        <div className="mb-4 alert-success">{t('common.saved')}</div>
       )}
       <form onSubmit={handleSave}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
@@ -171,7 +169,7 @@ function SimplePaySection({ can }) {
                     <td style={{ fontFamily: 'monospace' }}>{cred.merchant_id}</td>
                     <td>
                       {cred.has_secret_key
-                        ? <span style={{ color: '#15803d' }}>✓ {t('simplepay.set')}</span>
+                        ? <span style={{ color: 'var(--color-success-text)' }}>✓ {t('simplepay.set')}</span>
                         : <span className="text-muted">{t('simplepay.not_set')}</span>}
                     </td>
                     <td>{cred.sandbox ? t('common.yes') : t('common.no')}</td>
@@ -195,7 +193,7 @@ function SimplePaySection({ can }) {
           )}
 
           {editing && (
-            <div className="card" style={{ marginTop: 16, background: '#f8fafc' }}>
+            <div className="card" style={{ marginTop: 16, background: 'var(--color-surface-alt)' }}>
               {spError && <div className="alert-error mb-4">{spError}</div>}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 {editing.isNew ? (
@@ -332,13 +330,13 @@ export default function CompanyPage() {
     <div>
       <div className="page-header"><h1 className="page-title">{t('company.title')}</h1></div>
       {error && <div className="alert-error mb-4">{error}</div>}
-      {success && <div className="mb-4" style={{ background: '#dcfce7', color: '#15803d', padding: '10px 12px', borderRadius: 5 }}>Mentve.</div>}
+      {success && <div className="mb-4 alert-success">Mentve.</div>}
       {can('company.manage') && (
         <div className="card" style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 20 }}>
           {logoUrl ? (
             <img src={logoUrl} alt="logo" style={{ maxHeight: 64, maxWidth: 200, borderRadius: 4 }} />
           ) : (
-            <div style={{ width: 120, height: 64, background: '#f1f5f9', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 11 }}>
+            <div style={{ width: 120, height: 64, background: 'var(--color-surface-alt)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-muted)', fontSize: 11 }}>
               {t('company.no_logo')}
             </div>
           )}

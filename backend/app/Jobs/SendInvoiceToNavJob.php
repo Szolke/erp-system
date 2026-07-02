@@ -2,9 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Enums\CompanySetting;
 use App\Enums\NavStatus;
 use App\Models\Invoice;
 use App\Models\NavSubmissionLog;
+use App\Services\CompanySettingService;
 use App\Services\Nav\NavReporterFactory;
 use App\Services\Nav\NavXmlBuilder;
 use Illuminate\Bus\Queueable;
@@ -31,10 +33,21 @@ class SendInvoiceToNavJob implements ShouldQueue
         private readonly string $operation = 'CREATE',
     ) {}
 
-    public function handle(NavXmlBuilder $xmlBuilder, NavReporterFactory $reporterFactory): void
+    public function handle(NavXmlBuilder $xmlBuilder, NavReporterFactory $reporterFactory, CompanySettingService $settings): void
     {
         $invoice = Invoice::with(['company.navCredentials', 'partner', 'paymentMethod', 'items.vatRate'])
             ->findOrFail($this->invoiceId);
+
+        // Skip NAV submission when nav_enabled is turned off for the company
+        if (! $settings->get($invoice->company_id, CompanySetting::NAV_ENABLED)) {
+            $invoice->update(['nav_status' => NavStatus::NotApplicable]);
+            \Illuminate\Support\Facades\Log::info('NAV submission skipped: nav_enabled=false', [
+                'invoice_id' => $invoice->id,
+                'company_id' => $invoice->company_id,
+            ]);
+
+            return;
+        }
 
         // Uses whichever environment the company is currently switched to
         // (companies.nav_environment) rather than just "the first active

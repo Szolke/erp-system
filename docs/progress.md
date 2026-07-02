@@ -5,7 +5,7 @@
 > git logból/kódból kelljen visszafejtse, hol tartunk — itt egyben megtalálja.
 > Részletes tábla-/mezőszintű terv: [er-model.md](er-model.md).
 
-Utolsó frissítés: 2026-07-02, a 2. fázis (logó feltöltés + PDF generálás) után.
+Utolsó frissítés: 2026-07-02, a 3–5. fázis (dark mode, API dok, NAV toggle) után.
 
 ## Kész lépések
 
@@ -38,16 +38,23 @@ Utolsó frissítés: 2026-07-02, a 2. fázis (logó feltöltés + PDF generálá
 | **1** | **Egyéni mezők (1. fázis, JSONB hibrid):** `custom_field_definitions` tábla + `custom_fields JSONB` a `partners` és `products` táblán; `CustomFieldDefinition` modell + `CustomFieldDefinitionController` (CRUD, `company.manage`); `CustomFieldsForm` komponens (text/number/date/boolean/select típusok); `CustomFieldsPage` beállítás-oldal; Partner- és Termékform dinamikus mezőkkel; `customfield.*` i18n kulcsok | `CustomFieldDefinition.php`, `CustomFieldDefinitionController.php`, `CustomFieldsForm.jsx`, `CustomFieldsPage.jsx` | `890f78f` |
 | **2** | **Logó feltöltés + PDF generálás (2. fázis):** `POST/DELETE /api/company/logo` (Laravel Storage, public disk, max 2MB); `GET /api/invoices/{id}/pdf` és `GET /api/receipts/{id}/pdf` (on-the-fly, `barryvdh/laravel-dompdf`); Blade template (`pdf/invoice.blade.php`, `pdf/receipt.blade.php`, `pdf/layout.blade.php`) kék fejléccel, logóval, tételsorokkal, összesítővel; HU/EN/DE PDF felirat-fájlok; `invoice_language` CompanySetting alapján lokalizált PDF; logó feltöltés UI CompanyPage-en; PDF gomb InvoiceDetailPage + ReceiptDetailPage fejlécében | `PdfService.php`, `pdf/*.blade.php`, `lang/{hu,en,de}/pdf.php`, `CompanyController`, `InvoiceController`, `ReceiptController` | — |
 | **0b** | **Cégszintű beállítások frontend (0. fázis)**: "Általános beállítások" szekció a Cégbeállítások oldalon — deviza select (HUF/EUR/USD), számla nyelve select (hu/en/de), fizetési határidő szám-input; mentés per-PUT a beállítás-API-ra; `settings.*` fordítási kulcsok (7 kulcs × 3 nyelv) | `CompanyPage.jsx` (`GeneralSettingsSection`), `company.js` (`settings.getAll/set/reset`), `TranslationSeeder` (settings keys) | — |
+| **3** | **Dark mode (3. fázis):** CSS custom property alapú témaváltás (`[data-theme="dark"]` + 16 változó); Moon/Sun ikon gomb a sidebar Language switcher sorában; `localStorage` + `prefers-color-scheme` fallback; flash-mentes FOUC-védelem az `index.html`-ben; hardcoded hex színek cseréje CSS változóra: `index.css` (sp-*, badge-free kék, hover, success, danger), `CompanyPage`, `TranslationPage`, `UserDetailPage`, `AuditLogPage`, `CustomFieldsPage`, `DocumentSeriesSettingsPage`; új `alert-success` CSS osztály | `Layout.jsx`, `index.css`, `index.html`, több JSX oldal | — |
+| **4** | **API dokumentáció (4. fázis, Scribe):** `knuckleswtf/scribe` telepítve; 68 endpoint automatikusan dokumentálva; csoportosítás: Számlák, Nyugták, Partnerek, Termékek, Cég, Cég beállítások, SimplePay, Felhasználók, Csoportok, Audit napló, stb.; `GET /docs` védett `auth:sanctum` middleware-rel (hitelesítetlen kérés → redirect `/login`-ra); SPA CSRF support (`use_csrf: true`); OpenAPI spec + Postman collection is generálódik | `config/scribe.php`, összes Api Controller (`@group` docblock), `routes/web.php` | — |
+| **5** | **NAV toggle (5. fázis):** `SendInvoiceToNavJob::handle()` elején `CompanySettingService::get(company_id, NAV_ENABLED)` ellenőrzés — ha `false`, a számla `nav_status = not_applicable` lesz és a job naplóz + visszatér (nem küldi el, nem dob hibát, queue nem retry-ol) | `SendInvoiceToNavJob.php` | — |
 
 ## Még hátravan
 
-- **PDF-generálás** (számla/nyugta bizonylat) — `pdf_path` mező van az invoices/receipts táblában, de sem könyvtár (pl. barryvdh/laravel-dompdf), sem template, sem controller-endpoint nincs hozzá.
-- **RBAC management UI/API** — **KÉSZ** (12a. lépés). Felhasználók és csoportok kezelése UI-ból elérhető.
-- **SimplePay UI** — **KÉSZ** (14b. lépés). Hitelesítő adatok kezelhetők a Cégbeállítások oldalon.
-- **i18n** — **KÉSZ** (15. lépés). HU/EN/DE, adatbázis-alapú, felhasználói szintű preference, admin szerkesztő.
-- **Cég-onboarding** — `CompanyController` csak az aktív céget kezeli, új cég létrehozása + első felhasználó hozzárendelése nincs megépítve.
-- **Frontend finomítás** — szükséges lehet: pagination lapozó UI (jelenleg per_page-szel állítható), Toast-értesítések sikeres/hibás műveletekre, SimplePay fizetés indítás gomb InvoiceDetailPage-ből.
-- **i18n bővítés** — `InvoiceCreatePage` és `ReceiptCreatePage` még nem kapta meg a `t()` cseréket (nem volt a feladatlistán); ezek manuálisan pótlandók.
+- **PDF-generálás** — **KÉSZ** (2. fázis). `barryvdh/laravel-dompdf`, HU/EN/DE lokalizáció, logó base64.
+- **Dark mode** — **KÉSZ** (3. fázis). CSS változók, sidebar toggle gomb.
+- **API dokumentáció** — **KÉSZ** (4. fázis). Scribe, `/docs` route, auth védett.
+- **NAV toggle** — **KÉSZ** (5. fázis). `nav_enabled=false` → skip, `nav_status=not_applicable`.
+- **RBAC management UI/API** — **KÉSZ** (12a. lépés).
+- **SimplePay UI** — **KÉSZ** (14b. lépés).
+- **i18n** — **KÉSZ** (15. lépés).
+- **6. fázis: SimplePay refund → storno lánc** — még nincs megépítve.
+- **Cég-onboarding** — új cég létrehozása + első felhasználó hozzárendelése nincs megépítve.
+- **Frontend finomítás** — pagination lapozó UI, Toast-értesítések, SimplePay gomb InvoiceDetailPage-ből.
+- **i18n bővítés** — `InvoiceCreatePage` és `ReceiptCreatePage` még nem kapta meg a `t()` cseréket.
 
 ## Architekturális konvenciók (amit egy új munkamenetnek tudnia kell)
 

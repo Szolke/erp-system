@@ -4,6 +4,7 @@ import { invoices } from '../../api/invoices'
 import { partners } from '../../api/partners'
 import client from '../../api/client'
 import ProductComboBox from '../../components/ProductComboBox'
+import { useTranslation } from '../../contexts/TranslationContext'
 
 const today = () => new Date().toISOString().split('T')[0]
 const plus30 = () => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0] }
@@ -20,6 +21,7 @@ const emptyItem = (defaultVatId = '') => ({
 
 export default function InvoiceCreatePage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [partnerList, setPartnerList] = useState([])
   const [vatRates, setVatRates] = useState([])
   const [payMethods, setPayMethods] = useState([])
@@ -92,7 +94,7 @@ export default function InvoiceCreatePage() {
     setError('')
 
     if (items.some((item) => !item.product_id)) {
-      setError('Minden tételhez kötelező terméket választani.')
+      setError(t('invoice.product_required'))
       return
     }
 
@@ -114,7 +116,7 @@ export default function InvoiceCreatePage() {
       navigate(`/invoices/${res.data.data.id}`)
     } catch (err) {
       const errs = err.response?.data?.errors
-      setError(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? 'Hiba')
+      setError(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? t('common.error'))
     } finally {
       setSaving(false)
     }
@@ -123,40 +125,40 @@ export default function InvoiceCreatePage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Új számla</h1>
-        <Link to="/invoices" className="btn btn-secondary">← Vissza</Link>
+        <h1 className="page-title">{t('invoice.new_title')}</h1>
+        <Link to="/invoices" className="btn btn-secondary">{t('common.back')}</Link>
       </div>
       {error && <div className="alert-error mb-4">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="card">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div className="form-group">
-              <label>Partner</label>
+              <label>{t('invoice.partner_col')}</label>
               <select value={form.partner_id} onChange={(e) => setField('partner_id', e.target.value)} required>
-                <option value="">— válassz —</option>
+                <option value="">— —</option>
                 {partnerList.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
             <div className="form-group">
-              <label>Fizetési mód</label>
+              <label>{t('invoice.pay_method')}</label>
               <select value={form.payment_method_id} onChange={(e) => setField('payment_method_id', e.target.value)} required>
                 {payMethods.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
               </select>
             </div>
             <div className="form-group">
-              <label>Kiállítás</label>
+              <label>{t('invoice.issue_date')}</label>
               <input type="date" value={form.issue_date} onChange={(e) => setField('issue_date', e.target.value)} required />
             </div>
             <div className="form-group">
-              <label>Teljesítés</label>
+              <label>{t('invoice.fulfillment')}</label>
               <input type="date" value={form.fulfillment_date} onChange={(e) => setField('fulfillment_date', e.target.value)} required />
             </div>
             <div className="form-group">
-              <label>Fizetési határidő</label>
+              <label>{t('invoice.due_date')}</label>
               <input type="date" value={form.due_date} onChange={(e) => setField('due_date', e.target.value)} required />
             </div>
             <div className="form-group">
-              <label>Deviza</label>
+              <label>{t('common.currency')}</label>
               <select value={form.currency} onChange={(e) => setField('currency', e.target.value)} required>
                 <option value="HUF">HUF</option>
                 <option value="EUR">EUR</option>
@@ -164,22 +166,22 @@ export default function InvoiceCreatePage() {
             </div>
           </div>
           <div className="form-group">
-            <label>Megjegyzés</label>
+            <label>{t('invoice.notes')}</label>
             <textarea rows={2} value={form.notes} onChange={(e) => setField('notes', e.target.value)} />
           </div>
         </div>
 
         <div className="card">
-          <strong>Tételek</strong>
+          <strong>{t('invoice.items')}</strong>
           <table className="items-table mt-4">
             <thead>
               <tr>
-                <th style={{ width: '30%' }}>Termék / Megnevezés</th>
-                <th>Me.</th>
-                <th>Mennyiség</th>
-                <th>Egységár</th>
-                <th>ÁFA</th>
-                <th>Kedv. %</th>
+                <th style={{ width: '30%' }}>{t('invoice.product_desc')}</th>
+                <th>{t('invoice.unit')}</th>
+                <th>{t('invoice.quantity')}</th>
+                <th>{t('invoice.unit_price')}</th>
+                <th>{t('invoice.vat')}</th>
+                <th>{t('invoice.discount')}</th>
                 <th></th>
               </tr>
             </thead>
@@ -239,14 +241,14 @@ export default function InvoiceCreatePage() {
               ))}
             </tbody>
           </table>
-          <button type="button" className="btn btn-secondary btn-sm mt-4" onClick={addItem}>+ Tétel</button>
+          <button type="button" className="btn btn-secondary btn-sm mt-4" onClick={addItem}>{t('invoice.add_item')}</button>
         </div>
 
         <div className="flex">
           <button className="btn btn-primary" type="submit" disabled={saving}>
-            {saving ? 'Mentés…' : 'Számla kiállítása'}
+            {saving ? t('common.saving') : t('invoice.submit')}
           </button>
-          <Link to="/invoices" className="btn btn-secondary">Mégsem</Link>
+          <Link to="/invoices" className="btn btn-secondary">{t('common.cancel')}</Link>
         </div>
       </form>
     </div>

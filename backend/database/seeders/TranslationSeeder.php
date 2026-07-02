@@ -122,15 +122,26 @@ class TranslationSeeder extends Seeder
             ['invoice', 'number_col',      'Számlaszám',                        'Invoice number',                    'Rechnungsnummer'],
             ['invoice', 'partner_col',     'Partner',                           'Partner',                           'Partner'],
             ['invoice', 'gross_col',       'Bruttó',                            'Gross',                             'Brutto'],
+            ['invoice', 'new_title',       'Új számla',                         'New invoice',                       'Neue Rechnung'],
+            ['invoice', 'notes',           'Megjegyzés',                        'Notes',                             'Anmerkung'],
+            ['invoice', 'items',           'Tételek',                           'Items',                             'Positionen'],
+            ['invoice', 'product_desc',    'Termék / Megnevezés',               'Product / Description',             'Produkt / Bezeichnung'],
+            ['invoice', 'discount',        'Kedv. %',                           'Disc. %',                           'Rabatt %'],
+            ['invoice', 'add_item',        '+ Tétel',                           '+ Item',                            '+ Position'],
+            ['invoice', 'submit',          'Számla kiállítása',                 'Issue invoice',                     'Rechnung ausstellen'],
+            ['invoice', 'product_required','Minden tételhez kötelező terméket választani.', 'A product must be selected for every item.', 'Für jede Position muss ein Produkt gewählt werden.'],
 
             // ── Nyugta ────────────────────────────────────────────────
             ['receipt', 'title',           'Nyugták',                           'Receipts',                          'Quittungen'],
             ['receipt', 'new',             '+ Új nyugta',                       '+ New receipt',                     '+ Neue Quittung'],
+            ['receipt', 'new_title',       'Új nyugta',                         'New receipt',                       'Neue Quittung'],
             ['receipt', 'storno_confirm',  'Biztosan sztornózza a nyugtát?',    'Are you sure you want to cancel this receipt?', 'Möchten Sie diese Quittung stornieren?'],
             ['receipt', 'number_col',      'Számlaszám',                        'Receipt number',                    'Quittungsnummer'],
             ['receipt', 'issued_col',      'Kelt',                              'Date',                              'Datum'],
+            ['receipt', 'date',            'Kelt',                              'Date',                              'Datum'],
             ['receipt', 'st_issued',       'Kiállított',                        'Issued',                            'Ausgestellt'],
             ['receipt', 'st_storno',       'Sztornózott',                       'Cancelled',                         'Storniert'],
+            ['receipt', 'submit',          'Nyugta kiállítása',                 'Issue receipt',                     'Quittung ausstellen'],
 
             // ── Partner ───────────────────────────────────────────────
             ['partner', 'title',           'Partnerek',                         'Partners',                          'Partner'],

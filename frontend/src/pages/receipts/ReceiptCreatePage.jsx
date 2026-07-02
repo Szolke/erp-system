@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { receipts } from '../../api/receipts'
 import client from '../../api/client'
+import { useTranslation } from '../../contexts/TranslationContext'
 
 const today = () => new Date().toISOString().split('T')[0]
 const emptyItem = () => ({ description: '', quantity: 1, unit_price: '', vat_rate_id: '' })
 
 export default function ReceiptCreatePage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [vatRates, setVatRates] = useState([])
   const [payMethods, setPayMethods] = useState([])
   const [form, setForm] = useState({ payment_method_id: '', issue_date: today(), currency: 'HUF' })
@@ -36,7 +38,7 @@ export default function ReceiptCreatePage() {
       navigate(`/receipts/${res.data.data.id}`)
     } catch (err) {
       const errs = err.response?.data?.errors
-      setError(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? 'Hiba')
+      setError(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? t('common.error'))
     } finally {
       setSaving(false)
     }
@@ -45,28 +47,28 @@ export default function ReceiptCreatePage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Új nyugta</h1>
-        <Link to="/receipts" className="btn btn-secondary">← Vissza</Link>
+        <h1 className="page-title">{t('receipt.new_title')}</h1>
+        <Link to="/receipts" className="btn btn-secondary">{t('common.back')}</Link>
       </div>
       {error && <div className="alert-error mb-4">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="card">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div className="form-group">
-              <label>Fizetési mód</label>
+              <label>{t('invoice.pay_method')}</label>
               <select value={form.payment_method_id} onChange={(e) => setForm({ ...form, payment_method_id: e.target.value })} required>
                 {payMethods.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
               </select>
             </div>
             <div className="form-group">
-              <label>Kelt</label>
+              <label>{t('receipt.date')}</label>
               <input type="date" value={form.issue_date} onChange={(e) => setForm({ ...form, issue_date: e.target.value })} required />
             </div>
           </div>
         </div>
         <div className="card">
           <table className="items-table">
-            <thead><tr><th>Megnevezés</th><th>Mennyiség</th><th>Egységár</th><th>ÁFA</th><th></th></tr></thead>
+            <thead><tr><th>{t('invoice.description')}</th><th>{t('invoice.quantity')}</th><th>{t('invoice.unit_price')}</th><th>{t('invoice.vat')}</th><th></th></tr></thead>
             <tbody>
               {items.map((item, i) => (
                 <tr key={i}>
@@ -83,11 +85,11 @@ export default function ReceiptCreatePage() {
               ))}
             </tbody>
           </table>
-          <button type="button" className="btn btn-secondary btn-sm mt-4" onClick={() => setItems((it) => [...it, { ...emptyItem(), vat_rate_id: vatRates[0]?.id ?? '' }])}>+ Tétel</button>
+          <button type="button" className="btn btn-secondary btn-sm mt-4" onClick={() => setItems((it) => [...it, { ...emptyItem(), vat_rate_id: vatRates[0]?.id ?? '' }])}>{t('invoice.add_item')}</button>
         </div>
         <div className="flex">
-          <button className="btn btn-primary" disabled={saving}>{saving ? 'Mentés…' : 'Nyugta kiállítása'}</button>
-          <Link to="/receipts" className="btn btn-secondary">Mégsem</Link>
+          <button className="btn btn-primary" disabled={saving}>{saving ? t('common.saving') : t('receipt.submit')}</button>
+          <Link to="/receipts" className="btn btn-secondary">{t('common.cancel')}</Link>
         </div>
       </form>
     </div>

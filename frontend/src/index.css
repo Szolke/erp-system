@@ -51,53 +51,49 @@ body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; color
 /* ── Sidebar ────────────────────────────────────────────────── */
 .sidebar { width: var(--sidebar-width); background: var(--color-sidebar-bg); color: var(--color-sidebar-text); display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.2s ease; overflow: hidden; }
 .sidebar--collapsed { width: var(--sidebar-width-collapsed); }
-.sidebar-brand { padding: 16px 16px 12px; font-size: 20px; font-weight: 700; color: #fff; border-bottom: 1px solid #334155; white-space: nowrap; }
-.sidebar--collapsed .sidebar-brand { text-align: center; padding: 16px 0 12px; font-size: 16px; }
+
+/* Fejléc: brand bal, becsukó jobb */
+.sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px 12px; border-bottom: 1px solid #334155; gap: 8px; }
+.sidebar-brand-text { font-size: 18px; font-weight: 700; color: #fff; white-space: nowrap; flex: 1; overflow: hidden; }
+.sidebar--collapsed .sidebar-header { justify-content: center; padding: 14px 0 12px; }
+.sidebar--collapsed .sidebar-brand-text { display: none; }
+.sidebar-collapse-btn { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; flex-shrink: 0; border: none; background: #334155; color: #94a3b8; border-radius: 5px; cursor: pointer; }
+.sidebar-collapse-btn:hover { background: #475569; color: #fff; }
+.sidebar--collapsed .sidebar-collapse-btn { background: transparent; }
 
 /* Company switcher */
-.company-name { padding: 10px 16px; font-size: 12px; color: #94a3b8; white-space: nowrap; }
-.company-select { display: block; margin: 8px 12px; width: calc(100% - 24px); background: #334155; border: none; color: #fff; padding: 6px 8px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+.company-name { padding: 8px 14px; font-size: 12px; color: #94a3b8; white-space: nowrap; }
+.company-select { display: block; margin: 6px 10px; width: calc(100% - 20px); background: #334155; border: none; color: #fff; padding: 6px 8px; border-radius: 5px; font-size: 13px; cursor: pointer; }
 
-/* Nav links */
-.sidebar-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+/* Nav */
+.sidebar-nav { flex: 1; padding: 6px 0; overflow-y: auto; }
 .nav-icon { flex-shrink: 0; }
-.nav-link { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: var(--color-sidebar-text); text-decoration: none; font-size: 13px; white-space: nowrap; }
-.nav-link:hover { background: #334155; }
-.nav-link.active { background: var(--color-sidebar-active); color: #fff; font-weight: 600; }
-.sidebar--collapsed .nav-link { justify-content: center; padding: 10px 0; }
+.nav-link { display: flex; align-items: center; gap: 10px; padding: 7px 10px; margin: 1px 6px; color: var(--color-sidebar-text); text-decoration: none; font-size: 13px; white-space: nowrap; border-radius: 6px; }
+.nav-link:hover { background: #334155; color: #fff; }
+.nav-link.active { background: #334155; color: #fff; font-weight: 600; }
+.sidebar--collapsed .nav-link { justify-content: center; margin: 1px 4px; padding: 8px 4px; }
 
-/* Nav group divider (collapsed mode) */
-.nav-divider { height: 1px; background: #334155; margin: 6px 10px; }
+/* Szekció-cím (Beállítások) */
+.nav-section-label { display: flex; align-items: center; gap: 6px; padding: 14px 16px 4px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #475569; white-space: nowrap; }
 
-/* Beállítások group (expanded mode) */
-.nav-group-header { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 16px; color: var(--color-sidebar-text); font-size: 13px; background: none; border: none; cursor: pointer; text-align: left; white-space: nowrap; }
-.nav-group-header:hover { background: #334155; }
-.nav-group-header.has-active { color: #fff; font-weight: 600; }
-.nav-group-header span:last-child { margin-left: auto; }
-.nav-group-arrow { flex-shrink: 0; }
-.nav-sublink { display: flex; align-items: center; gap: 8px; padding: 8px 16px 8px 30px; color: var(--color-sidebar-text); text-decoration: none; font-size: 13px; white-space: nowrap; }
-.nav-sublink:hover { background: #334155; }
-.nav-sublink.active { background: var(--color-sidebar-active); color: #fff; font-weight: 600; }
+/* Elválasztó (collapsed módban szekciók közt) */
+.nav-divider { height: 1px; background: #334155; margin: 8px 10px; }
 
-/* Nyelvváltó */
-.lang-switcher { display: flex; gap: 4px; padding: 8px 12px; border-top: 1px solid #334155; }
-.lang-switcher--collapsed { justify-content: center; padding: 8px 4px; flex-direction: column; align-items: center; }
+/* Nyelvváltó gombok */
 .lang-btn { padding: 3px 7px; border: 1px solid #475569; border-radius: 4px; background: none; color: #94a3b8; font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: .05em; }
 .lang-btn:hover { background: #334155; color: #fff; }
 .lang-btn.active { background: var(--color-sidebar-active); color: #fff; border-color: var(--color-sidebar-active); }
-.theme-toggle-btn { display: flex; align-items: center; justify-content: center; margin-left: auto; padding: 3px 6px; border: 1px solid #475569; border-radius: 4px; background: none; color: #94a3b8; cursor: pointer; line-height: 1; }
+.theme-toggle-btn { display: flex; align-items: center; justify-content: center; padding: 3px 6px; border: 1px solid #475569; border-radius: 4px; background: none; color: #94a3b8; cursor: pointer; line-height: 1; }
 .theme-toggle-btn:hover { background: #334155; color: #fff; }
 
-/* Sidebar toggle button */
-.sidebar-toggle { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 16px; color: #64748b; font-size: 12px; background: none; border: none; border-top: 1px solid #334155; cursor: pointer; white-space: nowrap; }
-.sidebar-toggle:hover { background: #334155; color: var(--color-sidebar-text); }
-.sidebar--collapsed .sidebar-toggle { justify-content: center; padding: 9px 0; }
-
 /* Footer */
-.sidebar-footer { padding: 10px 16px; border-top: 1px solid #334155; font-size: 12px; display: flex; flex-direction: column; gap: 6px; }
-.sidebar--collapsed .sidebar-footer { padding: 10px 0; align-items: center; }
-.sidebar-logout { display: flex; align-items: center; gap: 6px; color: var(--color-sidebar-text) !important; white-space: nowrap; }
-.user-name { color: #94a3b8; }
+.sidebar-footer { padding: 10px 12px; border-top: 1px solid #334155; display: flex; flex-direction: column; gap: 8px; }
+.sidebar-footer--collapsed { align-items: center; padding: 10px 0; gap: 10px; }
+.sidebar-lang-row { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.sidebar-user-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.sidebar-logout { display: flex; align-items: center; gap: 6px; color: var(--color-sidebar-text) !important; white-space: nowrap; font-size: 12px; }
+.user-name { color: #94a3b8; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 .main-content { flex: 1; padding: 28px 32px; overflow-y: auto; }
 .loading-screen { display: flex; align-items: center; justify-content: center; height: 100vh; color: var(--color-muted); }
 

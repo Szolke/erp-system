@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { invoices } from '../../api/invoices'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { PaymentStatusBadge, InvoiceStatusBadge } from '../../components/StatusBadge'
 import PerPageSelector from '../../components/PerPageSelector'
 
 export default function InvoiceListPage() {
   const { can } = useAuth()
+  const { t } = useTranslation()
   const [data, setData]       = useState(null)
   const [search, setSearch]   = useState('')
   const [loading, setLoading] = useState(true)
@@ -37,21 +39,21 @@ export default function InvoiceListPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Számlák</h1>
+        <h1 className="page-title">{t('invoice.title')}</h1>
         {can('invoice.create') && (
-          <Link to="/invoices/new" className="btn btn-primary">+ Új számla</Link>
+          <Link to="/invoices/new" className="btn btn-primary">+ {t('invoice.new')}</Link>
         )}
       </div>
       <form className="search-row" onSubmit={handleSearch}>
         <input placeholder="Számlaszám vagy partner neve…" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <button className="btn btn-secondary" type="submit">Keresés</button>
+        <button className="btn btn-secondary" type="submit">{t('common.search')}</button>
         <PerPageSelector value={perPage} onChange={handlePerPage} />
       </form>
-      {loading ? <p className="text-muted">Betöltés…</p> : (
+      {loading ? <p className="text-muted">{t('common.loading')}</p> : (
         <table>
           <thead>
             <tr>
-              <th>Számlaszám</th><th>Partner</th><th>Kelt</th><th>Bruttó</th><th>Deviza</th><th>Státusz</th><th>Fizetés</th>
+              <th>{t('invoice.number_col')}</th><th>{t('invoice.partner_col')}</th><th>{t('invoice.issue_date')}</th><th>{t('invoice.gross_col')}</th><th>{t('common.currency')}</th><th>Státusz</th><th>Fizetés</th>
             </tr>
           </thead>
           <tbody>
@@ -69,7 +71,7 @@ export default function InvoiceListPage() {
           </tbody>
         </table>
       )}
-      {data && <p className="text-muted mt-4">Összesen: {data.meta?.total} db</p>}
+      {data && <p className="text-muted mt-4">{t('common.total')}: {data.meta?.total} {t('common.pieces')}</p>}
     </div>
   )
 }

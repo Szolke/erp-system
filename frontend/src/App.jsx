@@ -20,41 +20,43 @@ import GroupListPage from './pages/groups/GroupListPage'
 import GroupDetailPage from './pages/groups/GroupDetailPage'
 import DocumentSeriesSettingsPage from './pages/settings/DocumentSeriesSettingsPage'
 import DocumentListPage from './pages/documents/DocumentListPage'
+import TranslationPage from './pages/settings/TranslationPage'
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="/documents" replace />} />
-        <Route path="documents" element={<DocumentListPage />} />
-        <Route path="invoices" element={<InvoiceListPage />} />
-        <Route path="invoices/new" element={<InvoiceCreatePage />} />
-        <Route path="invoices/:id" element={<InvoiceDetailPage />} />
-        <Route path="receipts" element={<ReceiptListPage />} />
-        <Route path="receipts/new" element={<ReceiptCreatePage />} />
-        <Route path="receipts/:id" element={<ReceiptDetailPage />} />
-        <Route path="partners" element={<PartnerListPage />} />
-        <Route path="partners/new" element={<PartnerFormPage />} />
-        <Route path="partners/:id/edit" element={<PartnerFormPage />} />
-        <Route path="products" element={<ProductListPage />} />
-        <Route path="products/new" element={<ProductFormPage />} />
-        <Route path="products/:id/edit" element={<ProductFormPage />} />
-        <Route path="company" element={<CompanyPage />} />
-        <Route path="audit-logs" element={<AuditLogPage />} />
-        <Route path="users" element={<UserListPage />} />
-        <Route path="users/:id" element={<UserDetailPage />} />
-        <Route path="groups" element={<GroupListPage />} />
-        <Route path="groups/:id" element={<GroupDetailPage />} />
-        <Route path="settings/document-series" element={<DocumentSeriesSettingsPage />} />
-      </Route>
-    </Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="/documents" replace />} />
+          <Route path="documents" element={<DocumentListPage />} />
+          <Route path="invoices" element={<InvoiceListPage />} />
+          <Route path="invoices/new" element={<InvoiceCreatePage />} />
+          <Route path="invoices/:id" element={<InvoiceDetailPage />} />
+          <Route path="receipts" element={<ReceiptListPage />} />
+          <Route path="receipts/new" element={<ReceiptCreatePage />} />
+          <Route path="receipts/:id" element={<ReceiptDetailPage />} />
+          <Route path="partners" element={<PartnerListPage />} />
+          <Route path="partners/new" element={<PartnerFormPage />} />
+          <Route path="partners/:id/edit" element={<PartnerFormPage />} />
+          <Route path="products" element={<ProductListPage />} />
+          <Route path="products/new" element={<ProductFormPage />} />
+          <Route path="products/:id/edit" element={<ProductFormPage />} />
+          <Route path="company" element={<CompanyPage />} />
+          <Route path="audit-logs" element={<AuditLogPage />} />
+          <Route path="users" element={<UserListPage />} />
+          <Route path="users/:id" element={<UserDetailPage />} />
+          <Route path="groups" element={<GroupListPage />} />
+          <Route path="groups/:id" element={<GroupDetailPage />} />
+          <Route path="settings/document-series" element={<DocumentSeriesSettingsPage />} />
+          <Route path="settings/translations" element={<TranslationPage />} />
+        </Route>
+      </Routes>
   )
 }

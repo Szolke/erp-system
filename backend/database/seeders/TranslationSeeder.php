@@ -1,0 +1,250 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Translation;
+use Illuminate\Database\Seeder;
+
+class TranslationSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Format: [namespace, key, hu, en, de]
+        $translations = [
+
+            // ── Navigáció ────────────────────────────────────────────
+            ['nav', 'documents',      'Bizonylatok',          'Documents',          'Belege'],
+            ['nav', 'partners',       'Partnerek',            'Partners',           'Partner'],
+            ['nav', 'products',       'Termékek',             'Products',           'Produkte'],
+            ['nav', 'settings',       'Beállítások',          'Settings',           'Einstellungen'],
+            ['nav', 'users',          'Felhasználók',         'Users',              'Benutzer'],
+            ['nav', 'groups',         'Csoportok',            'Groups',             'Gruppen'],
+            ['nav', 'company',        'Cégbeállítások',       'Company settings',   'Firmeneinstellungen'],
+            ['nav', 'audit_log',      'Audit napló',          'Audit log',          'Audit-Protokoll'],
+            ['nav', 'doc_series',     'Sorszámtartományok',   'Document series',    'Nummernkreise'],
+            ['nav', 'translations',   'Fordítások',           'Translations',       'Übersetzungen'],
+            ['nav', 'simplepay',      'SimplePay',            'SimplePay',          'SimplePay'],
+            ['nav', 'collapse',       'Összecsukás',          'Collapse',           'Einklappen'],
+            ['nav', 'logout',         'Kijelentkezés',        'Logout',             'Abmelden'],
+
+            // ── Közös gombok / állapotok ──────────────────────────────
+            ['common', 'save',        'Mentés',               'Save',               'Speichern'],
+            ['common', 'saving',      'Mentés…',              'Saving…',            'Speichern…'],
+            ['common', 'cancel',      'Mégsem',               'Cancel',             'Abbrechen'],
+            ['common', 'search',      'Keresés',              'Search',             'Suchen'],
+            ['common', 'loading',     'Betöltés…',            'Loading…',           'Laden…'],
+            ['common', 'back',        '← Vissza',             '← Back',             '← Zurück'],
+            ['common', 'all',         'Összes',               'All',                'Alle'],
+            ['common', 'total',       'Összesen',             'Total',              'Gesamt'],
+            ['common', 'new',         'Új',                   'New',                'Neu'],
+            ['common', 'edit',        'Szerkesztés',          'Edit',               'Bearbeiten'],
+            ['common', 'delete',      'Törlés',               'Delete',             'Löschen'],
+            ['common', 'add',         'Hozzáadás',            'Add',                'Hinzufügen'],
+            ['common', 'yes',         'Igen',                 'Yes',                'Ja'],
+            ['common', 'no',          'Nem',                  'No',                 'Nein'],
+            ['common', 'rows',        'Sorok',                'Rows',               'Zeilen'],
+            ['common', 'error',       'Hiba',                 'Error',              'Fehler'],
+            ['common', 'saved',       'Mentve.',              'Saved.',             'Gespeichert.'],
+            ['common', 'not_found',   'Nem található.',       'Not found.',         'Nicht gefunden.'],
+            ['common', 'active',      'Aktív',                'Active',             'Aktiv'],
+            ['common', 'inactive',    'Inaktív',              'Inactive',           'Inaktiv'],
+            ['common', 'name',        'Név',                  'Name',               'Name'],
+            ['common', 'email',       'E-mail',               'Email',              'E-Mail'],
+            ['common', 'amount',      'Összeg',               'Amount',             'Betrag'],
+            ['common', 'date',        'Dátum',                'Date',               'Datum'],
+            ['common', 'currency',    'Deviza',               'Currency',           'Währung'],
+            ['common', 'language',    'Nyelv',                'Language',           'Sprache'],
+            ['common', 'pieces',      'db',                   'pcs',                'Stk.'],
+            ['common', 'storno',      'Sztornó',              'Cancel',             'Stornieren'],
+
+            // ── Bejelentkezés ─────────────────────────────────────────
+            ['auth', 'title',         'Bejelentkezés',        'Login',              'Anmelden'],
+            ['auth', 'email',         'E-mail cím',           'Email address',      'E-Mail-Adresse'],
+            ['auth', 'password',      'Jelszó',               'Password',           'Passwort'],
+            ['auth', 'submit',        'Belépés',              'Sign in',            'Einloggen'],
+            ['auth', 'error',         'Hibás email vagy jelszó.', 'Invalid email or password.', 'Ungültige E-Mail oder Passwort.'],
+
+            // ── Bizonylatok (egységes lista) ──────────────────────────
+            ['document', 'title',          'Bizonylatok',                       'Documents',                         'Belege'],
+            ['document', 'number',         'Bizonylat száma',                   'Document number',                   'Belegnummer'],
+            ['document', 'type_col',       'Típus',                             'Type',                              'Typ'],
+            ['document', 'partner',        'Partner',                           'Partner',                           'Partner'],
+            ['document', 'issued_at',      'Kelt',                              'Date',                              'Datum'],
+            ['document', 'gross',          'Bruttó',                            'Gross',                             'Brutto'],
+            ['document', 'status_col',     'Állapot',                           'Status',                            'Status'],
+            ['document', 'payment_col',    'Fizetés',                           'Payment',                           'Zahlung'],
+            ['document', 'date_from',      'Dátumtól',                          'Date from',                         'Von Datum'],
+            ['document', 'date_to',        'Dátumig',                           'Date to',                           'Bis Datum'],
+            ['document', 'search_ph',      'Bizonylat száma vagy partner neve…','Document number or partner name…',  'Belegnummer oder Partnername…'],
+            ['document', 'type_all',       'Összes',                            'All',                               'Alle'],
+            ['document', 'type_invoice',   'Számla',                            'Invoice',                           'Rechnung'],
+            ['document', 'type_inv_st',    'Sztornó számla',                    'Credit note',                       'Stornorechnung'],
+            ['document', 'type_receipt',   'Nyugta',                            'Receipt',                           'Quittung'],
+            ['document', 'type_rec_st',    'Sztornó nyugta',                    'Credit receipt',                    'Storno-Quittung'],
+            ['document', 'pay_all',        'Összes',                            'All',                               'Alle'],
+            ['document', 'pay_open',       'Nyitott',                           'Open',                              'Offen'],
+            ['document', 'pay_partial',    'Részben fizetve',                   'Partially paid',                    'Teilweise bezahlt'],
+            ['document', 'pay_paid',       'Fizetve',                           'Paid',                              'Bezahlt'],
+            ['document', 'new_invoice',    '+ Új számla',                       '+ New invoice',                     '+ Neue Rechnung'],
+            ['document', 'new_receipt',    '+ Új nyugta',                       '+ New receipt',                     '+ Neue Quittung'],
+            ['document', 'curr_all',       'Összes deviza',                     'All currencies',                    'Alle Währungen'],
+            ['document', 'pay_status',     'Fizetési állapot',                  'Payment status',                    'Zahlungsstatus'],
+
+            // ── Számla ────────────────────────────────────────────────
+            ['invoice', 'title',           'Számlák',                           'Invoices',                          'Rechnungen'],
+            ['invoice', 'new',             '+ Új számla',                       '+ New invoice',                     '+ Neue Rechnung'],
+            ['invoice', 'storno_confirm',  'Biztosan sztornózza a számlát?',    'Are you sure you want to cancel this invoice?', 'Möchten Sie diese Rechnung stornieren?'],
+            ['invoice', 'issue_date',      'Kiállítás',                         'Issue date',                        'Ausstellungsdatum'],
+            ['invoice', 'fulfillment',     'Teljesítés',                        'Fulfillment date',                  'Erfüllungsdatum'],
+            ['invoice', 'due_date',        'Fizetési határidő',                 'Due date',                          'Fälligkeitsdatum'],
+            ['invoice', 'currency_rate',   'Deviza / árfolyam',                 'Currency / rate',                   'Währung / Kurs'],
+            ['invoice', 'pay_method',      'Fizetési mód',                      'Payment method',                    'Zahlungsmethode'],
+            ['invoice', 'description',     'Megnevezés',                        'Description',                       'Bezeichnung'],
+            ['invoice', 'unit',            'Me.',                               'Unit',                              'Einh.'],
+            ['invoice', 'quantity',        'Mennyiség',                         'Quantity',                          'Menge'],
+            ['invoice', 'unit_price',      'Egységár',                          'Unit price',                        'Stückpreis'],
+            ['invoice', 'vat',             'ÁFA',                               'VAT',                               'MwSt.'],
+            ['invoice', 'net',             'Nettó',                             'Net',                               'Netto'],
+            ['invoice', 'gross',           'Bruttó',                            'Gross',                             'Brutto'],
+            ['invoice', 'payments_title',  'Befizetések',                       'Payments',                          'Zahlungen'],
+            ['invoice', 'no_payments',     'Még nincs befizetés.',              'No payments yet.',                  'Noch keine Zahlungen.'],
+            ['invoice', 'add_payment',     'Rögzítés',                          'Add payment',                       'Zahlung hinzufügen'],
+            ['invoice', 'reference',       'Hivatkozás',                        'Reference',                         'Referenz'],
+            ['invoice', 'st_issued',       'Kiállított',                        'Issued',                            'Ausgestellt'],
+            ['invoice', 'st_draft',        'Piszkozat',                         'Draft',                             'Entwurf'],
+            ['invoice', 'st_storno',       'Sztornózott',                       'Cancelled',                         'Storniert'],
+            ['invoice', 'pay_open',        'Nyitott',                           'Open',                              'Offen'],
+            ['invoice', 'pay_partial',     'Részben fizetve',                   'Partially paid',                    'Teilweise bezahlt'],
+            ['invoice', 'pay_paid',        'Fizetve',                           'Paid',                              'Bezahlt'],
+            ['invoice', 'number_col',      'Számlaszám',                        'Invoice number',                    'Rechnungsnummer'],
+            ['invoice', 'partner_col',     'Partner',                           'Partner',                           'Partner'],
+            ['invoice', 'gross_col',       'Bruttó',                            'Gross',                             'Brutto'],
+
+            // ── Nyugta ────────────────────────────────────────────────
+            ['receipt', 'title',           'Nyugták',                           'Receipts',                          'Quittungen'],
+            ['receipt', 'new',             '+ Új nyugta',                       '+ New receipt',                     '+ Neue Quittung'],
+            ['receipt', 'storno_confirm',  'Biztosan sztornózza a nyugtát?',    'Are you sure you want to cancel this receipt?', 'Möchten Sie diese Quittung stornieren?'],
+            ['receipt', 'number_col',      'Számlaszám',                        'Receipt number',                    'Quittungsnummer'],
+            ['receipt', 'issued_col',      'Kelt',                              'Date',                              'Datum'],
+            ['receipt', 'st_issued',       'Kiállított',                        'Issued',                            'Ausgestellt'],
+            ['receipt', 'st_storno',       'Sztornózott',                       'Cancelled',                         'Storniert'],
+
+            // ── Partner ───────────────────────────────────────────────
+            ['partner', 'title',           'Partnerek',                         'Partners',                          'Partner'],
+            ['partner', 'new',             '+ Új partner',                      '+ New partner',                     '+ Neuer Partner'],
+            ['partner', 'company_name',    'Cégnév',                            'Company name',                      'Firmenname'],
+            ['partner', 'tax_number',      'Adószám',                           'Tax number',                        'Steuernummer'],
+            ['partner', 'country',         'Ország',                            'Country',                           'Land'],
+            ['partner', 'city',            'Város',                             'City',                              'Stadt'],
+            ['partner', 'address',         'Cím',                               'Address',                           'Adresse'],
+            ['partner', 'eu_tax',          'Közösségi adószám',                 'EU tax number',                     'EU-Steuernummer'],
+            ['partner', 'postal',          'Irányítószám',                      'Postal code',                       'Postleitzahl'],
+            ['partner', 'email',           'E-mail',                            'Email',                             'E-Mail'],
+            ['partner', 'phone',           'Telefon',                           'Phone',                             'Telefon'],
+            ['partner', 'bank_account',    'Bankszámlaszám',                    'Bank account',                      'Bankkontonummer'],
+
+            // ── Termék ────────────────────────────────────────────────
+            ['product', 'title',           'Termékek',                          'Products',                          'Produkte'],
+            ['product', 'new',             '+ Új termék',                       '+ New product',                     '+ Neues Produkt'],
+            ['product', 'sku',             'Cikkszám',                          'SKU',                               'Artikelnr.'],
+            ['product', 'name',            'Megnevezés',                        'Name',                              'Bezeichnung'],
+            ['product', 'vat_rate',        'ÁFA kulcs',                         'VAT rate',                          'MwSt.-Satz'],
+            ['product', 'net_price',       'Nettó ár',                          'Net price',                         'Nettopreis'],
+            ['product', 'unit',            'Egység',                            'Unit',                              'Einheit'],
+
+            // ── Felhasználó ───────────────────────────────────────────
+            ['user', 'title',              'Felhasználók',                      'Users',                             'Benutzer'],
+            ['user', 'new',                '+ Új felhasználó',                  '+ New user',                        '+ Neuer Benutzer'],
+            ['user', 'name',               'Név',                               'Name',                              'Name'],
+            ['user', 'email',              'E-mail',                            'Email',                             'E-Mail'],
+            ['user', 'role',               'Szerepkör',                         'Role',                              'Rolle'],
+            ['user', 'password',           'Jelszó',                            'Password',                          'Passwort'],
+            ['user', 'overrides',          'Jogosultság felülírások',           'Permission overrides',              'Berechtigungsüberschreibungen'],
+            ['user', 'language',           'Felhasználói nyelv',                'User language',                     'Benutzersprache'],
+            ['user', 'save_overrides',     'Felülírások mentése',               'Save overrides',                    'Überschreibungen speichern'],
+
+            // ── Csoport ───────────────────────────────────────────────
+            ['group', 'title',             'Csoportok',                         'Groups',                            'Gruppen'],
+            ['group', 'new',               '+ Új csoport',                      '+ New group',                       '+ Neue Gruppe'],
+            ['group', 'group_name',        'Csoport neve',                      'Group name',                        'Gruppenname'],
+            ['group', 'members',           'Tagok',                             'Members',                           'Mitglieder'],
+            ['group', 'permissions',       'Jogosultságok',                     'Permissions',                       'Berechtigungen'],
+            ['group', 'add_member',        'Tag hozzáadása',                    'Add member',                        'Mitglied hinzufügen'],
+            ['group', 'remove_member',     'Eltávolítás',                       'Remove',                            'Entfernen'],
+
+            // ── Cégbeállítások ────────────────────────────────────────
+            ['company', 'title',           'Cégbeállítások',                    'Company settings',                  'Firmeneinstellungen'],
+            ['company', 'name',            'Cégnév',                            'Company name',                      'Firmenname'],
+            ['company', 'tax_number',      'Adószám',                           'Tax number',                        'Steuernummer'],
+            ['company', 'eu_tax',          'Közösségi adószám',                 'EU tax number',                     'EU-Steuernummer'],
+            ['company', 'reg_number',      'Cégjegyzékszám',                    'Registration number',               'Handelsregisternr.'],
+            ['company', 'postal',          'Irányítószám',                      'Postal code',                       'Postleitzahl'],
+            ['company', 'city',            'Város',                             'City',                              'Stadt'],
+            ['company', 'address',         'Cím',                               'Address',                           'Adresse'],
+            ['company', 'base_currency',   'Alap deviza',                       'Base currency',                     'Basiswährung'],
+            ['company', 'nav_env',         'NAV környezet',                     'NAV environment',                   'NAV-Umgebung'],
+            ['company', 'nav_test',        'Teszt (sandbox)',                   'Test (sandbox)',                     'Test (Sandbox)'],
+            ['company', 'nav_prod',        'Éles (production)',                 'Production',                        'Produktion'],
+            ['company', 'inv_header',      'Bizonylatfejléc',                   'Invoice header',                    'Rechnungskopf'],
+            ['company', 'inv_footer',      'Bizonylatláb',                      'Invoice footer',                    'Rechnungsfuß'],
+
+            // ── Audit napló ───────────────────────────────────────────
+            ['audit', 'title',             'Audit napló',                       'Audit log',                         'Audit-Protokoll'],
+            ['audit', 'event',             'Esemény',                           'Event',                             'Ereignis'],
+            ['audit', 'user_col',          'Felhasználó',                       'User',                              'Benutzer'],
+            ['audit', 'record',            'Rekord',                            'Record',                            'Datensatz'],
+            ['audit', 'before',            'Előtte',                            'Before',                            'Vorher'],
+            ['audit', 'after',             'Utána',                             'After',                             'Nachher'],
+
+            // ── SimplePay ─────────────────────────────────────────────
+            ['simplepay', 'title',         'SimplePay beállítások',             'SimplePay settings',                'SimplePay-Einstellungen'],
+            ['simplepay', 'merchant_id',   'Merchant ID',                       'Merchant ID',                       'Händler-ID'],
+            ['simplepay', 'secret_key',    'Titkos kulcs',                      'Secret key',                        'Geheimer Schlüssel'],
+            ['simplepay', 'new_key',       'Új titkos kulcs (üresen hagyva = megtartja a régit)', 'New secret key (leave empty to keep current)', 'Neuer Schlüssel (leer lassen = beibehalten)'],
+            ['simplepay', 'sandbox',       'Tesztkörnyezet (sandbox)',          'Sandbox mode',                      'Testmodus (Sandbox)'],
+            ['simplepay', 'set',           'Beállítva',                         'Set',                               'Eingestellt'],
+            ['simplepay', 'not_set',       'Nincs megadva',                     'Not set',                           'Nicht angegeben'],
+            ['simplepay', 'add',           '+ Hitelesítő adatok hozzáadása',    '+ Add credentials',                 '+ Anmeldedaten hinzufügen'],
+            ['simplepay', 'del_confirm',   'Biztosan törli ezeket az adatokat?','Are you sure you want to delete?',  'Wirklich löschen?'],
+
+            // ── Sorszámtartományok ────────────────────────────────────
+            ['docseries', 'title',         'Sorszámtartományok',                'Document series',                   'Nummernkreise'],
+            ['docseries', 'prefix',        'Előtag',                            'Prefix',                            'Präfix'],
+            ['docseries', 'next_number',   'Következő szám',                    'Next number',                       'Nächste Nummer'],
+            ['docseries', 'type',          'Típus',                             'Type',                              'Typ'],
+            ['docseries', 'year',          'Év',                                'Year',                              'Jahr'],
+
+            // ── Általános beállítások ─────────────────────────────────────
+            ['settings', 'title',            'Általános beállítások',         'General settings',         'Allgemeine Einstellungen'],
+            ['settings', 'default_currency', 'Alapértelmezett deviza',        'Default currency',         'Standardwährung'],
+            ['settings', 'invoice_language', 'Számla nyelve',                 'Invoice language',         'Rechnungssprache'],
+            ['settings', 'invoice_due_days', 'Fizetési határidő (nap)',       'Payment due days',         'Zahlungsfrist (Tage)'],
+            ['settings', 'nav_enabled',      'NAV integráció',                'NAV integration',          'NAV-Integration'],
+            ['settings', 'nav_environment',  'NAV környezet',                 'NAV environment',          'NAV-Umgebung'],
+            ['settings', 'simplepay_enabled','SimplePay integráció',          'SimplePay integration',    'SimplePay-Integration'],
+
+            // ── Fordításkezelő ────────────────────────────────────────
+            ['translation', 'title',       'Fordítások kezelése',               'Translation manager',               'Übersetzungsverwaltung'],
+            ['translation', 'namespace',   'Névtér',                            'Namespace',                         'Namespace'],
+            ['translation', 'key',         'Kulcs',                             'Key',                               'Schlüssel'],
+            ['translation', 'hu',          'Magyar',                            'Hungarian',                         'Ungarisch'],
+            ['translation', 'en',          'Angol',                             'English',                           'Englisch'],
+            ['translation', 'de',          'Német',                             'German',                            'Deutsch'],
+            ['translation', 'search_ph',   'Keresés kulcsra…',                  'Search by key…',                    'Nach Schlüssel suchen…'],
+            ['translation', 'all_ns',      'Összes névtér',                     'All namespaces',                    'Alle Namespaces'],
+            ['translation', 'unsaved',     'Nem mentett változások',            'Unsaved changes',                   'Nicht gespeicherte Änderungen'],
+        ];
+
+        $now = now();
+
+        foreach ($translations as [$ns, $key, $hu, $en, $de]) {
+            foreach (['hu' => $hu, 'en' => $en, 'de' => $de] as $locale => $value) {
+                \DB::table('translations')->upsert(
+                    ['namespace' => $ns, 'key' => $key, 'locale' => $locale, 'value' => $value, 'created_at' => $now, 'updated_at' => $now],
+                    ['namespace', 'key', 'locale'],
+                    ['value', 'updated_at'],
+                );
+            }
+        }
+    }
+}

@@ -1,16 +1,25 @@
-const PAYMENT_STATUS = { open: 'Nyitott', partial: 'Részben fizetve', paid: 'Kiegyenlített' }
-const INVOICE_STATUS = { draft: 'Piszkozat', issued: 'Kiállítva', storno: 'Sztornó' }
-const DOC_TYPE_LABEL = { invoice: 'Számla', invoice_storno: 'Sztornó számla', receipt: 'Nyugta', receipt_storno: 'Sztornó nyugta' }
+import { useTranslation } from '../contexts/TranslationContext'
 
 export function PaymentStatusBadge({ status }) {
-  return <span className={`badge badge-pay-${status}`}>{PAYMENT_STATUS[status] ?? status}</span>
+  const { t } = useTranslation()
+  const label = { open: t('invoice.pay_open'), partial: t('invoice.pay_partial'), paid: t('invoice.pay_paid') }
+  return <span className={`badge badge-pay-${status}`}>{label[status] ?? status}</span>
 }
 
 export function InvoiceStatusBadge({ status }) {
-  return <span className={`badge badge-inv-${status}`}>{INVOICE_STATUS[status] ?? status}</span>
+  const { t } = useTranslation()
+  const label = { draft: t('invoice.st_draft'), issued: t('invoice.st_issued'), storno: t('invoice.st_storno') }
+  return <span className={`badge badge-inv-${status}`}>{label[status] ?? status}</span>
 }
 
 export function DocumentTypeBadge({ type }) {
+  const { t } = useTranslation()
+  const label = {
+    invoice:         t('document.type_invoice'),
+    invoice_storno:  t('document.type_inv_st'),
+    receipt:         t('document.type_receipt'),
+    receipt_storno:  t('document.type_rec_st'),
+  }
   const cssClass = type?.replace('_', '-')
-  return <span className={`badge badge-type-${cssClass}`}>{DOC_TYPE_LABEL[type] ?? type}</span>
+  return <span className={`badge badge-type-${cssClass}`}>{label[type] ?? type}</span>
 }

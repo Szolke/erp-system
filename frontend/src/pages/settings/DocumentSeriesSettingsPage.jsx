@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { documentSeries as dsApi } from '../../api/documentSeries'
+import { useTranslation } from '../../contexts/TranslationContext'
 
 const TYPE_ORDER = ['invoice', 'invoice_storno', 'receipt', 'receipt_storno']
 
@@ -13,7 +14,7 @@ function preview(prefix, nextNumber) {
   return `${prefix}-${ym()}-${String(nextNumber ?? 1).padStart(6, '0')}`
 }
 
-function SeriesRow({ series, onSaved }) {
+function SeriesRow({ series, onSaved, t }) {
   const [prefix, setPrefix]           = useState(series.prefix)
   const [resetYearly, setResetYearly] = useState(series.reset_yearly)
   const [saving, setSaving]           = useState(false)
@@ -65,13 +66,13 @@ function SeriesRow({ series, onSaved }) {
         {preview(prefix, series.next_number)}
       </td>
       <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-        {saved && <span style={{ color: '#15803d', fontSize: 12, marginRight: 10 }}>✓ Mentve</span>}
+        {saved && <span style={{ color: '#15803d', fontSize: 12, marginRight: 10 }}>✓ {t('common.save')}</span>}
         <button
           className="btn btn-primary btn-sm"
           onClick={handleSave}
           disabled={saving || !dirty || !prefix}
         >
-          {saving ? 'Mentés…' : 'Mentés'}
+          {saving ? t('common.saving') : t('common.save')}
         </button>
       </td>
     </tr>
@@ -79,6 +80,7 @@ function SeriesRow({ series, onSaved }) {
 }
 
 export default function DocumentSeriesSettingsPage() {
+  const { t } = useTranslation()
   const [list, setList]       = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState('')
@@ -104,7 +106,7 @@ export default function DocumentSeriesSettingsPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Bizonylat-sorszámtartományok</h1>
+        <h1 className="page-title">{t('docseries.title')}</h1>
       </div>
 
       <div className="card">
@@ -116,22 +118,22 @@ export default function DocumentSeriesSettingsPage() {
         {error && <div className="alert-error mb-4">{error}</div>}
 
         {loading ? (
-          <p className="text-muted">Betöltés…</p>
+          <p className="text-muted">{t('common.loading')}</p>
         ) : (
           <table>
             <thead>
               <tr>
-                <th>Bizonylatfajta</th>
-                <th>Prefix</th>
-                <th>Nullázás</th>
-                <th>Következő szám (előnézet)</th>
+                <th>{t('docseries.type')}</th>
+                <th>{t('docseries.prefix')}</th>
+                <th>{t('docseries.year')}</th>
+                <th>{t('docseries.next_number')}</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {list.map((series) =>
                 series.exists ? (
-                  <SeriesRow key={series.document_type} series={series} onSaved={handleSaved} />
+                  <SeriesRow key={series.document_type} series={series} onSaved={handleSaved} t={t} />
                 ) : (
                   <tr key={series.document_type}>
                     <td style={{ fontWeight: 600 }}>{series.label}</td>

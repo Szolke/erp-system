@@ -3,10 +3,12 @@ import { useParams, Link } from 'react-router-dom'
 import client from '../../api/client'
 import { groups as groupsApi } from '../../api/groups'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 
 export default function GroupDetailPage() {
   const { id } = useParams()
   const { can } = useAuth()
+  const { t } = useTranslation()
   const [group, setGroup]           = useState(null)
   const [allPerms, setAllPerms]     = useState([])
   const [companyUsers, setCompanyUsers] = useState([])
@@ -71,8 +73,8 @@ export default function GroupDetailPage() {
 
   const canManage = can('group.manage')
 
-  if (loading) return <p className="text-muted">Betöltés…</p>
-  if (!group) return <p className="text-muted">Nem található.</p>
+  if (loading) return <p className="text-muted">{t('common.loading')}</p>
+  if (!group) return <p className="text-muted">{t('common.not_found')}</p>
 
   // Jogosultságok modulonként csoportosítva
   const byModule = allPerms.reduce((acc, p) => {
@@ -90,7 +92,7 @@ export default function GroupDetailPage() {
           <h1 className="page-title">{group.name}</h1>
           {group.description && <p className="text-muted mt-4">{group.description}</p>}
         </div>
-        <Link to="/groups" className="btn btn-secondary">← Vissza</Link>
+        <Link to="/groups" className="btn btn-secondary">{t('common.back')}</Link>
       </div>
 
       {error && <div className="alert-error mb-4">{error}</div>}
@@ -98,10 +100,10 @@ export default function GroupDetailPage() {
       {/* ── Jogosultságok ── */}
       <div className="card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <strong>Jogosultságok</strong>
+          <strong>{t('group.permissions')}</strong>
           {canManage && !group.is_system && (
             <button className="btn btn-primary btn-sm" onClick={handleSavePerms} disabled={saving}>
-              {saving ? 'Mentés…' : 'Mentés'}
+              {saving ? t('common.saving') : t('common.save')}
             </button>
           )}
         </div>
@@ -130,7 +132,7 @@ export default function GroupDetailPage() {
 
       {/* ── Tagok ── */}
       <div className="card">
-        <strong>Tagok</strong>
+        <strong>{t('group.members')}</strong>
 
         {canManage && (
           <form onSubmit={handleAddMember} style={{ display: 'flex', gap: 10, marginTop: 12, marginBottom: 16 }}>
@@ -140,7 +142,7 @@ export default function GroupDetailPage() {
                 <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
               ))}
             </select>
-            <button className="btn btn-primary btn-sm" type="submit" disabled={!addUserId}>Hozzáadás</button>
+            <button className="btn btn-primary btn-sm" type="submit" disabled={!addUserId}>{t('group.add_member')}</button>
             {nonMembers.length === 0 && companyUsers.length > 0 && (
               <span className="text-muted" style={{ fontSize: 12, alignSelf: 'center' }}>
                 Minden céges felhasználó már tagja ennek a csoportnak.
@@ -153,7 +155,7 @@ export default function GroupDetailPage() {
         {group.users?.length > 0 && (
           <table>
             <thead>
-              <tr><th>Név</th><th>E-mail</th>{canManage && <th></th>}</tr>
+              <tr><th>{t('common.name')}</th><th>{t('common.email')}</th>{canManage && <th></th>}</tr>
             </thead>
             <tbody>
               {group.users.map((u) => (
@@ -162,7 +164,7 @@ export default function GroupDetailPage() {
                   <td>{u.email}</td>
                   {canManage && (
                     <td style={{ textAlign: 'right' }}>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleRemoveMember(u.id)}>Eltávolítás</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleRemoveMember(u.id)}>{t('group.remove_member')}</button>
                     </td>
                   )}
                 </tr>

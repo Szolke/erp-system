@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { company as companyApi } from '../api/company'
 import PerPageSelector from '../components/PerPageSelector'
+import { useTranslation } from '../contexts/TranslationContext'
 
 export default function AuditLogPage() {
+  const { t } = useTranslation()
   const [data, setData]       = useState(null)
   const [action, setAction]   = useState('')
   const [loading, setLoading] = useState(true)
@@ -27,15 +29,15 @@ export default function AuditLogPage() {
 
   return (
     <div>
-      <div className="page-header"><h1 className="page-title">Audit napló</h1></div>
+      <div className="page-header"><h1 className="page-title">{t('audit.title')}</h1></div>
       <form className="search-row" onSubmit={(e) => { e.preventDefault(); load(action, perPage) }}>
         <input placeholder="Szűrés művelet szerint (pl. invoice.cancel)" value={action} onChange={(e) => setAction(e.target.value)} />
-        <button className="btn btn-secondary" type="submit">Szűrés</button>
+        <button className="btn btn-secondary" type="submit">{t('common.search')}</button>
         <PerPageSelector value={perPage} onChange={handlePerPage} />
       </form>
-      {loading ? <p className="text-muted">Betöltés…</p> : (
+      {loading ? <p className="text-muted">{t('common.loading')}</p> : (
         <table>
-          <thead><tr><th>Időpont</th><th>Felhasználó</th><th>Művelet</th><th>Objektum</th><th>Régi érték</th><th>Új érték</th></tr></thead>
+          <thead><tr><th>Időpont</th><th>{t('audit.user_col')}</th><th>{t('audit.event')}</th><th>{t('audit.record')}</th><th>{t('audit.before')}</th><th>{t('audit.after')}</th></tr></thead>
           <tbody>
             {data?.data.map((log) => (
               <tr key={log.id}>
@@ -50,7 +52,7 @@ export default function AuditLogPage() {
           </tbody>
         </table>
       )}
-      {data && <p className="text-muted mt-4">Összesen: {data.meta?.total} db</p>}
+      {data && <p className="text-muted mt-4">{t('common.total')}: {data.meta?.total} {t('common.pieces')}</p>}
     </div>
   )
 }

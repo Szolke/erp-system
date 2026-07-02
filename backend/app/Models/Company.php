@@ -44,6 +44,11 @@ class Company extends Model
         return $this->hasMany(CompanyNavCredential::class);
     }
 
+    public function simplePayCredentials(): HasMany
+    {
+        return $this->hasMany(CompanySimplePayCredential::class);
+    }
+
     public function groups(): HasMany
     {
         return $this->hasMany(Group::class);

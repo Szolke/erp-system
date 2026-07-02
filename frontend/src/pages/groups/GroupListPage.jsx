@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { groups as groupsApi } from '../../api/groups'
 import PerPageSelector from '../../components/PerPageSelector'
 
 export default function GroupListPage() {
   const { can } = useAuth()
+  const { t } = useTranslation()
   const [list, setList]         = useState([])
   const [loading, setLoading]   = useState(true)
   const [perPage, setPerPage]   = useState(20)
@@ -59,21 +61,21 @@ export default function GroupListPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Csoportok</h1>
+        <h1 className="page-title">{t('group.title')}</h1>
         {canManage && (
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Mégsem' : '+ Új csoport'}
+            {showForm ? t('common.cancel') : `+ ${t('group.new')}`}
           </button>
         )}
       </div>
 
       {showForm && (
         <div className="card">
-          <strong>Új csoport</strong>
+          <strong>{t('group.new')}</strong>
           {formErr && <div className="alert-error mt-4">{formErr}</div>}
           <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr auto', gap: 12, marginTop: 12, alignItems: 'flex-end' }}>
             <div className="form-group" style={{ margin: 0 }}>
-              <label>Név</label>
+              <label>{t('group.group_name')}</label>
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
             <div className="form-group" style={{ margin: 0 }}>
@@ -81,7 +83,7 @@ export default function GroupListPage() {
               <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </div>
             <button className="btn btn-primary" type="submit" disabled={saving}>
-              {saving ? 'Mentés…' : 'Létrehozás'}
+              {saving ? t('common.saving') : 'Létrehozás'}
             </button>
           </form>
         </div>
@@ -92,21 +94,21 @@ export default function GroupListPage() {
       </div>
 
       {loading ? (
-        <p className="text-muted">Betöltés…</p>
+        <p className="text-muted">{t('common.loading')}</p>
       ) : (
         <table>
           <thead>
             <tr>
-              <th>Csoport neve</th>
+              <th>{t('group.group_name')}</th>
               <th>Leírás</th>
-              <th>Tagok</th>
-              <th>Jogosultságok</th>
+              <th>{t('group.members')}</th>
+              <th>{t('group.permissions')}</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {list.length === 0 && (
-              <tr><td colSpan={5} className="text-muted">Nincs csoport.</td></tr>
+              <tr><td colSpan={5} className="text-muted">{t('common.not_found')}</td></tr>
             )}
             {list.map((g) => (
               <tr key={g.id}>
@@ -118,9 +120,9 @@ export default function GroupListPage() {
                 <td>{g.users_count}</td>
                 <td>{g.permissions_count}</td>
                 <td style={{ textAlign: 'right' }}>
-                  <Link to={`/groups/${g.id}`} className="btn btn-secondary btn-sm" style={{ marginRight: 6 }}>Szerkesztés</Link>
+                  <Link to={`/groups/${g.id}`} className="btn btn-secondary btn-sm" style={{ marginRight: 6 }}>{t('common.edit')}</Link>
                   {canManage && !g.is_system && (
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(g)}>Törlés</button>
+                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(g)}>{t('common.delete')}</button>
                   )}
                 </td>
               </tr>

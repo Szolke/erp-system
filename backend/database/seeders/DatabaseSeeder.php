@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             VatRateSeeder::class,
             PaymentMethodSeeder::class,
+            TranslationSeeder::class,
         ]);
 
         // User::factory(10)->create();

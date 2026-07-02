@@ -4,6 +4,7 @@ import client from '../../api/client'
 import { users as usersApi } from '../../api/users'
 import { groups as groupsApi } from '../../api/groups'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 
 const EFFECT_LABELS = {
   allow: { label: 'Engedélyezve', bg: '#dcfce7', color: '#15803d' },
@@ -39,6 +40,7 @@ function EffectToggle({ effect, onChange, disabled }) {
 export default function UserDetailPage() {
   const { id } = useParams()
   const { can } = useAuth()
+  const { t } = useTranslation()
   const [data, setData]           = useState(null)
   const [allPerms, setAllPerms]   = useState([])
   const [allGroups, setAllGroups] = useState([])
@@ -115,8 +117,8 @@ export default function UserDetailPage() {
     }
   }
 
-  if (loading) return <p className="text-muted">Betöltés…</p>
-  if (!data) return <p className="text-muted">Nem található.</p>
+  if (loading) return <p className="text-muted">{t('common.loading')}</p>
+  if (!data) return <p className="text-muted">{t('common.not_found')}</p>
 
   const { user, from_groups: fromGroups } = data
   const fromGroupSet = new Set(fromGroups ?? [])
@@ -139,10 +141,10 @@ export default function UserDetailPage() {
         <div className="flex">
           {canOverride && (
             <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-              {saving ? 'Mentés…' : 'Mentés'}
+              {saving ? t('common.saving') : t('user.save_overrides')}
             </button>
           )}
-          <Link to="/users" className="btn btn-secondary">← Vissza</Link>
+          <Link to="/users" className="btn btn-secondary">{t('common.back')}</Link>
         </div>
       </div>
 
@@ -155,7 +157,7 @@ export default function UserDetailPage() {
 
       {/* Csoportok */}
       <div className="card" style={{ marginBottom: 16 }}>
-        <strong>Csoporttagság</strong>
+        <strong>{t('group.members')}</strong>
 
         {canManage && (() => {
           const memberGroupIds = new Set(user.groups?.map((g) => g.id) ?? [])
@@ -166,7 +168,7 @@ export default function UserDetailPage() {
                 <option value="">— csoport kiválasztása —</option>
                 {available.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
               </select>
-              <button className="btn btn-primary btn-sm" type="submit">Hozzáadás</button>
+              <button className="btn btn-primary btn-sm" type="submit">{t('group.add_member')}</button>
             </form>
           ) : null
         })()}
@@ -175,7 +177,7 @@ export default function UserDetailPage() {
           ? <p className="text-muted mt-4">Nincs csoporttagság.</p>
           : (
             <table style={{ marginTop: 8 }}>
-              <thead><tr><th>Csoport neve</th><th>Leírás</th>{canManage && <th></th>}</tr></thead>
+              <thead><tr><th>{t('group.group_name')}</th><th>Leírás</th>{canManage && <th></th>}</tr></thead>
               <tbody>
                 {user.groups.map((g) => (
                   <tr key={g.id}>
@@ -183,7 +185,7 @@ export default function UserDetailPage() {
                     <td className="text-muted">{g.description || '—'}</td>
                     {canManage && (
                       <td style={{ textAlign: 'right' }}>
-                        <button className="btn btn-danger btn-sm" onClick={() => handleRemoveGroup(g.id)}>Eltávolítás</button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleRemoveGroup(g.id)}>{t('group.remove_member')}</button>
                       </td>
                     )}
                   </tr>
@@ -196,7 +198,7 @@ export default function UserDetailPage() {
       {/* Jogosultságok */}
       <div className="card">
         <div style={{ marginBottom: 16 }}>
-          <strong>Egyedi jogosultság-felülírások</strong>
+          <strong>{t('user.overrides')}</strong>
           <p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
             A csoporttól kapott jog <span style={{ fontWeight: 700, color: '#1d4ed8' }}>kék</span> háttérrel jelölt.
             A felülírás felülbírálja a csoport döntését — engedélyezés (zöld) vagy tiltás (piros).

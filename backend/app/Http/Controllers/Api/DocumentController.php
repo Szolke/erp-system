@@ -20,16 +20,21 @@ class DocumentController extends Controller
             $this->authorize('invoice.view'); // triggers 403 via Gate
         }
 
-        $typeFilter = $request->string('type')->trim()->value();
-        $search     = $request->string('search')->trim()->value();
-        $dateFrom   = $request->string('date_from')->trim()->value();
-        $dateTo     = $request->string('date_to')->trim()->value();
-        $perPage    = $this->perPage($request);
-        $page       = max(1, (int) $request->get('page', 1));
+        $typeFilter    = $request->string('type')->trim()->value();
+        $search        = $request->string('search')->trim()->value();
+        $dateFrom      = $request->string('date_from')->trim()->value();
+        $dateTo        = $request->string('date_to')->trim()->value();
+        $currency      = $request->string('currency')->trim()->value();
+        $paymentStatus = $request->string('payment_status')->trim()->value();
+        $perPage       = $this->perPage($request);
+        $page          = max(1, (int) $request->get('page', 1));
 
         // Determine which tables to query based on permission + type filter
         $includeInvoices = $canInvoice && in_array($typeFilter, ['', 'invoice', 'invoice_storno'], true);
-        $includeReceipts = $canReceipt && in_array($typeFilter, ['', 'receipt', 'receipt_storno'], true);
+        // Receipts have no payment_status — exclude them when that filter is active
+        $includeReceipts = $canReceipt
+            && in_array($typeFilter, ['', 'receipt', 'receipt_storno'], true)
+            && $paymentStatus === '';
 
         $parts    = [];
         $bindings = [];
@@ -69,6 +74,12 @@ class DocumentController extends Controller
             }
             if ($dateTo !== '') {
                 $q->whereDate('invoices.issue_date', '<=', $dateTo);
+            }
+            if ($currency !== '') {
+                $q->where('invoices.currency', $currency);
+            }
+            if ($paymentStatus !== '') {
+                $q->where('invoices.payment_status', $paymentStatus);
             }
 
             $parts[]  = "({$q->toSql()})";
@@ -110,6 +121,9 @@ class DocumentController extends Controller
             }
             if ($dateTo !== '') {
                 $q->whereDate('receipts.issue_date', '<=', $dateTo);
+            }
+            if ($currency !== '') {
+                $q->where('receipts.currency', $currency);
             }
 
             $parts[]  = "({$q->toSql()})";

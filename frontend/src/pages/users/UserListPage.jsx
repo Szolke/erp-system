@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { users as usersApi } from '../../api/users'
 import PerPageSelector from '../../components/PerPageSelector'
 
 export default function UserListPage() {
   const { can } = useAuth()
+  const { t } = useTranslation()
   const [list, setList]         = useState([])
   const [search, setSearch]     = useState('')
   const [loading, setLoading]   = useState(true)
@@ -68,10 +70,10 @@ export default function UserListPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Felhasználók</h1>
+        <h1 className="page-title">{t('user.title')}</h1>
         {canManage && (
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Mégsem' : '+ Felhasználó hozzáadása'}
+            {showForm ? t('common.cancel') : `+ ${t('user.new')}`}
           </button>
         )}
       </div>
@@ -85,19 +87,19 @@ export default function UserListPage() {
           {formErr && <div className="alert-error mt-4">{formErr}</div>}
           <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 12, marginTop: 12, alignItems: 'flex-end' }}>
             <div className="form-group" style={{ margin: 0 }}>
-              <label>Név</label>
+              <label>{t('user.name')}</label>
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
             <div className="form-group" style={{ margin: 0 }}>
-              <label>E-mail</label>
+              <label>{t('user.email')}</label>
               <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
             </div>
             <div className="form-group" style={{ margin: 0 }}>
-              <label>Jelszó (elhagyható meglévőnél)</label>
+              <label>{t('user.password')} (elhagyható meglévőnél)</label>
               <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="min. 8 karakter" />
             </div>
             <button className="btn btn-primary" type="submit" disabled={saving}>
-              {saving ? 'Mentés…' : 'Hozzáad'}
+              {saving ? t('common.saving') : t('common.add')}
             </button>
           </form>
         </div>
@@ -109,13 +111,13 @@ export default function UserListPage() {
       </div>
 
       {loading ? (
-        <p className="text-muted">Betöltés…</p>
+        <p className="text-muted">{t('common.loading')}</p>
       ) : (
         <table>
           <thead>
             <tr>
-              <th>Név</th>
-              <th>E-mail</th>
+              <th>{t('user.name')}</th>
+              <th>{t('user.email')}</th>
               <th>Csoportok</th>
               <th>Státusz</th>
               <th></th>
@@ -123,7 +125,7 @@ export default function UserListPage() {
           </thead>
           <tbody>
             {list.length === 0 && (
-              <tr><td colSpan={5} className="text-muted">Nincs találat.</td></tr>
+              <tr><td colSpan={5} className="text-muted">{t('common.not_found')}</td></tr>
             )}
             {list.map((u) => (
               <tr key={u.id}>
@@ -138,17 +140,17 @@ export default function UserListPage() {
                 </td>
                 <td>
                   <span className={u.is_active ? 'badge badge-pay-paid' : 'badge badge-inv-storno'}>
-                    {u.is_active ? 'Aktív' : 'Inaktív'}
+                    {u.is_active ? t('common.active') : 'Inaktív'}
                   </span>
                 </td>
                 <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                  <Link to={`/users/${u.id}`} className="btn btn-secondary btn-sm" style={{ marginRight: 6 }}>Jogosultságok</Link>
+                  <Link to={`/users/${u.id}`} className="btn btn-secondary btn-sm" style={{ marginRight: 6 }}>{t('user.overrides')}</Link>
                   {canManage && (
                     <>
                       <button className="btn btn-secondary btn-sm" onClick={() => handleToggleActive(u)} style={{ marginRight: 6 }}>
                         {u.is_active ? 'Letiltás' : 'Engedélyezés'}
                       </button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleRemove(u)}>Eltávolítás</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleRemove(u)}>{t('group.remove_member')}</button>
                     </>
                   )}
                 </td>

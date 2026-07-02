@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { invoices as invoiceApi } from '../../api/invoices'
 import client from '../../api/client'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTranslation } from '../../contexts/TranslationContext'
 import { PaymentStatusBadge, InvoiceStatusBadge } from '../../components/StatusBadge'
 
 const todayStr = () => new Date().toISOString().split('T')[0]
@@ -11,6 +12,7 @@ export default function InvoiceDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { can } = useAuth()
+  const { t } = useTranslation()
   const [invoice, setInvoice] = useState(null)
   const [payments, setPayments] = useState([])
   const [payMethods, setPayMethods] = useState([])
@@ -35,7 +37,7 @@ export default function InvoiceDetailPage() {
   useEffect(() => { load() }, [id])
 
   async function handleCancel() {
-    if (!confirm('Biztosan sztornózza a számlát?')) return
+    if (!confirm(t('invoice.storno_confirm'))) return
     await invoiceApi.cancel(id)
     navigate('/invoices')
   }
@@ -52,8 +54,8 @@ export default function InvoiceDetailPage() {
     }
   }
 
-  if (loading) return <p className="text-muted">Betöltés…</p>
-  if (!invoice) return <p className="text-muted">Nem található.</p>
+  if (loading) return <p className="text-muted">{t('common.loading')}</p>
+  if (!invoice) return <p className="text-muted">{t('common.not_found')}</p>
 
   const canCancel = can('invoice.cancel') && invoice.status === 'issued' && !invoice.storno_of_invoice_id
   const canPay = can('payment.create') && invoice.payment_status !== 'paid'
@@ -70,23 +72,23 @@ export default function InvoiceDetailPage() {
         </div>
         <div className="flex">
           {canCancel && (
-            <button className="btn btn-danger" onClick={handleCancel}>Sztornó</button>
+            <button className="btn btn-danger" onClick={handleCancel}>{t('common.storno')}</button>
           )}
-          <Link to="/documents" className="btn btn-secondary">← Vissza</Link>
+          <Link to="/documents" className="btn btn-secondary">{t('common.back')}</Link>
         </div>
       </div>
 
       <div className="card">
         <div className="detail-grid">
-          <div className="detail-row"><span className="detail-label">Partner</span><span className="detail-value">{invoice.partner?.name}</span></div>
-          <div className="detail-row"><span className="detail-label">Kiállítás</span><span className="detail-value">{invoice.issue_date}</span></div>
-          <div className="detail-row"><span className="detail-label">Teljesítés</span><span className="detail-value">{invoice.fulfillment_date}</span></div>
-          <div className="detail-row"><span className="detail-label">Fizetési határidő</span><span className="detail-value">{invoice.due_date}</span></div>
-          <div className="detail-row"><span className="detail-label">Deviza / árfolyam</span><span className="detail-value">{invoice.currency} ({invoice.exchange_rate})</span></div>
-          <div className="detail-row"><span className="detail-label">Fizetési mód</span><span className="detail-value">{invoice.payment_method?.name}</span></div>
+          <div className="detail-row"><span className="detail-label">{t('invoice.partner_col')}</span><span className="detail-value">{invoice.partner?.name}</span></div>
+          <div className="detail-row"><span className="detail-label">{t('invoice.issue_date')}</span><span className="detail-value">{invoice.issue_date}</span></div>
+          <div className="detail-row"><span className="detail-label">{t('invoice.fulfillment')}</span><span className="detail-value">{invoice.fulfillment_date}</span></div>
+          <div className="detail-row"><span className="detail-label">{t('invoice.due_date')}</span><span className="detail-value">{invoice.due_date}</span></div>
+          <div className="detail-row"><span className="detail-label">{t('invoice.currency_rate')}</span><span className="detail-value">{invoice.currency} ({invoice.exchange_rate})</span></div>
+          <div className="detail-row"><span className="detail-label">{t('invoice.pay_method')}</span><span className="detail-value">{invoice.payment_method?.name}</span></div>
         </div>
         <table className="items-table">
-          <thead><tr><th>Megnevezés</th><th>Me.</th><th>Mennyiség</th><th>Egységár</th><th>ÁFA</th><th>Nettó</th><th>Bruttó</th></tr></thead>
+          <thead><tr><th>{t('invoice.description')}</th><th>{t('invoice.unit')}</th><th>{t('invoice.quantity')}</th><th>{t('invoice.unit_price')}</th><th>{t('invoice.vat')}</th><th>{t('invoice.net')}</th><th>{t('invoice.gross')}</th></tr></thead>
           <tbody>
             {invoice.items?.map((item) => (
               <tr key={item.id}>
@@ -100,7 +102,7 @@ export default function InvoiceDetailPage() {
               </tr>
             ))}
             <tr className="total-row">
-              <td colSpan={5}>Összesen</td>
+              <td colSpan={5}>{t('common.total')}</td>
               <td className="text-right">{Number(invoice.net_total).toLocaleString('hu')}</td>
               <td className="text-right">{Number(invoice.gross_total).toLocaleString('hu')} {invoice.currency}</td>
             </tr>
@@ -109,11 +111,11 @@ export default function InvoiceDetailPage() {
       </div>
 
       <div className="card">
-        <strong>Befizetések</strong>
-        {payments.length === 0 && <p className="text-muted mt-4">Még nincs befizetés.</p>}
+        <strong>{t('invoice.payments_title')}</strong>
+        {payments.length === 0 && <p className="text-muted mt-4">{t('invoice.no_payments')}</p>}
         {payments.length > 0 && (
           <table className="mt-4">
-            <thead><tr><th>Dátum</th><th>Mód</th><th>Összeg</th><th>Hivatkozás</th></tr></thead>
+            <thead><tr><th>{t('common.date')}</th><th>Mód</th><th>{t('common.amount')}</th><th>{t('invoice.reference')}</th></tr></thead>
             <tbody>
               {payments.map((p) => (
                 <tr key={p.id}>
@@ -129,20 +131,20 @@ export default function InvoiceDetailPage() {
         {canPay && (
           <form onSubmit={handleAddPayment} style={{ display: 'flex', gap: 10, marginTop: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div className="form-group" style={{ margin: 0 }}>
-              <label>Összeg</label>
+              <label>{t('common.amount')}</label>
               <input type="number" step="0.01" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} required style={{ width: 130 }} />
             </div>
             <div className="form-group" style={{ margin: 0 }}>
-              <label>Fizetési mód</label>
+              <label>{t('invoice.pay_method')}</label>
               <select value={payForm.payment_method_id} onChange={(e) => setPayForm({ ...payForm, payment_method_id: e.target.value })} required style={{ width: 160 }}>
                 {payMethods.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
               </select>
             </div>
             <div className="form-group" style={{ margin: 0 }}>
-              <label>Dátum</label>
+              <label>{t('common.date')}</label>
               <input type="date" value={payForm.paid_at} onChange={(e) => setPayForm({ ...payForm, paid_at: e.target.value })} required style={{ width: 170 }} />
             </div>
-            <button className="btn btn-primary" type="submit">Rögzítés</button>
+            <button className="btn btn-primary" type="submit">{t('invoice.add_payment')}</button>
             {payError && <span className="form-error">{payError}</span>}
           </form>
         )}

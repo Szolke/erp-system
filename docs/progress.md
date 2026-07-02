@@ -5,7 +5,7 @@
 > git logból/kódból kelljen visszafejtse, hol tartunk — itt egyben megtalálja.
 > Részletes tábla-/mezőszintű terv: [er-model.md](er-model.md).
 
-Utolsó frissítés: 2026-07-02, a 6. fázis (SimplePay refund → storno lánc) után.
+Utolsó frissítés: 2026-07-02, szuperadmin szerep + cég-onboarding flow után.
 
 ## Kész lépések
 
@@ -42,20 +42,16 @@ Utolsó frissítés: 2026-07-02, a 6. fázis (SimplePay refund → storno lánc)
 | **4** | **API dokumentáció (4. fázis, Scribe):** `knuckleswtf/scribe` telepítve; 68 endpoint automatikusan dokumentálva; csoportosítás: Számlák, Nyugták, Partnerek, Termékek, Cég, Cég beállítások, SimplePay, Felhasználók, Csoportok, Audit napló, stb.; `GET /docs` védett `auth:sanctum` middleware-rel (hitelesítetlen kérés → redirect `/login`-ra); SPA CSRF support (`use_csrf: true`); OpenAPI spec + Postman collection is generálódik | `config/scribe.php`, összes Api Controller (`@group` docblock), `routes/web.php` | — |
 | **5** | **NAV toggle (5. fázis):** `SendInvoiceToNavJob::handle()` elején `CompanySettingService::get(company_id, NAV_ENABLED)` ellenőrzés — ha `false`, a számla `nav_status = not_applicable` lesz és a job naplóz + visszatér (nem küldi el, nem dob hibát, queue nem retry-ol) | `SendInvoiceToNavJob.php` | — |
 | **6** | **SimplePay refund → storno lánc (6. fázis):** `POST /api/invoices/{invoice}/simplepay-refund` — megkeresi a sikeres tranzakciót, meghívja a SimplePay refund API-t (`SimplePayClient::refund()`), `simplepay_transactions.status = refunded` + `refunded_at` + `refund_transaction_id`, majd `InvoiceService::cancel()` hívás (storno számla). Frontend: "SimplePay visszatérítés" gomb az `InvoiceDetailPage` fejlécében, csak ha `simplepay_transaction.status === 'success'` (az `InvoiceResource` tölti be). Migráció: `refund_transaction_id`, `refund_amount`, `refunded_at` + CHECK constraint bővítve `refunded` értékkel. **Szandbox-tesztelés szükséges élesítés előtt** (lásd nyitott pontok). | `SimplePayClient`, `SimplePayController`, `InvoiceResource`, `InvoiceDetailPage.jsx`, migráció | — |
+| **7** | **UX bővítések:** sidebar újratervezés (Claude-stílus, összecsukó gomb fejlécben, lekerekített nav linkek, section label); pagination UI (`Pagination` komponens, ellipsis + prev/next, mind a 8 listán); toast értesítések (`ToastContext`, 4s auto-dismiss, success/error/info); i18n bővítés (InvoiceCreatePage + ReceiptCreatePage teljes i18n); `tax_number` regex validáció + varchar(20) migráció | `Layout.jsx`, `index.css`, `Pagination.jsx`, `ToastContext.jsx`, `UpdateCompanyRequest.php`, `InvoiceCreatePage.jsx`, `ReceiptCreatePage.jsx` | `c516297`, `5deb859`, `c2bd031`, `c2aaee2` |
+| **8** | **Szuperadmin szerep:** `users.is_superadmin` boolean mező (migráció); `Gate::before` shortcut (superadmin mindent kap); `UserController` tiltja a superadmin törlését/letiltását; `DatabaseSeeder` létrehozza az `Admin` usert (`test@example.com`, `is_superadmin=true`); UserListPage: "Szuperadmin" badge, gombok elrejtve | `User.php`, `AppServiceProvider.php`, `UserController.php`, `DatabaseSeeder.php`, `UserListPage.jsx`, migráció | `841e577` |
+| **9** | **Cég-onboarding flow:** `GET /api/companies` (lista, superadmin) + `POST /api/companies` (létrehozás, superadmin); `store()` auto-létrehozza a 4 bizonylat-sorozatot (SZ/NY/SZSZT/NYSZT) és linkel a superadminhoz; `StoreCompanyRequest` (name + tax_number kötelező); `CompanyListPage` (lista + inline form + "Váltás" gomb); sidebar "Cégek" menüpont (csak superadmin); `refreshAuth()` az AuthContextben | `CompanyController.php`, `StoreCompanyRequest.php`, `api.php`, `CompanyListPage.jsx`, `Layout.jsx`, `AuthContext.jsx`, `company.js` | `13ca79b` |
 
 ## Még hátravan
 
-- **PDF-generálás** — **KÉSZ** (2. fázis). `barryvdh/laravel-dompdf`, HU/EN/DE lokalizáció, logó base64.
-- **Dark mode** — **KÉSZ** (3. fázis). CSS változók, sidebar toggle gomb.
-- **API dokumentáció** — **KÉSZ** (4. fázis). Scribe, `/docs` route, auth védett.
-- **NAV toggle** — **KÉSZ** (5. fázis). `nav_enabled=false` → skip, `nav_status=not_applicable`.
-- **RBAC management UI/API** — **KÉSZ** (12a. lépés).
-- **SimplePay UI** — **KÉSZ** (14b. lépés).
-- **i18n** — **KÉSZ** (15. lépés).
-- **6. fázis: SimplePay refund → storno lánc** — **KÉSZ**. Lásd 6. lépés a táblában.
-- **Cég-onboarding** — új cég létrehozása + első felhasználó hozzárendelése nincs megépítve.
-- **Frontend finomítás** — pagination lapozó UI, Toast-értesítések, SimplePay gomb InvoiceDetailPage-ből.
-- **i18n bővítés** — `InvoiceCreatePage` és `ReceiptCreatePage` még nem kapta meg a `t()` cseréket.
+Minden tervezett funkció implementálva van. Hátramaradó teendők kizárólag sandbox-tesztelés jellegűek (valódi hitelesítő adatok szükségesek):
+
+- **SimplePay sandbox-tesztelés** — start URL struktúra (1 vs. több callback URL), refund API pontos request/response formátum, IPN visszajelzés refundra. Valódi merchant-adatokkal kell ellenőrizni élesítés előtt.
+- **NAV sandbox-tesztelés** — `vatExemption` kódok (AAM/TAM stb.) XSD-konformitása `NavXmlBuilder`-ben.
 
 ## Architekturális konvenciók (amit egy új munkamenetnek tudnia kell)
 
@@ -69,19 +65,18 @@ Utolsó frissítés: 2026-07-02, a 6. fázis (SimplePay refund → storno lánc)
 ## Demo bejelentkezés (helyi teszteléshez)
 
 - `test@example.com` / `password`
-- Aktív cég: "Demo Kft." (tax_number `11111111142` — **kötőjelek nélkül, lásd nyitott pont lent**)
+- Felhasználó neve: **Admin**, `is_superadmin = true` — minden jogot megkap, nem törölhető/letiltható
+- Aktív cég: "Demo Kft." (tax_number `11111111-1-42`)
 - A demo user 2 csoportban van ("Pénzügy": invoice/receipt/payment jogok; "Törzsadatkezelő": product/partner/company/user/group/document_series jogok), plusz 1 explicit override (`invoice.cancel` allow) — RBAC-teszteléshez.
 - Bizonylat-sorozatok: `SZ` (számla), `NY` (nyugta), `SZSZT` (sztornó számla), `NYSZT` (sztornó nyugta). Formátum: `PREFIX-ÉÉÉÉHH-000001`.
 
 ## Nyitott pontok / ismert hiányosságok
 
 1. **NAV `vatExemption` case kódok** (AAM/TAM stb. a `vat_rates.nav_code`-ban) — a pontos XSD enumerációt nem sikerült közvetlenül kinyerni, NAV sandbox ellen kell ellenőrizni `NavXmlBuilder`-ben élesítés előtt.
-2. **`tax_number` formátum** — a `companies`/`partners` tábla `tax_number` mezőjének kötőjeles formátumban (`12345678-1-42`) kell lennie, hogy a NAV XML `supplierTaxNumber`/`customerTaxNumber` helyesen szétbontható legyen (`taxpayerId`/`vatCode`/`countyCode`). **Jelenleg nincs validáció erre** a `CompanyController`/`PartnerController` FormRequest-jeiben, és a demo adat is kötőjel nélküli.
+2. **`tax_number` formátum** — ~~Jelenleg nincs validáció~~ **MEGOLDVA** (`c2aaee2`): `UpdateCompanyRequest` + `StoreCompanyRequest` regex enforcolja (`^\d{8}-\d-\d{2}$`). Partner marad szabad formátum (külföldi cégekhez).
 3. **SimplePay `url` mező** — a start-kérésben az egyetlen `url` mezőt használjuk visszairányításra; nem 100%-osan megerősített, hogy SimplePay nem külön success/fail/cancel/timeout URL-eket vár-e. Sandbox-tesztelés valódi merchant-adatokkal szükséges élesítés előtt.
-6. **SimplePay refund API** — a `SimplePayClient::refund()` implementáció a v2 SDK forrása alapján készült (`refundTotal`, `transactionId` mezők, `/payment/v2/refund` endpoint), de az egzakt request/response struktúra és hogy van-e IPN visszajelzés refundra, sandbox-teszteléssel kell megerősíteni élesítés előtt.
-4. **Nincs draft→issue számla-workflow** — a `POST /api/invoices` azonnal `issued` állapotban, lefoglalt sorszámmal hozza létre a számlát (tudatos egyszerűsítés, mert kiállított számla soha nem törölhető, csak sztornózható — így rés a sorszámozásban nem keletkezhet). Ha draft-szerkesztés válik szükségessé, az `invoice_number` oszlopot nullable-re kell migrálni.
-5. **Nincs cég-onboarding flow** — `CompanyController` csak a meglévő aktív céget tudja megjeleníteni/szerkeszteni, új cég létrehozása (+ első felhasználó hozzárendelése) nincs megépítve.
-6. **Frontend** gyakorlatilag érintetlen — minden fenti API-t csak curl/tinker-rel teszteltünk, böngészőből még semmi nem használható.
+4. **SimplePay refund API** — a `SimplePayClient::refund()` implementáció a v2 SDK forrása alapján készült (`refundTotal`, `transactionId` mezők, `/payment/v2/refund` endpoint), de az egzakt request/response struktúra és hogy van-e IPN visszajelzés refundra, sandbox-teszteléssel kell megerősíteni élesítés előtt.
+5. **Nincs draft→issue számla-workflow** — a `POST /api/invoices` azonnal `issued` állapotban, lefoglalt sorszámmal hozza létre a számlát (tudatos egyszerűsítés). Ha draft-szerkesztés válik szükségessé, az `invoice_number` oszlopot nullable-re kell migrálni.
 
 ## Hogyan fuss neki gyorsan egy új munkamenetben
 

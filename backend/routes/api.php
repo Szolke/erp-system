@@ -44,6 +44,10 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::get('/payment-methods', fn () => response()->json(['data' => PaymentMethod::where('is_active', true)->get()]));
     Route::put('/active-company', [ActiveCompanyController::class, 'update']);
 
+    // Cégek kezelése — szuperadmin: lista + létrehozás; aktív cég: show/update/logo
+    Route::get('/companies', [CompanyController::class, 'index']);
+    Route::post('/companies', [CompanyController::class, 'store']);
+
     Route::get('/company', [CompanyController::class, 'show']);
     Route::put('/company', [CompanyController::class, 'update']);
     Route::post('/company/logo', [CompanyController::class, 'uploadLogo']);

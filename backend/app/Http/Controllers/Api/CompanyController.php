@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\DocumentType;
+use App\Enums\NavEnvironment;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
 use App\Http\Resources\CompanyResource;
 use App\Models\Company;
+use App\Models\DocumentSeries;
 use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
 use Illuminate\Http\JsonResponse;
@@ -21,6 +25,52 @@ use Illuminate\Support\Facades\Storage;
  */
 class CompanyController extends Controller
 {
+    /** GET /api/companies — az összes cég listája (csak szuperadmin) */
+    public function index(Request $request)
+    {
+        abort_unless($request->user()->is_superadmin, 403);
+
+        $companies = Company::withCount('users')
+            ->orderBy('name')
+            ->paginate(50);
+
+        return CompanyResource::collection($companies);
+    }
+
+    /** POST /api/companies — új cég létrehozása (csak szuperadmin) */
+    public function store(StoreCompanyRequest $request, AuditLogger $auditLogger)
+    {
+        $data = array_merge([
+            'country_code'   => 'HU',
+            'base_currency'  => 'HUF',
+            'nav_environment' => NavEnvironment::Test,
+            'is_active'      => true,
+        ], array_filter($request->validated(), fn ($v) => $v !== null));
+
+        $company = Company::create($data);
+
+        foreach ([
+            [DocumentType::Invoice,       'SZ'],
+            [DocumentType::Receipt,       'NY'],
+            [DocumentType::InvoiceStorno, 'SZSZT'],
+            [DocumentType::ReceiptStorno, 'NYSZT'],
+        ] as [$type, $prefix]) {
+            DocumentSeries::withoutGlobalScope('company')->create([
+                'company_id'    => $company->id,
+                'document_type' => $type->value,
+                'prefix'        => $prefix,
+                'reset_yearly'  => true,
+                'next_number'   => 1,
+            ]);
+        }
+
+        $request->user()->companies()->syncWithoutDetaching([$company->id => ['is_default' => false]]);
+
+        $auditLogger->log('company.manage', $company->id, $request->user()->id, $company, [], $company->toArray());
+
+        return CompanyResource::make($company)->response()->setStatusCode(201);
+    }
+
     public function show(CurrentCompany $currentCompany)
     {
         $this->authorize('company.view');

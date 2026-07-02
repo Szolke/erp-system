@@ -5,7 +5,7 @@ import { useTranslation } from '../contexts/TranslationContext'
 import CompanySwitcher from './CompanySwitcher'
 import {
   FileText, Users2, Package,
-  UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders,
+  UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers,
   Settings2, ChevronLeft, ChevronRight,
   LogOut, Moon, Sun,
 } from 'lucide-react'
@@ -52,6 +52,7 @@ export default function Layout() {
   ]
 
   const settingsItems = [
+    { to: '/companies',                label: 'Cégek',                icon: Layers,     superadminOnly: true },
     { to: '/users',                    label: t('nav.users'),         icon: UserRound,  perm: 'user.view' },
     { to: '/groups',                   label: t('nav.groups'),        icon: Users,      perm: 'group.view' },
     { to: '/company',                  label: t('nav.company'),       icon: Building2,  perm: 'company.view' },
@@ -62,7 +63,9 @@ export default function Layout() {
   ]
 
   const visibleTop      = topNavItems.filter((i) => i.anyPerm ? i.anyPerm.some((p) => can(p)) : can(i.perm))
-  const visibleSettings = settingsItems.filter((i) => can(i.perm))
+  const visibleSettings = settingsItems.filter((i) =>
+    i.superadminOnly ? user?.is_superadmin : can(i.perm)
+  )
   const collapsed       = !sidebarOpen
 
   return (

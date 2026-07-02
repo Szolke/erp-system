@@ -22,6 +22,7 @@ import DocumentSeriesSettingsPage from './pages/settings/DocumentSeriesSettingsP
 import DocumentListPage from './pages/documents/DocumentListPage'
 import TranslationPage from './pages/settings/TranslationPage'
 import CustomFieldsPage from './pages/settings/CustomFieldsPage'
+import CompanyListPage from './pages/companies/CompanyListPage'
 
 export default function App() {
   return (
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="settings/document-series" element={<DocumentSeriesSettingsPage />} />
           <Route path="settings/translations" element={<TranslationPage />} />
           <Route path="settings/custom-fields" element={<CustomFieldsPage />} />
+          <Route path="companies" element={<CompanyListPage />} />
         </Route>
       </Routes>
   )

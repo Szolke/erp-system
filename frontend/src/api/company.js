@@ -1,5 +1,10 @@
 import client from './client'
 
+export const companies = {
+  list:   (params) => client.get('/api/companies', { params }),
+  create: (data)   => client.post('/api/companies', data),
+}
+
 export const company = {
   get: () => client.get('/api/company'),
   update: (data) => client.put('/api/company', data),

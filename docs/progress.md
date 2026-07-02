@@ -5,7 +5,7 @@
 > git logból/kódból kelljen visszafejtse, hol tartunk — itt egyben megtalálja.
 > Részletes tábla-/mezőszintű terv: [er-model.md](er-model.md).
 
-Utolsó frissítés: 2026-07-01, a 12. lépés (RBAC UI + bizonylat-beállítások) után.
+Utolsó frissítés: 2026-07-02, a 0. fázis backend + frontend (cégszintű beállítások modulja) után.
 
 ## Kész lépések
 
@@ -28,13 +28,24 @@ Utolsó frissítés: 2026-07-01, a 12. lépés (RBAC UI + bizonylat-beállítás
 | 12b | Bizonylat-sorszámtartományok: külön sorozat sztornókhoz (`invoice_storno`/`receipt_storno`), szám-formátum ÉÉÉÉDÉHH (pl. 202606), beállítások oldal (`/settings/document-series`), `Sorszámtartományok` sidebar menü | `DocumentType`, `InvoiceNumberGenerator`, `InvoiceService::cancel`, `ReceiptService::cancel`, `DocumentSeriesController`, `DocumentSeriesSettingsPage` | — |
 | 12c | Kis UX javítások: deviza legördülő (HUF/EUR) InvoiceCreate + ProductForm; mértékegység legördülő ProductForm; fizetési dátum szélesebb; fizetési mód select (InvoiceDetail) | `InvoiceCreatePage`, `ProductFormPage`, `InvoiceDetailPage` | — |
 | 12d | Egységes bizonylatlista: `GET /api/documents` UNION ALL endpoint (számla + nyugta + sztornók), típusszűrő pill-gombok, keresés, `DocumentTypeBadge`; sidebar "Bizonylatok" váltja a különálló Számlák/Nyugták menüt | `DocumentController`, `DocumentListPage`, `StatusBadge`, `Layout`, `App` | `e611aef` |
+| 12e | UX: soronkénti elemszám-választó (PerPageSelector) minden listázó oldalon; dátumszűrő (date range) bizonylatok listán; vissza-gomb javítás (detail → /documents); keresőmező törlőgomb (✕) + típusszűrő-pill is törli | `PerPageSelector`, `DocumentListPage`, `InvoiceDetailPage`, `ReceiptDetailPage` | `abf1f5d`, `85c31ef`, `352633b` |
+| 13 | Sidebar megújítás: lucide-react ikonok minden menüponthoz; Beállítások összecsukható almenü (Felhasználók, Csoportok, Cégbeállítások, Audit napló, Sorszámtartományok, Fordítások); sidebar teljesen összecsukható ikon-módba (54 px), localStorage-ban tárolt állapot | `Layout.jsx`, `index.css` | — |
+| 13b | Bizonylatlista szűrők bővítése: deviza (HUF/EUR/USD) és fizetési állapot (Nyitott/Részben/Fizetve) szűrők; DocumentController backend-en mindkettő kezelve | `DocumentListPage`, `DocumentController` | — |
+| 14a | SimplePay hitelesítő adatok (backend): `company_simplepay_credentials` tábla (devizánként, titkosított secret_key `encrypted` cast), `CompanySimplePayController` (index/upsert/destroy), titkos kulcs soha nem kerül vissza nyers formában — csak `has_secret_key: bool` | `CompanySimplePayController`, `CompanySimplePayCredential`, migráció | — |
+| 14b | SimplePay UI (frontend): `CompanyPage` alatt megjelenik a "SimplePay beállítások" szekció — táblázat a beállított devizákkal, inline szerkesztőform (merchant_id, titkos kulcs, sandbox, aktív kapcsolók), hozzáadás/szerkesztés/törlés | `CompanyPage.jsx`, `company.js` (API client) | — |
+| 15 | Többnyelvűsítés (i18n, HU/EN/DE): `translations` tábla (549 sor, 183 kulcs × 3 nyelv), `users.locale` mező, `TranslationController` (publikus locale endpoint + admin CRUD), `TranslationSeeder` (upsert-alapú, újrafuttatható); frontend: `TranslationContext` (`t()` hook, `setLocale()` localStorage+API), nyelvváltó a sidebarban, `TranslationPage` admin szerkesztő (Beállítások → Fordítások); minden oldal és komponens frissítve `t()` hívásokra | `translations` migráció, `Translation`, `TranslationController`, `TranslationSeeder`, `TranslationContext.jsx`, `Layout.jsx`, összes oldal-komponens | — |
+| **0a** | **Cégszintű beállítások backend (0. fázis)**: `company_settings` tábla (key-value, `company_id` + unique), `CompanySetting` PHP enum registry (6 kulcs: `nav_enabled`, `nav_environment`, `simplepay_enabled`, `default_currency`, `invoice_language`, `invoice_due_days` — típus, default, validáció, audit-maszk), `CompanySettingModel` (cast/serialize), `CompanySettingService` (Redis cache 1h TTL, audit log), `CompanySettingController` (GET/PUT/DELETE `/api/company/settings/{key}`, RBAC: `company.manage`) | `CompanySetting.php`, `CompanySettingModel.php`, `CompanySettingService.php`, `CompanySettingController.php`, migráció | — |
+| **0b** | **Cégszintű beállítások frontend (0. fázis)**: "Általános beállítások" szekció a Cégbeállítások oldalon — deviza select (HUF/EUR/USD), számla nyelve select (hu/en/de), fizetési határidő szám-input; mentés per-PUT a beállítás-API-ra; `settings.*` fordítási kulcsok (7 kulcs × 3 nyelv) | `CompanyPage.jsx` (`GeneralSettingsSection`), `company.js` (`settings.getAll/set/reset`), `TranslationSeeder` (settings keys) | — |
 
 ## Még hátravan
 
 - **PDF-generálás** (számla/nyugta bizonylat) — `pdf_path` mező van az invoices/receipts táblában, de sem könyvtár (pl. barryvdh/laravel-dompdf), sem template, sem controller-endpoint nincs hozzá.
 - **RBAC management UI/API** — **KÉSZ** (12a. lépés). Felhasználók és csoportok kezelése UI-ból elérhető.
+- **SimplePay UI** — **KÉSZ** (14b. lépés). Hitelesítő adatok kezelhetők a Cégbeállítások oldalon.
+- **i18n** — **KÉSZ** (15. lépés). HU/EN/DE, adatbázis-alapú, felhasználói szintű preference, admin szerkesztő.
 - **Cég-onboarding** — `CompanyController` csak az aktív céget kezeli, új cég létrehozása + első felhasználó hozzárendelése nincs megépítve.
-- **Frontend finomítás** — a jelenlegi frontend funkcionális első változat; szükséges lehet: hibakezelés bővítése, pagination kezelés (csak az első oldal jelenik meg), lapozó UI, Toast-értesítések sikeres/hibás műveletekre, SimplePay fizetés indítás gomb InvoiceDetailPage-ből.
+- **Frontend finomítás** — szükséges lehet: pagination lapozó UI (jelenleg per_page-szel állítható), Toast-értesítések sikeres/hibás műveletekre, SimplePay fizetés indítás gomb InvoiceDetailPage-ből.
+- **i18n bővítés** — `InvoiceCreatePage` és `ReceiptCreatePage` még nem kapta meg a `t()` cseréket (nem volt a feladatlistán); ezek manuálisan pótlandók.
 
 ## Architekturális konvenciók (amit egy új munkamenetnek tudnia kell)
 

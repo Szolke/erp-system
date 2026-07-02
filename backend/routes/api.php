@@ -4,7 +4,10 @@ use App\Http\Controllers\Api\ActiveCompanyController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\CompanySettingController;
+use App\Http\Controllers\Api\CompanySimplePayController;
 use App\Http\Controllers\Api\DocumentController;
+use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\Api\DocumentSeriesController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\InvoiceController;
@@ -19,6 +22,9 @@ use App\Models\PaymentMethod;
 use App\Models\Permission;
 use App\Models\VatRate;
 use Illuminate\Support\Facades\Route;
+
+// Fordítások betöltése — publikus, nincs auth (a login oldal is használja)
+Route::get('/translations/{locale}', [TranslationController::class, 'forLocale']);
 
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:10,1');
@@ -39,6 +45,16 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     Route::get('/company', [CompanyController::class, 'show']);
     Route::put('/company', [CompanyController::class, 'update']);
+
+    // Cég-beállítások (kulcs-érték, registry-alapú típuscast)
+    Route::get('company/settings', [CompanySettingController::class, 'index']);
+    Route::put('company/settings/{key}', [CompanySettingController::class, 'update']);
+    Route::delete('company/settings/{key}', [CompanySettingController::class, 'destroy']);
+
+    // SimplePay hitelesítő adatok (devizánként, titkosítva tárolva)
+    Route::get('company/simplepay', [CompanySimplePayController::class, 'index']);
+    Route::put('company/simplepay/{currency}', [CompanySimplePayController::class, 'upsert']);
+    Route::delete('company/simplepay/{currency}', [CompanySimplePayController::class, 'destroy']);
 
     Route::apiResource('products', ProductController::class);
     Route::apiResource('partners', PartnerController::class);
@@ -73,4 +89,9 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     // Beállítások — bizonylat-sorszámtartományok
     Route::get('settings/document-series', [DocumentSeriesController::class, 'index']);
     Route::put('settings/document-series/{documentSeries}', [DocumentSeriesController::class, 'update']);
+
+    // Fordítások kezelése (admin) + locale frissítés
+    Route::get('translations', [TranslationController::class, 'index']);
+    Route::put('translations/{namespace}/{key}', [TranslationController::class, 'upsert']);
+    Route::put('me/locale', [TranslationController::class, 'updateLocale']);
 });

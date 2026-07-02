@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReceiptRequest;
 use App\Http\Resources\ReceiptResource;
@@ -16,6 +17,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 /** @group Nyugták */
 class ReceiptController extends Controller
 {
+    use EnforcesCompanyScope;
+
     public function __construct(
         private ReceiptService $receiptService,
         private PdfService $pdfService,
@@ -44,6 +47,7 @@ class ReceiptController extends Controller
 
     public function show(Receipt $receipt)
     {
+        $this->assertBelongsToCurrentCompany($receipt);
         $this->authorize('receipt.view');
 
         return ReceiptResource::make(
@@ -53,6 +57,7 @@ class ReceiptController extends Controller
 
     public function cancel(Receipt $receipt, Request $request)
     {
+        $this->assertBelongsToCurrentCompany($receipt);
         $this->authorize('receipt.cancel');
 
         $storno = $this->receiptService->cancel($receipt, $request->user());
@@ -63,6 +68,7 @@ class ReceiptController extends Controller
     /** GET /api/receipts/{receipt}/pdf — on-the-fly PDF letöltés */
     public function pdf(Receipt $receipt): StreamedResponse
     {
+        $this->assertBelongsToCurrentCompany($receipt);
         $this->authorize('receipt.view');
 
         $pdf      = $this->pdfService->forReceipt($receipt);

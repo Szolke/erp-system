@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePartnerRequest;
 use App\Http\Requests\UpdatePartnerRequest;
@@ -12,6 +13,8 @@ use Illuminate\Http\Request;
 /** @group Partnerek */
 class PartnerController extends Controller
 {
+    use EnforcesCompanyScope;
+
     public function index(Request $request)
     {
         $this->authorize('partner.view');
@@ -39,6 +42,7 @@ class PartnerController extends Controller
 
     public function show(Partner $partner)
     {
+        $this->assertBelongsToCurrentCompany($partner);
         $this->authorize('partner.view');
 
         return PartnerResource::make($partner);
@@ -46,6 +50,8 @@ class PartnerController extends Controller
 
     public function update(UpdatePartnerRequest $request, Partner $partner)
     {
+        $this->assertBelongsToCurrentCompany($partner);
+
         $partner->update($request->validated());
 
         return PartnerResource::make($partner);
@@ -53,6 +59,7 @@ class PartnerController extends Controller
 
     public function destroy(Partner $partner)
     {
+        $this->assertBelongsToCurrentCompany($partner);
         $this->authorize('partner.delete');
 
         if ($partner->invoices()->exists() || $partner->receipts()->exists()) {

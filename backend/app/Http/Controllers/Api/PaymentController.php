@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePaymentRequest;
 use App\Http\Resources\PaymentResource;
@@ -17,8 +18,11 @@ use App\Services\PaymentStatusUpdater;
  */
 class PaymentController extends Controller
 {
+    use EnforcesCompanyScope;
+
     public function index(Invoice $invoice)
     {
+        $this->assertBelongsToCurrentCompany($invoice);
         $this->authorize('payment.view');
 
         return PaymentResource::collection(
@@ -28,6 +32,8 @@ class PaymentController extends Controller
 
     public function store(StorePaymentRequest $request, Invoice $invoice, PaymentStatusUpdater $statusUpdater)
     {
+        $this->assertBelongsToCurrentCompany($invoice);
+
         $payment = $invoice->payments()->create([
             'company_id' => $invoice->company_id,
             'payment_method_id' => $request->validated('payment_method_id'),

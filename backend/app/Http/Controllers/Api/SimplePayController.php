@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\SimplePayStatus;
+use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
@@ -15,8 +16,11 @@ use Illuminate\Support\Str;
 /** @group SimplePay fizetés */
 class SimplePayController extends Controller
 {
+    use EnforcesCompanyScope;
+
     public function start(Invoice $invoice, SimplePayClient $client)
     {
+        $this->assertBelongsToCurrentCompany($invoice);
         $this->authorize('payment.create');
 
         $invoice->loadMissing('partner');
@@ -61,6 +65,7 @@ class SimplePayController extends Controller
      */
     public function refund(Invoice $invoice, SimplePayClient $client, InvoiceService $invoiceService)
     {
+        $this->assertBelongsToCurrentCompany($invoice);
         $this->authorize('invoice.cancel');
 
         $transaction = $invoice->simplepayTransactions()

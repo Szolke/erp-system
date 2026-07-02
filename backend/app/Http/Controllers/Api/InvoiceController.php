@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Resources\InvoiceResource;
@@ -22,6 +23,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class InvoiceController extends Controller
 {
+    use EnforcesCompanyScope;
+
     public function __construct(
         private InvoiceService $invoiceService,
         private PdfService $pdfService,
@@ -55,6 +58,7 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice)
     {
+        $this->assertBelongsToCurrentCompany($invoice);
         $this->authorize('invoice.view');
 
         return InvoiceResource::make(
@@ -64,6 +68,7 @@ class InvoiceController extends Controller
 
     public function cancel(Invoice $invoice, Request $request)
     {
+        $this->assertBelongsToCurrentCompany($invoice);
         $this->authorize('invoice.cancel');
 
         $storno = $this->invoiceService->cancel($invoice, $request->user());
@@ -74,6 +79,7 @@ class InvoiceController extends Controller
     /** GET /api/invoices/{invoice}/pdf — on-the-fly PDF letöltés */
     public function pdf(Invoice $invoice): StreamedResponse
     {
+        $this->assertBelongsToCurrentCompany($invoice);
         $this->authorize('invoice.view');
 
         $pdf      = $this->pdfService->forInvoice($invoice);

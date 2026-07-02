@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\Permission;
@@ -12,6 +13,8 @@ use Illuminate\Http\Request;
 /** @group Csoportok */
 class GroupController extends Controller
 {
+    use EnforcesCompanyScope;
+
     public function __construct(private CurrentCompany $currentCompany) {}
 
     public function index(Request $request)
@@ -41,6 +44,7 @@ class GroupController extends Controller
 
     public function show(Group $group)
     {
+        $this->assertBelongsToCurrentCompany($group);
         $this->authorize('group.view');
 
         return response()->json(
@@ -50,6 +54,7 @@ class GroupController extends Controller
 
     public function update(Request $request, Group $group)
     {
+        $this->assertBelongsToCurrentCompany($group);
         $this->authorize('group.manage');
 
         if ($group->is_system) {
@@ -68,6 +73,7 @@ class GroupController extends Controller
 
     public function destroy(Group $group)
     {
+        $this->assertBelongsToCurrentCompany($group);
         $this->authorize('group.manage');
 
         if ($group->is_system) {
@@ -82,6 +88,7 @@ class GroupController extends Controller
     // PUT /api/groups/{group}/permissions  — jogosultságok szinkronizálása
     public function syncPermissions(Request $request, Group $group)
     {
+        $this->assertBelongsToCurrentCompany($group);
         $this->authorize('group.manage');
 
         $data = $request->validate([
@@ -97,6 +104,7 @@ class GroupController extends Controller
     // POST /api/groups/{group}/members
     public function addMember(Request $request, Group $group)
     {
+        $this->assertBelongsToCurrentCompany($group);
         $this->authorize('group.manage');
 
         $data = $request->validate([
@@ -118,6 +126,7 @@ class GroupController extends Controller
     // DELETE /api/groups/{group}/members/{user}
     public function removeMember(Group $group, User $user)
     {
+        $this->assertBelongsToCurrentCompany($group);
         $this->authorize('group.manage');
 
         $group->users()->detach($user->id);

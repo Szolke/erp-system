@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
@@ -12,6 +13,8 @@ use Illuminate\Http\Request;
 /** @group Termékek */
 class ProductController extends Controller
 {
+    use EnforcesCompanyScope;
+
     public function index(Request $request)
     {
         $this->authorize('product.view');
@@ -40,6 +43,7 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
+        $this->assertBelongsToCurrentCompany($product);
         $this->authorize('product.view');
 
         return ProductResource::make($product->load('vatRate'));
@@ -47,6 +51,8 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, Product $product)
     {
+        $this->assertBelongsToCurrentCompany($product);
+
         $product->update($request->validated());
 
         return ProductResource::make($product->load('vatRate'));
@@ -54,6 +60,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        $this->assertBelongsToCurrentCompany($product);
         $this->authorize('product.delete');
 
         $product->delete();

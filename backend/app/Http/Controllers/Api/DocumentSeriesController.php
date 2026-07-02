@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\DocumentType;
+use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Models\DocumentSeries;
 use App\Support\CurrentCompany;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 /** @group Bizonylat sorozatok */
 class DocumentSeriesController extends Controller
 {
+    use EnforcesCompanyScope;
+
     public function __construct(private CurrentCompany $currentCompany) {}
 
     public function index()
@@ -43,11 +46,8 @@ class DocumentSeriesController extends Controller
 
     public function update(Request $request, DocumentSeries $documentSeries)
     {
+        $this->assertBelongsToCurrentCompany($documentSeries);
         $this->authorize('document_series.manage');
-
-        if ($documentSeries->company_id !== $this->currentCompany->id()) {
-            abort(403);
-        }
 
         $data = $request->validate([
             'prefix'       => ['required', 'string', 'max:20', 'regex:/^[A-Z0-9]+$/'],

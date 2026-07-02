@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Models\CustomFieldDefinition;
 use App\Support\CurrentCompany;
@@ -12,6 +13,8 @@ use Illuminate\Validation\Rule;
 /** @group Egyéni mezők */
 class CustomFieldDefinitionController extends Controller
 {
+    use EnforcesCompanyScope;
+
     /**
      * GET /api/custom-fields?entity_type=partner
      * Returns all definitions for the active company, optionally filtered by entity type.
@@ -62,6 +65,7 @@ class CustomFieldDefinitionController extends Controller
     /** PUT /api/custom-fields/{definition} */
     public function update(Request $request, CurrentCompany $currentCompany, CustomFieldDefinition $definition): JsonResponse
     {
+        $this->assertBelongsToCurrentCompany($definition);
         $this->authorize('company.manage');
 
         $validated = $request->validate([
@@ -82,6 +86,7 @@ class CustomFieldDefinitionController extends Controller
     /** DELETE /api/custom-fields/{definition} */
     public function destroy(CurrentCompany $currentCompany, CustomFieldDefinition $definition): JsonResponse
     {
+        $this->assertBelongsToCurrentCompany($definition);
         $this->authorize('company.manage');
 
         $definition->delete();

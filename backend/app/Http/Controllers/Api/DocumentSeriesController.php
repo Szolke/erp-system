@@ -8,6 +8,7 @@ use App\Models\DocumentSeries;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 
+/** @group Bizonylat sorozatok */
 class DocumentSeriesController extends Controller
 {
     public function __construct(private CurrentCompany $currentCompany) {}

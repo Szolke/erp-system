@@ -14,14 +14,11 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
+ * @group Számlák
+ *
  * Invoices are immutable once issued — there is no update endpoint.
  * Cancellation is handled by the dedicated 'cancel' action which creates
  * a storno (credit note) document via InvoiceService::cancel().
- *
- * The draft-then-issue workflow is not implemented in this phase (v1 always
- * issues immediately). If gap-free numbering while supporting abandoned drafts
- * becomes a requirement, a nullable invoice_number + explicit /issue action
- * should be added.
  */
 class InvoiceController extends Controller
 {

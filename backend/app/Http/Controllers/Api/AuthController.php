@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
+/** @group Hitelesítés */
 class AuthController extends Controller
 {
     public function login(Request $request)

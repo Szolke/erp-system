@@ -8,6 +8,7 @@ use App\Models\Receipt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/** @group Bizonylatok */
 class DocumentController extends Controller
 {
     public function index(Request $request)

@@ -7,6 +7,7 @@ use App\Models\CompanySimplePayCredential;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 
+/** @group SimplePay */
 class CompanySimplePayController extends Controller
 {
     /** List all SimplePay credentials for the active company. */

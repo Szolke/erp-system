@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 
+/** @group Csoportok */
 class GroupController extends Controller
 {
     public function __construct(private CurrentCompany $currentCompany) {}

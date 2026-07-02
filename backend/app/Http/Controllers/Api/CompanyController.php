@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
+ * @group Cég
+ *
  * Operates only on the caller's active company (docs/er-model.md tenant
  * model) — there is no index/store/destroy here; creating new companies
  * and onboarding their first user is a separate, not-yet-built flow.

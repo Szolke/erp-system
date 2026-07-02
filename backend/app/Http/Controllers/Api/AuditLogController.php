@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 
+/** @group Audit napló */
 class AuditLogController extends Controller
 {
     public function index(Request $request, CurrentCompany $currentCompany)

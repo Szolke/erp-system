@@ -1,0 +1,154 @@
+name: 'Cég beállítások'
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/company/settings
+    metadata:
+      custom: []
+      groupName: 'Cég beállítások'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/company/settings — all settings for the active company'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5174'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/company/settings/{key}'
+    metadata:
+      custom: []
+      groupName: 'Cég beállítások'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'PUT /api/company/settings/{key} — update a single setting'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      key:
+        custom: []
+        name: key
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      key: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      value:
+        custom: []
+        name: value
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      value: architecto
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/company/settings/{key}'
+    metadata:
+      custom: []
+      groupName: 'Cég beállítások'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'DELETE /api/company/settings/{key} — reset to default'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      key:
+        custom: []
+        name: key
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      key: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

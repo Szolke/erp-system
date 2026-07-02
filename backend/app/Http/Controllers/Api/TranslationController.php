@@ -7,6 +7,7 @@ use App\Models\Translation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/** @group Fordítások */
 class TranslationController extends Controller
 {
     private const LOCALES = ['hu', 'en', 'de'];

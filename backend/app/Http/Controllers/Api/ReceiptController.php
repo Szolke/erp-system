@@ -13,6 +13,7 @@ use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/** @group Nyugták */
 class ReceiptController extends Controller
 {
     public function __construct(

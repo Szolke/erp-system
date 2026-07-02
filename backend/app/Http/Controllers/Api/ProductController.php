@@ -9,6 +9,7 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
+/** @group Termékek */
 class ProductController extends Controller
 {
     public function index(Request $request)

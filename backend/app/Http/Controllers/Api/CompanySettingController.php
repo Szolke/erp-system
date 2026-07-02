@@ -9,6 +9,7 @@ use App\Support\CurrentCompany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/** @group Cég beállítások */
 class CompanySettingController extends Controller
 {
     public function __construct(private readonly CompanySettingService $settings) {}

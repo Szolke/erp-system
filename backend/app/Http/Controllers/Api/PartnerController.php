@@ -9,6 +9,7 @@ use App\Http\Resources\PartnerResource;
 use App\Models\Partner;
 use Illuminate\Http\Request;
 
+/** @group Partnerek */
 class PartnerController extends Controller
 {
     public function index(Request $request)

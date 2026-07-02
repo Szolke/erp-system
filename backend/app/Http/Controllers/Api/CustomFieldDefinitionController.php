@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
+/** @group Egyéni mezők */
 class CustomFieldDefinitionController extends Controller
 {
     /**

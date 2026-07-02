@@ -1,0 +1,251 @@
+name: Fordítások
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/translations/{locale}'
+    metadata:
+      custom: []
+      groupName: Fordítások
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Public endpoint — returns flat key→value map for the given locale.'
+      description: |-
+        Used by the frontend to load translations on startup.
+        Format: { "nav.documents": "Bizonylatok", ... }
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      locale:
+        custom: []
+        name: locale
+        description: ''
+        required: true
+        example: sr_BA
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      locale: sr_BA
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 422
+        content: '{"error":"Unsupported locale"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5174'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/translations
+    metadata:
+      custom: []
+      groupName: Fordítások
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Admin endpoint — returns all keys with values for every locale.'
+      description: |-
+        Used by the translation manager page.
+        Format: [{ namespace, key, hu, en, de }, ...]
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5174'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/translations/{namespace}/{key}'
+    metadata:
+      custom: []
+      groupName: Fordítások
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Upsert translation values for one key across one or more locales.'
+      description: 'Body: { hu?: string, en?: string, de?: string }'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      namespace:
+        custom: []
+        name: namespace
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      key:
+        custom: []
+        name: key
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      namespace: architecto
+      key: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      hu:
+        custom: []
+        name: hu
+        description: 'Must not be greater than 2000 characters.'
+        required: false
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      en:
+        custom: []
+        name: en
+        description: 'Must not be greater than 2000 characters.'
+        required: false
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      de:
+        custom: []
+        name: de
+        description: 'Must not be greater than 2000 characters.'
+        required: false
+        example: g
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      hu: b
+      en: 'n'
+      de: g
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: api/me/locale
+    metadata:
+      custom: []
+      groupName: Fordítások
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Update the authenticated user's locale preference."
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      locale:
+        custom: []
+        name: locale
+        description: ''
+        required: true
+        example: sr_BA
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      locale: sr_BA
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

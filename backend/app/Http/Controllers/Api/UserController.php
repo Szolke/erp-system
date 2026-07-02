@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
+/** @group Felhasználók */
 class UserController extends Controller
 {
     public function __construct(private CurrentCompany $currentCompany) {}

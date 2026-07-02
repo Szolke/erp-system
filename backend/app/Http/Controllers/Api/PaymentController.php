@@ -9,6 +9,8 @@ use App\Models\Invoice;
 use App\Services\PaymentStatusUpdater;
 
 /**
+ * @group Befizetések
+ *
  * Manual payment recording for non-SimplePay methods (cash, card terminal,
  * bank transfer confirmation). SimplePay payments are recorded automatically
  * by SimplePayIpnController instead.

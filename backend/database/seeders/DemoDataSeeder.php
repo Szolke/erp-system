@@ -40,7 +40,7 @@ class DemoDataSeeder extends Seeder
         }
 
         $company = Company::query()->updateOrCreate(
-            ['tax_number' => '11111111142'],
+            ['tax_number' => '11111111-1-42'],
             [
                 'name' => 'Demo Kft.',
                 'registration_number' => '01-09-000001',

@@ -17,7 +17,7 @@ class UpdateCompanyRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'tax_number' => ['required', 'string', 'max:11'],
+            'tax_number' => ['required', 'regex:/^\d{8}-\d-\d{2}$/'],
             'eu_tax_number' => ['nullable', 'string', 'max:255'],
             'registration_number' => ['required', 'string', 'max:255'],
             'postal_code' => ['required', 'string', 'max:10'],

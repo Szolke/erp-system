@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { partners } from '../../api/partners'
+import { customFields as cfApi } from '../../api/customFields'
 import { useTranslation } from '../../contexts/TranslationContext'
+import CustomFieldsForm from '../../components/CustomFieldsForm'
 
-const empty = { type: 'customer', name: '', tax_number: '', billing_postal_code: '', billing_city: '', billing_address_line: '', default_currency: 'HUF', email: '', phone: '' }
+const empty = { type: 'customer', name: '', tax_number: '', billing_postal_code: '', billing_city: '', billing_address_line: '', default_currency: 'HUF', email: '', phone: '', custom_fields: {} }
 
 export default function PartnerFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const isEdit = !!id
-  const [form, setForm] = useState(empty)
-  const [error, setError] = useState('')
-  const [saving, setSaving] = useState(false)
+  const [form, setForm]         = useState(empty)
+  const [cfDefs, setCfDefs]     = useState([])
+  const [error, setError]       = useState('')
+  const [saving, setSaving]     = useState(false)
 
   useEffect(() => {
-    if (isEdit) partners.get(id).then((res) => setForm(res.data.data))
+    cfApi.list('partner').then((res) => setCfDefs(res.data.data))
+    if (isEdit) partners.get(id).then((res) => setForm({ ...res.data.data, custom_fields: res.data.data.custom_fields ?? {} }))
   }, [id])
 
   function setField(k, v) { setForm((f) => ({ ...f, [k]: v })) }
@@ -63,6 +67,11 @@ export default function PartnerFormPage() {
               <input type={type} value={form[key] ?? ''} onChange={(e) => setField(key, e.target.value)} required={req} />
             </div>
           ))}
+          <CustomFieldsForm
+            definitions={cfDefs}
+            values={form.custom_fields}
+            onChange={(cf) => setField('custom_fields', cf)}
+          />
         </div>
         <div className="flex">
           <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? t('common.saving') : t('common.save')}</button>

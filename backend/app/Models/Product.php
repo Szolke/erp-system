@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'company_id', 'sku', 'name', 'description', 'unit', 'type',
-    'vat_rate_id', 'base_price', 'base_currency', 'is_active',
+    'vat_rate_id', 'base_price', 'base_currency', 'is_active', 'custom_fields',
 ])]
 class Product extends Model
 {
@@ -20,9 +20,10 @@ class Product extends Model
     protected function casts(): array
     {
         return [
-            'type' => ProductType::class,
-            'base_price' => 'decimal:2',
-            'is_active' => 'boolean',
+            'type'          => ProductType::class,
+            'base_price'    => 'decimal:2',
+            'is_active'     => 'boolean',
+            'custom_fields' => 'array',
         ];
     }
 

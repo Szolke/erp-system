@@ -1,26 +1,28 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { products } from '../../api/products'
+import { customFields as cfApi } from '../../api/customFields'
 import client from '../../api/client'
 import { useTranslation } from '../../contexts/TranslationContext'
+import CustomFieldsForm from '../../components/CustomFieldsForm'
 
-const empty = { sku: '', name: '', description: '', unit: 'db', type: 'product', vat_rate_id: '', base_price: '', base_currency: 'HUF', is_active: true }
+const empty = { sku: '', name: '', description: '', unit: 'db', type: 'product', vat_rate_id: '', base_price: '', base_currency: 'HUF', is_active: true, custom_fields: {} }
 
 const UNITS = [
-  { value: 'db',    label: 'db – darab' },
-  { value: 'kg',    label: 'kg – kilogramm' },
-  { value: 'g',     label: 'g – gramm' },
-  { value: 'l',     label: 'l – liter' },
-  { value: 'ml',    label: 'ml – milliliter' },
-  { value: 'm',     label: 'm – méter' },
-  { value: 'm²',    label: 'm² – négyzetméter' },
-  { value: 'm³',    label: 'm³ – köbméter' },
-  { value: 'km',    label: 'km – kilométer' },
-  { value: 'óra',   label: 'óra' },
-  { value: 'nap',   label: 'nap' },
-  { value: 'hét',   label: 'hét' },
-  { value: 'hónap', label: 'hónap' },
-  { value: 'csomag',label: 'csomag' },
+  { value: 'db',     label: 'db – darab' },
+  { value: 'kg',     label: 'kg – kilogramm' },
+  { value: 'g',      label: 'g – gramm' },
+  { value: 'l',      label: 'l – liter' },
+  { value: 'ml',     label: 'ml – milliliter' },
+  { value: 'm',      label: 'm – méter' },
+  { value: 'm²',     label: 'm² – négyzetméter' },
+  { value: 'm³',     label: 'm³ – köbméter' },
+  { value: 'km',     label: 'km – kilométer' },
+  { value: 'óra',    label: 'óra' },
+  { value: 'nap',    label: 'nap' },
+  { value: 'hét',    label: 'hét' },
+  { value: 'hónap',  label: 'hónap' },
+  { value: 'csomag', label: 'csomag' },
   { value: 'készlet',label: 'készlet' },
 ]
 
@@ -29,9 +31,10 @@ export default function ProductFormPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const isEdit = !!id
-  const [form, setForm] = useState(empty)
+  const [form, setForm]     = useState(empty)
   const [vatRates, setVatRates] = useState([])
-  const [error, setError] = useState('')
+  const [cfDefs, setCfDefs] = useState([])
+  const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -39,7 +42,8 @@ export default function ProductFormPage() {
       setVatRates(res.data.data ?? [])
       if (!isEdit && res.data.data?.[0]) setForm((f) => ({ ...f, vat_rate_id: res.data.data[0].id }))
     })
-    if (isEdit) products.get(id).then((res) => setForm(res.data.data))
+    cfApi.list('product').then((res) => setCfDefs(res.data.data))
+    if (isEdit) products.get(id).then((res) => setForm({ ...res.data.data, custom_fields: res.data.data.custom_fields ?? {} }))
   }, [id])
 
   function setField(k, v) { setForm((f) => ({ ...f, [k]: v })) }
@@ -93,6 +97,11 @@ export default function ProductFormPage() {
               <option value="EUR">EUR</option>
             </select>
           </div>
+          <CustomFieldsForm
+            definitions={cfDefs}
+            values={form.custom_fields}
+            onChange={(cf) => setField('custom_fields', cf)}
+          />
         </div>
         <div className="flex">
           <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? t('common.saving') : t('common.save')}</button>

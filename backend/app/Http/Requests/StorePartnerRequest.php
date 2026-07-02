@@ -32,7 +32,8 @@ class StorePartnerRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
             'bank_account_number' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['boolean'],
+            'is_active'      => ['boolean'],
+            'custom_fields'  => ['nullable', 'array'],
         ];
     }
 }

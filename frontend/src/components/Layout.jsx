@@ -5,7 +5,7 @@ import { useTranslation } from '../contexts/TranslationContext'
 import CompanySwitcher from './CompanySwitcher'
 import {
   FileText, Users2, Package,
-  UserRound, Users, Building2, ScrollText, Hash, Languages,
+  UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders,
   Settings2, ChevronDown, ChevronRight, ChevronLeft,
   LogOut,
 } from 'lucide-react'
@@ -53,7 +53,8 @@ export default function Layout() {
     { to: '/company',                  label: t('nav.company'),      icon: Building2,  perm: 'company.view' },
     { to: '/audit-logs',               label: t('nav.audit_log'),    icon: ScrollText, perm: 'audit.view' },
     { to: '/settings/document-series', label: t('nav.doc_series'),   icon: Hash,       perm: 'document_series.manage' },
-    { to: '/settings/translations',    label: t('nav.translations'), icon: Languages,  perm: 'company.manage' },
+    { to: '/settings/translations',    label: t('nav.translations'),   icon: Languages,  perm: 'company.manage' },
+    { to: '/settings/custom-fields',   label: t('nav.custom_fields'),  icon: Sliders,    perm: 'company.manage' },
   ]
 
   const visibleTop      = topNavItems.filter((i) => i.anyPerm ? i.anyPerm.some((p) => can(p)) : can(i.perm))

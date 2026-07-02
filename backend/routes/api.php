@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ActiveCompanyController;
+use App\Http\Controllers\Api\CustomFieldDefinitionController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
@@ -55,6 +56,12 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::get('company/simplepay', [CompanySimplePayController::class, 'index']);
     Route::put('company/simplepay/{currency}', [CompanySimplePayController::class, 'upsert']);
     Route::delete('company/simplepay/{currency}', [CompanySimplePayController::class, 'destroy']);
+
+    // Egyéni mezők definíciói (cég-szintű, company.manage jog)
+    Route::get('custom-fields', [CustomFieldDefinitionController::class, 'index']);
+    Route::post('custom-fields', [CustomFieldDefinitionController::class, 'store']);
+    Route::put('custom-fields/{definition}', [CustomFieldDefinitionController::class, 'update']);
+    Route::delete('custom-fields/{definition}', [CustomFieldDefinitionController::class, 'destroy']);
 
     Route::apiResource('products', ProductController::class);
     Route::apiResource('partners', PartnerController::class);

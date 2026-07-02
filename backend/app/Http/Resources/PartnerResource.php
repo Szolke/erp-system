@@ -28,9 +28,10 @@ class PartnerResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'bank_account_number' => $this->bank_account_number,
-            'is_active' => $this->is_active,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'is_active'     => $this->is_active,
+            'custom_fields' => $this->custom_fields ?? [],
+            'created_at'    => $this->created_at,
+            'updated_at'    => $this->updated_at,
         ];
     }
 }

@@ -25,9 +25,10 @@ class ProductResource extends JsonResource
             ]),
             'base_price' => $this->base_price,
             'base_currency' => $this->base_currency,
-            'is_active' => $this->is_active,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'is_active'     => $this->is_active,
+            'custom_fields' => $this->custom_fields ?? [],
+            'created_at'    => $this->created_at,
+            'updated_at'    => $this->updated_at,
         ];
     }
 }

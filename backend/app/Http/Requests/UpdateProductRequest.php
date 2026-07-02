@@ -31,7 +31,8 @@ class UpdateProductRequest extends FormRequest
             'vat_rate_id' => ['required', 'integer', Rule::exists('vat_rates', 'id')],
             'base_price' => ['required', 'numeric', 'min:0'],
             'base_currency' => ['required', 'string', 'size:3'],
-            'is_active' => ['boolean'],
+            'is_active'     => ['boolean'],
+            'custom_fields' => ['nullable', 'array'],
         ];
     }
 }

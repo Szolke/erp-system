@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'billing_postal_code', 'billing_city', 'billing_address_line',
     'shipping_postal_code', 'shipping_city', 'shipping_address_line',
     'default_payment_method_id', 'default_currency', 'email', 'phone',
-    'bank_account_number', 'is_active',
+    'bank_account_number', 'is_active', 'custom_fields',
 ])]
 class Partner extends Model
 {
@@ -23,8 +23,9 @@ class Partner extends Model
     protected function casts(): array
     {
         return [
-            'type' => PartnerType::class,
-            'is_active' => 'boolean',
+            'type'          => PartnerType::class,
+            'is_active'     => 'boolean',
+            'custom_fields' => 'array',
         ];
     }
 

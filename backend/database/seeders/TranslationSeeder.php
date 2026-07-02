@@ -23,6 +23,7 @@ class TranslationSeeder extends Seeder
             ['nav', 'audit_log',      'Audit napló',          'Audit log',          'Audit-Protokoll'],
             ['nav', 'doc_series',     'Sorszámtartományok',   'Document series',    'Nummernkreise'],
             ['nav', 'translations',   'Fordítások',           'Translations',       'Übersetzungen'],
+            ['nav', 'custom_fields', 'Egyéni mezők',         'Custom fields',      'Benutzerdefinierte Felder'],
             ['nav', 'simplepay',      'SimplePay',            'SimplePay',          'SimplePay'],
             ['nav', 'collapse',       'Összecsukás',          'Collapse',           'Einklappen'],
             ['nav', 'logout',         'Kijelentkezés',        'Logout',             'Abmelden'],
@@ -213,6 +214,24 @@ class TranslationSeeder extends Seeder
             ['docseries', 'next_number',   'Következő szám',                    'Next number',                       'Nächste Nummer'],
             ['docseries', 'type',          'Típus',                             'Type',                              'Typ'],
             ['docseries', 'year',          'Év',                                'Year',                              'Jahr'],
+
+            // ── Egyéni mezők ──────────────────────────────────────────────
+            ['customfield', 'title',          'Egyéni mezők',                  'Custom fields',              'Benutzerdefinierte Felder'],
+            ['customfield', 'new',            '+ Új mező',                     '+ New field',                '+ Neues Feld'],
+            ['customfield', 'entity_partner', 'Partner mezők',                 'Partner fields',             'Partnerfelder'],
+            ['customfield', 'entity_product', 'Termék mezők',                  'Product fields',             'Produktfelder'],
+            ['customfield', 'key',            'Kulcs (slug)',                   'Key (slug)',                 'Schlüssel (Slug)'],
+            ['customfield', 'label',          'Megjelenő név',                 'Label',                      'Bezeichnung'],
+            ['customfield', 'type',           'Típus',                         'Type',                       'Typ'],
+            ['customfield', 'type_text',      'Szöveg',                        'Text',                       'Text'],
+            ['customfield', 'type_number',    'Szám',                          'Number',                     'Zahl'],
+            ['customfield', 'type_date',      'Dátum',                         'Date',                       'Datum'],
+            ['customfield', 'type_boolean',   'Igen/Nem',                      'Yes/No',                     'Ja/Nein'],
+            ['customfield', 'type_select',    'Legördülő lista',               'Dropdown',                   'Dropdown'],
+            ['customfield', 'options',        'Értékek (soronként egy)',        'Options (one per line)',     'Optionen (eine pro Zeile)'],
+            ['customfield', 'required',       'Kötelező mező',                 'Required',                   'Pflichtfeld'],
+            ['customfield', 'del_confirm',    'Biztosan törli ezt a mezőt?',   'Delete this field?',         'Dieses Feld löschen?'],
+            ['customfield', 'key_hint',       'Csak kisbetű, szám, alulvonás (pl. belso_azonosito)', 'Lowercase letters, numbers, underscore only', 'Nur Kleinbuchstaben, Zahlen, Unterstrich'],
 
             // ── Általános beállítások ─────────────────────────────────────
             ['settings', 'title',            'Általános beállítások',         'General settings',         'Allgemeine Einstellungen'],

@@ -28,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
         // 'invoice.cancel') through PermissionChecker for every
         // Gate::allows()/$this->authorize() call using that key.
         Gate::before(function (User $user, string $ability) {
+            if ($user->is_superadmin) {
+                return true;
+            }
+
             if (! str_contains($ability, '.')) {
                 return null;
             }

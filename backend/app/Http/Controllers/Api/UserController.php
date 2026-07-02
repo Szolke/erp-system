@@ -78,6 +78,10 @@ class UserController extends Controller
             'password'  => ['nullable', Password::min(8)],
         ]);
 
+        if ($user->is_superadmin) {
+            return response()->json(['message' => 'A szuperadmin felhasználó nem módosítható.'], 422);
+        }
+
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
@@ -94,6 +98,10 @@ class UserController extends Controller
         $this->authorize('user.manage');
 
         $this->ensureSameCompany($user);
+
+        if ($user->is_superadmin) {
+            return response()->json(['message' => 'A szuperadmin felhasználó nem törölhető.'], 422);
+        }
 
         if ($user->id === $request->user()->id) {
             return response()->json(['message' => 'Saját magát nem távolíthatja el.'], 422);

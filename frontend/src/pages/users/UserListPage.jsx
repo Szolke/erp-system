@@ -151,13 +151,16 @@ export default function UserListPage() {
                     : <span className="text-muted">—</span>}
                 </td>
                 <td>
-                  <span className={u.is_active ? 'badge badge-pay-paid' : 'badge badge-inv-storno'}>
-                    {u.is_active ? t('common.active') : 'Inaktív'}
-                  </span>
+                  {u.is_superadmin
+                    ? <span className="badge badge-inv-issued">Szuperadmin</span>
+                    : <span className={u.is_active ? 'badge badge-pay-paid' : 'badge badge-inv-storno'}>
+                        {u.is_active ? t('common.active') : 'Inaktív'}
+                      </span>
+                  }
                 </td>
                 <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                   <Link to={`/users/${u.id}`} className="btn btn-secondary btn-sm" style={{ marginRight: 6 }}>{t('user.overrides')}</Link>
-                  {canManage && (
+                  {canManage && !u.is_superadmin && (
                     <>
                       <button className="btn btn-secondary btn-sm" onClick={() => handleToggleActive(u)} style={{ marginRight: 6 }}>
                         {u.is_active ? 'Letiltás' : 'Engedélyezés'}

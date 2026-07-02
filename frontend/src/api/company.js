@@ -4,6 +4,12 @@ export const company = {
   get: () => client.get('/api/company'),
   update: (data) => client.put('/api/company', data),
   auditLogs: (params) => client.get('/api/audit-logs', { params }),
+  uploadLogo: (file) => {
+    const fd = new FormData()
+    fd.append('logo', file)
+    return client.post('/api/company/logo', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+  },
+  deleteLogo: () => client.delete('/api/company/logo'),
   settings: {
     getAll: () => client.get('/api/company/settings'),
     set: (key, value) => client.put(`/api/company/settings/${key}`, { value }),

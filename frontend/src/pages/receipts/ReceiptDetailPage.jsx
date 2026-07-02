@@ -32,6 +32,14 @@ export default function ReceiptDetailPage() {
           {can('receipt.cancel') && receipt.status === 'issued' && (
             <button className="btn btn-danger" onClick={handleCancel}>{t('common.storno')}</button>
           )}
+          <a
+            href={`/api/receipts/${receipt.id}/pdf`}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-secondary"
+          >
+            PDF
+          </a>
           <Link to="/documents" className="btn btn-secondary">{t('common.back')}</Link>
         </div>
       </div>

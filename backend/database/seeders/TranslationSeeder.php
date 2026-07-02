@@ -186,6 +186,9 @@ class TranslationSeeder extends Seeder
             ['company', 'nav_env',         'NAV környezet',                     'NAV environment',                   'NAV-Umgebung'],
             ['company', 'nav_test',        'Teszt (sandbox)',                   'Test (sandbox)',                     'Test (Sandbox)'],
             ['company', 'nav_prod',        'Éles (production)',                 'Production',                        'Produktion'],
+            ['company', 'upload_logo',     'Logó feltöltése',                   'Upload logo',                       'Logo hochladen'],
+            ['company', 'change_logo',     'Logó cseréje',                      'Change logo',                       'Logo ändern'],
+            ['company', 'no_logo',         'Nincs logó',                        'No logo',                           'Kein Logo'],
             ['company', 'inv_header',      'Bizonylatfejléc',                   'Invoice header',                    'Rechnungskopf'],
             ['company', 'inv_footer',      'Bizonylatláb',                      'Invoice footer',                    'Rechnungsfuß'],
 

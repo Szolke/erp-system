@@ -7,13 +7,18 @@ use App\Http\Requests\StoreReceiptRequest;
 use App\Http\Resources\ReceiptResource;
 use App\Models\Company;
 use App\Models\Receipt;
+use App\Services\PdfService;
 use App\Services\ReceiptService;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReceiptController extends Controller
 {
-    public function __construct(private ReceiptService $receiptService) {}
+    public function __construct(
+        private ReceiptService $receiptService,
+        private PdfService $pdfService,
+    ) {}
 
     public function index(Request $request)
     {
@@ -52,5 +57,20 @@ class ReceiptController extends Controller
         $storno = $this->receiptService->cancel($receipt, $request->user());
 
         return ReceiptResource::make($storno)->response()->setStatusCode(201);
+    }
+
+    /** GET /api/receipts/{receipt}/pdf — on-the-fly PDF letöltés */
+    public function pdf(Receipt $receipt): StreamedResponse
+    {
+        $this->authorize('receipt.view');
+
+        $pdf      = $this->pdfService->forReceipt($receipt);
+        $filename = $receipt->receipt_number . '.pdf';
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            $filename,
+            ['Content-Type' => 'application/pdf'],
+        );
     }
 }

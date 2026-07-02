@@ -74,6 +74,14 @@ export default function InvoiceDetailPage() {
           {canCancel && (
             <button className="btn btn-danger" onClick={handleCancel}>{t('common.storno')}</button>
           )}
+          <a
+            href={`/api/invoices/${invoice.id}/pdf`}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-secondary"
+          >
+            PDF
+          </a>
           <Link to="/documents" className="btn btn-secondary">{t('common.back')}</Link>
         </div>
       </div>

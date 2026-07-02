@@ -46,6 +46,8 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     Route::get('/company', [CompanyController::class, 'show']);
     Route::put('/company', [CompanyController::class, 'update']);
+    Route::post('/company/logo', [CompanyController::class, 'uploadLogo']);
+    Route::delete('/company/logo', [CompanyController::class, 'deleteLogo']);
 
     // Cég-beállítások (kulcs-érték, registry-alapú típuscast)
     Route::get('company/settings', [CompanySettingController::class, 'index']);
@@ -71,6 +73,7 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     Route::apiResource('invoices', InvoiceController::class)->only(['index', 'store', 'show']);
     Route::post('invoices/{invoice}/cancel', [InvoiceController::class, 'cancel']);
+    Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf']);
     Route::get('audit-logs', [AuditLogController::class, 'index']);
 
     Route::get('invoices/{invoice}/payments', [PaymentController::class, 'index']);
@@ -79,6 +82,7 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     Route::apiResource('receipts', ReceiptController::class)->only(['index', 'store', 'show']);
     Route::post('receipts/{receipt}/cancel', [ReceiptController::class, 'cancel']);
+    Route::get('receipts/{receipt}/pdf', [ReceiptController::class, 'pdf']);
 
     // Felhasználók
     Route::apiResource('users', UserController::class)->only(['index', 'store', 'show', 'update', 'destroy']);

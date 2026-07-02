@@ -8,8 +8,10 @@ use App\Http\Resources\InvoiceResource;
 use App\Models\Company;
 use App\Models\Invoice;
 use App\Services\InvoiceService;
+use App\Services\PdfService;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Invoices are immutable once issued — there is no update endpoint.
@@ -23,7 +25,10 @@ use Illuminate\Http\Request;
  */
 class InvoiceController extends Controller
 {
-    public function __construct(private InvoiceService $invoiceService) {}
+    public function __construct(
+        private InvoiceService $invoiceService,
+        private PdfService $pdfService,
+    ) {}
 
     public function index(Request $request)
     {
@@ -67,5 +72,20 @@ class InvoiceController extends Controller
         $storno = $this->invoiceService->cancel($invoice, $request->user());
 
         return InvoiceResource::make($storno)->response()->setStatusCode(201);
+    }
+
+    /** GET /api/invoices/{invoice}/pdf — on-the-fly PDF letöltés */
+    public function pdf(Invoice $invoice): StreamedResponse
+    {
+        $this->authorize('invoice.view');
+
+        $pdf      = $this->pdfService->forInvoice($invoice);
+        $filename = $invoice->invoice_number . '.pdf';
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            $filename,
+            ['Content-Type' => 'application/pdf'],
+        );
     }
 }

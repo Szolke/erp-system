@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { company as companyApi } from '../api/company'
 import { useAuth } from '../contexts/AuthContext'
 import { useTranslation } from '../contexts/TranslationContext'
@@ -268,16 +268,42 @@ function SimplePaySection({ can }) {
 export default function CompanyPage() {
   const { can } = useAuth()
   const { t } = useTranslation()
-  const [form, setForm] = useState(null)
-  const [error, setError] = useState('')
+  const [form, setForm]       = useState(null)
+  const [error, setError]     = useState('')
   const [success, setSuccess] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving]   = useState(false)
+  const [logoUrl, setLogoUrl] = useState(null)
+  const [logoUploading, setLogoUploading] = useState(false)
+  const logoInputRef = useRef(null)
 
   useEffect(() => {
-    companyApi.get().then((res) => setForm(res.data.data))
+    companyApi.get().then((res) => {
+      setForm(res.data.data)
+      setLogoUrl(res.data.data.logo_url ?? null)
+    })
   }, [])
 
   function setField(k, v) { setForm((f) => ({ ...f, [k]: v })); setSuccess(false) }
+
+  async function handleLogoUpload(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setLogoUploading(true)
+    try {
+      const res = await companyApi.uploadLogo(file)
+      setLogoUrl(res.data.logo_url)
+    } catch (err) {
+      setError(err.response?.data?.message ?? t('common.error'))
+    } finally { setLogoUploading(false) }
+  }
+
+  async function handleLogoDelete() {
+    setLogoUploading(true)
+    try {
+      await companyApi.deleteLogo()
+      setLogoUrl(null)
+    } finally { setLogoUploading(false) }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -307,6 +333,29 @@ export default function CompanyPage() {
       <div className="page-header"><h1 className="page-title">{t('company.title')}</h1></div>
       {error && <div className="alert-error mb-4">{error}</div>}
       {success && <div className="mb-4" style={{ background: '#dcfce7', color: '#15803d', padding: '10px 12px', borderRadius: 5 }}>Mentve.</div>}
+      {can('company.manage') && (
+        <div className="card" style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 20 }}>
+          {logoUrl ? (
+            <img src={logoUrl} alt="logo" style={{ maxHeight: 64, maxWidth: 200, borderRadius: 4 }} />
+          ) : (
+            <div style={{ width: 120, height: 64, background: '#f1f5f9', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 11 }}>
+              {t('company.no_logo')}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => logoInputRef.current?.click()} disabled={logoUploading}>
+              {logoUrl ? t('company.change_logo') : t('company.upload_logo')}
+            </button>
+            {logoUrl && (
+              <button type="button" className="btn btn-danger btn-sm" onClick={handleLogoDelete} disabled={logoUploading}>
+                {t('common.delete')}
+              </button>
+            )}
+            <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" style={{ display: 'none' }} onChange={handleLogoUpload} />
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
         <div className="card" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           {fields.map(([key, label, type, req]) => (

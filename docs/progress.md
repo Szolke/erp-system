@@ -77,6 +77,7 @@ Minden tervezett funkció implementálva van. Hátramaradó teendők kizárólag
 3. **SimplePay `url` mező** — a start-kérésben az egyetlen `url` mezőt használjuk visszairányításra; nem 100%-osan megerősített, hogy SimplePay nem külön success/fail/cancel/timeout URL-eket vár-e. Sandbox-tesztelés valódi merchant-adatokkal szükséges élesítés előtt.
 4. **SimplePay refund API** — a `SimplePayClient::refund()` implementáció a v2 SDK forrása alapján készült (`refundTotal`, `transactionId` mezők, `/payment/v2/refund` endpoint), de az egzakt request/response struktúra és hogy van-e IPN visszajelzés refundra, sandbox-teszteléssel kell megerősíteni élesítés előtt.
 5. **Nincs draft→issue számla-workflow** — a `POST /api/invoices` azonnal `issued` állapotban, lefoglalt sorszámmal hozza létre a számlát (tudatos egyszerűsítés). Ha draft-szerkesztés válik szükségessé, az `invoice_number` oszlopot nullable-re kell migrálni.
+6. **Produkciós szuperadmin-seed kockázat** — `DatabaseSeeder` fix `test@example.com` / `password` kombinációval hoz létre `is_superadmin=true` felhasználót. Ez fejlesztési/demo környezetben rendben, de **élesítés előtt kötelező kezelni**: vagy feltételes futtatás (`App::environment('local', 'testing')` ellenőrzéssel), vagy a fix seed teljes eltávolítása és egyszeri, manuális admin-létrehozás `php artisan tinker`-rel. Amíg ez nem történik meg, az éles szerver egyetlen ismert jelszavú szuperadmin fiókot tartalmaz.
 
 ## Hogyan fuss neki gyorsan egy új munkamenetben
 

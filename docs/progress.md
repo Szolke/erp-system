@@ -5,7 +5,7 @@
 > git logból/kódból kelljen visszafejtse, hol tartunk — itt egyben megtalálja.
 > Részletes tábla-/mezőszintű terv: [er-model.md](er-model.md).
 
-Utolsó frissítés: 2026-07-02, a 3–5. fázis (dark mode, API dok, NAV toggle) után.
+Utolsó frissítés: 2026-07-02, a 6. fázis (SimplePay refund → storno lánc) után.
 
 ## Kész lépések
 
@@ -41,6 +41,7 @@ Utolsó frissítés: 2026-07-02, a 3–5. fázis (dark mode, API dok, NAV toggle
 | **3** | **Dark mode (3. fázis):** CSS custom property alapú témaváltás (`[data-theme="dark"]` + 16 változó); Moon/Sun ikon gomb a sidebar Language switcher sorában; `localStorage` + `prefers-color-scheme` fallback; flash-mentes FOUC-védelem az `index.html`-ben; hardcoded hex színek cseréje CSS változóra: `index.css` (sp-*, badge-free kék, hover, success, danger), `CompanyPage`, `TranslationPage`, `UserDetailPage`, `AuditLogPage`, `CustomFieldsPage`, `DocumentSeriesSettingsPage`; új `alert-success` CSS osztály | `Layout.jsx`, `index.css`, `index.html`, több JSX oldal | — |
 | **4** | **API dokumentáció (4. fázis, Scribe):** `knuckleswtf/scribe` telepítve; 68 endpoint automatikusan dokumentálva; csoportosítás: Számlák, Nyugták, Partnerek, Termékek, Cég, Cég beállítások, SimplePay, Felhasználók, Csoportok, Audit napló, stb.; `GET /docs` védett `auth:sanctum` middleware-rel (hitelesítetlen kérés → redirect `/login`-ra); SPA CSRF support (`use_csrf: true`); OpenAPI spec + Postman collection is generálódik | `config/scribe.php`, összes Api Controller (`@group` docblock), `routes/web.php` | — |
 | **5** | **NAV toggle (5. fázis):** `SendInvoiceToNavJob::handle()` elején `CompanySettingService::get(company_id, NAV_ENABLED)` ellenőrzés — ha `false`, a számla `nav_status = not_applicable` lesz és a job naplóz + visszatér (nem küldi el, nem dob hibát, queue nem retry-ol) | `SendInvoiceToNavJob.php` | — |
+| **6** | **SimplePay refund → storno lánc (6. fázis):** `POST /api/invoices/{invoice}/simplepay-refund` — megkeresi a sikeres tranzakciót, meghívja a SimplePay refund API-t (`SimplePayClient::refund()`), `simplepay_transactions.status = refunded` + `refunded_at` + `refund_transaction_id`, majd `InvoiceService::cancel()` hívás (storno számla). Frontend: "SimplePay visszatérítés" gomb az `InvoiceDetailPage` fejlécében, csak ha `simplepay_transaction.status === 'success'` (az `InvoiceResource` tölti be). Migráció: `refund_transaction_id`, `refund_amount`, `refunded_at` + CHECK constraint bővítve `refunded` értékkel. **Szandbox-tesztelés szükséges élesítés előtt** (lásd nyitott pontok). | `SimplePayClient`, `SimplePayController`, `InvoiceResource`, `InvoiceDetailPage.jsx`, migráció | — |
 
 ## Még hátravan
 
@@ -51,7 +52,7 @@ Utolsó frissítés: 2026-07-02, a 3–5. fázis (dark mode, API dok, NAV toggle
 - **RBAC management UI/API** — **KÉSZ** (12a. lépés).
 - **SimplePay UI** — **KÉSZ** (14b. lépés).
 - **i18n** — **KÉSZ** (15. lépés).
-- **6. fázis: SimplePay refund → storno lánc** — még nincs megépítve.
+- **6. fázis: SimplePay refund → storno lánc** — **KÉSZ**. Lásd 6. lépés a táblában.
 - **Cég-onboarding** — új cég létrehozása + első felhasználó hozzárendelése nincs megépítve.
 - **Frontend finomítás** — pagination lapozó UI, Toast-értesítések, SimplePay gomb InvoiceDetailPage-ből.
 - **i18n bővítés** — `InvoiceCreatePage` és `ReceiptCreatePage` még nem kapta meg a `t()` cseréket.
@@ -77,6 +78,7 @@ Utolsó frissítés: 2026-07-02, a 3–5. fázis (dark mode, API dok, NAV toggle
 1. **NAV `vatExemption` case kódok** (AAM/TAM stb. a `vat_rates.nav_code`-ban) — a pontos XSD enumerációt nem sikerült közvetlenül kinyerni, NAV sandbox ellen kell ellenőrizni `NavXmlBuilder`-ben élesítés előtt.
 2. **`tax_number` formátum** — a `companies`/`partners` tábla `tax_number` mezőjének kötőjeles formátumban (`12345678-1-42`) kell lennie, hogy a NAV XML `supplierTaxNumber`/`customerTaxNumber` helyesen szétbontható legyen (`taxpayerId`/`vatCode`/`countyCode`). **Jelenleg nincs validáció erre** a `CompanyController`/`PartnerController` FormRequest-jeiben, és a demo adat is kötőjel nélküli.
 3. **SimplePay `url` mező** — a start-kérésben az egyetlen `url` mezőt használjuk visszairányításra; nem 100%-osan megerősített, hogy SimplePay nem külön success/fail/cancel/timeout URL-eket vár-e. Sandbox-tesztelés valódi merchant-adatokkal szükséges élesítés előtt.
+6. **SimplePay refund API** — a `SimplePayClient::refund()` implementáció a v2 SDK forrása alapján készült (`refundTotal`, `transactionId` mezők, `/payment/v2/refund` endpoint), de az egzakt request/response struktúra és hogy van-e IPN visszajelzés refundra, sandbox-teszteléssel kell megerősíteni élesítés előtt.
 4. **Nincs draft→issue számla-workflow** — a `POST /api/invoices` azonnal `issued` állapotban, lefoglalt sorszámmal hozza létre a számlát (tudatos egyszerűsítés, mert kiállított számla soha nem törölhető, csak sztornózható — így rés a sorszámozásban nem keletkezhet). Ha draft-szerkesztés válik szükségessé, az `invoice_number` oszlopot nullable-re kell migrálni.
 5. **Nincs cég-onboarding flow** — `CompanyController` csak a meglévő aktív céget tudja megjeleníteni/szerkeszteni, új cég létrehozása (+ első felhasználó hozzárendelése) nincs megépítve.
 6. **Frontend** gyakorlatilag érintetlen — minden fenti API-t csak curl/tinker-rel teszteltünk, böngészőből még semmi nem használható.

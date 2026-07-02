@@ -61,6 +61,56 @@ class SimplePayClient
         ];
     }
 
+    /**
+     * Initiates a refund for a previously completed transaction.
+     *
+     * VERIFY BEFORE PRODUCTION: the exact request body field names
+     * (`refundTotal` vs `total`, `transactionId` presence) and the
+     * response structure must be confirmed against the SimplePay v2
+     * sandbox with real merchant credentials.
+     *
+     * @return array{refundTransactionId: string|null, status: string}
+     */
+    public function refund(string $orderRef, string $transactionId, float $refundTotal, string $currency): array
+    {
+        $salt = Str::random(32);
+
+        $payload = [
+            'salt' => $salt,
+            'merchant' => config('simplepay.merchant_id'),
+            'orderRef' => $orderRef,
+            'transactionId' => $transactionId,
+            'currency' => strtoupper($currency),
+            'refundTotal' => $this->formatTotal($refundTotal, $currency),
+            'sdkVersion' => config('simplepay.sdk_version'),
+        ];
+
+        $body = json_encode($payload, JSON_UNESCAPED_SLASHES);
+        $signature = $this->sign($body);
+
+        $apiUrl = config('simplepay.refund_urls.'.config('simplepay.environment'));
+
+        $response = Http::withHeaders(['Signature' => $signature])
+            ->withBody($body, 'application/json')
+            ->post($apiUrl);
+
+        if ($response->failed()) {
+            throw new RuntimeException('SimplePay visszatérítés sikertelen: HTTP '.$response->status().' '.$response->body());
+        }
+
+        $data = $response->json();
+
+        // Treat any non-success errorCode as a failure
+        if (! empty($data['errorCode']) && $data['errorCode'] !== 'SUCCESS') {
+            throw new RuntimeException('SimplePay visszatérítés hiba: '.($data['errorMessage'] ?? $data['errorCode']));
+        }
+
+        return [
+            'refundTransactionId' => $data['refundTransactionId'] ?? null,
+            'status' => $data['status'] ?? 'UNKNOWN',
+        ];
+    }
+
     public function verifyIpnSignature(string $rawBody, ?string $signatureHeader): bool
     {
         if ($signatureHeader === null || $signatureHeader === '') {

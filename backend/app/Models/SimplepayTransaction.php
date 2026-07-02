@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
-    'company_id', 'invoice_id', 'order_ref', 'transaction_id', 'amount', 'currency',
-    'status', 'ipn_payload', 'ipn_received_at', 'finished_at',
+    'company_id', 'invoice_id', 'order_ref', 'transaction_id', 'refund_transaction_id',
+    'amount', 'refund_amount', 'currency',
+    'status', 'ipn_payload', 'ipn_received_at', 'finished_at', 'refunded_at',
 ])]
 class SimplepayTransaction extends Model
 {
@@ -20,10 +21,12 @@ class SimplepayTransaction extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'refund_amount' => 'decimal:2',
             'status' => SimplePayStatus::class,
             'ipn_payload' => 'array',
             'ipn_received_at' => 'datetime',
             'finished_at' => 'datetime',
+            'refunded_at' => 'datetime',
         ];
     }
 

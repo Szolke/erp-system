@@ -25,6 +25,12 @@ return [
         'production' => 'https://secure.simplepay.hu/payment/v2/start',
     ],
 
+    // VERIFY BEFORE PRODUCTION: refund endpoint URLs per SimplePay v2 docs
+    'refund_urls' => [
+        'sandbox' => 'https://sandbox.simplepay.hu/payment/v2/refund',
+        'production' => 'https://secure.simplepay.hu/payment/v2/refund',
+    ],
+
     'sdk_version' => 'erp-system_simplepay_v2_1.0.0',
 
     'timeout_minutes' => env('SIMPLEPAY_TIMEOUT_MINUTES', 30),

@@ -44,6 +44,18 @@ class InvoiceResource extends JsonResource
             'nav_status' => $this->nav_status,
             'notes' => $this->notes,
             'items' => InvoiceItemResource::collection($this->whenLoaded('items')),
+            'simplepay_transaction' => $this->whenLoaded('simplepayTransactions', function () {
+                $tx = $this->simplepayTransactions->first(
+                    fn ($t) => $t->status === \App\Enums\SimplePayStatus::Success && $t->refunded_at === null
+                );
+
+                return $tx ? [
+                    'id' => $tx->id,
+                    'status' => $tx->status->value,
+                    'amount' => $tx->amount,
+                    'currency' => $tx->currency,
+                ] : null;
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

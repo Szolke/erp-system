@@ -10,4 +10,5 @@ enum SimplePayStatus: string
     case Fail = 'fail';
     case Timeout = 'timeout';
     case Cancel = 'cancel';
+    case Refunded = 'refunded';
 }

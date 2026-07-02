@@ -19,6 +19,8 @@ export default function InvoiceDetailPage() {
   const [loading, setLoading] = useState(true)
   const [payForm, setPayForm] = useState({ payment_method_id: '', amount: '', paid_at: todayStr() })
   const [payError, setPayError] = useState('')
+  const [refunding, setRefunding] = useState(false)
+  const [refundMsg, setRefundMsg] = useState('')
 
   async function load() {
     const [invRes, payRes, pmRes] = await Promise.all([
@@ -42,6 +44,21 @@ export default function InvoiceDetailPage() {
     navigate('/invoices')
   }
 
+  async function handleRefund() {
+    if (!confirm(t('simplepay.refund_confirm'))) return
+    setRefunding(true)
+    setRefundMsg('')
+    try {
+      await client.post(`/api/invoices/${id}/simplepay-refund`)
+      setRefundMsg(t('simplepay.refund_ok'))
+      await load()
+    } catch (err) {
+      setRefundMsg(err.response?.data?.message ?? t('simplepay.refund_err'))
+    } finally {
+      setRefunding(false)
+    }
+  }
+
   async function handleAddPayment(e) {
     e.preventDefault()
     setPayError('')
@@ -59,6 +76,7 @@ export default function InvoiceDetailPage() {
 
   const canCancel = can('invoice.cancel') && invoice.status === 'issued' && !invoice.storno_of_invoice_id
   const canPay = can('payment.create') && invoice.payment_status !== 'paid'
+  const canRefund = can('invoice.cancel') && invoice.status === 'issued' && invoice.simplepay_transaction?.status === 'success'
 
   return (
     <div>
@@ -71,7 +89,12 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
         <div className="flex">
-          {canCancel && (
+          {canRefund && (
+            <button className="btn btn-danger" onClick={handleRefund} disabled={refunding}>
+              {refunding ? '…' : t('simplepay.refund')}
+            </button>
+          )}
+          {canCancel && !canRefund && (
             <button className="btn btn-danger" onClick={handleCancel}>{t('common.storno')}</button>
           )}
           <a
@@ -85,6 +108,12 @@ export default function InvoiceDetailPage() {
           <Link to="/documents" className="btn btn-secondary">{t('common.back')}</Link>
         </div>
       </div>
+
+      {refundMsg && (
+        <div className={refundMsg === t('simplepay.refund_ok') ? 'alert-success mb-4' : 'alert-error mb-4'}>
+          {refundMsg}
+        </div>
+      )}
 
       <div className="card">
         <div className="detail-grid">

@@ -58,7 +58,7 @@ class InvoiceController extends Controller
         $this->authorize('invoice.view');
 
         return InvoiceResource::make(
-            $invoice->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod'])
+            $invoice->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod', 'simplepayTransactions'])
         );
     }
 

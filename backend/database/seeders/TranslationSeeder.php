@@ -212,6 +212,10 @@ class TranslationSeeder extends Seeder
             ['simplepay', 'not_set',       'Nincs megadva',                     'Not set',                           'Nicht angegeben'],
             ['simplepay', 'add',           '+ Hitelesítő adatok hozzáadása',    '+ Add credentials',                 '+ Anmeldedaten hinzufügen'],
             ['simplepay', 'del_confirm',   'Biztosan törli ezeket az adatokat?','Are you sure you want to delete?',  'Wirklich löschen?'],
+            ['simplepay', 'refund',        'SimplePay visszatérítés',           'SimplePay refund',                  'SimplePay-Rückerstattung'],
+            ['simplepay', 'refund_confirm','Biztosan visszatéríti a teljes összeget és sztornózza a számlát?','Refund the full amount and create a storno invoice?','Gesamtbetrag erstatten und Stornorechnung erstellen?'],
+            ['simplepay', 'refund_ok',     'Visszatérítés sikeres, sztornó számla létrehozva.','Refund successful, storno invoice created.','Rückerstattung erfolgreich, Stornorechnung erstellt.'],
+            ['simplepay', 'refund_err',    'Visszatérítés sikertelen.',         'Refund failed.',                    'Rückerstattung fehlgeschlagen.'],
 
             // ── Sorszámtartományok ────────────────────────────────────
             ['docseries', 'title',         'Sorszámtartományok',                'Document series',                   'Nummernkreise'],

@@ -79,6 +79,7 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::get('invoices/{invoice}/payments', [PaymentController::class, 'index']);
     Route::post('invoices/{invoice}/payments', [PaymentController::class, 'store']);
     Route::post('invoices/{invoice}/simplepay', [SimplePayController::class, 'start']);
+    Route::post('invoices/{invoice}/simplepay-refund', [SimplePayController::class, 'refund']);
 
     Route::apiResource('receipts', ReceiptController::class)->only(['index', 'store', 'show']);
     Route::post('receipts/{receipt}/cancel', [ReceiptController::class, 'cancel']);

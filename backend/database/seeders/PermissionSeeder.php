@@ -39,10 +39,12 @@ class PermissionSeeder extends Seeder
             ['key' => 'invoice.edit', 'module' => 'invoice', 'description' => 'Piszkozat számla szerkesztése', 'is_sensitive' => false],
             ['key' => 'invoice.cancel', 'module' => 'invoice', 'description' => 'Számla sztornózása', 'is_sensitive' => true],
             ['key' => 'invoice.send_nav', 'module' => 'invoice', 'description' => 'Számla NAV felé történő (újra)beküldése', 'is_sensitive' => true],
+            ['key' => 'invoice.regenerate_pdf', 'module' => 'invoice', 'description' => 'Kiállított számla PDF-jének kontrollált újragenerálása (számlaadat változatlan, csak a sablon újrarajzolódik)', 'is_sensitive' => true],
 
             ['key' => 'receipt.view', 'module' => 'receipt', 'description' => 'Nyugták megtekintése', 'is_sensitive' => false],
             ['key' => 'receipt.create', 'module' => 'receipt', 'description' => 'Nyugta kiállítása', 'is_sensitive' => false],
             ['key' => 'receipt.cancel', 'module' => 'receipt', 'description' => 'Nyugta sztornózása', 'is_sensitive' => true],
+            ['key' => 'receipt.regenerate_pdf', 'module' => 'receipt', 'description' => 'Kiállított nyugta PDF-jének kontrollált újragenerálása (nyugtaadat változatlan, csak a sablon újrarajzolódik)', 'is_sensitive' => true],
 
             ['key' => 'payment.view', 'module' => 'payment', 'description' => 'Fizetések megtekintése', 'is_sensitive' => false],
             ['key' => 'payment.create', 'module' => 'payment', 'description' => 'Fizetés rögzítése bizonylathoz', 'is_sensitive' => false],

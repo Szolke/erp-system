@@ -8,9 +8,11 @@ use App\Http\Requests\StoreReceiptRequest;
 use App\Http\Resources\ReceiptResource;
 use App\Models\Company;
 use App\Models\Receipt;
+use App\Services\AuditLogger;
 use App\Services\PdfService;
 use App\Services\ReceiptService;
 use App\Support\CurrentCompany;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -66,7 +68,29 @@ class ReceiptController extends Controller
         return ReceiptResource::make($storno)->response()->setStatusCode(201);
     }
 
-    /** GET /api/receipts/{receipt}/pdf — on-the-fly PDF letöltés */
+    /** POST /api/receipts/{receipt}/regenerate-pdf — kontrollált PDF újragenerálás */
+    public function regeneratePdf(Receipt $receipt, Request $request): JsonResponse
+    {
+        $this->assertBelongsToCurrentCompany($receipt);
+        $this->authorize('receipt.regenerate_pdf');
+
+        $supersededFile = $this->pdfService->archiveAndRegenerateReceipt($receipt);
+
+        app(AuditLogger::class)->log(
+            'receipt.pdf_regenerated',
+            $receipt->company_id,
+            $request->user()->id,
+            $receipt,
+            null,
+            [
+                'document_number' => $receipt->receipt_number,
+                'superseded_file' => $supersededFile,
+            ],
+        );
+
+        return response()->json(['superseded_file' => $supersededFile]);
+    }
+
     /** GET /api/receipts/{receipt}/pdf — archivált vagy on-the-fly PDF letöltés */
     public function pdf(Receipt $receipt): StreamedResponse
     {

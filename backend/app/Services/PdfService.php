@@ -52,6 +52,31 @@ class PdfService
     }
 
     /**
+     * Archives the existing canonical PDF (if any) under a timestamped superseded name,
+     * then regenerates the PDF from the current template and saves it at the canonical path.
+     *
+     * Returns the basename of the superseded file, or null if no prior file existed.
+     * The superseded file is NEVER overwritten: a millisecond timestamp + collision counter
+     * guarantee uniqueness even for rapid successive calls.
+     */
+    public function archiveAndRegenerateInvoice(Invoice $invoice): ?string
+    {
+        $path = $this->storagePath($invoice->invoice_number, $invoice->company_id, $invoice->issue_date);
+        $supersededBasename = $this->archiveCurrentFile($path);
+        Storage::disk('local')->put($path, $this->forInvoice($invoice)->output());
+        return $supersededBasename;
+    }
+
+    /** @see archiveAndRegenerateInvoice */
+    public function archiveAndRegenerateReceipt(Receipt $receipt): ?string
+    {
+        $path = $this->storagePath($receipt->receipt_number, $receipt->company_id, $receipt->issue_date);
+        $supersededBasename = $this->archiveCurrentFile($path);
+        Storage::disk('local')->put($path, $this->forReceipt($receipt)->output());
+        return $supersededBasename;
+    }
+
+    /**
      * Saves the invoice PDF to the local disk immediately after issuance.
      * Skips silently if the file already exists — a legally archived PDF must never be overwritten.
      */
@@ -73,6 +98,36 @@ class PdfService
         if (!Storage::disk('local')->exists($path)) {
             Storage::disk('local')->put($path, $this->forReceipt($receipt)->output());
         }
+    }
+
+    /**
+     * Moves the file at $canonicalPath to a timestamped superseded name in the same directory.
+     * Returns the basename of the new superseded file, or null if no file existed.
+     *
+     * Collision guard: millisecond-precision timestamp makes collisions extremely unlikely;
+     * the while-loop handles the residual edge case so the superseded file is NEVER overwritten.
+     */
+    private function archiveCurrentFile(string $canonicalPath): ?string
+    {
+        if (!Storage::disk('local')->exists($canonicalPath)) {
+            return null;
+        }
+
+        $dir  = dirname($canonicalPath);
+        $stem = pathinfo($canonicalPath, PATHINFO_FILENAME);
+
+        $timestamp      = now()->format('YmdHis_v'); // e.g. 20260703143022_456
+        $supersededPath = "{$dir}/{$stem}.superseded-{$timestamp}.pdf";
+
+        $counter = 1;
+        while (Storage::disk('local')->exists($supersededPath)) {
+            $supersededPath = "{$dir}/{$stem}.superseded-{$timestamp}-{$counter}.pdf";
+            $counter++;
+        }
+
+        Storage::disk('local')->move($canonicalPath, $supersededPath);
+
+        return basename($supersededPath);
     }
 
     private function logoBase64(?string $logoPath): ?string

@@ -8,9 +8,11 @@ use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Company;
 use App\Models\Invoice;
+use App\Services\AuditLogger;
 use App\Services\InvoiceService;
 use App\Services\PdfService;
 use App\Support\CurrentCompany;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -75,6 +77,29 @@ class InvoiceController extends Controller
         $storno = $this->invoiceService->cancel($invoice, $request->user());
 
         return InvoiceResource::make($storno)->response()->setStatusCode(201);
+    }
+
+    /** POST /api/invoices/{invoice}/regenerate-pdf — kontrollált PDF újragenerálás */
+    public function regeneratePdf(Invoice $invoice, Request $request): JsonResponse
+    {
+        $this->assertBelongsToCurrentCompany($invoice);
+        $this->authorize('invoice.regenerate_pdf');
+
+        $supersededFile = $this->pdfService->archiveAndRegenerateInvoice($invoice);
+
+        app(AuditLogger::class)->log(
+            'invoice.pdf_regenerated',
+            $invoice->company_id,
+            $request->user()->id,
+            $invoice,
+            null,
+            [
+                'document_number' => $invoice->invoice_number,
+                'superseded_file' => $supersededFile,
+            ],
+        );
+
+        return response()->json(['superseded_file' => $supersededFile]);
     }
 
     /** GET /api/invoices/{invoice}/pdf — archivált vagy on-the-fly PDF letöltés */

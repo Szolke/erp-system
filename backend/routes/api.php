@@ -78,6 +78,7 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::apiResource('invoices', InvoiceController::class)->only(['index', 'store', 'show']);
     Route::post('invoices/{invoice}/cancel', [InvoiceController::class, 'cancel']);
     Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf']);
+    Route::post('invoices/{invoice}/regenerate-pdf', [InvoiceController::class, 'regeneratePdf']);
     Route::get('audit-logs', [AuditLogController::class, 'index']);
 
     Route::get('invoices/{invoice}/payments', [PaymentController::class, 'index']);
@@ -88,6 +89,7 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::apiResource('receipts', ReceiptController::class)->only(['index', 'store', 'show']);
     Route::post('receipts/{receipt}/cancel', [ReceiptController::class, 'cancel']);
     Route::get('receipts/{receipt}/pdf', [ReceiptController::class, 'pdf']);
+    Route::post('receipts/{receipt}/regenerate-pdf', [ReceiptController::class, 'regeneratePdf']);
 
     // Felhasználók
     Route::apiResource('users', UserController::class)->only(['index', 'store', 'show', 'update', 'destroy']);

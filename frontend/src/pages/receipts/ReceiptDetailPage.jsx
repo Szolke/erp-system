@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { receipts as receiptApi } from '../../api/receipts'
-import { apiBase } from '../../api/client'
+import client from '../../api/client'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 
@@ -16,6 +16,16 @@ export default function ReceiptDetailPage() {
   useEffect(() => {
     receiptApi.get(id).then((res) => { setReceipt(res.data.data); setLoading(false) })
   }, [id])
+
+  async function downloadPdf() {
+    const res = await client.get(`/api/receipts/${receipt.id}/pdf`, { responseType: 'blob' })
+    const url = URL.createObjectURL(res.data)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${receipt.receipt_number}.pdf`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   async function handleCancel() {
     if (!confirm(t('receipt.storno_confirm'))) return
@@ -33,14 +43,7 @@ export default function ReceiptDetailPage() {
           {can('receipt.cancel') && receipt.status === 'issued' && (
             <button className="btn btn-danger" onClick={handleCancel}>{t('common.storno')}</button>
           )}
-          <a
-            href={`${apiBase}/api/receipts/${receipt.id}/pdf`}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-secondary"
-          >
-            PDF
-          </a>
+          <button className="btn btn-secondary" onClick={downloadPdf}>PDF</button>
           <Link to="/documents" className="btn btn-secondary">{t('common.back')}</Link>
         </div>
       </div>

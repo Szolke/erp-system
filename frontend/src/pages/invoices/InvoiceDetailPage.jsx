@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { invoices as invoiceApi } from '../../api/invoices'
-import client, { apiBase } from '../../api/client'
+import client from '../../api/client'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { PaymentStatusBadge, InvoiceStatusBadge } from '../../components/StatusBadge'
@@ -59,6 +59,16 @@ export default function InvoiceDetailPage() {
     }
   }
 
+  async function downloadPdf() {
+    const res = await client.get(`/api/invoices/${invoice.id}/pdf`, { responseType: 'blob' })
+    const url = URL.createObjectURL(res.data)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${invoice.invoice_number}.pdf`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   async function handleAddPayment(e) {
     e.preventDefault()
     setPayError('')
@@ -97,14 +107,7 @@ export default function InvoiceDetailPage() {
           {canCancel && !canRefund && (
             <button className="btn btn-danger" onClick={handleCancel}>{t('common.storno')}</button>
           )}
-          <a
-            href={`${apiBase}/api/invoices/${invoice.id}/pdf`}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-secondary"
-          >
-            PDF
-          </a>
+          <button className="btn btn-secondary" onClick={downloadPdf}>PDF</button>
           <Link to="/documents" className="btn btn-secondary">{t('common.back')}</Link>
         </div>
       </div>

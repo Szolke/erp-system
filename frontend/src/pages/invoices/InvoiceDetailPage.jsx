@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { invoices as invoiceApi } from '../../api/invoices'
-import client from '../../api/client'
+import client, { apiBase } from '../../api/client'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { PaymentStatusBadge, InvoiceStatusBadge } from '../../components/StatusBadge'
@@ -98,7 +98,7 @@ export default function InvoiceDetailPage() {
             <button className="btn btn-danger" onClick={handleCancel}>{t('common.storno')}</button>
           )}
           <a
-            href={`/api/invoices/${invoice.id}/pdf`}
+            href={`${apiBase}/api/invoices/${invoice.id}/pdf`}
             target="_blank"
             rel="noreferrer"
             className="btn btn-secondary"

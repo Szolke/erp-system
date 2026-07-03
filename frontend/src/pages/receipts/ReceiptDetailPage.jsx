@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { receipts as receiptApi } from '../../api/receipts'
+import { apiBase } from '../../api/client'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 
@@ -33,7 +34,7 @@ export default function ReceiptDetailPage() {
             <button className="btn btn-danger" onClick={handleCancel}>{t('common.storno')}</button>
           )}
           <a
-            href={`/api/receipts/${receipt.id}/pdf`}
+            href={`${apiBase}/api/receipts/${receipt.id}/pdf`}
             target="_blank"
             rel="noreferrer"
             className="btn btn-secondary"

@@ -34,6 +34,8 @@ export default function InvoiceCreatePage() {
   const [items, setItems] = useState([emptyItem()])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [issuedResult, setIssuedResult] = useState(null) // {id, number} after successful POST
 
   useEffect(() => {
     Promise.all([
@@ -89,16 +91,31 @@ export default function InvoiceCreatePage() {
     setItems((it) => it.filter((_, idx) => idx !== i))
   }
 
-  async function handleSubmit(e) {
+  function lineGross(item) {
+    const qty = Number(item.quantity) || 0
+    const price = Number(item.unit_price) || 0
+    const disc = Number(item.discount_percent) || 0
+    const vat = vatRates.find((v) => v.id == item.vat_rate_id)
+    const vatPct = vat ? Number(vat.rate_percent) : 0
+    return qty * price * (1 - disc / 100) * (1 + vatPct / 100)
+  }
+
+  // Validates and opens the confirmation modal — no POST here
+  function handleSubmit(e) {
     e.preventDefault()
     setError('')
-
     if (items.some((item) => !item.product_id)) {
       setError(t('invoice.product_required'))
       return
     }
+    setIssuedResult(null)
+    setShowModal(true)
+  }
 
+  // Called from modal confirm button — does the actual POST
+  async function handleConfirm() {
     setSaving(true)
+    setError('')
     try {
       const payload = {
         ...form,
@@ -113,7 +130,8 @@ export default function InvoiceCreatePage() {
         })),
       }
       const res = await invoices.create(payload)
-      navigate(`/invoices/${res.data.data.id}`)
+      const inv = res.data.data
+      setIssuedResult({ id: inv.id, number: inv.invoice_number })
     } catch (err) {
       const errs = err.response?.data?.errors
       setError(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? t('common.error'))
@@ -122,16 +140,21 @@ export default function InvoiceCreatePage() {
     }
   }
 
+  // Derived values for modal summary
+  const partnerName = partnerList.find((p) => p.id == form.partner_id)?.name ?? '—'
+  const payMethodName = payMethods.find((m) => m.id == form.payment_method_id)?.name ?? '—'
+  const grandTotal = items.reduce((sum, item) => sum + lineGross(item), 0)
+
   return (
     <div>
       <div className="page-header">
         <h1 className="page-title">{t('invoice.new_title')}</h1>
         <Link to="/invoices" className="btn btn-secondary">{t('common.back')}</Link>
       </div>
-      {error && <div className="alert-error mb-4">{error}</div>}
+      {error && !showModal && <div className="alert-error mb-4">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="card">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
             <div className="form-group">
               <label>{t('invoice.partner_col')}</label>
               <select value={form.partner_id} onChange={(e) => setField('partner_id', e.target.value)} required>
@@ -245,12 +268,109 @@ export default function InvoiceCreatePage() {
         </div>
 
         <div className="flex">
-          <button className="btn btn-primary" type="submit" disabled={saving}>
-            {saving ? t('common.saving') : t('invoice.submit')}
+          <button className="btn btn-primary" type="submit">
+            {t('invoice.submit')}
           </button>
           <Link to="/invoices" className="btn btn-secondary">{t('common.cancel')}</Link>
         </div>
       </form>
+
+      {showModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          zIndex: 1000, display: 'flex', alignItems: 'flex-start',
+          justifyContent: 'center', overflowY: 'auto', padding: '40px 16px',
+        }}>
+          <div className="card" style={{ maxWidth: 680, width: '100%' }}>
+            {issuedResult ? (
+              // Success state — invoice number from server response
+              <>
+                <div className="alert-success mb-4" style={{ fontSize: 15 }}>
+                  {t('invoice.issued_ok', { number: issuedResult.number })}
+                </div>
+                <div className="flex">
+                  <button className="btn btn-primary" onClick={() => navigate(`/invoices/${issuedResult.id}`)}>
+                    {t('invoice.view_detail')}
+                  </button>
+                  <Link to="/documents" className="btn btn-secondary">{t('common.back_to_list')}</Link>
+                </div>
+              </>
+            ) : (
+              // Confirmation state — summary without invoice number
+              <>
+                <h2 style={{ marginTop: 0, marginBottom: 16 }}>{t('invoice.confirm_title')}</h2>
+                {error && <div className="alert-error mb-4">{error}</div>}
+
+                <table style={{ width: '100%', marginBottom: 16, borderCollapse: 'collapse' }}>
+                  <tbody>
+                    {[
+                      [t('invoice.partner_col'), <strong key="p">{partnerName}</strong>],
+                      [t('invoice.pay_method'), payMethodName],
+                      [t('invoice.issue_date'), form.issue_date],
+                      [t('invoice.fulfillment'), form.fulfillment_date],
+                      [t('invoice.due_date'), form.due_date],
+                      [t('common.currency'), form.currency],
+                    ].map(([label, value]) => (
+                      <tr key={label}>
+                        <td style={{ color: 'var(--color-muted)', paddingBottom: 6, width: '40%', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em' }}>{label}</td>
+                        <td style={{ paddingBottom: 6 }}>{value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <strong>{t('invoice.items')}</strong>
+                <table className="items-table" style={{ marginTop: 8, marginBottom: 16 }}>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left' }}>{t('invoice.description')}</th>
+                      <th>{t('invoice.quantity')}</th>
+                      <th>{t('invoice.unit_price')}</th>
+                      <th>{t('invoice.vat')}</th>
+                      <th>{t('invoice.line_total')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((item, i) => {
+                      const vat = vatRates.find((v) => v.id == item.vat_rate_id)
+                      return (
+                        <tr key={i}>
+                          <td>{item.description || '—'}</td>
+                          <td>{item.quantity}</td>
+                          <td>{Number(item.unit_price).toLocaleString('hu-HU')}</td>
+                          <td>{vat?.name ?? '—'}</td>
+                          <td>{lineGross(item).toLocaleString('hu-HU', { maximumFractionDigits: 0 })}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ fontWeight: 600, borderTop: `2px solid var(--color-border)` }}>
+                      <td colSpan={4} style={{ paddingTop: 8 }}>{t('common.total')}</td>
+                      <td style={{ paddingTop: 8 }}>
+                        {grandTotal.toLocaleString('hu-HU', { maximumFractionDigits: 0 })} {form.currency}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+
+                <div className="flex">
+                  <button className="btn btn-primary" onClick={handleConfirm} disabled={saving}>
+                    {saving ? t('common.saving') : t('invoice.confirm_submit')}
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => { setShowModal(false); setError('') }}
+                    disabled={saving}
+                  >
+                    {t('common.cancel')}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

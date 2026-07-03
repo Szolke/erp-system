@@ -132,6 +132,11 @@ class TranslationSeeder extends Seeder
             ['invoice', 'add_item',        '+ Tétel',                           '+ Item',                            '+ Position'],
             ['invoice', 'submit',          'Számla kiállítása',                 'Issue invoice',                     'Rechnung ausstellen'],
             ['invoice', 'product_required','Minden tételhez kötelező terméket választani.', 'A product must be selected for every item.', 'Für jede Position muss ein Produkt gewählt werden.'],
+            ['invoice', 'confirm_title',  'Számla-kiállítás megerősítése',             'Confirm invoice issuance',              'Rechnungsausstellung bestätigen'],
+            ['invoice', 'confirm_submit', 'Kiállítás megerősítése',                    'Confirm issuance',                      'Ausstellung bestätigen'],
+            ['invoice', 'issued_ok',      'A számla kiállítva: {number}',              'Invoice issued: {number}',              'Rechnung ausgestellt: {number}'],
+            ['invoice', 'view_detail',    'Számla megtekintése',                       'View invoice',                          'Rechnung anzeigen'],
+            ['invoice', 'line_total',     'Bruttó sor',                                'Line total',                            'Zeilenbetrag'],
 
             // ── Nyugta ────────────────────────────────────────────────
             ['receipt', 'title',           'Nyugták',                           'Receipts',                          'Quittungen'],
@@ -144,6 +149,11 @@ class TranslationSeeder extends Seeder
             ['receipt', 'st_issued',       'Kiállított',                        'Issued',                            'Ausgestellt'],
             ['receipt', 'st_storno',       'Sztornózott',                       'Cancelled',                         'Storniert'],
             ['receipt', 'submit',          'Nyugta kiállítása',                 'Issue receipt',                     'Quittung ausstellen'],
+            ['receipt', 'confirm_title',  'Nyugta-kiállítás megerősítése',     'Confirm receipt issuance',          'Quittungsausstellung bestätigen'],
+            ['receipt', 'issued_ok',      'A nyugta kiállítva: {number}',      'Receipt issued: {number}',          'Quittung ausgestellt: {number}'],
+            ['receipt', 'view_detail',    'Nyugta megtekintése',               'View receipt',                      'Quittung anzeigen'],
+
+            ['common',  'back_to_list',   'Vissza a listához',                 'Back to list',                      'Zurück zur Liste'],
 
             // ── Toast visszajelzések ──────────────────────────────────
             ['partner',  'deleted',  'Partner törölve.',  'Partner deleted.',  'Partner gelöscht.'],

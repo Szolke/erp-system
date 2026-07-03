@@ -259,6 +259,50 @@ class StornoChainTest extends TestCase
         $service->cancel($invoice->fresh(), $this->user);
     }
 
+    // ─── Test 7: dupla számla-sztornó kísérlet elutasítva ────────────────────
+
+    public function test_double_invoice_cancel_is_rejected_and_creates_only_one_storno(): void
+    {
+        $invoice = $this->makeInvoice();
+        $service = app(InvoiceService::class);
+
+        $service->cancel($invoice, $this->user);
+
+        $exceptionThrown = false;
+        try {
+            $service->cancel($invoice->fresh(), $this->user);
+        } catch (ValidationException $e) {
+            $exceptionThrown = true;
+        }
+
+        $this->assertTrue($exceptionThrown,
+            'A második sztornó-kísérletnek ValidationException-t kell dobnia');
+        $this->assertSame(1, $invoice->fresh()->stornos()->count(),
+            'Az eredeti számlához pontosan egy sztornó létezhet');
+    }
+
+    // ─── Test 8: dupla nyugta-sztornó kísérlet elutasítva ────────────────────
+
+    public function test_double_receipt_cancel_is_rejected_and_creates_only_one_storno(): void
+    {
+        $receipt = $this->makeReceipt();
+        $service = app(ReceiptService::class);
+
+        $service->cancel($receipt, $this->user);
+
+        $exceptionThrown = false;
+        try {
+            $service->cancel($receipt->fresh(), $this->user);
+        } catch (ValidationException $e) {
+            $exceptionThrown = true;
+        }
+
+        $this->assertTrue($exceptionThrown,
+            'A második sztornó-kísérletnek ValidationException-t kell dobnia');
+        $this->assertSame(1, $receipt->fresh()->stornos()->count(),
+            'Az eredeti nyugtához pontosan egy sztornó létezhet');
+    }
+
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
     /**

@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\Receipt;
 use App\Models\User;
 use App\Models\VatRate;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -63,61 +64,79 @@ class ReceiptService
 
     public function cancel(Receipt $receipt, ?User $actor = null): Receipt
     {
+        // Sztornó bizonylat nem sztornózható — gyors ellenőrzés, a státusz soha nem változik
         if ($receipt->status === ReceiptStatus::Storno) {
             throw ValidationException::withMessages(['receipt' => ['Egy sztornó nyugta nem sztornózható.']]);
         }
 
-        if ($receipt->stornos()->exists()) {
-            throw ValidationException::withMessages(['receipt' => ['A nyugta már sztornózva van.']]);
-        }
+        try {
+            return DB::transaction(function () use ($receipt, $actor) {
+                // Egy nyugtához pontosan egy sztornó engedélyezett (HU számviteli szabály).
+                // lockForUpdate() szerializálja a párhuzamos kéréseket: a második kérés
+                // a lock feloldása után már látja az első által létrehozott sztornót.
+                $locked = Receipt::withoutGlobalScope('company')
+                    ->where('id', $receipt->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-        return DB::transaction(function () use ($receipt, $actor) {
-            $receipt->load('items');
+                if ($locked->stornos()->exists()) {
+                    throw ValidationException::withMessages(['receipt' => ['A nyugta már sztornózva van.']]);
+                }
 
-            [$series, $receiptNumber] = $this->numberGenerator->next(
-                $receipt->company_id, DocumentType::ReceiptStorno, 'NYSZT'
-            );
+                $locked->load('items');
 
-            $storno = Receipt::create([
-                'company_id' => $receipt->company_id,
-                'partner_id' => $receipt->partner_id,
-                'document_series_id' => $series->id,
-                'receipt_number' => $receiptNumber,
-                'issue_date' => now()->toDateString(),
-                'currency' => $receipt->currency,
-                'exchange_rate' => $receipt->exchange_rate,
-                'exchange_rate_date' => $receipt->exchange_rate_date,
-                'payment_method_id' => $receipt->payment_method_id,
-                'status' => ReceiptStatus::Storno,
-                'storno_of_receipt_id' => $receipt->id,
-            ]);
+                [$series, $receiptNumber] = $this->numberGenerator->next(
+                    $locked->company_id, DocumentType::ReceiptStorno, 'NYSZT'
+                );
 
-            foreach ($receipt->items as $index => $item) {
-                $storno->items()->create([
-                    'product_id' => $item->product_id,
-                    'description' => $item->description,
-                    'quantity' => -$item->quantity,
-                    'unit_price' => $item->unit_price,
-                    'vat_rate_id' => $item->vat_rate_id,
-                    'net_amount' => -$item->net_amount,
-                    'vat_amount' => -$item->vat_amount,
-                    'gross_amount' => -$item->gross_amount,
-                    'sort_order' => $index,
+                $storno = Receipt::create([
+                    'company_id'           => $locked->company_id,
+                    'partner_id'           => $locked->partner_id,
+                    'document_series_id'   => $series->id,
+                    'receipt_number'       => $receiptNumber,
+                    'issue_date'           => now()->toDateString(),
+                    'currency'             => $locked->currency,
+                    'exchange_rate'        => $locked->exchange_rate,
+                    'exchange_rate_date'   => $locked->exchange_rate_date,
+                    'payment_method_id'    => $locked->payment_method_id,
+                    'status'               => ReceiptStatus::Storno,
+                    'storno_of_receipt_id' => $locked->id,
                 ]);
+
+                foreach ($locked->items as $index => $item) {
+                    $storno->items()->create([
+                        'product_id'  => $item->product_id,
+                        'description' => $item->description,
+                        'quantity'    => -$item->quantity,
+                        'unit_price'  => $item->unit_price,
+                        'vat_rate_id' => $item->vat_rate_id,
+                        'net_amount'  => -$item->net_amount,
+                        'vat_amount'  => -$item->vat_amount,
+                        'gross_amount'=> -$item->gross_amount,
+                        'sort_order'  => $index,
+                    ]);
+                }
+
+                $this->updateTotals($storno);
+
+                $loaded = $storno->refresh()->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
+
+                $this->auditLogger->log('receipt.cancel', $locked->company_id, $actor?->id, $receipt, [
+                    'receipt_number' => $locked->receipt_number,
+                ], [
+                    'storno_receipt_number' => $storno->receipt_number,
+                ]);
+
+                return $loaded;
+            });
+        } catch (QueryException $e) {
+            // Védelmi háló: extrém race condition esetén a DB unique constraint fogja meg
+            // az ütközést — 500 helyett felhasználóbarát 422 kell.
+            if ($e->getCode() === '23505' && str_contains($e->getMessage(), 'storno_of_receipt_id')) {
+                throw ValidationException::withMessages(['receipt' => ['A nyugta már sztornózva van.']]);
             }
-
-            $this->updateTotals($storno);
-
-            $loaded = $storno->refresh()->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod']);
-
-            $this->auditLogger->log('receipt.cancel', $receipt->company_id, $actor?->id, $receipt, [
-                'receipt_number' => $receipt->receipt_number,
-            ], [
-                'storno_receipt_number' => $storno->receipt_number,
-            ]);
-
-            return $loaded;
-        });
+            throw $e;
+        }
     }
 
     private function createItems(Receipt $receipt, array $items): void

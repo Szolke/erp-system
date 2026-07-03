@@ -100,7 +100,6 @@ export default function InvoiceDetailPage() {
           <h1 className="page-title">{invoice.invoice_number}</h1>
           <div className="flex mt-4">
             <InvoiceStatusBadge status={invoice.status} />
-            <PaymentStatusBadge status={invoice.payment_status} />
           </div>
         </div>
         <div className="flex">
@@ -127,13 +126,50 @@ export default function InvoiceDetailPage() {
       )}
 
       <div className="card">
-        <div className="detail-grid">
-          <div className="detail-row"><span className="detail-label">{t('invoice.partner_col')}</span><span className="detail-value">{invoice.partner?.name}</span></div>
-          <div className="detail-row"><span className="detail-label">{t('invoice.issue_date')}</span><span className="detail-value">{invoice.issue_date}</span></div>
-          <div className="detail-row"><span className="detail-label">{t('invoice.fulfillment')}</span><span className="detail-value">{invoice.fulfillment_date}</span></div>
-          <div className="detail-row"><span className="detail-label">{t('invoice.due_date')}</span><span className="detail-value">{invoice.due_date}</span></div>
-          <div className="detail-row"><span className="detail-label">{t('invoice.currency_rate')}</span><span className="detail-value">{invoice.currency} ({invoice.exchange_rate})</span></div>
-          <div className="detail-row"><span className="detail-label">{t('invoice.pay_method')}</span><span className="detail-value">{invoice.payment_method?.name}</span></div>
+        <div className="detail-section">
+          <div className="detail-section-left">
+            <div className="info-row">
+              <span className="info-label">{t('invoice.partner_col')}</span>
+              <span className="info-value">{invoice.partner?.name}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">{t('invoice.issue_date')}</span>
+              <span className="info-value">{invoice.issue_date}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">{t('invoice.fulfillment')}</span>
+              <span className="info-value">{invoice.fulfillment_date}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">{t('invoice.due_date')}</span>
+              <span className="info-value">{invoice.due_date}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">{t('invoice.pay_method')}</span>
+              <span className="info-value">{invoice.payment_method?.name}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">{t('invoice.currency_rate')}</span>
+              <span className="info-value">{invoice.currency} ({invoice.exchange_rate})</span>
+            </div>
+          </div>
+          <div className="detail-section-right">
+            <div className="info-row">
+              <span className="info-label">{t('invoice.net')}</span>
+              <span className="info-value">{Number(invoice.net_total).toLocaleString('hu')}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">{t('invoice.vat')}</span>
+              <span className="info-value">{Number(invoice.vat_total).toLocaleString('hu')}</span>
+            </div>
+            <div className="info-row info-row--total">
+              <span className="info-label">{t('invoice.gross')}</span>
+              <span className="info-value">{Number(invoice.gross_total).toLocaleString('hu')} {invoice.currency}</span>
+            </div>
+            <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
+              <PaymentStatusBadge status={invoice.payment_status} />
+            </div>
+          </div>
         </div>
         <table className="items-table">
           <thead><tr><th>{t('invoice.description')}</th><th>{t('invoice.unit')}</th><th>{t('invoice.quantity')}</th><th>{t('invoice.unit_price')}</th><th>{t('invoice.vat')}</th><th>{t('invoice.net')}</th><th>{t('invoice.gross')}</th></tr></thead>

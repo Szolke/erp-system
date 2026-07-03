@@ -56,9 +56,23 @@ export default function ReceiptDetailPage() {
         </div>
       </div>
       <div className="card">
-        <div className="detail-grid">
-          <div className="detail-row"><span className="detail-label">{t('receipt.issued_col')}</span><span className="detail-value">{receipt.issue_date}</span></div>
-          <div className="detail-row"><span className="detail-label">{t('invoice.pay_method')}</span><span className="detail-value">{receipt.payment_method?.name}</span></div>
+        <div className="detail-section">
+          <div className="detail-section-left">
+            <div className="info-row">
+              <span className="info-label">{t('receipt.issued_col')}</span>
+              <span className="info-value">{receipt.issue_date}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">{t('invoice.pay_method')}</span>
+              <span className="info-value">{receipt.payment_method?.name}</span>
+            </div>
+          </div>
+          <div className="detail-section-right">
+            <div className="info-row info-row--highlight">
+              <span className="info-label">{t('invoice.gross')}</span>
+              <span className="info-value">{Number(receipt.gross_total).toLocaleString('hu')} {receipt.currency}</span>
+            </div>
+          </div>
         </div>
         <table className="items-table">
           <thead><tr><th>{t('invoice.description')}</th><th>{t('invoice.quantity')}</th><th>{t('invoice.unit_price')}</th><th>{t('invoice.gross')}</th></tr></thead>

@@ -176,6 +176,20 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .detail-label { font-size: 11px; font-weight: 600; color: var(--color-muted); text-transform: uppercase; }
 .detail-value { font-size: 14px; }
 
+/* ── Detail page kétoszlopos fejléc-blokk ───────────────────── */
+.detail-section { display: flex; margin-bottom: 24px; }
+.detail-section-left { flex: 1; padding-right: 28px; border-right: 1px solid var(--color-border); }
+.detail-section-right { flex: 1; padding-left: 28px; }
+.info-row { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--color-border); gap: 12px; }
+.info-label { font-size: 12px; font-weight: 600; color: var(--color-muted); text-transform: uppercase; letter-spacing: .045em; white-space: nowrap; flex-shrink: 0; }
+.info-value { font-size: 14px; color: var(--color-text); text-align: right; }
+.info-row--total { border-top: 2px solid var(--color-border); border-bottom: none; margin-top: 6px; padding-top: 10px; }
+.info-row--total .info-label { font-size: 13px; color: var(--color-text); font-weight: 700; }
+.info-row--total .info-value { font-size: 17px; font-weight: 700; }
+.info-row--highlight { border-bottom: none; }
+.info-row--highlight .info-label { font-size: 13px; color: var(--color-text); font-weight: 700; }
+.info-row--highlight .info-value { font-size: 17px; font-weight: 700; }
+
 /* ── Lapozó ──────────────────────────────────────────────────── */
 .pagination { display: flex; gap: 4px; align-items: center; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
 .pagination-ellipsis { padding: 0 6px; color: var(--color-muted); font-size: 14px; }

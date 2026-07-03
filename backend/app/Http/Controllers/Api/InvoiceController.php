@@ -12,6 +12,7 @@ use App\Services\InvoiceService;
 use App\Services\PdfService;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -76,17 +77,29 @@ class InvoiceController extends Controller
         return InvoiceResource::make($storno)->response()->setStatusCode(201);
     }
 
-    /** GET /api/invoices/{invoice}/pdf — on-the-fly PDF letöltés */
+    /** GET /api/invoices/{invoice}/pdf — archivált vagy on-the-fly PDF letöltés */
     public function pdf(Invoice $invoice): StreamedResponse
     {
         $this->assertBelongsToCurrentCompany($invoice);
         $this->authorize('invoice.view');
 
-        $pdf      = $this->pdfService->forInvoice($invoice);
+        $path     = $this->pdfService->storagePath($invoice->invoice_number, $invoice->company_id, $invoice->issue_date);
         $filename = $invoice->invoice_number . '.pdf';
 
+        if (Storage::disk('local')->exists($path)) {
+            return response()->streamDownload(
+                fn () => print(Storage::disk('local')->get($path)),
+                $filename,
+                ['Content-Type' => 'application/pdf'],
+            );
+        }
+
+        // Fallback: régi bizonylat vagy kiállításkori mentési kudarc esetén generál + ment.
+        // Meglévő fájlt sosem ír felül (az exists() ellenőrzés fent garantálja).
+        $this->pdfService->persistInvoice($invoice);
+
         return response()->streamDownload(
-            fn () => print($pdf->output()),
+            fn () => print(Storage::disk('local')->get($path)),
             $filename,
             ['Content-Type' => 'application/pdf'],
         );

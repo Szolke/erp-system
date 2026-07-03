@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\VatRate;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class InvoiceService
@@ -19,11 +20,12 @@ class InvoiceService
     public function __construct(
         private InvoiceNumberGenerator $numberGenerator,
         private AuditLogger $auditLogger,
+        private PdfService $pdfService,
     ) {}
 
     public function create(Company $company, array $data, User $creator): Invoice
     {
-        return DB::transaction(function () use ($company, $data, $creator) {
+        $loaded = DB::transaction(function () use ($company, $data, $creator) {
             [$series, $invoiceNumber] = $this->numberGenerator->next(
                 $company->id, DocumentType::Invoice
             );
@@ -66,6 +68,10 @@ class InvoiceService
 
             return $loaded;
         });
+
+        $this->tryPersistPdf($loaded, $creator);
+
+        return $loaded;
     }
 
     /**
@@ -83,7 +89,7 @@ class InvoiceService
         }
 
         try {
-            return DB::transaction(function () use ($invoice, $actor) {
+            $storno = DB::transaction(function () use ($invoice, $actor) {
                 // Egy számlához pontosan egy sztornó engedélyezett (HU számviteli szabály).
                 // lockForUpdate() szerializálja a párhuzamos kéréseket: a második kérés
                 // a lock feloldása után már látja az első által létrehozott sztornót.
@@ -158,6 +164,31 @@ class InvoiceService
                 throw ValidationException::withMessages(['invoice' => ['A számla már sztornózva van.']]);
             }
             throw $e;
+        }
+
+        $this->tryPersistPdf($storno, $actor);
+
+        return $storno;
+    }
+
+    private function tryPersistPdf(Invoice $invoice, User $actor): void
+    {
+        try {
+            $this->pdfService->persistInvoice($invoice);
+        } catch (\Throwable $e) {
+            Log::error('invoice.pdf_persist_failed', [
+                'invoice_id'     => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'error'          => $e->getMessage(),
+            ]);
+            $this->auditLogger->log(
+                'invoice.pdf_persist_failed',
+                $invoice->company_id,
+                $actor->id,
+                $invoice,
+                null,
+                ['invoice_number' => $invoice->invoice_number, 'error' => $e->getMessage()],
+            );
         }
     }
 

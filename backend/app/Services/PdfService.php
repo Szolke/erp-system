@@ -40,6 +40,41 @@ class PdfService
         ])->setPaper('A4', 'portrait');
     }
 
+    /**
+     * Deterministic storage path for an archived PDF.
+     * Format: documents/{company_id}/{YYYY}/{MM}/{DD}/{number}.pdf
+     * The document number (PREFIX-YYYYMM-000001) contains only A-Z, 0-9, '-' — safe on all filesystems.
+     */
+    public function storagePath(string $docNumber, int $companyId, \DateTimeInterface|string $issueDate): string
+    {
+        $d = $issueDate instanceof \DateTimeInterface ? $issueDate : \Carbon\Carbon::parse($issueDate);
+        return sprintf('documents/%d/%s/%s.pdf', $companyId, $d->format('Y/m/d'), $docNumber);
+    }
+
+    /**
+     * Saves the invoice PDF to the local disk immediately after issuance.
+     * Skips silently if the file already exists — a legally archived PDF must never be overwritten.
+     */
+    public function persistInvoice(Invoice $invoice): void
+    {
+        $path = $this->storagePath($invoice->invoice_number, $invoice->company_id, $invoice->issue_date);
+        if (!Storage::disk('local')->exists($path)) {
+            Storage::disk('local')->put($path, $this->forInvoice($invoice)->output());
+        }
+    }
+
+    /**
+     * Saves the receipt PDF to the local disk immediately after issuance.
+     * Skips silently if the file already exists — a legally archived PDF must never be overwritten.
+     */
+    public function persistReceipt(Receipt $receipt): void
+    {
+        $path = $this->storagePath($receipt->receipt_number, $receipt->company_id, $receipt->issue_date);
+        if (!Storage::disk('local')->exists($path)) {
+            Storage::disk('local')->put($path, $this->forReceipt($receipt)->output());
+        }
+    }
+
     private function logoBase64(?string $logoPath): ?string
     {
         if (!$logoPath) {

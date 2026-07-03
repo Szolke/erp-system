@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\VatRate;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -21,11 +22,12 @@ class ReceiptService
     public function __construct(
         private InvoiceNumberGenerator $numberGenerator,
         private AuditLogger $auditLogger,
+        private PdfService $pdfService,
     ) {}
 
     public function create(Company $company, array $data, User $creator): Receipt
     {
-        return DB::transaction(function () use ($company, $data, $creator) {
+        $loaded = DB::transaction(function () use ($company, $data, $creator) {
             [$series, $receiptNumber] = $this->numberGenerator->next(
                 $company->id, DocumentType::Receipt, 'NY'
             );
@@ -60,6 +62,10 @@ class ReceiptService
 
             return $loaded;
         });
+
+        $this->tryPersistPdf($loaded, $creator);
+
+        return $loaded;
     }
 
     public function cancel(Receipt $receipt, ?User $actor = null): Receipt
@@ -70,7 +76,7 @@ class ReceiptService
         }
 
         try {
-            return DB::transaction(function () use ($receipt, $actor) {
+            $storno = DB::transaction(function () use ($receipt, $actor) {
                 // Egy nyugtához pontosan egy sztornó engedélyezett (HU számviteli szabály).
                 // lockForUpdate() szerializálja a párhuzamos kéréseket: a második kérés
                 // a lock feloldása után már látja az első által létrehozott sztornót.
@@ -136,6 +142,31 @@ class ReceiptService
                 throw ValidationException::withMessages(['receipt' => ['A nyugta már sztornózva van.']]);
             }
             throw $e;
+        }
+
+        $this->tryPersistPdf($storno, $actor);
+
+        return $storno;
+    }
+
+    private function tryPersistPdf(Receipt $receipt, ?User $actor): void
+    {
+        try {
+            $this->pdfService->persistReceipt($receipt);
+        } catch (\Throwable $e) {
+            Log::error('receipt.pdf_persist_failed', [
+                'receipt_id'     => $receipt->id,
+                'receipt_number' => $receipt->receipt_number,
+                'error'          => $e->getMessage(),
+            ]);
+            $this->auditLogger->log(
+                'receipt.pdf_persist_failed',
+                $receipt->company_id,
+                $actor?->id,
+                $receipt,
+                null,
+                ['receipt_number' => $receipt->receipt_number, 'error' => $e->getMessage()],
+            );
         }
     }
 

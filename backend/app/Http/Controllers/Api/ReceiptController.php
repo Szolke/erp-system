@@ -12,6 +12,7 @@ use App\Services\PdfService;
 use App\Services\ReceiptService;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /** @group Nyugták */
@@ -66,16 +67,29 @@ class ReceiptController extends Controller
     }
 
     /** GET /api/receipts/{receipt}/pdf — on-the-fly PDF letöltés */
+    /** GET /api/receipts/{receipt}/pdf — archivált vagy on-the-fly PDF letöltés */
     public function pdf(Receipt $receipt): StreamedResponse
     {
         $this->assertBelongsToCurrentCompany($receipt);
         $this->authorize('receipt.view');
 
-        $pdf      = $this->pdfService->forReceipt($receipt);
+        $path     = $this->pdfService->storagePath($receipt->receipt_number, $receipt->company_id, $receipt->issue_date);
         $filename = $receipt->receipt_number . '.pdf';
 
+        if (Storage::disk('local')->exists($path)) {
+            return response()->streamDownload(
+                fn () => print(Storage::disk('local')->get($path)),
+                $filename,
+                ['Content-Type' => 'application/pdf'],
+            );
+        }
+
+        // Fallback: régi bizonylat vagy kiállításkori mentési kudarc esetén generál + ment.
+        // Meglévő fájlt sosem ír felül (az exists() ellenőrzés fent garantálja).
+        $this->pdfService->persistReceipt($receipt);
+
         return response()->streamDownload(
-            fn () => print($pdf->output()),
+            fn () => print(Storage::disk('local')->get($path)),
             $filename,
             ['Content-Type' => 'application/pdf'],
         );

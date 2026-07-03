@@ -27,6 +27,11 @@ export default function ReceiptDetailPage() {
     URL.revokeObjectURL(url)
   }
 
+  async function regeneratePdf() {
+    if (!confirm(t('receipt.regenerate_pdf_confirm'))) return
+    await client.post(`/api/receipts/${receipt.id}/regenerate-pdf`)
+  }
+
   async function handleCancel() {
     if (!confirm(t('receipt.storno_confirm'))) return
     await receiptApi.cancel(id)
@@ -44,6 +49,9 @@ export default function ReceiptDetailPage() {
             <button className="btn btn-danger" onClick={handleCancel}>{t('common.storno')}</button>
           )}
           <button className="btn btn-secondary" onClick={downloadPdf}>PDF</button>
+          {can('receipt.regenerate_pdf') && (
+            <button className="btn btn-secondary" onClick={regeneratePdf}>{t('receipt.regenerate_pdf')}</button>
+          )}
           <Link to="/documents" className="btn btn-secondary">{t('common.back')}</Link>
         </div>
       </div>

@@ -69,6 +69,11 @@ export default function InvoiceDetailPage() {
     URL.revokeObjectURL(url)
   }
 
+  async function regeneratePdf() {
+    if (!confirm(t('invoice.regenerate_pdf_confirm'))) return
+    await client.post(`/api/invoices/${invoice.id}/regenerate-pdf`)
+  }
+
   async function handleAddPayment(e) {
     e.preventDefault()
     setPayError('')
@@ -108,6 +113,9 @@ export default function InvoiceDetailPage() {
             <button className="btn btn-danger" onClick={handleCancel}>{t('common.storno')}</button>
           )}
           <button className="btn btn-secondary" onClick={downloadPdf}>PDF</button>
+          {can('invoice.regenerate_pdf') && (
+            <button className="btn btn-secondary" onClick={regeneratePdf}>{t('invoice.regenerate_pdf')}</button>
+          )}
           <Link to="/documents" className="btn btn-secondary">{t('common.back')}</Link>
         </div>
       </div>

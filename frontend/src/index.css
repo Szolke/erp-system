@@ -25,6 +25,7 @@
   --color-accent-text: #1d4ed8;
   --sidebar-width: 220px;
   --sidebar-width-collapsed: 54px;
+  --sidebar-accent-color: #1e293b;
 }
 
 [data-theme="dark"] {
@@ -53,7 +54,7 @@ body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; color
 .sidebar--collapsed { width: var(--sidebar-width-collapsed); }
 
 /* Fejléc: brand bal, becsukó jobb */
-.sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px 12px; border-bottom: 1px solid #334155; gap: 8px; }
+.sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px 12px; border-bottom: 1px solid #334155; gap: 8px; background: var(--sidebar-accent-color, #1e293b); transition: background 0.3s ease; }
 .sidebar-brand-text { font-size: 18px; font-weight: 700; color: #fff; white-space: nowrap; flex: 1; overflow: hidden; }
 .sidebar--collapsed .sidebar-header { justify-content: center; padding: 14px 0 12px; }
 .sidebar--collapsed .sidebar-brand-text { display: none; }

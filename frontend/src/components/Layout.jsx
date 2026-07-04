@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTranslation } from '../contexts/TranslationContext'
+import { company as companyApi } from '../api/company'
 import CompanySwitcher from './CompanySwitcher'
 import {
   FileText, Users2, Package,
@@ -11,7 +12,7 @@ import {
 } from 'lucide-react'
 
 export default function Layout() {
-  const { user, logout, can }               = useAuth()
+  const { user, logout, can, activeCompanyId } = useAuth()
   const { locale, setLocale, t, SUPPORTED } = useTranslation()
   const navigate                            = useNavigate()
 
@@ -25,6 +26,16 @@ export default function Layout() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
+
+  useEffect(() => {
+    if (!activeCompanyId) return
+    companyApi.settings.getAll()
+      .then((res) => {
+        const s = res.data.data.find((x) => x.key === 'sidebar_accent_color')
+        document.documentElement.style.setProperty('--sidebar-accent-color', s?.value ?? '#1e293b')
+      })
+      .catch(() => {})
+  }, [activeCompanyId])
 
   function toggleTheme() {
     setTheme((prev) => {

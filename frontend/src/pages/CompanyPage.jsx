@@ -3,6 +3,77 @@ import { company as companyApi } from '../api/company'
 import { useAuth } from '../contexts/AuthContext'
 import { useTranslation } from '../contexts/TranslationContext'
 
+const ACCENT_PALETTE = [
+  { hex: '#1e293b', label: 'Slate'       },
+  { hex: '#1e3a5f', label: 'Mélykék'     },
+  { hex: '#134e4a', label: 'Teal'        },
+  { hex: '#14532d', label: 'Erdőzöld'    },
+  { hex: '#3b0764', label: 'Lila'        },
+  { hex: '#4c0519', label: 'Bordó'       },
+  { hex: '#78350f', label: 'Sötét arany' },
+]
+
+function AccentColorSection({ can }) {
+  const { t } = useTranslation()
+  const [current, setCurrent] = useState('#1e293b')
+  const [saving, setSaving]   = useState(false)
+  const [msg, setMsg]         = useState('')
+
+  useEffect(() => {
+    companyApi.settings.getAll().then((res) => {
+      const s = res.data.data.find((x) => x.key === 'sidebar_accent_color')
+      if (s) setCurrent(s.value)
+    })
+  }, [])
+
+  async function handleSelect(hex) {
+    if (hex === current || !can('company.manage')) return
+    setSaving(true)
+    setMsg('')
+    try {
+      await companyApi.settings.set('sidebar_accent_color', hex)
+      setCurrent(hex)
+      document.documentElement.style.setProperty('--sidebar-accent-color', hex)
+      setMsg('ok')
+    } catch {
+      setMsg('err')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="card" style={{ marginTop: 16 }}>
+      <h2 style={{ margin: '0 0 14px', fontSize: '1.1rem' }}>{t('settings.sidebar_accent_color')}</h2>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        {ACCENT_PALETTE.map(({ hex, label }) => (
+          <button
+            key={hex}
+            type="button"
+            title={label}
+            onClick={() => handleSelect(hex)}
+            disabled={saving || !can('company.manage')}
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 8,
+              background: hex,
+              border: 'none',
+              cursor: can('company.manage') ? 'pointer' : 'default',
+              outline: hex === current ? '3px solid white' : '3px solid transparent',
+              outlineOffset: 3,
+              boxShadow: hex === current ? '0 0 0 5px var(--color-primary)' : 'none',
+              transition: 'box-shadow 0.15s, outline 0.15s',
+            }}
+          />
+        ))}
+      </div>
+      {msg === 'ok'  && <div className="mt-4 alert-success">{t('common.saved')}</div>}
+      {msg === 'err' && <div className="alert-error mt-4">{t('common.error')}</div>}
+    </div>
+  )
+}
+
 function GeneralSettingsSection({ can }) {
   const { t } = useTranslation()
   const [draft, setDraft]     = useState({})
@@ -384,6 +455,7 @@ export default function CompanyPage() {
       </form>
 
       {can('company.manage') && <GeneralSettingsSection can={can} />}
+      {can('company.manage') && <AccentColorSection can={can} />}
       {can('company.manage') && <SimplePaySection can={can} />}
     </div>
   )

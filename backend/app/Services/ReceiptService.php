@@ -42,6 +42,7 @@ class ReceiptService
                 'document_series_id' => $series->id,
                 'receipt_number' => $receiptNumber,
                 'issue_date' => $data['issue_date'],
+                'fulfillment_date' => $data['fulfillment_date'] ?? $data['issue_date'],
                 'currency' => $data['currency'],
                 'exchange_rate' => $exchangeRate,
                 'exchange_rate_date' => $data['issue_date'],

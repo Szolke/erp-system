@@ -20,6 +20,7 @@ class ReceiptResource extends JsonResource
                 'name' => $this->partner->name,
             ] : null),
             'issue_date' => $this->issue_date?->format('Y-m-d'),
+            'fulfillment_date' => $this->fulfillment_date?->format('Y-m-d'),
             'currency' => $this->currency,
             'exchange_rate' => $this->exchange_rate,
             'payment_method_id' => $this->payment_method_id,

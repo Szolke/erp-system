@@ -24,6 +24,7 @@ class StoreReceiptRequest extends FormRequest
                 Rule::exists('partners', 'id')->where('company_id', $companyId)],
             'payment_method_id' => ['required', 'integer', Rule::exists('payment_methods', 'id')],
             'issue_date' => ['required', 'date'],
+            'fulfillment_date' => ['nullable', 'date'],
             'currency' => ['required', 'string', 'size:3'],
             'exchange_rate' => [
                 Rule::requiredIf(fn () => $this->input('currency') !== $baseCurrency),

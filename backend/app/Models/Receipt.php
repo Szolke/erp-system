@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable([
     'company_id', 'partner_id', 'document_series_id', 'receipt_number',
-    'issue_date', 'currency', 'exchange_rate', 'exchange_rate_date',
+    'issue_date', 'fulfillment_date', 'currency', 'exchange_rate', 'exchange_rate_date',
     'payment_method_id', 'status', 'net_total', 'vat_total', 'gross_total',
     'storno_of_receipt_id', 'pdf_path', 'created_by',
 ])]
@@ -24,6 +24,7 @@ class Receipt extends Model
     {
         return [
             'issue_date' => 'date',
+            'fulfillment_date' => 'date',
             'exchange_rate' => 'decimal:6',
             'exchange_rate_date' => 'date',
             'status' => ReceiptStatus::class,

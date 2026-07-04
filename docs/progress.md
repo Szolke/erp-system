@@ -60,6 +60,17 @@ Minden tervezett funkció implementálva van. Hátramaradó teendők kizárólag
 - **SimplePay sandbox-tesztelés** — start URL struktúra (1 vs. több callback URL), refund API pontos request/response formátum, IPN visszajelzés refundra. Valódi merchant-adatokkal kell ellenőrizni élesítés előtt.
 - **NAV sandbox-tesztelés** — `vatExemption` kódok (AAM/TAM stb.) XSD-konformitása `NavXmlBuilder`-ben.
 
+## Élesítés előtti checklist
+
+Ezek a pontok **blokkolják** az éles üzembe helyezést. Mind addig nyitott, amíg be nem jelölve.
+
+- [ ] **Szuperadmin-seed letiltása élesben** — `DatabaseSeeder` fix `test@example.com` / `password` kombinációt hoz létre `is_superadmin=true`-val. Élesítés előtt: feltételes futtatás (`App::environment('local', 'testing')`) vagy a seed teljes eltávolítása + egyszeri manuális admin-létrehozás `tinker`-rel. Részletek: Nyitott pont #6.
+- [ ] **PDF-tár Docker-jogosultság** — ha a `storage/app/private/documents/` könyvtárat root hozza létre, a `sail` user nem tud írni bele (500 hiba). Frissen klónozott repo / új szerver esetén egyszer: `docker compose exec laravel.test chown -R sail:sail storage/app/private/documents`. Részletek: Nyitott pont #7.
+- [ ] **PDF-tár külső backup** — `storage/app/private/documents/` gitben nincs (szándékos). Élesítésnél kötelező a napi külső mentés (S3 vagy egyenértékű) — a tárolt PDF-ek jogi bizonyíték-értékűek. Részletek: Nyitott pont #7.
+- [ ] **NAV sandbox-tesztelés** — `vatExemption` kódok (AAM/TAM stb.) XSD-konformitása `NavXmlBuilder`-ben valódi NAV sandbox hitelesítő adatokkal ellenőrzendő. Részletek: Nyitott pont #1.
+- [ ] **SimplePay sandbox-tesztelés** — start URL struktúra (1 vs. több callback URL), refund request/response formátum, IPN visszajelzés refundra, valódi merchant-adatokkal. Részletek: Nyitott pont #3, #4.
+- [ ] **`.env` éles értékek** — `APP_ENV=production`, `APP_DEBUG=false`, `APP_KEY`, DB jelszó, `NAV_*`, `SIMPLEPAY_*` kulcsok cserélve fejlesztési értékekről (érzékeny adat — commitba soha ne kerüljön). Részletek: Nyitott pont #0.
+
 ## Architekturális konvenciók (amit egy új munkamenetnek tudnia kell)
 
 - **Multi-tenant szűrés**: minden cég-szintű modell a `BelongsToCompany` trait-et használja (`app/Models/Concerns/BelongsToCompany.php`) — globális scope a `CurrentCompany` singletonon keresztül (`app/Support/CurrentCompany.php`), amit az `EnsureCompanyContext` middleware tölt fel kérésenként. Service/job kontextusban (ahol nincs middleware) explicit `withoutGlobalScope('company')`-t kell használni, ha a company_id-t kézzel adjuk meg (lásd `InvoiceNumberGenerator`, `PermissionChecker`).
@@ -79,6 +90,8 @@ Minden tervezett funkció implementálva van. Hátramaradó teendők kizárólag
 - Bizonylat-sorozatok: `SZ` (számla), `NY` (nyugta), `SZSZT` (sztornó számla), `NYSZT` (sztornó nyugta). Formátum: `PREFIX-ÉÉÉÉHH-000001`.
 
 ## Nyitott pontok / ismert hiányosságok
+
+0. **`.env` éles értékek cseréje** — A fejlesztési `.env` értékek (`APP_ENV=local`, `APP_DEBUG=true`, fejlesztési `APP_KEY`, tesztelési DB jelszó, NAV sandbox hitelesítők, SimplePay sandbox merchant-adatok) cserélendők éles megfelelőikre élesítés előtt: `APP_ENV=production`, `APP_DEBUG=false` (hibaüzenetek ne szivárogjanak ki), erős egyedi `APP_KEY`, biztonságos DB jelszó, valódi NAV technikai felhasználó + aláírási kulcs, valódi SimplePay merchant ID + titkos kulcs. Ezek az értékek **SOHA nem kerülhetnek commitba** — kizárólag a szerveren a `.env` fájlban tárolhatók.
 
 9. **Opcionális jövőbeli fázis — nyitott/kézzel fizethető nyugta:** Jelenleg a nyugta "azonnal fizetett" modell szerint működik — a `receipts` táblán nincs `payment_status` mező (az `invoices` táblán van: `open`/`partial`/`paid`), a `PaymentController` és `PaymentStatusUpdater` csak számlát kezel. A `Receipt::payments(): MorphMany` reláció deklarált a modellen, de jelenleg használaton kívüli. Ha a jövőben szükségessé válik a nyitott/részben fizetett nyugta, az szükségessé teszi: (a) migrációt (`receipts.payment_status` mező — **kockázatos lépés**), (b) `PaymentController`/`PaymentStatusUpdater` kiterjesztést Receiptre, (c) `ReceiptDetailPage` fizetés-szekciót, (d) opcionálisan `CompanySetting::RECEIPT_AUTO_SETTLE` kapcsolót. Jelenlegi állapot a design szándék: a nyugta kiállítása egyben lezárja a fizetési folyamatot.
 

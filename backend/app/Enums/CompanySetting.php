@@ -21,6 +21,9 @@ enum CompanySetting: string
     case INVOICE_LANGUAGE = 'invoice_language';  // string  – 'hu' | 'en' | 'de'
     case INVOICE_DUE_DAYS = 'invoice_due_days';  // integer – fizetési határidő napokban
 
+    // ── UI / megjelenés ───────────────────────────────────────────────────
+    case SIDEBAR_ACCENT_COLOR = 'sidebar_accent_color';  // string – hex paletta-szín
+
     /** Value type: 'boolean' | 'string' | 'integer' | 'encrypted' */
     public function type(): string
     {
@@ -30,7 +33,8 @@ enum CompanySetting: string
             self::INVOICE_DUE_DAYS        => 'integer',
             self::NAV_ENVIRONMENT,
             self::DEFAULT_CURRENCY,
-            self::INVOICE_LANGUAGE        => 'string',
+            self::INVOICE_LANGUAGE,
+            self::SIDEBAR_ACCENT_COLOR    => 'string',
         };
     }
 
@@ -44,6 +48,7 @@ enum CompanySetting: string
             self::DEFAULT_CURRENCY        => 'HUF',
             self::INVOICE_LANGUAGE        => 'hu',
             self::INVOICE_DUE_DAYS        => 8,
+            self::SIDEBAR_ACCENT_COLOR    => '#1e293b',
         };
     }
 
@@ -66,18 +71,30 @@ enum CompanySetting: string
             self::DEFAULT_CURRENCY        => 'settings.default_currency',
             self::INVOICE_LANGUAGE        => 'settings.invoice_language',
             self::INVOICE_DUE_DAYS        => 'settings.invoice_due_days',
+            self::SIDEBAR_ACCENT_COLOR    => 'settings.sidebar_accent_color',
         };
     }
+
+    public const SIDEBAR_ACCENT_PALETTE = [
+        '#1e293b', // slate  (alapértelmezett)
+        '#1e3a5f', // mélykék
+        '#134e4a', // teal
+        '#14532d', // erdőzöld
+        '#3b0764', // lila
+        '#4c0519', // bordó
+        '#78350f', // sötét arany
+    ];
 
     /** Validate a raw (string) value for this setting. */
     public function validate(mixed $value): bool
     {
         return match ($this) {
-            self::NAV_ENVIRONMENT   => in_array($value, ['test', 'production'], true),
-            self::DEFAULT_CURRENCY  => in_array($value, ['HUF', 'EUR', 'USD'], true),
-            self::INVOICE_LANGUAGE  => in_array($value, ['hu', 'en', 'de'], true),
-            self::INVOICE_DUE_DAYS  => is_numeric($value) && (int) $value >= 0 && (int) $value <= 365,
-            default                 => true,
+            self::NAV_ENVIRONMENT        => in_array($value, ['test', 'production'], true),
+            self::DEFAULT_CURRENCY       => in_array($value, ['HUF', 'EUR', 'USD'], true),
+            self::INVOICE_LANGUAGE       => in_array($value, ['hu', 'en', 'de'], true),
+            self::INVOICE_DUE_DAYS       => is_numeric($value) && (int) $value >= 0 && (int) $value <= 365,
+            self::SIDEBAR_ACCENT_COLOR   => in_array($value, self::SIDEBAR_ACCENT_PALETTE, true),
+            default                      => true,
         };
     }
 }

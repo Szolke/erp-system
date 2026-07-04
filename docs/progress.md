@@ -5,7 +5,7 @@
 > git logból/kódból kelljen visszafejtse, hol tartunk — itt egyben megtalálja.
 > Részletes tábla-/mezőszintű terv: [er-model.md](er-model.md).
 
-Utolsó frissítés: 2026-07-04, nyugta-form bővítés + detail-oldal javítás után.
+Utolsó frissítés: 2026-07-04, accent-szín + nyitott egyenleg gomb után.
 
 ## Kész lépések
 
@@ -52,6 +52,8 @@ Utolsó frissítés: 2026-07-04, nyugta-form bővítés + detail-oldal javítás
 | **16a** | **Nyugta-form bővítés (backend):** `fulfillment_date DATE` nullable mező a `receipts` táblán (migráció); `StoreReceiptRequest` validáció; `ReceiptService::create()` service-szintű default (`fulfillment_date ?? issue_date`, konzisztens az InvoiceService mintájával); `ReceiptResource` visszaadja; `Receipt` modell: `#[Fillable]` + `casts()` (`'date'`). `ReceiptCreateEnhancementsTest` — 6 új teszt: partnerrel, partner nélkül (névtelen), termék-alapú tételsorral, nem-HUF devizával, fulfillment_date mentés, fulfillment_date default. **Teljes suite: 53 teszt / 136 assertion, mind zöld.** | `Receipt.php`, `StoreReceiptRequest.php`, `ReceiptService.php`, `ReceiptResource.php`, migráció, `ReceiptCreateEnhancementsTest.php` | `c2d074d` |
 | **16b** | **Nyugta-form bővítés (frontend):** `ReceiptCreatePage` újraírva — opcionális partner-választó ("— Névtelen —" fallback), teljesítési dátum (opcionális, backend defaultol `issue_date`-re), deviza (HUF/EUR/USD), árfolyam-input (csak nem-HUF esetén), `ProductComboBox` tételsoronként (auto-tölti az egységárat/ÁFÁ-t, megnevezés utána szerkeszthető marad). Visszavezet `/documents`-re. Megerősítő modal tartalmazza az új mezőket. `TranslationSeeder` +3 kulcs (HU/EN/DE): `common.optional`, `invoice.exchange_rate`, `receipt.anonymous`. | `ReceiptCreatePage.jsx`, `TranslationSeeder.php` | `a82497c` |
 | **16c** | **Nyugta-detail oldal javítás:** `ReceiptDetailPage` kiegészítve a kiállítóformmal konzisztens megjelenítésre — partner neve (fallback "Névtelen"), teljesítési dátum, deviza/árfolyam (HUF esetén csak deviza, egyébként `EUR (410.5)` formátum), státusz badge (`InvoiceStatusBadge`), nettó+ÁFA összesítő a jobb oszlopban, tételsorban +Nettó és +ÁFA oszlop. Storno után `navigate('/documents')` (volt: `/receipts`). `ReceiptItemResource` már visszaadta a szükséges mezőket — backend módosítás nem kellett. | `ReceiptDetailPage.jsx`, `docs/progress.md` | `8fa805c` |
+| **17** | **"Nyitott egyenleg" gomb a fizetés-rögzítőnél:** az összeg-input mellé kerül egy gomb, ami egy kattintással kitölti a hátralévő bruttó egyenleget (`gross_total − Σ payments.amount`). HUF: egész kerekítés; egyéb deviza: 2 tizedesjegy. Ha `openAmount ≤ 0`, a gomb nem jelenik meg. Tisztán frontend, backend-változtatás nélkül. `invoice.fill_open_amount` i18n kulcs (HU/EN/DE). | `InvoiceDetailPage.jsx`, `TranslationSeeder.php` | `2cc67e0` |
+| **AC** | **Company-nkénti sidebar accent-szín:** `CompanySetting::SIDEBAR_ACCENT_COLOR` (string, default `#1e293b`, validáció: 7 elemű paletta-whitelist, migráció nem kell). Frontend: `AccentColorSection` a Cégbeállítások oldalon (7 négyzet, aktív kiemelve), azonnali mentés + CSS-változó injektálás. `Layout` `useEffect([activeCompanyId])` betölti a beállítást és frissíti a `--sidebar-accent-color` változót — company-váltáskor frissül, fallback `#1e293b`. `SidebarAccentColorTest` — 4 teszt (default, mentés+visszaolvasás, invalid → 422, reset). **Teljes suite: 57 teszt / 148 assertion.** | `CompanySetting.php`, `SidebarAccentColorTest.php`, `CompanyPage.jsx`, `Layout.jsx`, `index.css`, `TranslationSeeder.php` | `b00038f` (backend+teszt), `395b7b1` (frontend) |
 
 ## Még hátravan
 
@@ -78,7 +80,6 @@ Ezek tervek, nem mai feladatok — rögzítve, hogy egy-egy munkamenet ne talál
 - **Hibajelentő / support-ticket modul:** a rendszer felhasználói hibajelentést vehetnek fel közvetlenül az ERP-ből; önálló közepes modul (saját tábla, státuszok, RBAC jogosultságok) — részletezés később szükséges.
 - **Konfiguráció átláthatóbbá tétele:** NEM külön `conf.php` (ütközne a Laravel `.env`/`config` rendszerével, és érzékeny adatot csábítana commitba), hanem dokumentált `.env.example` + egy `config/erp.php` a projekt-specifikus, nem-titkos beállításoknak — cél: egy helyen, Laravel-konform módon konfigurálható rendszer.
 - **Fejlesztői/felhasználói dokumentáció (wiki):** `docs/` alatti Markdown-wiki vagy GitHub repo-wiki, a fejlesztésekkel párhuzamosan frissítve; a meglévő `progress.md` + `er-model.md` a fejlesztői napló marad, ez a felhasználói/áttekintő dokumentációt pótolná.
-- **Company-nkénti színséma:** `CompanySetting`-hez köthető accent-szín, amelyet a frontend a CSS-változókba injektál — vizuális megkülönböztetés company-váltáskor (multi-company hibamegelőzés); jó jelölt a következő kis-közepes fejlesztésnek.
 
 ## Architekturális konvenciók (amit egy új munkamenetnek tudnia kell)
 

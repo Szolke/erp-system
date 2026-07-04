@@ -61,6 +61,7 @@ class TranslationSeeder extends Seeder
             ['common', 'storno',      'Sztornó',              'Cancel',             'Stornieren'],
             ['common', 'prev_page',   '← Előző',             '← Prev',             '← Zurück'],
             ['common', 'next_page',   'Következő →',          'Next →',             'Weiter →'],
+            ['common', 'optional',   '(nem kötelező)',        '(optional)',          '(optional)'],
 
             // ── Bejelentkezés ─────────────────────────────────────────
             ['auth', 'title',         'Bejelentkezés',        'Login',              'Anmelden'],
@@ -139,6 +140,7 @@ class TranslationSeeder extends Seeder
             ['invoice', 'issued_ok',      'A számla kiállítva: {number}',              'Invoice issued: {number}',              'Rechnung ausgestellt: {number}'],
             ['invoice', 'view_detail',    'Számla megtekintése',                       'View invoice',                          'Rechnung anzeigen'],
             ['invoice', 'line_total',     'Bruttó sor',                                'Line total',                            'Zeilenbetrag'],
+            ['invoice', 'exchange_rate', 'Árfolyam',                                  'Exchange rate',                         'Wechselkurs'],
 
             // ── Nyugta ────────────────────────────────────────────────
             ['receipt', 'title',           'Nyugták',                           'Receipts',                          'Quittungen'],
@@ -156,6 +158,7 @@ class TranslationSeeder extends Seeder
             ['receipt', 'confirm_title',  'Nyugta-kiállítás megerősítése',     'Confirm receipt issuance',          'Quittungsausstellung bestätigen'],
             ['receipt', 'issued_ok',      'A nyugta kiállítva: {number}',      'Receipt issued: {number}',          'Quittung ausgestellt: {number}'],
             ['receipt', 'view_detail',    'Nyugta megtekintése',               'View receipt',                      'Quittung anzeigen'],
+            ['receipt', 'anonymous',      'Névtelen (partner nélkül)',          'Anonymous (no partner)',             'Anonym (kein Partner)'],
 
             ['common',  'back_to_list',   'Vissza a listához',                 'Back to list',                      'Zurück zur Liste'],
 

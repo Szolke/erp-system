@@ -93,6 +93,11 @@ export default function InvoiceDetailPage() {
   const canPay = can('payment.create') && invoice.payment_status !== 'paid'
   const canRefund = can('invoice.cancel') && invoice.status === 'issued' && invoice.simplepay_transaction?.status === 'success'
 
+  const paidTotal = payments.reduce((sum, p) => sum + Number(p.amount), 0)
+  const openAmount = invoice.currency === 'HUF'
+    ? Math.round(Number(invoice.gross_total) - paidTotal)
+    : Math.round((Number(invoice.gross_total) - paidTotal) * 100) / 100
+
   return (
     <div>
       <div className="page-header">
@@ -216,7 +221,19 @@ export default function InvoiceDetailPage() {
           <form onSubmit={handleAddPayment} style={{ display: 'flex', gap: 10, marginTop: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div className="form-group" style={{ margin: 0 }}>
               <label>{t('common.amount')}</label>
-              <input type="number" step="0.01" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} required style={{ width: 130 }} />
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <input type="number" step="0.01" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} required style={{ width: 130 }} />
+                {openAmount > 0 && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{ padding: '4px 10px', fontSize: '0.82rem', whiteSpace: 'nowrap' }}
+                    onClick={() => setPayForm((f) => ({ ...f, amount: String(openAmount) }))}
+                  >
+                    {t('invoice.fill_open_amount')}: {openAmount.toLocaleString('hu')}
+                  </button>
+                )}
+              </div>
             </div>
             <div className="form-group" style={{ margin: 0 }}>
               <label>{t('invoice.pay_method')}</label>

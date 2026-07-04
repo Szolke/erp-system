@@ -117,6 +117,7 @@ class TranslationSeeder extends Seeder
             ['invoice', 'payments_title',  'Befizetések',                       'Payments',                          'Zahlungen'],
             ['invoice', 'no_payments',     'Még nincs befizetés.',              'No payments yet.',                  'Noch keine Zahlungen.'],
             ['invoice', 'add_payment',     'Rögzítés',                          'Add payment',                       'Zahlung hinzufügen'],
+            ['invoice', 'fill_open_amount', 'Nyitott egyenleg',                 'Open balance',                      'Offener Betrag'],
             ['invoice', 'reference',       'Hivatkozás',                        'Reference',                         'Referenz'],
             ['invoice', 'st_issued',       'Kiállított',                        'Issued',                            'Ausgestellt'],
             ['invoice', 'st_draft',        'Piszkozat',                         'Draft',                             'Entwurf'],

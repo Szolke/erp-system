@@ -14,6 +14,7 @@
 
 ## Lépésenkénti haladás
 - Egy logikai egységnyi módosítás/parancs után állj meg, és kérj visszajelzést, mielőtt továbblépsz.
+- Ha egy feladat több lépésre van bontva a promptban, MINDEN köztes megállásnál állj meg és kérj visszajelzést — akkor is, ha a következő lépés triviálisnak tűnik. Ne csináld végig egyben a több lépésre bontott feladatot; a köztes jóváhagyás a lényeg, nem formalitás.
 - Kockázatos lépések előtt (adatbázis-migráció, konténer törlése, force push, .env módosítás) MINDIG kérj explicit megerősítést.
 - Ha egy parancs hibát ad, ne találgass: kérd el a pontos hibaüzenetet/logot, és csak az alapján javíts.
 
@@ -34,6 +35,7 @@
 - Commit üzenetek angolul, rövidek, tárgyilagosak (pl. "Add company model and migration").
 - NE commitolj és NE pusholj automatikusan anélkül, hogy előtte jeleznéd, mit fogsz commitolni.
 - Force push csak explicit jóváhagyással.
+- Minden commit-csoport végén a `docs/progress.md` a TÉNYLEGES commit-hasheket kapja (ne "folyamatban" jelzést, ne hiányos hasht). Commit után mutass `git log --oneline`-t megerősítésül, hogy a napló a valós git-állapotot tükrözi.
 
 ## Érzékeny adatok
 - NAV technikai felhasználó adatai, SimplePay kulcsok, `.env` tartalom SOHA ne kerüljön commitba, és ne íródjon ki nyersen terminálba/logba.
@@ -48,6 +50,7 @@
 - NAV Online Számla integráció
 - SimplePay integráció
 - Jelezz, ha egy implementációs döntés ütközne ezekkel az alapelvekkel.
+- Route model bindinget használó új végpontoknál kötelező az `EnforcesCompanyScope` minta (`assertBelongsToCurrentCompany()`) — a binding az `EnsureCompanyContext` middleware előtt fut, a globális scope önmagában nem elegendő. Részletesen: `docs/progress.md` Architekturális konvenciók.
 
 ## Bizonytalanság kezelése
 - Ha valamit nem tudsz biztosan (pl. NAV Online Számla 3.0 XML-séma aktuális részletei, SimplePay API aktuális végpontjai), mondd meg egyértelműen, és ha szükséges, nézz utána friss dokumentációban — ne találgass.

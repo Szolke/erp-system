@@ -71,6 +71,15 @@ Ezek a pontok **blokkolják** az éles üzembe helyezést. Mind addig nyitott, a
 - [ ] **SimplePay sandbox-tesztelés** — start URL struktúra (1 vs. több callback URL), refund request/response formátum, IPN visszajelzés refundra, valódi merchant-adatokkal. Részletek: Nyitott pont #3, #4.
 - [ ] **`.env` éles értékek** — `APP_ENV=production`, `APP_DEBUG=false`, `APP_KEY`, DB jelszó, `NAV_*`, `SIMPLEPAY_*` kulcsok cserélve fejlesztési értékekről (érzékeny adat — commitba soha ne kerüljön). Részletek: Nyitott pont #0.
 
+## Tervezett jövőbeli fejlesztések
+
+Ezek tervek, nem mai feladatok — rögzítve, hogy egy-egy munkamenet ne találja ki újra.
+
+- **Hibajelentő / support-ticket modul:** a rendszer felhasználói hibajelentést vehetnek fel közvetlenül az ERP-ből; önálló közepes modul (saját tábla, státuszok, RBAC jogosultságok) — részletezés később szükséges.
+- **Konfiguráció átláthatóbbá tétele:** NEM külön `conf.php` (ütközne a Laravel `.env`/`config` rendszerével, és érzékeny adatot csábítana commitba), hanem dokumentált `.env.example` + egy `config/erp.php` a projekt-specifikus, nem-titkos beállításoknak — cél: egy helyen, Laravel-konform módon konfigurálható rendszer.
+- **Fejlesztői/felhasználói dokumentáció (wiki):** `docs/` alatti Markdown-wiki vagy GitHub repo-wiki, a fejlesztésekkel párhuzamosan frissítve; a meglévő `progress.md` + `er-model.md` a fejlesztői napló marad, ez a felhasználói/áttekintő dokumentációt pótolná.
+- **Company-nkénti színséma:** `CompanySetting`-hez köthető accent-szín, amelyet a frontend a CSS-változókba injektál — vizuális megkülönböztetés company-váltáskor (multi-company hibamegelőzés); jó jelölt a következő kis-közepes fejlesztésnek.
+
 ## Architekturális konvenciók (amit egy új munkamenetnek tudnia kell)
 
 - **Multi-tenant szűrés**: minden cég-szintű modell a `BelongsToCompany` trait-et használja (`app/Models/Concerns/BelongsToCompany.php`) — globális scope a `CurrentCompany` singletonon keresztül (`app/Support/CurrentCompany.php`), amit az `EnsureCompanyContext` middleware tölt fel kérésenként. Service/job kontextusban (ahol nincs middleware) explicit `withoutGlobalScope('company')`-t kell használni, ha a company_id-t kézzel adjuk meg (lásd `InvoiceNumberGenerator`, `PermissionChecker`).

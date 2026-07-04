@@ -77,6 +77,8 @@ Minden tervezett funkció implementálva van. Hátramaradó teendők kizárólag
 
 ## Nyitott pontok / ismert hiányosságok
 
+9. **Opcionális jövőbeli fázis — nyitott/kézzel fizethető nyugta:** Jelenleg a nyugta "azonnal fizetett" modell szerint működik — a `receipts` táblán nincs `payment_status` mező (az `invoices` táblán van: `open`/`partial`/`paid`), a `PaymentController` és `PaymentStatusUpdater` csak számlát kezel. A `Receipt::payments(): MorphMany` reláció deklarált a modellen, de jelenleg használaton kívüli. Ha a jövőben szükségessé válik a nyitott/részben fizetett nyugta, az szükségessé teszi: (a) migrációt (`receipts.payment_status` mező — **kockázatos lépés**), (b) `PaymentController`/`PaymentStatusUpdater` kiterjesztést Receiptre, (c) `ReceiptDetailPage` fizetés-szekciót, (d) opcionálisan `CompanySetting::RECEIPT_AUTO_SETTLE` kapcsolót. Jelenlegi állapot a design szándék: a nyugta kiállítása egyben lezárja a fizetési folyamatot.
+
 1. **NAV `vatExemption` case kódok** (AAM/TAM stb. a `vat_rates.nav_code`-ban) — a pontos XSD enumerációt nem sikerült közvetlenül kinyerni, NAV sandbox ellen kell ellenőrizni `NavXmlBuilder`-ben élesítés előtt.
 2. **`tax_number` formátum** — ~~Jelenleg nincs validáció~~ **MEGOLDVA** (`c2aaee2`): `UpdateCompanyRequest` + `StoreCompanyRequest` regex enforcolja (`^\d{8}-\d-\d{2}$`). Partner marad szabad formátum (külföldi cégekhez).
 3. **SimplePay `url` mező** — a start-kérésben az egyetlen `url` mezőt használjuk visszairányításra; nem 100%-osan megerősített, hogy SimplePay nem külön success/fail/cancel/timeout URL-eket vár-e. Sandbox-tesztelés valódi merchant-adatokkal szükséges élesítés előtt.

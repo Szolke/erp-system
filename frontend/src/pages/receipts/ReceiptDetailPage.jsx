@@ -4,6 +4,7 @@ import { receipts as receiptApi } from '../../api/receipts'
 import client from '../../api/client'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
+import { InvoiceStatusBadge } from '../../components/StatusBadge'
 
 export default function ReceiptDetailPage() {
   const { id } = useParams()
@@ -35,7 +36,7 @@ export default function ReceiptDetailPage() {
   async function handleCancel() {
     if (!confirm(t('receipt.storno_confirm'))) return
     await receiptApi.cancel(id)
-    navigate('/receipts')
+    navigate('/documents')
   }
 
   if (loading) return <p className="text-muted">{t('common.loading')}</p>
@@ -43,7 +44,12 @@ export default function ReceiptDetailPage() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">{receipt.receipt_number}</h1>
+        <div>
+          <h1 className="page-title">{receipt.receipt_number}</h1>
+          <div className="flex mt-4">
+            <InvoiceStatusBadge status={receipt.status} />
+          </div>
+        </div>
         <div className="flex">
           {can('receipt.cancel') && receipt.status === 'issued' && (
             <button className="btn btn-danger" onClick={handleCancel}>{t('common.storno')}</button>
@@ -55,38 +61,76 @@ export default function ReceiptDetailPage() {
           <Link to="/documents" className="btn btn-secondary">{t('common.back')}</Link>
         </div>
       </div>
+
       <div className="card">
         <div className="detail-section">
           <div className="detail-section-left">
             <div className="info-row">
-              <span className="info-label">{t('receipt.issued_col')}</span>
+              <span className="info-label">{t('invoice.partner_col')}</span>
+              <span className="info-value">{receipt.partner?.name ?? t('receipt.anonymous')}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">{t('receipt.date')}</span>
               <span className="info-value">{receipt.issue_date}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">{t('invoice.fulfillment')}</span>
+              <span className="info-value">{receipt.fulfillment_date}</span>
             </div>
             <div className="info-row">
               <span className="info-label">{t('invoice.pay_method')}</span>
               <span className="info-value">{receipt.payment_method?.name}</span>
             </div>
+            <div className="info-row">
+              <span className="info-label">{t('invoice.currency_rate')}</span>
+              <span className="info-value">
+                {receipt.currency !== 'HUF'
+                  ? `${receipt.currency} (${receipt.exchange_rate})`
+                  : receipt.currency}
+              </span>
+            </div>
           </div>
           <div className="detail-section-right">
-            <div className="info-row info-row--highlight">
+            <div className="info-row">
+              <span className="info-label">{t('invoice.net')}</span>
+              <span className="info-value">{Number(receipt.net_total).toLocaleString('hu')}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">{t('invoice.vat')}</span>
+              <span className="info-value">{Number(receipt.vat_total).toLocaleString('hu')}</span>
+            </div>
+            <div className="info-row info-row--total">
               <span className="info-label">{t('invoice.gross')}</span>
               <span className="info-value">{Number(receipt.gross_total).toLocaleString('hu')} {receipt.currency}</span>
             </div>
           </div>
         </div>
+
         <table className="items-table">
-          <thead><tr><th>{t('invoice.description')}</th><th>{t('invoice.quantity')}</th><th>{t('invoice.unit_price')}</th><th>{t('invoice.gross')}</th></tr></thead>
+          <thead>
+            <tr>
+              <th>{t('invoice.description')}</th>
+              <th>{t('invoice.quantity')}</th>
+              <th>{t('invoice.unit_price')}</th>
+              <th>{t('invoice.vat')}</th>
+              <th>{t('invoice.net')}</th>
+              <th>{t('invoice.gross')}</th>
+            </tr>
+          </thead>
           <tbody>
             {receipt.items?.map((item) => (
               <tr key={item.id}>
                 <td>{item.description}</td>
                 <td className="text-right">{item.quantity}</td>
                 <td className="text-right">{Number(item.unit_price).toLocaleString('hu')}</td>
+                <td>{item.vat_rate?.name}</td>
+                <td className="text-right">{Number(item.net_amount).toLocaleString('hu')}</td>
                 <td className="text-right">{Number(item.gross_amount).toLocaleString('hu')}</td>
               </tr>
             ))}
             <tr className="total-row">
-              <td colSpan={3}>{t('common.total')}</td>
+              <td colSpan={4}>{t('common.total')}</td>
+              <td className="text-right">{Number(receipt.net_total).toLocaleString('hu')}</td>
               <td className="text-right">{Number(receipt.gross_total).toLocaleString('hu')} {receipt.currency}</td>
             </tr>
           </tbody>

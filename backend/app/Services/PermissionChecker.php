@@ -32,6 +32,12 @@ class PermissionChecker
             return [];
         }
 
+        // Consistent with Gate::before in AppServiceProvider: superadmin bypasses
+        // group/override resolution and gets every permission in every company.
+        if ($user->is_superadmin) {
+            return $this->cache['superadmin'] ??= Permission::query()->pluck('key')->all();
+        }
+
         $cacheKey = $user->id.':'.$companyId;
 
         if (isset($this->cache[$cacheKey])) {

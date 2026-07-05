@@ -164,6 +164,84 @@ class RbacResolverTest extends TestCase
         );
     }
 
+    // ─── Test 5: superadmin gets full list from PermissionChecker (no groups) ──
+
+    public function test_superadmin_gets_full_permission_list_without_group_membership(): void
+    {
+        $superadmin = User::create([
+            'name'          => 'Super Admin',
+            'email'         => 'superadmin@example.com',
+            'password'      => bcrypt('password'),
+            'is_superadmin' => true,
+        ]);
+        // No company membership, no groups, no overrides in $this->company.
+
+        $checker = app(PermissionChecker::class);
+        $keys = $checker->effectivePermissionKeys($superadmin, $this->company->id);
+
+        $this->assertContains(
+            'invoice.view',
+            $keys,
+            'Superadmin must receive all permission keys even without any group membership'
+        );
+        $this->assertCount(
+            Permission::count(),
+            $keys,
+            'Superadmin permission list must equal the full permission catalog'
+        );
+    }
+
+    // ─── Test 6: normal user permissions are unaffected by the superadmin fix ─
+
+    public function test_normal_user_permissions_unchanged_after_superadmin_fix(): void
+    {
+        $extraPermission = Permission::create([
+            'key'    => 'partner.view',
+            'module' => 'partner',
+        ]);
+
+        // Group grants only invoice.view — NOT partner.view
+        $group = Group::create(['name' => 'Limited Group']);
+        $group->users()->attach($this->user->id);
+        $group->permissions()->attach($this->permission->id); // invoice.view only
+
+        $checker = app(PermissionChecker::class);
+        $keys = $checker->effectivePermissionKeys($this->user, $this->company->id);
+
+        $this->assertContains('invoice.view', $keys, 'Group-granted permission must be present');
+        $this->assertNotContains(
+            'partner.view',
+            $keys,
+            'Normal user must not receive permissions outside their group (regression guard)'
+        );
+        $this->assertCount(1, $keys, 'Normal user must receive exactly the permissions their groups grant');
+    }
+
+    // ─── Test 7: superadmin full list is consistent across companies ──────────
+
+    public function test_superadmin_permission_list_consistent_across_companies(): void
+    {
+        $superadmin = User::create([
+            'name'          => 'Super Admin 2',
+            'email'         => 'superadmin2@example.com',
+            'password'      => bcrypt('password'),
+            'is_superadmin' => true,
+        ]);
+
+        $otherCompany = $this->makeCompany();
+
+        $checker = app(PermissionChecker::class);
+        $keysInCompany1 = $checker->effectivePermissionKeys($superadmin, $this->company->id);
+        $keysInCompany2 = $checker->effectivePermissionKeys($superadmin, $otherCompany->id);
+
+        $this->assertNotEmpty($keysInCompany1, 'Superadmin must have permissions in company 1');
+        $this->assertSame(
+            $keysInCompany1,
+            $keysInCompany2,
+            'Superadmin permission list must be identical regardless of which company is active'
+        );
+    }
+
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
     private function makeCompany(): Company

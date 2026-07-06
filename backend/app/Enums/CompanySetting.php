@@ -76,13 +76,24 @@ enum CompanySetting: string
     }
 
     public const SIDEBAR_ACCENT_PALETTE = [
-        '#1e293b', // slate  (alapértelmezett)
-        '#1e3a5f', // mélykék
-        '#134e4a', // teal
-        '#14532d', // erdőzöld
-        '#3b0764', // lila
-        '#4c0519', // bordó
-        '#78350f', // sötét arany
+        '#0f172a', // slate-950
+        '#1e293b', // slate-800  (alapértelmezett)
+        '#1e3a5f', // kék-sötét
+        '#374151', // szürke-700
+        '#134e4a', // teal-sötét
+        '#14532d', // zöld-sötét
+        '#3b0764', // lila-sötét
+        '#4c0519', // bordó-sötét
+        '#78350f', // arany-sötét
+        '#1d4ed8', // kék-700
+        '#047857', // emerald-700
+        '#7c3aed', // violet-600
+        '#be123c', // rose-700
+        '#bfdbfe', // kék-200
+        '#d1fae5', // emerald-200
+        '#ede9fe', // lila-200
+        '#fef9c3', // sárga-200
+        '#f1f5f9', // slate-100
     ];
 
     /** Validate a raw (string) value for this setting. */

@@ -130,6 +130,40 @@ class SidebarAccentColorTest extends TestCase
         $this->assertSame('#1e293b', $setting['value']);
     }
 
+    // ── 5. Mind a 18 paletta-szín átmegy a validate()-on ─────────────────
+
+    public function test_all_eighteen_palette_colors_pass_validation(): void
+    {
+        $setting = CompanySetting::SIDEBAR_ACCENT_COLOR;
+
+        foreach (CompanySetting::SIDEBAR_ACCENT_PALETTE as $hex) {
+            $this->assertTrue(
+                $setting->validate($hex),
+                "Expected {$hex} to be a valid palette color, but validate() returned false"
+            );
+        }
+    }
+
+    // ── 6. Paletta mérete pontosan 18 ─────────────────────────────────────
+
+    public function test_palette_size_is_eighteen(): void
+    {
+        $this->assertCount(18, CompanySetting::SIDEBAR_ACCENT_PALETTE);
+    }
+
+    // ── 7. Új szín (nem volt az eredeti 7-ben) menthető az API-n ─────────
+
+    public function test_new_palette_color_can_be_saved_via_api(): void
+    {
+        // #1d4ed8 (kék-700) az eredeti 7-ben nem szerepelt
+        $response = $this->inCompany()->putJson('/api/company/settings/sidebar_accent_color', [
+            'value' => '#1d4ed8',
+        ]);
+
+        $response->assertOk();
+        $this->assertSame('#1d4ed8', $response->json('data.value'));
+    }
+
     // ── Segédfüggvény ─────────────────────────────────────────────────────
 
     private function inCompany(): static

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ActiveCompanyController;
+use App\Http\Controllers\Api\ApiTesterController;
 use App\Http\Controllers\Api\CustomFieldDefinitionController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
@@ -107,6 +108,9 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     // Beállítások — bizonylat-sorszámtartományok
     Route::get('settings/document-series', [DocumentSeriesController::class, 'index']);
     Route::put('settings/document-series/{documentSeries}', [DocumentSeriesController::class, 'update']);
+
+    // API-tesztelő
+    Route::get('api-tester/openapi', [ApiTesterController::class, 'openapi']);
 
     // Fordítások kezelése (admin) + locale frissítés
     Route::get('translations', [TranslationController::class, 'index']);

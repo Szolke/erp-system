@@ -52,6 +52,8 @@ class PermissionSeeder extends Seeder
             ['key' => 'document_series.manage', 'module' => 'document_series', 'description' => 'Bizonylat-sorszámtartományok kezelése', 'is_sensitive' => true],
 
             ['key' => 'audit.view', 'module' => 'audit', 'description' => 'Audit napló megtekintése', 'is_sensitive' => true],
+
+            ['key' => 'api_tester.use', 'module' => 'api_tester', 'description' => 'Beépített API-tesztelő használata (élő kérések a bejelentkezett session jogaival)', 'is_sensitive' => true],
         ];
 
         foreach ($permissions as $permission) {

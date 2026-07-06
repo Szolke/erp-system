@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -23,16 +24,20 @@ class DatabaseSeeder extends Seeder
             TranslationSeeder::class,
         ]);
 
-        User::updateOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name'          => 'Admin',
-                'password'      => Hash::make('password'),
-                'is_superadmin' => true,
-                'is_active'     => true,
-            ]
-        );
+        // Demo user and data are only created in local/testing environments.
+        // In production, use `php artisan erp:create-superadmin` instead.
+        if (App::environment('local', 'testing')) {
+            User::updateOrCreate(
+                ['email' => 'test@example.com'],
+                [
+                    'name'          => 'Admin',
+                    'password'      => Hash::make('password'),
+                    'is_superadmin' => true,
+                    'is_active'     => true,
+                ]
+            );
 
-        $this->call(DemoDataSeeder::class);
+            $this->call(DemoDataSeeder::class);
+        }
     }
 }

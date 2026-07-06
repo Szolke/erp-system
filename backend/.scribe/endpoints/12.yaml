@@ -34,14 +34,14 @@ endpoints:
         name: invoice_id
         description: 'The ID of the invoice.'
         required: true
-        example: 4
+        example: 13
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      invoice_id: 4
+      invoice_id: 13
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -95,14 +95,14 @@ endpoints:
         name: invoice_id
         description: 'The ID of the invoice.'
         required: true
-        example: 4
+        example: 13
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      invoice_id: 4
+      invoice_id: 13
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -133,7 +133,7 @@ endpoints:
         name: paid_at
         description: 'Must be a valid date.'
         required: true
-        example: '2026-07-02T08:39:45'
+        example: '2026-07-06T20:39:46'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -153,7 +153,7 @@ endpoints:
     cleanBodyParameters:
       payment_method_id: 16
       amount: 39
-      paid_at: '2026-07-02T08:39:45'
+      paid_at: '2026-07-06T20:39:46'
       reference: g
     fileParameters: []
     responses: []

@@ -13,7 +13,7 @@ class ApiTesterController extends Controller
     {
         Gate::authorize('api_tester.use');
 
-        $path = storage_path('app/scribe/openapi.yaml');
+        $path = storage_path('app/private/scribe/openapi.yaml');
 
         if (! file_exists($path)) {
             return response()->json([

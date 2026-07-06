@@ -109,7 +109,7 @@ endpoints:
         name: issue_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-07-02T08:39:45'
+        example: '2026-07-06T20:39:46'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -120,7 +120,7 @@ endpoints:
         name: fulfillment_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-07-02T08:39:45'
+        example: '2026-07-06T20:39:46'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -131,7 +131,7 @@ endpoints:
         name: due_date
         description: 'Must be a valid date. Must be a date after or equal to <code>issue_date</code>.'
         required: true
-        example: '2052-07-25'
+        example: '2052-07-29'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -262,9 +262,9 @@ endpoints:
     cleanBodyParameters:
       partner_id: 16
       payment_method_id: 16
-      issue_date: '2026-07-02T08:39:45'
-      fulfillment_date: '2026-07-02T08:39:45'
-      due_date: '2052-07-25'
+      issue_date: '2026-07-06T20:39:46'
+      fulfillment_date: '2026-07-06T20:39:46'
+      due_date: '2052-07-29'
       currency: ngz
       exchange_rate: 77
       notes: architecto
@@ -316,14 +316,14 @@ endpoints:
         name: id
         description: 'The ID of the invoice.'
         required: true
-        example: 4
+        example: 13
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 4
+      id: 13
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -377,14 +377,14 @@ endpoints:
         name: invoice_id
         description: 'The ID of the invoice.'
         required: true
-        example: 4
+        example: 13
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      invoice_id: 4
+      invoice_id: 13
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -414,7 +414,7 @@ endpoints:
         a storno (credit note) document via InvoiceService::cancel().
       subgroup: ''
       subgroupDescription: ''
-      title: 'GET /api/invoices/{invoice}/pdf — on-the-fly PDF letöltés'
+      title: 'GET /api/invoices/{invoice}/pdf — archivált vagy on-the-fly PDF letöltés'
       description: ''
       authenticated: true
       deprecated: false
@@ -428,14 +428,14 @@ endpoints:
         name: invoice_id
         description: 'The ID of the invoice.'
         required: true
-        example: 4
+        example: 13
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      invoice_id: 4
+      invoice_id: 13
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -452,6 +452,57 @@ endpoints:
           access-control-allow-origin: 'http://localhost:5174'
           access-control-allow-credentials: 'true'
         description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/invoices/{invoice_id}/regenerate-pdf'
+    metadata:
+      custom: []
+      groupName: Számlák
+      groupDescription: |-
+
+        Invoices are immutable once issued — there is no update endpoint.
+        Cancellation is handled by the dedicated 'cancel' action which creates
+        a storno (credit note) document via InvoiceService::cancel().
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/invoices/{invoice}/regenerate-pdf — kontrollált PDF újragenerálás'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      invoice_id:
+        custom: []
+        name: invoice_id
+        description: 'The ID of the invoice.'
+        required: true
+        example: 13
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      invoice_id: 13
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
     responseFields: []
     auth:
       - headers

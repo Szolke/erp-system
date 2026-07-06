@@ -345,7 +345,7 @@ endpoints:
         name: type
         description: ''
         required: true
-        example: product
+        example: service
         type: string
         enumValues:
           - product
@@ -413,7 +413,7 @@ endpoints:
       name: 'n'
       description: 'Eius et animi quos velit et.'
       unit: v
-      type: product
+      type: service
       vat_rate_id: 16
       base_price: 39
       base_currency: gzm

@@ -176,8 +176,8 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: 'api/invoices/{invoice_id}/simplepay'
+      - GET
+    uri: api/permissions
     metadata:
       custom: []
       groupName: Endpoints
@@ -192,26 +192,24 @@ endpoints:
       Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      invoice_id:
-        custom: []
-        name: invoice_id
-        description: 'The ID of the invoice.'
-        required: true
-        example: 4
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      invoice_id: 4
+    urlParameters: []
+    cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
-    responses: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5174'
+          access-control-allow-credentials: 'true'
+        description: null
     responseFields: []
     auth:
       - headers
@@ -224,7 +222,7 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: api/permissions
+    uri: api/api-tester/openapi
     metadata:
       custom: []
       groupName: Endpoints

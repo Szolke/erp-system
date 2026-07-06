@@ -1,14 +1,14 @@
-name: Csoportok
+name: Felhasználók
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/groups
+    uri: api/users
     metadata:
       custom: []
-      groupName: Csoportok
+      groupName: Felhasználók
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
@@ -50,10 +50,10 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/groups
+    uri: api/users
     metadata:
       custom: []
-      groupName: Csoportok
+      groupName: Felhasználók
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
@@ -73,7 +73,7 @@ endpoints:
       name:
         custom: []
         name: name
-        description: 'Must not be greater than 100 characters.'
+        description: 'Must not be greater than 255 characters.'
         required: true
         example: b
         type: string
@@ -81,12 +81,23 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      description:
+      email:
         custom: []
-        name: description
-        description: 'Must not be greater than 500 characters.'
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: true
+        example: zbailey@example.net
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password:
+        custom: []
+        name: password
+        description: ''
         required: false
-        example: 'Et animi quos velit et fugiat.'
+        example: null
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -94,7 +105,7 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       name: b
-      description: 'Et animi quos velit et fugiat.'
+      email: zbailey@example.net
     fileParameters: []
     responses: []
     responseFields: []
@@ -109,10 +120,10 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: 'api/groups/{id}'
+    uri: 'api/users/{id}'
     metadata:
       custom: []
-      groupName: Csoportok
+      groupName: Felhasználók
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
@@ -128,16 +139,16 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the group.'
+        description: 'The ID of the user.'
         required: true
-        example: 1
+        example: 24
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 1
+      id: 24
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -167,10 +178,10 @@ endpoints:
     httpMethods:
       - PUT
       - PATCH
-    uri: 'api/groups/{id}'
+    uri: 'api/users/{id}'
     metadata:
       custom: []
-      groupName: Csoportok
+      groupName: Felhasználók
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
@@ -186,23 +197,23 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the group.'
+        description: 'The ID of the user.'
         required: true
-        example: 1
+        example: 24
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 1
+      id: 24
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
       name:
         custom: []
         name: name
-        description: 'Must not be greater than 100 characters.'
+        description: 'Must not be greater than 255 characters.'
         required: false
         example: b
         type: string
@@ -210,12 +221,23 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      description:
+      is_active:
         custom: []
-        name: description
-        description: 'Must not be greater than 500 characters.'
+        name: is_active
+        description: ''
         required: false
-        example: 'Et animi quos velit et fugiat.'
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password:
+        custom: []
+        name: password
+        description: ''
+        required: false
+        example: null
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -223,7 +245,7 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       name: b
-      description: 'Et animi quos velit et fugiat.'
+      is_active: true
     fileParameters: []
     responses: []
     responseFields: []
@@ -238,10 +260,10 @@ endpoints:
     custom: []
     httpMethods:
       - DELETE
-    uri: 'api/groups/{id}'
+    uri: 'api/users/{id}'
     metadata:
       custom: []
-      groupName: Csoportok
+      groupName: Felhasználók
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
@@ -257,16 +279,16 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the group.'
+        description: 'The ID of the user.'
         required: true
-        example: 1
+        example: 24
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 1
+      id: 24
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -285,10 +307,10 @@ endpoints:
     custom: []
     httpMethods:
       - PUT
-    uri: 'api/groups/{group_id}/permissions'
+    uri: 'api/users/{user_id}/overrides'
     metadata:
       custom: []
-      groupName: Csoportok
+      groupName: Felhasználók
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
@@ -301,155 +323,39 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      group_id:
-        custom: []
-        name: group_id
-        description: 'The ID of the group.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      group_id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      permission_ids:
-        custom: []
-        name: permission_ids
-        description: 'Must match an existing stored value.'
-        required: false
-        example:
-          - 16
-        type: 'integer[]'
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      permission_ids:
-        - 16
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: 'api/groups/{group_id}/members'
-    metadata:
-      custom: []
-      groupName: Csoportok
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: ''
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      group_id:
-        custom: []
-        name: group_id
-        description: 'The ID of the group.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      group_id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      user_id:
-        custom: []
-        name: user_id
-        description: 'Must match an existing stored value.'
-        required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      user_id: 16
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - DELETE
-    uri: 'api/groups/{group_id}/members/{user_id}'
-    metadata:
-      custom: []
-      groupName: Csoportok
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: ''
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      group_id:
-        custom: []
-        name: group_id
-        description: 'The ID of the group.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
       user_id:
         custom: []
         name: user_id
         description: 'The ID of the user.'
         required: true
-        example: 1
+        example: 24
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      group_id: 1
-      user_id: 1
+      user_id: 24
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    bodyParameters:
+      overrides:
+        custom: []
+        name: overrides
+        description: ''
+        required: false
+        example:
+          - allow
+        type: 'string[]'
+        enumValues:
+          - allow
+          - deny
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      overrides:
+        - allow
     fileParameters: []
     responses: []
     responseFields: []

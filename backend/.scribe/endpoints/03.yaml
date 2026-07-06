@@ -9,6 +9,214 @@ endpoints:
     custom: []
     httpMethods:
       - GET
+    uri: api/companies
+    metadata:
+      custom: []
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/companies — az összes cég listája (csak szuperadmin)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5174'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/companies
+    metadata:
+      custom: []
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/companies — új cég létrehozása (csak szuperadmin)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      tax_number:
+        custom: []
+        name: tax_number
+        description: 'Must match the regex /^\d{8}-\d-\d{2}$/.'
+        required: true
+        example: 64255931-4-23
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      registration_number:
+        custom: []
+        name: registration_number
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      postal_code:
+        custom: []
+        name: postal_code
+        description: 'Must not be greater than 10 characters.'
+        required: false
+        example: aykcmy
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      city:
+        custom: []
+        name: city
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: u
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      address_line:
+        custom: []
+        name: address_line
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      country_code:
+        custom: []
+        name: country_code
+        description: 'Must be 2 characters.'
+        required: false
+        example: pw
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      email:
+        custom: []
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: false
+        example: emelie.baumbach@example.net
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      phone:
+        custom: []
+        name: phone
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: s
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      base_currency:
+        custom: []
+        name: base_currency
+        description: 'Must be 3 characters.'
+        required: false
+        example: itc
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+      tax_number: 64255931-4-23
+      registration_number: w
+      postal_code: aykcmy
+      city: u
+      address_line: w
+      country_code: pw
+      email: emelie.baumbach@example.net
+      phone: s
+      base_currency: itc
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
     uri: api/company
     metadata:
       custom: []
@@ -96,9 +304,9 @@ endpoints:
       tax_number:
         custom: []
         name: tax_number
-        description: 'Must not be greater than 11 characters.'
+        description: 'Must match the regex /^\d{8}-\d-\d{2}$/.'
         required: true
-        example: ngzmiy
+        example: 64255931-4-23
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -109,7 +317,7 @@ endpoints:
         name: eu_tax_number
         description: 'Must not be greater than 255 characters.'
         required: false
-        example: v
+        example: w
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -120,7 +328,7 @@ endpoints:
         name: registration_number
         description: 'Must not be greater than 255 characters.'
         required: true
-        example: d
+        example: a
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -131,7 +339,7 @@ endpoints:
         name: postal_code
         description: 'Must not be greater than 10 characters.'
         required: true
-        example: ljnikh
+        example: ykcmyu
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -153,7 +361,7 @@ endpoints:
         name: address_line
         description: 'Must not be greater than 255 characters.'
         required: true
-        example: a
+        example: p
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -164,7 +372,7 @@ endpoints:
         name: country_code
         description: 'Must be 2 characters.'
         required: true
-        example: yk
+        example: wl
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -175,7 +383,7 @@ endpoints:
         name: email
         description: 'Must be a valid email address. Must not be greater than 255 characters.'
         required: false
-        example: lyric80@example.com
+        example: wleuschke@example.net
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -186,7 +394,7 @@ endpoints:
         name: phone
         description: 'Must not be greater than 255 characters.'
         required: false
-        example: p
+        example: s
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -230,7 +438,7 @@ endpoints:
         name: is_active
         description: ''
         required: false
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -251,19 +459,19 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       name: b
-      tax_number: ngzmiy
-      eu_tax_number: v
-      registration_number: d
-      postal_code: ljnikh
+      tax_number: 64255931-4-23
+      eu_tax_number: w
+      registration_number: a
+      postal_code: ykcmyu
       city: w
-      address_line: a
-      country_code: yk
-      email: lyric80@example.com
-      phone: p
+      address_line: p
+      country_code: wl
+      email: wleuschke@example.net
+      phone: s
       invoice_header_text: architecto
       invoice_footer_text: architecto
       base_currency: ngz
-      is_active: false
+      is_active: true
       nav_environment: production
     fileParameters: []
     responses: []

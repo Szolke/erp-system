@@ -21,7 +21,7 @@ class ApiTesterAccessTest extends TestCase
         parent::setUp();
         $this->seed(PermissionSeeder::class);
 
-        $this->specPath = storage_path('app/scribe/openapi.yaml');
+        $this->specPath = storage_path('app/private/scribe/openapi.yaml');
     }
 
     protected function tearDown(): void

@@ -20,6 +20,11 @@
 /public/storage
 /storage/*.key
 /storage/pail
+
+# Scribe generated output (spec + Postman collection; regenerate with scribe:generate)
+/storage/app/private/scribe/
+# Scribe endpoint cache (derived from source; not for version control)
+/.scribe/endpoints.cache/
 /vendor
 _ide_helper.php
 Homestead.json

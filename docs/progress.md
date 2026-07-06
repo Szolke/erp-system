@@ -53,6 +53,7 @@ Ezek tervek, nem mai feladatok — rögzítve, hogy egy-egy munkamenet ne talál
 - **Hibajelentő / support-ticket modul:** a rendszer felhasználói hibajelentést vehetnek fel közvetlenül az ERP-ből; önálló közepes modul (saját tábla, státuszok, RBAC jogosultságok) — részletezés később szükséges.
 - **Konfiguráció átláthatóbbá tétele:** NEM külön `conf.php` (ütközne a Laravel `.env`/`config` rendszerével, és érzékeny adatot csábítana commitba), hanem dokumentált `.env.example` + egy `config/erp.php` a projekt-specifikus, nem-titkos beállításoknak — cél: egy helyen, Laravel-konform módon konfigurálható rendszer.
 - ~~**Fejlesztői/felhasználói dokumentáció (wiki):**~~ **KÉSZ (`47176b8`)** — `docs/wiki/` alatt 17 Markdown-fájl: `README.md` index + `hu/` és `en/` alkönyvtárban 8-8 oldal (bejelentkezés, számla/nyugta kiállítás, bizonylatok, fizetések, beállítások, jogosultságok, egyéb).
+- **Wiki viewer az ERP frontendben (kereshető):** a `docs/wiki/` Markdown-tartalom megjelenítése a bejelentkezett felhasználók számára a React SPA-ban. Döntött irány: Vite `?raw` import (bundled), `react-markdown` renderer, kliens-oldali keresés mind a 8 oldalon, locale-érzékeny (`hu/` vs `en/` a `TranslationContext` alapján), `/wiki` útvonal sidebar-menüponttal. Backend-változtatás nem szükséges. A wiki-tartalom (`docs/wiki/`) minden nagyobb fejlesztés után frissítendő.
 
 ## Architekturális konvenciók (amit egy új munkamenetnek tudnia kell)
 

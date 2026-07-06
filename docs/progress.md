@@ -8,7 +8,7 @@
 > - **[CHANGELOG.md](CHANGELOG.md)** — történelmi lépés-napló: lépések leírása, commit hash-ek, fájllisták
 > - **[er-model.md](er-model.md)** — részletes tábla-/mezőszintű adatmodell
 
-Utolsó frissítés: 2026-07-06, dokumentáció-karcsúsítás (history → CHANGELOG.md).
+Utolsó frissítés: 2026-07-06, felhasználói wiki elkészítve (`docs/wiki/`, `47176b8`).
 
 ## Kész modulok (összefoglaló)
 
@@ -22,6 +22,7 @@ Megvalósított főbb területek:
 - MNB árfolyam-lekérdező (ütemezve, supervisor), audit log
 - PDF generálás + archiválás + kontrollált újragenerálás (jogi megőrzéssel)
 - i18n (HU/EN/DE), dark mode, API dokumentáció (Scribe, 68 endpoint)
+- Felhasználói wiki (`docs/wiki/`, HU+EN, 17 Markdown-fájl, 8 fejezet)
 - Bizonylatlista (UNION ALL, szűrők), sidebar (összecsukó, accent-szín 18 paletta, CSS-változók)
 - Toast értesítések, pagination UI, szuperadmin-bootstrap (`erp:create-superadmin`)
 
@@ -51,7 +52,7 @@ Ezek tervek, nem mai feladatok — rögzítve, hogy egy-egy munkamenet ne talál
 
 - **Hibajelentő / support-ticket modul:** a rendszer felhasználói hibajelentést vehetnek fel közvetlenül az ERP-ből; önálló közepes modul (saját tábla, státuszok, RBAC jogosultságok) — részletezés később szükséges.
 - **Konfiguráció átláthatóbbá tétele:** NEM külön `conf.php` (ütközne a Laravel `.env`/`config` rendszerével, és érzékeny adatot csábítana commitba), hanem dokumentált `.env.example` + egy `config/erp.php` a projekt-specifikus, nem-titkos beállításoknak — cél: egy helyen, Laravel-konform módon konfigurálható rendszer.
-- **Fejlesztői/felhasználói dokumentáció (wiki):** `docs/` alatti Markdown-wiki vagy GitHub repo-wiki, a fejlesztésekkel párhuzamosan frissítve; a meglévő `progress.md` + `er-model.md` a fejlesztői napló marad, ez a felhasználói/áttekintő dokumentációt pótolná.
+- ~~**Fejlesztői/felhasználói dokumentáció (wiki):**~~ **KÉSZ (`47176b8`)** — `docs/wiki/` alatt 17 Markdown-fájl: `README.md` index + `hu/` és `en/` alkönyvtárban 8-8 oldal (bejelentkezés, számla/nyugta kiállítás, bizonylatok, fizetések, beállítások, jogosultságok, egyéb).
 
 ## Architekturális konvenciók (amit egy új munkamenetnek tudnia kell)
 

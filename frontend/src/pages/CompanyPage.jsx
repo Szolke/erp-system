@@ -2,15 +2,27 @@ import { useEffect, useRef, useState } from 'react'
 import { company as companyApi } from '../api/company'
 import { useAuth } from '../contexts/AuthContext'
 import { useTranslation } from '../contexts/TranslationContext'
+import { applySidebarTheme } from '../utils/sidebarTheme'
 
 const ACCENT_PALETTE = [
-  { hex: '#1e293b', label: 'Slate'       },
-  { hex: '#1e3a5f', label: 'Mélykék'     },
-  { hex: '#134e4a', label: 'Teal'        },
-  { hex: '#14532d', label: 'Erdőzöld'    },
-  { hex: '#3b0764', label: 'Lila'        },
-  { hex: '#4c0519', label: 'Bordó'       },
-  { hex: '#78350f', label: 'Sötét arany' },
+  { hex: '#0f172a', label: 'Slate 950'    },
+  { hex: '#1e293b', label: 'Slate 800'    },
+  { hex: '#1e3a5f', label: 'Kék-sötét'   },
+  { hex: '#374151', label: 'Szürke 700'   },
+  { hex: '#134e4a', label: 'Teal'         },
+  { hex: '#14532d', label: 'Zöld-sötét'  },
+  { hex: '#3b0764', label: 'Lila-sötét'  },
+  { hex: '#4c0519', label: 'Bordó'        },
+  { hex: '#78350f', label: 'Arany-sötét' },
+  { hex: '#1d4ed8', label: 'Kék 700'     },
+  { hex: '#047857', label: 'Emerald 700'  },
+  { hex: '#7c3aed', label: 'Violet 600'   },
+  { hex: '#be123c', label: 'Rose 700'     },
+  { hex: '#bfdbfe', label: 'Kék 200'     },
+  { hex: '#d1fae5', label: 'Emerald 200'  },
+  { hex: '#ede9fe', label: 'Lila 200'     },
+  { hex: '#fef9c3', label: 'Sárga 200'   },
+  { hex: '#f1f5f9', label: 'Slate 100'    },
 ]
 
 function AccentColorSection({ can }) {
@@ -33,7 +45,7 @@ function AccentColorSection({ can }) {
     try {
       await companyApi.settings.set('sidebar_accent_color', hex)
       setCurrent(hex)
-      document.documentElement.style.setProperty('--sidebar-accent-color', hex)
+      applySidebarTheme(hex)
       setMsg('ok')
     } catch {
       setMsg('err')
@@ -45,7 +57,7 @@ function AccentColorSection({ can }) {
   return (
     <div className="card" style={{ marginTop: 16 }}>
       <h2 style={{ margin: '0 0 14px', fontSize: '1.1rem' }}>{t('settings.sidebar_accent_color')}</h2>
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 42px)', gap: 10 }}>
         {ACCENT_PALETTE.map(({ hex, label }) => (
           <button
             key={hex}
@@ -58,7 +70,7 @@ function AccentColorSection({ can }) {
               height: 42,
               borderRadius: 8,
               background: hex,
-              border: 'none',
+              border: '1px solid rgba(0,0,0,0.15)',
               cursor: can('company.manage') ? 'pointer' : 'default',
               outline: hex === current ? '3px solid white' : '3px solid transparent',
               outlineOffset: 3,

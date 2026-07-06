@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTranslation } from '../contexts/TranslationContext'
 import { company as companyApi } from '../api/company'
 import CompanySwitcher from './CompanySwitcher'
+import { applySidebarTheme } from '../utils/sidebarTheme'
 import {
   FileText, Users2, Package,
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers,
@@ -32,7 +33,7 @@ export default function Layout() {
     companyApi.settings.getAll()
       .then((res) => {
         const s = res.data.data.find((x) => x.key === 'sidebar_accent_color')
-        document.documentElement.style.setProperty('--sidebar-accent-color', s?.value ?? '#1e293b')
+        applySidebarTheme(s?.value ?? '#1e293b')
       })
       .catch(() => {})
   }, [activeCompanyId])

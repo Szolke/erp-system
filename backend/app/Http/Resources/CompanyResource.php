@@ -30,6 +30,7 @@ class CompanyResource extends JsonResource
             'logo_url'        => $this->logo_path
                 ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->logo_path)
                 : null,
+            'users_count' => $this->whenCounted('users'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

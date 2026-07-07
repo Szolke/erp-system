@@ -337,6 +337,23 @@ class TranslationSeeder extends Seeder
             // ── Wiki ──────────────────────────────────────────────────────────
             ['wiki', 'search_placeholder', 'Keresés a kézikönyvben…', 'Search user guide…',  'Handbuch durchsuchen…'],
             ['wiki', 'no_results',         'Nincs találat',           'No results',           'Keine Ergebnisse'],
+
+            // ── User–cég hozzárendelés ─────────────────────────────────────────
+            ['user', 'companies_section',  'Cégek',                                           'Companies',                                    'Firmen'],
+            ['user', 'no_companies',       'Jelenleg egy céghez sem tartozik.',                'Not assigned to any company.',                 'Keiner Firma zugeordnet.'],
+            ['user', 'no_companies_hint',  'Amíg nincs cég hozzárendelve, a felhasználó nem lát adatot.', 'Without a company assignment the user cannot access any data.', 'Ohne Firmenzuordnung hat der Benutzer keinen Datenzugriff.'],
+            ['user', 'add_company',        'Cég hozzárendelése',                              'Assign company',                               'Firma zuweisen'],
+            ['user', 'company_added',      'Cég sikeresen hozzárendelve.',                    'Company assigned successfully.',               'Firma erfolgreich zugewiesen.'],
+            ['user', 'company_removed',    'Cég leválasztva.',                                'Company removed.',                             'Firma entfernt.'],
+
+            ['company', 'show_users',      'Felhasználók',                                    'Users',                                        'Benutzer'],
+            ['company', 'users_section',   'Felhasználók kezelése',                           'Manage users',                                 'Benutzer verwalten'],
+            ['company', 'add_user',        'Felhasználó hozzáadása',                          'Add user',                                     'Benutzer hinzufügen'],
+            ['company', 'user_added',      'Felhasználó hozzáadva.',                          'User added.',                                  'Benutzer hinzugefügt.'],
+            ['company', 'user_removed',    'Felhasználó eltávolítva.',                        'User removed.',                                'Benutzer entfernt.'],
+            ['company', 'no_users',        'Nincs felhasználó ebben a cégben.',               'No users in this company.',                    'Keine Benutzer in dieser Firma.'],
+
+            ['common', 'no_permission',    'Nincs jogosultságod ehhez a művelethez.',         'You do not have permission for this.',         'Keine Berechtigung für diese Aktion.'],
         ];
 
         $now = now();

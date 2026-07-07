@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReceiptController;
 use App\Http\Controllers\Api\SimplePayController;
 use App\Http\Controllers\Api\SimplePayIpnController;
+use App\Http\Controllers\Api\UserCompanyController;
 use App\Http\Controllers\Api\UserController;
 use App\Models\PaymentMethod;
 use App\Models\Permission;
@@ -95,6 +96,11 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     // Felhasználók
     Route::apiResource('users', UserController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::put('users/{user}/overrides', [UserController::class, 'syncOverrides']);
+
+    // User–cég hozzárendelés (superadmin-only)
+    Route::get('users/{user}/companies', [UserCompanyController::class, 'index']);
+    Route::post('users/{user}/companies/{company}', [UserCompanyController::class, 'attach']);
+    Route::delete('users/{user}/companies/{company}', [UserCompanyController::class, 'detach']);
 
     // Csoportok
     Route::apiResource('groups', GroupController::class)->only(['index', 'store', 'show', 'update', 'destroy']);

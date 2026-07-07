@@ -4,6 +4,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useToast } from '../../contexts/ToastContext'
 import { companies as companiesApi } from '../../api/company'
+import { users as usersApi } from '../../api/users'
+import client from '../../api/client'
 
 const EMPTY_FORM = { name: '', tax_number: '', city: '', address_line: '', postal_code: '', registration_number: '', email: '' }
 
@@ -20,6 +22,13 @@ export default function CompanyListPage() {
   const [formErr, setFormErr]   = useState('')
   const [saving, setSaving]     = useState(false)
   const [switching, setSwitching] = useState(null)
+
+  // Users modal state
+  const [usersModal, setUsersModal]         = useState(null)   // aktuálisan nyitott company obj
+  const [modalUsers, setModalUsers]         = useState([])     // cég jelenlegi tagjai
+  const [activeUsers, setActiveUsers]       = useState([])     // saját aktív cég userei (add-hoz)
+  const [modalLoading, setModalLoading]     = useState(false)
+  const [addUserId, setAddUserId]           = useState('')
 
   async function load() {
     setLoading(true)
@@ -58,6 +67,60 @@ export default function CompanyListPage() {
       await switchCompany(company.id)
       navigate('/documents')
     } finally { setSwitching(null) }
+  }
+
+  async function openUsersModal(company) {
+    setUsersModal(company)
+    setAddUserId('')
+    setModalLoading(true)
+    try {
+      // Cég tagjait az X-Company-Id fejléccel kérjük le (superadmin tagja minden saját cégnek)
+      const [membersRes, myUsersRes] = await Promise.all([
+        client.get('/api/users', { params: { per_page: 200 }, headers: { 'X-Company-Id': String(company.id) } }),
+        usersApi.list({ per_page: 200 }),
+      ])
+      setModalUsers(membersRes.data.data ?? [])
+      setActiveUsers(myUsersRes.data.data ?? [])
+    } catch {
+      setModalUsers([])
+      setActiveUsers([])
+    } finally { setModalLoading(false) }
+  }
+
+  function closeUsersModal() {
+    setUsersModal(null)
+    setModalUsers([])
+    setActiveUsers([])
+    setAddUserId('')
+    // Frissíti az users_count-ot a listában
+    load()
+  }
+
+  async function handleModalAttach(e) {
+    e.preventDefault()
+    if (!addUserId || !usersModal) return
+    try {
+      await usersApi.attachCompany(addUserId, usersModal.id)
+      setAddUserId('')
+      // Újratölti a modal users listát
+      const res = await client.get('/api/users', { params: { per_page: 200 }, headers: { 'X-Company-Id': String(usersModal.id) } })
+      setModalUsers(res.data.data ?? [])
+      toast(t('company.user_added'), 'success')
+    } catch (err) {
+      toast(err.response?.data?.message ?? t('common.error'), 'error')
+    }
+  }
+
+  async function handleModalDetach(targetUser) {
+    if (!usersModal) return
+    if (!window.confirm(`Biztosan eltávolítod „${targetUser.name}" felhasználót a(z) „${usersModal.name}" cégből?`)) return
+    try {
+      await usersApi.detachCompany(targetUser.id, usersModal.id)
+      setModalUsers((prev) => prev.filter((u) => u.id !== targetUser.id))
+      toast(t('company.user_removed'), 'success')
+    } catch (err) {
+      toast(err.response?.data?.message ?? t('common.error'), 'error')
+    }
   }
 
   const list = data?.data ?? []
@@ -160,7 +223,14 @@ export default function CompanyListPage() {
                     {c.is_active ? t('common.active') : 'Inaktív'}
                   </span>
                 </td>
-                <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                <td style={{ textAlign: 'right', whiteSpace: 'nowrap', display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => openUsersModal(c)}
+                    style={{ fontSize: 11 }}
+                  >
+                    {t('company.show_users')} ({c.users_count ?? 0})
+                  </button>
                   {c.id !== activeCompanyId && (
                     <button
                       className="btn btn-secondary btn-sm"
@@ -178,6 +248,88 @@ export default function CompanyListPage() {
       )}
       {data && (
         <p className="text-muted mt-4">{t('common.total')}: {data.meta?.total ?? list.length} {t('common.pieces')}</p>
+      )}
+
+      {/* Users modal */}
+      {usersModal && (
+        <div
+          onClick={closeUsersModal}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+              borderRadius: 10, padding: 24, width: 560, maxWidth: '95vw', maxHeight: '80vh',
+              overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>{usersModal.name}</h2>
+                <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--color-muted)' }}>{t('company.users_section')}</p>
+              </div>
+              <button
+                onClick={closeUsersModal}
+                style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: 'var(--color-muted)', lineHeight: 1, padding: '0 4px' }}
+              >×</button>
+            </div>
+
+            {modalLoading ? (
+              <p className="text-muted">{t('common.loading')}</p>
+            ) : (
+              <>
+                {/* Add user form */}
+                {(() => {
+                  const memberIds = new Set(modalUsers.map((u) => u.id))
+                  const available = activeUsers.filter((u) => !memberIds.has(u.id))
+                  return available.length > 0 ? (
+                    <form onSubmit={handleModalAttach} style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+                      <select value={addUserId} onChange={(e) => setAddUserId(e.target.value)} required style={{ flex: 1 }}>
+                        <option value="">— {t('company.add_user')} —</option>
+                        {available.map((u) => (
+                          <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                        ))}
+                      </select>
+                      <button className="btn btn-primary btn-sm" type="submit">{t('common.add')}</button>
+                    </form>
+                  ) : null
+                })()}
+
+                {/* Current user list */}
+                {modalUsers.length === 0 ? (
+                  <p className="text-muted" style={{ fontSize: 13 }}>{t('company.no_users')}</p>
+                ) : (
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>{t('user.name')}</th>
+                        <th>{t('user.email')}</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {modalUsers.map((u) => (
+                        <tr key={u.id}>
+                          <td>{u.name}</td>
+                          <td className="text-muted">{u.email}</td>
+                          <td style={{ textAlign: 'right' }}>
+                            <button
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleModalDetach(u)}
+                            >
+                              {t('group.remove_member')}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </>
+            )}
+          </div>
+        </div>
       )}
     </div>
   )

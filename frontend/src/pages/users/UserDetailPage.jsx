@@ -3,8 +3,10 @@ import { useParams, Link } from 'react-router-dom'
 import client from '../../api/client'
 import { users as usersApi } from '../../api/users'
 import { groups as groupsApi } from '../../api/groups'
+import { companies as companiesApi } from '../../api/company'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
+import { useToast } from '../../contexts/ToastContext'
 
 const EFFECT_LABELS = {
   allow: { label: 'Engedélyezve', bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
@@ -39,8 +41,11 @@ function EffectToggle({ effect, onChange, disabled }) {
 
 export default function UserDetailPage() {
   const { id } = useParams()
-  const { can } = useAuth()
+  const { user: authUser, can } = useAuth()
   const { t } = useTranslation()
+  const toast = useToast()
+  const isSuperadmin = authUser?.is_superadmin
+
   const [data, setData]           = useState(null)
   const [allPerms, setAllPerms]   = useState([])
   const [allGroups, setAllGroups] = useState([])
@@ -51,12 +56,22 @@ export default function UserDetailPage() {
   const [error, setError]         = useState('')
   const [addGroupId, setAddGroupId] = useState('')
 
+  // Cég-szekció state (csak superadminnak)
+  const [userCompanies, setUserCompanies] = useState([])
+  const [allCompanies,  setAllCompanies]  = useState([])
+  const [addCompanyId,  setAddCompanyId]  = useState('')
+
   async function load() {
-    const [uRes, pRes, gRes] = await Promise.all([
+    const promises = [
       usersApi.get(id),
       client.get('/api/permissions'),
       groupsApi.list(),
-    ])
+    ]
+    if (isSuperadmin) {
+      promises.push(usersApi.listCompanies(id))
+      promises.push(companiesApi.list({ per_page: 200 }))
+    }
+    const [uRes, pRes, gRes, ucRes, acRes] = await Promise.all(promises)
     const d = uRes.data
     setData(d)
     setAllPerms(pRes.data.data ?? [])
@@ -64,10 +79,14 @@ export default function UserDetailPage() {
     const map = {}
     Object.entries(d.overrides ?? {}).forEach(([k, v]) => { map[Number(k)] = v })
     setOverrides(map)
+    if (isSuperadmin) {
+      setUserCompanies(ucRes?.data?.data ?? [])
+      setAllCompanies(acRes?.data?.data ?? [])
+    }
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [id])
+  useEffect(() => { load() }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function setOverride(permId, effect) {
     setOverrides((prev) => ({ ...prev, [permId]: effect }))
@@ -117,6 +136,32 @@ export default function UserDetailPage() {
     }
   }
 
+  async function handleAttachCompany(e) {
+    e.preventDefault()
+    if (!addCompanyId) return
+    try {
+      const res = await usersApi.attachCompany(id, addCompanyId)
+      setUserCompanies(res.data.data ?? [])
+      setAddCompanyId('')
+      toast(t('user.company_added'), 'success')
+    } catch (err) {
+      toast(err.response?.data?.message ?? t('common.error'), 'error')
+    }
+  }
+
+  async function handleDetachCompany(companyId) {
+    const company = userCompanies.find((c) => c.id === companyId)
+    if (!window.confirm(`Biztosan eltávolítod a(z) „${company?.name ?? companyId}" céget erről a felhasználóról?`)) return
+    try {
+      await usersApi.detachCompany(id, companyId)
+      const res = await usersApi.listCompanies(id)
+      setUserCompanies(res.data.data ?? [])
+      toast(t('user.company_removed'), 'success')
+    } catch (err) {
+      toast(err.response?.data?.message ?? t('common.error'), 'error')
+    }
+  }
+
   if (loading) return <p className="text-muted">{t('common.loading')}</p>
   if (!data) return <p className="text-muted">{t('common.not_found')}</p>
 
@@ -124,6 +169,10 @@ export default function UserDetailPage() {
   const fromGroupSet = new Set(fromGroups ?? [])
   const canManage   = can('group.manage')
   const canOverride = can('permission.override')
+
+  // Cég-szekció: allCompanies mínusz már hozzárendelt cégek
+  const assignedCompanyIds   = new Set(userCompanies.map((c) => c.id))
+  const availableCompanies   = allCompanies.filter((c) => !assignedCompanyIds.has(c.id))
 
   // Modulonként csoportosítva
   const byModule = allPerms.reduce((acc, p) => {
@@ -152,6 +201,68 @@ export default function UserDetailPage() {
       {saved && (
         <div className="alert-success" style={{ fontSize: 13, marginBottom: 16 }}>
           Felülírások mentve.
+        </div>
+      )}
+
+      {/* Cégek — csak superadmin látja */}
+      {isSuperadmin && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <strong>{t('user.companies_section')}</strong>
+
+          {userCompanies.length === 0 && (
+            <div style={{
+              marginTop: 12, padding: '10px 14px',
+              background: 'var(--color-danger-bg)', borderRadius: 6,
+              borderLeft: '3px solid var(--color-danger)', fontSize: 13,
+            }}>
+              <p style={{ margin: 0, fontWeight: 600, color: 'var(--color-danger)' }}>
+                {t('user.no_companies')}
+              </p>
+              <p style={{ margin: '4px 0 0', color: 'var(--color-muted)', fontSize: 12 }}>
+                {t('user.no_companies_hint')}
+              </p>
+            </div>
+          )}
+
+          {availableCompanies.length > 0 && (
+            <form onSubmit={handleAttachCompany} style={{ display: 'flex', gap: 10, marginTop: 12, marginBottom: 12 }}>
+              <select value={addCompanyId} onChange={(e) => setAddCompanyId(e.target.value)} required style={{ maxWidth: 320 }}>
+                <option value="">— {t('user.add_company')} —</option>
+                {availableCompanies.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name} ({c.tax_number})</option>
+                ))}
+              </select>
+              <button className="btn btn-primary btn-sm" type="submit">{t('common.add')}</button>
+            </form>
+          )}
+
+          {userCompanies.length > 0 && (
+            <table style={{ marginTop: 8 }}>
+              <thead>
+                <tr>
+                  <th>{t('company.name')}</th>
+                  <th>{t('company.tax_number')}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {userCompanies.map((c) => (
+                  <tr key={c.id}>
+                    <td><strong>{c.name}</strong></td>
+                    <td className="text-muted">{c.tax_number}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDetachCompany(c.id)}
+                      >
+                        {t('group.remove_member')}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 

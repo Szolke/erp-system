@@ -83,3 +83,27 @@ a szerkesztőben három nyelven (HU / EN / DE). A változtatások azonnal érvé
 felhasználói felületen.
 
 Ez a szekció `company.manage` jogosultsághoz kötött.
+
+---
+
+## API tesztelő (Beállítások → API tesztelő)
+
+Interaktív felület az ERP saját REST API-jának böngészéséhez és teszteléséhez. A bal panelen
+csoportonként összecsukható listában láthatók az elérhető endpointok (metódusbadge + útvonal);
+jobb oldalon az endpoint részletei jelennek meg: paramétertábla, request body schema, majd a
+„Kérés küldése" kártya.
+
+**Kérés küldése:**
+- A `{invoice}`, `{partner}` stb. útvonal-paramétereket külön beviteli mezőkben kell megadni.
+- Lekérdezési paraméterek (pl. `page`, `per_page`) szintén kitölthetők.
+- POST/PUT/PATCH metódusoknál JSON body textarea jelenik meg, a schema alapján előkitöltve.
+- A „Küldés" gombra kattintva a válasz (HTTP státusz, átfutási idő, JSON body) a jobb panel
+  alján jelenik meg.
+
+**Visszafordíthatatlan műveletek védelme:**  
+Sztornózás (`/cancel`), SimplePay visszatérítés (`/refund`), PDF újragenerálás
+(`/regenerate-pdf`) és törlés (DELETE) esetén az egyszerű megerősítés helyett egy piros keretű
+figyelmeztető modal jelenik meg, amely tartalmazza az aktív cég nevét. A „Küldés" gomb csak egy
+„Megértettem, ez a művelet visszafordíthatatlan" jelölőnégyzet bejelölése után válik aktívvá.
+
+Ez az oldal `api_tester.use` jogosultsághoz kötött.

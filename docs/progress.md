@@ -8,7 +8,7 @@
 > - **[CHANGELOG.md](CHANGELOG.md)** — történelmi lépés-napló: lépések leírása, commit hash-ek, fájllisták
 > - **[er-model.md](er-model.md)** — részletes tábla-/mezőszintű adatmodell
 
-Utolsó frissítés: 2026-07-06, felhasználói wiki elkészítve (`docs/wiki/`, `47176b8`).
+Utolsó frissítés: 2026-07-07, API tesztelő elkészítve (`2e768a4`).
 
 ## Kész modulok (összefoglaló)
 
@@ -21,7 +21,8 @@ Megvalósított főbb területek:
 - NAV Online Számla 3.0 (queue job, toggle), SimplePay (start + IPN + refund → sztornó)
 - MNB árfolyam-lekérdező (ütemezve, supervisor), audit log
 - PDF generálás + archiválás + kontrollált újragenerálás (jogi megőrzéssel)
-- i18n (HU/EN/DE), dark mode, API dokumentáció (Scribe, 68 endpoint)
+- i18n (HU/EN/DE), dark mode, API dokumentáció (Scribe, 73 endpoint)
+- API tesztelő (`/settings/api-tester`): Scribe spec explorer, élő API hívás (path/query/body paraméterek), kétszintű megerősítő modal (normál write vs. visszafordíthatatlan: cancel/refund/regenerate-pdf/DELETE)
 - Felhasználói wiki (`docs/wiki/`, HU+EN, 17 Markdown-fájl, 8 fejezet)
 - Bizonylatlista (UNION ALL, szűrők), sidebar (összecsukó, accent-szín 18 paletta, CSS-változók)
 - Toast értesítések, pagination UI, szuperadmin-bootstrap (`erp:create-superadmin`)
@@ -64,6 +65,7 @@ Ezek tervek, nem mai feladatok — rögzítve, hogy egy-egy munkamenet ne talál
 - **DB-default mezők**: `Model::create()` után **mindig** `->refresh()` kell, ha a válaszban DB-szintű default értéket (pl. `is_active`, `nav_status`) akarunk visszaadni — enélkül `null` jön vissza a friss objektumból. Ez a hiba már kétszer előjött (Product/Partner, majd Invoice), `refresh()`-sel javítva.
 - **Seederek**: `PermissionSeeder`/`VatRateSeeder`/`PaymentMethodSeeder` = valódi katalógus-adat, mindig fusson. `DemoDataSeeder` = reprodukálható teszt-sandbox (1 cég, 2 csoport, override-ok, 1 termék/partner, NAV teszt+éles dummy hitelesítés) — idempotens (`updateOrCreate`/`sync`), bármikor újrafuttatható.
 - **Worker/scheduler**: a Sail image-et publikáltuk (`backend/docker/8.5/`, NEM a `vendor/`-ból épül többé), a `supervisord.conf` futtat egy `queue-worker` (NAV job) és egy `scheduler` (MNB) processzt — ezeknek menniük kell automatikusan, nem kell kézzel `queue:work`-öt indítani.
+- **`scribe:generate` — mindig `--user sail` flaggel:** `docker compose exec --user sail laravel.test php artisan scribe:generate`. Ha root-ként fut (flag nélkül), a generált könyvtárak (`storage/app/private/scribe/`, `.scribe/`, `public/vendor/scribe/`, `resources/views/scribe/`) `root:root` tulajdonba kerülnek (`700` jogokkal), a PHP-FPM `sail` user nem tudja olvasni → `file_exists()` visszaad `false`-t → 503 válasz. Ha root-tulajdonú fájlok keletkeztek: `docker compose exec laravel.test chown -R sail:sail .scribe storage/app/private/scribe public/vendor/scribe resources/views/scribe`.
 
 ## Demo bejelentkezés (helyi teszteléshez)
 

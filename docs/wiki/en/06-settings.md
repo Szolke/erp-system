@@ -88,3 +88,27 @@ across three languages (HU / EN / DE). Changes take effect immediately on the us
 interface.
 
 Requires the `company.manage` permission.
+
+---
+
+## API Tester (Settings → API Tester)
+
+An interactive interface for browsing and testing the ERP's own REST API. The left panel
+shows all available endpoints in collapsible groups (method badge + path); the right panel
+displays the endpoint details: parameter table, request body schema, and the "Send request"
+card.
+
+**Sending a request:**
+- Path parameters such as `{invoice}` or `{partner}` are filled in dedicated input fields.
+- Query parameters (e.g. `page`, `per_page`) can also be provided.
+- POST/PUT/PATCH methods show a JSON body textarea, pre-filled from the schema.
+- After clicking **Send**, the response (HTTP status, duration, JSON body) appears at the
+  bottom of the right panel.
+
+**Protection for irreversible operations:**  
+For cancel (`/cancel`), SimplePay refund (`/refund`), PDF regeneration (`/regenerate-pdf`),
+and delete (DELETE) endpoints, a red-bordered warning modal appears instead of the standard
+confirmation. It displays the active company name and requires ticking an "I understand —
+this operation is irreversible" checkbox before the Send button becomes active.
+
+Requires the `api_tester.use` permission.

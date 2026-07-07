@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReceiptController;
 use App\Http\Controllers\Api\SimplePayController;
 use App\Http\Controllers\Api\SimplePayIpnController;
+use App\Http\Controllers\Api\TokenAuthController;
 use App\Http\Controllers\Api\UserCompanyController;
 use App\Http\Controllers\Api\UserController;
 use App\Models\PaymentMethod;
@@ -33,6 +34,14 @@ Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:10,1');
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+// Token-auth (külső kliensek: mobil, API-integrációk)
+// company.context NEM kell ide — a token-login nem igényel cég-kontextust,
+// a revoke-hoz sem szükséges (nincs cég-szintű adat-hozzáférés).
+Route::post('/auth/token', [TokenAuthController::class, 'issue'])
+    ->middleware('throttle:5,1');
+Route::post('/auth/token/revoke', [TokenAuthController::class, 'revoke'])
+    ->middleware('auth:sanctum');
 
 // Public — called directly by SimplePay's servers, authenticated via the
 // HMAC Signature header instead of Sanctum (see SimplePayIpnController).

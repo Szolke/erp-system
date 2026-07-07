@@ -26,8 +26,10 @@ class EnsureCompanyContext
             return $next($request);
         }
 
+        // hasSession() = false Bearer token kéréseknél (Sanctum nem indít session-t
+        // nem-stateful origin esetén) → session() hívás RuntimeException-t dobna.
         $companyId = $request->header('X-Company-Id')
-            ?? $request->session()->get('current_company_id')
+            ?? ($request->hasSession() ? $request->session()->get('current_company_id') : null)
             ?? $user->default_company_id;
 
         $companyId = $companyId !== null ? (int) $companyId : null;
@@ -36,7 +38,7 @@ class EnsureCompanyContext
             abort(403, 'A felhasználó nem tagja a megadott cégnek.');
         }
 
-        if ($companyId !== null) {
+        if ($companyId !== null && $request->hasSession()) {
             $request->session()->put('current_company_id', $companyId);
         }
 

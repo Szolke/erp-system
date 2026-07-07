@@ -6,7 +6,7 @@ import { company as companyApi } from '../api/company'
 import CompanySwitcher from './CompanySwitcher'
 import { applySidebarTheme } from '../utils/sidebarTheme'
 import {
-  FileText, Users2, Package,
+  FileText, Users2, Package, BookOpen,
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers,
   Settings2, ChevronLeft, ChevronRight,
   LogOut, Moon, Sun, Terminal,
@@ -58,9 +58,10 @@ export default function Layout() {
   async function handleLocale(loc) { await setLocale(loc, true) }
 
   const topNavItems = [
-    { to: '/documents', label: t('nav.documents'), icon: FileText, anyPerm: ['invoice.view', 'receipt.view'] },
-    { to: '/partners',  label: t('nav.partners'),  icon: Users2,   perm: 'partner.view' },
-    { to: '/products',  label: t('nav.products'),  icon: Package,  perm: 'product.view' },
+    { to: '/documents', label: t('nav.documents'), icon: FileText,  anyPerm: ['invoice.view', 'receipt.view'] },
+    { to: '/partners',  label: t('nav.partners'),  icon: Users2,    perm: 'partner.view' },
+    { to: '/products',  label: t('nav.products'),  icon: Package,   perm: 'product.view' },
+    { to: '/wiki',      label: t('nav.wiki'),       icon: BookOpen,  public: true },
   ]
 
   const settingsItems = [
@@ -75,7 +76,7 @@ export default function Layout() {
     { to: '/settings/api-tester',      label: t('nav.api_tester'),    icon: Terminal,   perm: 'api_tester.use' },
   ]
 
-  const visibleTop      = topNavItems.filter((i) => i.anyPerm ? i.anyPerm.some((p) => can(p)) : can(i.perm))
+  const visibleTop      = topNavItems.filter((i) => i.public || (i.anyPerm ? i.anyPerm.some((p) => can(p)) : can(i.perm)))
   const visibleSettings = settingsItems.filter((i) =>
     i.superadminOnly ? user?.is_superadmin : can(i.perm)
   )

@@ -24,6 +24,7 @@ import TranslationPage from './pages/settings/TranslationPage'
 import CustomFieldsPage from './pages/settings/CustomFieldsPage'
 import CompanyListPage from './pages/companies/CompanyListPage'
 import ApiTesterPage from './pages/settings/ApiTesterPage'
+import WikiPage from './pages/WikiPage'
 
 export default function App() {
   return (
@@ -62,6 +63,7 @@ export default function App() {
           <Route path="settings/custom-fields" element={<CustomFieldsPage />} />
           <Route path="companies" element={<CompanyListPage />} />
           <Route path="settings/api-tester" element={<ApiTesterPage />} />
+          <Route path="wiki" element={<WikiPage />} />
         </Route>
       </Routes>
   )

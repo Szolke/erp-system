@@ -65,6 +65,7 @@ services:
             - '5174:5173'
         volumes:
             - './frontend:/app'
+            - './docs/wiki:/app/wiki'
         environment:
             - VITE_API_URL=http://localhost
         networks:

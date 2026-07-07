@@ -25,6 +25,7 @@ class TranslationSeeder extends Seeder
             ['nav', 'translations',   'Fordítások',           'Translations',       'Übersetzungen'],
             ['nav', 'custom_fields', 'Egyéni mezők',         'Custom fields',      'Benutzerdefinierte Felder'],
             ['nav', 'api_tester',    'API tesztelő',         'API tester',         'API-Tester'],
+            ['nav', 'wiki',          'Kézikönyv',            'User guide',         'Benutzerhandbuch'],
             ['nav', 'simplepay',      'SimplePay',            'SimplePay',          'SimplePay'],
             ['nav', 'collapse',       'Összecsukás',          'Collapse',           'Einklappen'],
             ['nav', 'dark_mode',      'Sötét mód',            'Dark mode',          'Dunkler Modus'],
@@ -332,6 +333,10 @@ class TranslationSeeder extends Seeder
             ['api_tester', 'destructive_warning', 'Ez a művelet VALÓS adatokon hajtódik végre az aktív cégnél, és nem vonható vissza. Kérjük, légy biztos a döntésedben.', 'This operation runs on REAL data in the active company and cannot be undone. Please be sure before proceeding.', 'Diese Operation läuft auf ECHTEN Daten der aktiven Firma und kann nicht rückgängig gemacht werden.'],
             ['api_tester', 'destructive_company', 'Aktív cég:',                                        'Active company:',                            'Aktive Firma:'],
             ['api_tester', 'destructive_ack',   'Megértettem — ez a művelet visszafordíthatatlan',     'I understand — this operation is irreversible', 'Ich verstehe — diese Operation ist nicht umkehrbar'],
+
+            // ── Wiki ──────────────────────────────────────────────────────────
+            ['wiki', 'search_placeholder', 'Keresés a kézikönyvben…', 'Search user guide…',  'Handbuch durchsuchen…'],
+            ['wiki', 'no_results',         'Nincs találat',           'No results',           'Keine Ergebnisse'],
         ];
 
         $now = now();

@@ -49,7 +49,7 @@ export default function ProductListPage() {
     <div>
       <div className="page-header">
         <h1 className="page-title">{t('product.title')}</h1>
-        {can('product.create') && <Link to="/products/new" className="btn btn-primary">+ {t('product.new')}</Link>}
+        {can('product.create') && <Link to="/products/new" className="btn btn-primary">{t('product.new')}</Link>}
       </div>
       <form className="search-row" onSubmit={(e) => { e.preventDefault(); setPage(1); load(search, perPage, 1) }}>
         <input placeholder="Név vagy cikkszám…" value={search} onChange={(e) => setSearch(e.target.value)} />

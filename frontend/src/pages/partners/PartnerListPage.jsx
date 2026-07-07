@@ -49,7 +49,7 @@ export default function PartnerListPage() {
     <div>
       <div className="page-header">
         <h1 className="page-title">{t('partner.title')}</h1>
-        {can('partner.create') && <Link to="/partners/new" className="btn btn-primary">+ {t('partner.new')}</Link>}
+        {can('partner.create') && <Link to="/partners/new" className="btn btn-primary">{t('partner.new')}</Link>}
       </div>
       <form className="search-row" onSubmit={(e) => { e.preventDefault(); setPage(1); load(search, perPage, 1) }}>
         <input placeholder="Név vagy adószám…" value={search} onChange={(e) => setSearch(e.target.value)} />

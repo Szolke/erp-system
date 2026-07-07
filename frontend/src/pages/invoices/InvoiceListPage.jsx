@@ -44,7 +44,7 @@ export default function InvoiceListPage() {
       <div className="page-header">
         <h1 className="page-title">{t('invoice.title')}</h1>
         {can('invoice.create') && (
-          <Link to="/invoices/new" className="btn btn-primary">+ {t('invoice.new')}</Link>
+          <Link to="/invoices/new" className="btn btn-primary">{t('invoice.new')}</Link>
         )}
       </div>
       <form className="search-row" onSubmit={handleSearch}>

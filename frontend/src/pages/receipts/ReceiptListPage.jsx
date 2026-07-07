@@ -35,7 +35,7 @@ export default function ReceiptListPage() {
     <div>
       <div className="page-header">
         <h1 className="page-title">{t('receipt.title')}</h1>
-        {can('receipt.create') && <Link to="/receipts/new" className="btn btn-primary">+ {t('receipt.new')}</Link>}
+        {can('receipt.create') && <Link to="/receipts/new" className="btn btn-primary">{t('receipt.new')}</Link>}
       </div>
       <div className="search-row">
         <PerPageSelector value={perPage} onChange={handlePerPage} />

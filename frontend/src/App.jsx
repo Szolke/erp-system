@@ -23,6 +23,7 @@ import DocumentListPage from './pages/documents/DocumentListPage'
 import TranslationPage from './pages/settings/TranslationPage'
 import CustomFieldsPage from './pages/settings/CustomFieldsPage'
 import CompanyListPage from './pages/companies/CompanyListPage'
+import ApiTesterPage from './pages/settings/ApiTesterPage'
 
 export default function App() {
   return (
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="settings/translations" element={<TranslationPage />} />
           <Route path="settings/custom-fields" element={<CustomFieldsPage />} />
           <Route path="companies" element={<CompanyListPage />} />
+          <Route path="settings/api-tester" element={<ApiTesterPage />} />
         </Route>
       </Routes>
   )

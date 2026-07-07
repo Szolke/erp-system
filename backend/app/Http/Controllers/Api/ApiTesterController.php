@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\Yaml\Yaml;
 
+/** @group API tesztelő */
 class ApiTesterController extends Controller
 {
     public function openapi(): JsonResponse

@@ -9,7 +9,7 @@ import {
   FileText, Users2, Package,
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers,
   Settings2, ChevronLeft, ChevronRight,
-  LogOut, Moon, Sun,
+  LogOut, Moon, Sun, Terminal,
 } from 'lucide-react'
 
 export default function Layout() {
@@ -72,6 +72,7 @@ export default function Layout() {
     { to: '/settings/document-series', label: t('nav.doc_series'),    icon: Hash,       perm: 'document_series.manage' },
     { to: '/settings/translations',    label: t('nav.translations'),  icon: Languages,  perm: 'company.manage' },
     { to: '/settings/custom-fields',   label: t('nav.custom_fields'), icon: Sliders,    perm: 'company.manage' },
+    { to: '/settings/api-tester',      label: t('nav.api_tester'),    icon: Terminal,   perm: 'api_tester.use' },
   ]
 
   const visibleTop      = topNavItems.filter((i) => i.anyPerm ? i.anyPerm.some((p) => can(p)) : can(i.perm))
@@ -165,7 +166,7 @@ export default function Layout() {
 
       </aside>
       <main className="main-content">
-        <Outlet />
+        <Outlet key={activeCompanyId} />
       </main>
     </div>
   )

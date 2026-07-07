@@ -39,12 +39,21 @@ function EffectToggle({ effect, onChange, disabled }) {
   )
 }
 
+function fmtDatetime(str) {
+  if (!str) return null
+  return new Date(str).toLocaleString('hu-HU', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+  })
+}
+
 export default function UserDetailPage() {
   const { id } = useParams()
   const { user: authUser, can } = useAuth()
   const { t } = useTranslation()
   const toast = useToast()
   const isSuperadmin = authUser?.is_superadmin
+  const isOwnProfile = authUser?.id === Number(id)
 
   const [data, setData]           = useState(null)
   const [allPerms, setAllPerms]   = useState([])
@@ -61,6 +70,24 @@ export default function UserDetailPage() {
   const [allCompanies,  setAllCompanies]  = useState([])
   const [addCompanyId,  setAddCompanyId]  = useState('')
 
+  // Token-szekció state (superadmin vagy saját profil)
+  const canViewTokens = isSuperadmin || isOwnProfile
+  const [tokens, setTokens]           = useState([])
+  const [tokensLoading, setTokensLoading] = useState(false)
+
+  async function loadTokens() {
+    if (!canViewTokens) return
+    setTokensLoading(true)
+    try {
+      const res = await usersApi.listTokens(id)
+      setTokens(res.data.data ?? [])
+    } catch {
+      setTokens([])
+    } finally {
+      setTokensLoading(false)
+    }
+  }
+
   async function load() {
     const promises = [
       usersApi.get(id),
@@ -71,22 +98,37 @@ export default function UserDetailPage() {
       promises.push(usersApi.listCompanies(id))
       promises.push(companiesApi.list({ per_page: 200 }))
     }
-    const [uRes, pRes, gRes, ucRes, acRes] = await Promise.all(promises)
-    const d = uRes.data
+
+    // allSettled: ha valamelyik részleges hiba (pl. group.view hiánya), az oldal
+    // akkor is betölt, csak az érintett szekció marad üres.
+    const [uRes, pRes, gRes, ucRes, acRes] = await Promise.allSettled(promises)
+
+    if (uRes.status === 'rejected') {
+      setLoading(false)
+      return
+    }
+
+    const d = uRes.value.data
     setData(d)
-    setAllPerms(pRes.data.data ?? [])
-    setAllGroups(gRes.data.data ?? [])
+    setAllPerms(pRes.status === 'fulfilled' ? (pRes.value.data.data ?? []) : [])
+    setAllGroups(gRes.status === 'fulfilled' ? (gRes.value.data.data ?? []) : [])
+
     const map = {}
     Object.entries(d.overrides ?? {}).forEach(([k, v]) => { map[Number(k)] = v })
     setOverrides(map)
+
     if (isSuperadmin) {
-      setUserCompanies(ucRes?.data?.data ?? [])
-      setAllCompanies(acRes?.data?.data ?? [])
+      setUserCompanies(ucRes?.status === 'fulfilled' ? (ucRes.value?.data?.data ?? []) : [])
+      setAllCompanies(acRes?.status === 'fulfilled' ? (acRes.value?.data?.data ?? []) : [])
     }
+
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    load()
+    loadTokens()
+  }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function setOverride(permId, effect) {
     setOverrides((prev) => ({ ...prev, [permId]: effect }))
@@ -98,7 +140,6 @@ export default function UserDetailPage() {
     setError('')
     setSaved(false)
     try {
-      // null értékek is elküldendők (override törlés)
       const payload = {}
       allPerms.forEach((p) => { payload[p.id] = overrides[p.id] ?? null })
       const res = await usersApi.syncOverrides(id, payload)
@@ -162,19 +203,28 @@ export default function UserDetailPage() {
     }
   }
 
+  async function handleRevokeToken(tokenId, deviceName) {
+    if (!window.confirm(t('user.token_revoke_confirm'))) return
+    try {
+      await usersApi.deleteToken(id, tokenId)
+      toast(t('user.token_revoked'), 'success')
+      loadTokens()
+    } catch (err) {
+      toast(err.response?.data?.message ?? t('common.error'), 'error')
+    }
+  }
+
   if (loading) return <p className="text-muted">{t('common.loading')}</p>
-  if (!data) return <p className="text-muted">{t('common.not_found')}</p>
+  if (!data)   return <p className="text-muted">{t('common.not_found')}</p>
 
   const { user, from_groups: fromGroups } = data
   const fromGroupSet = new Set(fromGroups ?? [])
   const canManage   = can('group.manage')
   const canOverride = can('permission.override')
 
-  // Cég-szekció: allCompanies mínusz már hozzárendelt cégek
-  const assignedCompanyIds   = new Set(userCompanies.map((c) => c.id))
-  const availableCompanies   = allCompanies.filter((c) => !assignedCompanyIds.has(c.id))
+  const assignedCompanyIds = new Set(userCompanies.map((c) => c.id))
+  const availableCompanies = allCompanies.filter((c) => !assignedCompanyIds.has(c.id))
 
-  // Modulonként csoportosítva
   const byModule = allPerms.reduce((acc, p) => {
     ;(acc[p.module] ??= []).push(p)
     return acc
@@ -256,6 +306,53 @@ export default function UserDetailPage() {
                         onClick={() => handleDetachCompany(c.id)}
                       >
                         {t('group.remove_member')}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      {/* Tokenek / eszközök — superadmin vagy saját profil */}
+      {canViewTokens && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <strong>{t('user.tokens_section')}</strong>
+
+          {tokensLoading ? (
+            <p className="text-muted" style={{ marginTop: 12, fontSize: 13 }}>{t('common.loading')}</p>
+          ) : tokens.length === 0 ? (
+            <p className="text-muted" style={{ marginTop: 12, fontSize: 13 }}>{t('user.no_tokens')}</p>
+          ) : (
+            <table style={{ marginTop: 12 }}>
+              <thead>
+                <tr>
+                  <th>{t('user.token_device')}</th>
+                  <th>{t('user.token_created')}</th>
+                  <th>{t('user.token_last_used')}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {tokens.map((tok) => (
+                  <tr key={tok.id}>
+                    <td><strong>{tok.name}</strong></td>
+                    <td className="text-muted" style={{ whiteSpace: 'nowrap', fontSize: 13 }}>
+                      {fmtDatetime(tok.created_at)}
+                    </td>
+                    <td className="text-muted" style={{ whiteSpace: 'nowrap', fontSize: 13 }}>
+                      {tok.last_used_at
+                        ? fmtDatetime(tok.last_used_at)
+                        : <em>{t('user.token_never_used')}</em>}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleRevokeToken(tok.id, tok.name)}
+                      >
+                        {t('user.token_revoke')}
                       </button>
                     </td>
                   </tr>

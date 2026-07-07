@@ -94,6 +94,8 @@ body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; color
 .sidebar-user-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .sidebar-logout { display: flex; align-items: center; gap: 6px; color: color-mix(in srgb, var(--sidebar-text-color, #fff) 70%, transparent) !important; white-space: nowrap; font-size: 12px; }
 .user-name { color: color-mix(in srgb, var(--sidebar-text-color, #fff) 55%, transparent); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-profile-link { display: flex; align-items: center; gap: 5px; color: color-mix(in srgb, var(--sidebar-text-color, #fff) 55%, transparent); text-decoration: none; min-width: 0; overflow: hidden; }
+.sidebar-profile-link:hover { color: color-mix(in srgb, var(--sidebar-text-color, #fff) 85%, transparent); }
 
 .main-content { flex: 1; padding: 28px 32px; overflow-y: auto; }
 .loading-screen { display: flex; align-items: center; justify-content: center; height: 100vh; color: var(--color-muted); }

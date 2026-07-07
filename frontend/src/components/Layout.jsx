@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTranslation } from '../contexts/TranslationContext'
 import { company as companyApi } from '../api/company'
@@ -145,7 +145,10 @@ export default function Layout() {
                 </button>
               </div>
               <div className="sidebar-user-row">
-                <span className="user-name">{user?.name}</span>
+                <Link to={`/users/${user?.id}`} className="sidebar-profile-link" title={t('nav.my_profile')}>
+                  <UserRound size={12} className="nav-icon" />
+                  <span className="user-name">{user?.name}</span>
+                </Link>
                 <button className="btn-link sidebar-logout" onClick={handleLogout} title={t('nav.logout')}>
                   <LogOut size={14} />
                   <span>{t('nav.logout')}</span>
@@ -154,6 +157,9 @@ export default function Layout() {
             </>
           ) : (
             <>
+              <Link to={`/users/${user?.id}`} className="sidebar-profile-link" title={t('nav.my_profile')}>
+                <UserRound size={14} />
+              </Link>
               <button className="theme-toggle-btn" onClick={toggleTheme}
                 title={theme === 'dark' ? t('nav.light_mode') : t('nav.dark_mode')}>
                 {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}

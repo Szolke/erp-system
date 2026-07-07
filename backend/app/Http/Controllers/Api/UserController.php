@@ -114,9 +114,13 @@ class UserController extends Controller
         return response()->noContent();
     }
 
-    public function show(User $user)
+    public function show(Request $request, User $user)
     {
-        $this->authorize('user.view');
+        // Saját profil: user.view jog nélkül is megtekinthető (token-eszközkezelőhöz szükséges).
+        // Más user profilja: user.view jog kell.
+        if ($request->user()->id !== $user->id) {
+            $this->authorize('user.view');
+        }
         $this->ensureSameCompany($user);
 
         $companyId = $this->currentCompany->id();
@@ -172,7 +176,7 @@ class UserController extends Controller
             }
         }
 
-        return $this->show($user);
+        return $this->show($request, $user);
     }
 
     private function ensureSameCompany(User $user): void

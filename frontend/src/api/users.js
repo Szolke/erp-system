@@ -11,4 +11,7 @@ export const users = {
   listCompanies:  (userId)             => client.get(`/api/users/${userId}/companies`),
   attachCompany:  (userId, companyId)  => client.post(`/api/users/${userId}/companies/${companyId}`),
   detachCompany:  (userId, companyId)  => client.delete(`/api/users/${userId}/companies/${companyId}`),
+
+  listTokens:  (userId)             => client.get(`/api/users/${userId}/tokens`),
+  deleteToken: (userId, tokenId)    => client.delete(`/api/users/${userId}/tokens/${tokenId}`),
 }

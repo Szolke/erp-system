@@ -346,6 +346,18 @@ class TranslationSeeder extends Seeder
             ['user', 'company_added',      'Cég sikeresen hozzárendelve.',                    'Company assigned successfully.',               'Firma erfolgreich zugewiesen.'],
             ['user', 'company_removed',    'Cég leválasztva.',                                'Company removed.',                             'Firma entfernt.'],
 
+            // ── Token-eszközkezelő ─────────────────────────────────────────────
+            ['nav',  'my_profile',             'Saját profil',                                    'My profile',                                   'Mein Profil'],
+            ['user', 'tokens_section',         'Bejelentkezett eszközök / tokenek',               'Active tokens / devices',                      'Aktive Token / Geräte'],
+            ['user', 'token_device',           'Eszköznév',                                       'Device name',                                  'Gerätename'],
+            ['user', 'token_created',          'Létrehozva',                                      'Created',                                      'Erstellt'],
+            ['user', 'token_last_used',        'Utoljára aktív',                                  'Last active',                                  'Zuletzt aktiv'],
+            ['user', 'token_never_used',       'Még nem használt',                                'Not used yet',                                 'Noch nicht verwendet'],
+            ['user', 'token_revoke',           'Visszavonás',                                     'Revoke',                                       'Widerrufen'],
+            ['user', 'token_revoke_confirm',   'Biztosan visszavonod ezt az eszközt? A rá kapcsolódó alkalmazásnak újra be kell jelentkeznie.', 'Are you sure you want to revoke this device? The connected app will need to log in again.', 'Dieses Gerät wirklich widerrufen? Die verbundene App muss sich erneut anmelden.'],
+            ['user', 'token_revoked',          'Eszköz visszavonva.',                             'Device revoked.',                              'Gerät widerrufen.'],
+            ['user', 'no_tokens',              'Nincs kiadott token / eszköz.',                   'No active tokens / devices.',                  'Keine aktiven Token / Geräte.'],
+
             ['company', 'show_users',      'Felhasználók',                                    'Users',                                        'Benutzer'],
             ['company', 'users_section',   'Felhasználók kezelése',                           'Manage users',                                 'Benutzer verwalten'],
             ['company', 'add_user',        'Felhasználó hozzáadása',                          'Add user',                                     'Benutzer hinzufügen'],

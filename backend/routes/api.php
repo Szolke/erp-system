@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\SimplePayIpnController;
 use App\Http\Controllers\Api\TokenAuthController;
 use App\Http\Controllers\Api\UserCompanyController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserTokenController;
 use App\Models\PaymentMethod;
 use App\Models\Permission;
 use App\Models\VatRate;
@@ -110,6 +111,10 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::get('users/{user}/companies', [UserCompanyController::class, 'index']);
     Route::post('users/{user}/companies/{company}', [UserCompanyController::class, 'attach']);
     Route::delete('users/{user}/companies/{company}', [UserCompanyController::class, 'detach']);
+
+    // Token-eszközkezelő: superadmin bármely user, normál user csak saját
+    Route::get('users/{user}/tokens', [UserTokenController::class, 'index']);
+    Route::delete('users/{user}/tokens/{tokenId}', [UserTokenController::class, 'destroy']);
 
     // Csoportok
     Route::apiResource('groups', GroupController::class)->only(['index', 'store', 'show', 'update', 'destroy']);

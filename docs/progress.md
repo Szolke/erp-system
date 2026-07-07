@@ -8,7 +8,7 @@
 > - **[CHANGELOG.md](CHANGELOG.md)** — történelmi lépés-napló: lépések leírása, commit hash-ek, fájllisták
 > - **[er-model.md](er-model.md)** — részletes tábla-/mezőszintű adatmodell
 
-Utolsó frissítés: 2026-07-07, Wiki viewer + keresés elkészítve (`70cd459`).
+Utolsó frissítés: 2026-07-07, Superadmin user–cég M:N hozzárendelés elkészítve (`d4f7962`).
 
 ## Kész modulok (összefoglaló)
 
@@ -24,6 +24,7 @@ Megvalósított főbb területek:
 - i18n (HU/EN/DE), dark mode, API dokumentáció (Scribe, 73 endpoint)
 - API tesztelő (`/settings/api-tester`): Scribe spec explorer, élő API hívás (path/query/body paraméterek), kétszintű megerősítő modal (normál write vs. visszafordíthatatlan: cancel/refund/regenerate-pdf/DELETE)
 - Felhasználói wiki (`docs/wiki/`, HU+EN, 17 Markdown-fájl, 8 fejezet)
+- **Superadmin user–cég M:N hozzárendelés:** `GET/POST/DELETE /api/users/{user}/companies[/{company}]` — superadmin hozzárendeli/leválasztja a usereket cégekhez; utolsó cégből nem lehet kivenni (422); audit log; `CompanyListPage` felhasználók modal; `UserDetailPage` cégek szekció; 13 feature teszt
 - Bizonylatlista (UNION ALL, szűrők), sidebar (összecsukó, accent-szín 18 paletta, CSS-változók)
 - Toast értesítések, pagination UI, szuperadmin-bootstrap (`erp:create-superadmin`)
 

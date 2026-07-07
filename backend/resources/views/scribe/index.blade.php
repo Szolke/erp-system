@@ -66,6 +66,16 @@
                     <a href="#authenticating-requests">Authenticating requests</a>
                 </li>
                             </ul>
+                    <ul id="tocify-header-api-tesztelo" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="api-tesztelo">
+                    <a href="#api-tesztelo">API tesztelő</a>
+                </li>
+                                    <ul id="tocify-subheader-api-tesztelo" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="api-tesztelo-GETapi-api-tester-openapi">
+                                <a href="#api-tesztelo-GETapi-api-tester-openapi">GET api/api-tester/openapi</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
                     <ul id="tocify-header-audit-naplo" class="tocify-header">
                 <li class="tocify-item level-1" data-unique="audit-naplo">
                     <a href="#audit-naplo">Audit napló</a>
@@ -223,9 +233,6 @@ Returns all definitions for the active company, optionally filtered by entity ty
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="endpoints-GETapi-permissions">
                                 <a href="#endpoints-GETapi-permissions">GET api/permissions</a>
-                            </li>
-                                                                                <li class="tocify-item level-2" data-unique="endpoints-GETapi-api-tester-openapi">
-                                <a href="#endpoints-GETapi-api-tester-openapi">GET api/api-tester/openapi</a>
                             </li>
                                                                         </ul>
                             </ul>
@@ -421,7 +428,7 @@ Returns all definitions for the active company, optionally filtered by entity ty
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: July 6, 2026</li>
+        <li>Last updated: July 7, 2026</li>
     </ul>
 </div>
 
@@ -443,7 +450,154 @@ You can switch the language used with the tabs at the top right (or from the nav
 <p>All authenticated endpoints are marked with a <code>requires authentication</code> badge in the documentation below.</p>
 <p>Az API Sanctum SPA <strong>cookie-alapú</strong> session hitelesítést használ (nem Bearer token). A "Try it out" funkcióhoz először hívd meg a <code>GET /sanctum/csrf-cookie</code> végpontot, majd <code>POST /login</code>-nal jelentkezz be.</p>
 
-        <h1 id="audit-naplo">Audit napló</h1>
+        <h1 id="api-tesztelo">API tesztelő</h1>
+
+    
+
+                                <h2 id="api-tesztelo-GETapi-api-tester-openapi">GET api/api-tester/openapi</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-api-tester-openapi">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/api-tester/openapi" \
+    --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/api-tester/openapi"
+);
+
+const headers = {
+    "Authorization": "Bearer 6g43cv8PD1aE5beadkZfhV6",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-api-tester-openapi">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+access-control-allow-origin: http://localhost:5174
+access-control-allow-credentials: true
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-api-tester-openapi" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-api-tester-openapi"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-api-tester-openapi"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-api-tester-openapi" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-api-tester-openapi">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-api-tester-openapi" data-method="GET"
+      data-path="api/api-tester/openapi"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-api-tester-openapi', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-api-tester-openapi"
+                    onclick="tryItOut('GETapi-api-tester-openapi');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-api-tester-openapi"
+                    onclick="cancelTryOut('GETapi-api-tester-openapi');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-api-tester-openapi"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/api-tester/openapi</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-api-tester-openapi"
+               value="Bearer 6g43cv8PD1aE5beadkZfhV6"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer 6g43cv8PD1aE5beadkZfhV6</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-api-tester-openapi"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-api-tester-openapi"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                <h1 id="audit-naplo">Audit napló</h1>
 
     
 
@@ -773,7 +927,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"payment_method_id\": 16,
     \"amount\": 39,
-    \"paid_at\": \"2026-07-06T20:39:46\",
+    \"paid_at\": \"2026-07-07T11:50:19\",
     \"reference\": \"g\"
 }"
 </code></pre></div>
@@ -793,7 +947,7 @@ const headers = {
 let body = {
     "payment_method_id": 16,
     "amount": 39,
-    "paid_at": "2026-07-06T20:39:46",
+    "paid_at": "2026-07-07T11:50:19",
     "reference": "g"
 };
 
@@ -935,10 +1089,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="paid_at"                data-endpoint="POSTapi-invoices--invoice_id--payments"
-               value="2026-07-06T20:39:46"
+               value="2026-07-07T11:50:19"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-06T20:39:46</code></p>
+<p>Must be a valid date. Example: <code>2026-07-07T11:50:19</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>reference</code></b>&nbsp;&nbsp;
@@ -3287,8 +3441,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"invoice_header_text\": \"architecto\",
     \"invoice_footer_text\": \"architecto\",
     \"base_currency\": \"ngz\",
-    \"is_active\": true,
-    \"nav_environment\": \"production\"
+    \"is_active\": false,
+    \"nav_environment\": \"test\"
 }"
 </code></pre></div>
 
@@ -3318,8 +3472,8 @@ let body = {
     "invoice_header_text": "architecto",
     "invoice_footer_text": "architecto",
     "base_currency": "ngz",
-    "is_active": true,
-    "nav_environment": "production"
+    "is_active": false,
+    "nav_environment": "test"
 };
 
 fetch(url, {
@@ -3592,7 +3746,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>nav_environment</code></b>&nbsp;&nbsp;
@@ -3601,10 +3755,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="nav_environment"                data-endpoint="PUTapi-company"
-               value="production"
+               value="test"
                data-component="body">
     <br>
-<p>Example: <code>production</code></p>
+<p>Example: <code>test</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>test</code></li> <li><code>production</code></li></ul>
         </div>
@@ -3628,7 +3782,7 @@ Must be one of:
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
-    --form "logo=@/tmp/php6urkoha1kac25bdIeQu" </code></pre></div>
+    --form "logo=@/tmp/phpscakl4gtpb5h5fd63iW" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -3749,7 +3903,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/php6urkoha1kac25bdIeQu</code></p>
+<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpscakl4gtpb5h5fd63iW</code></p>
         </div>
         </form>
 
@@ -4768,7 +4922,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"options\": [
         \"n\"
     ],
-    \"is_required\": true,
+    \"is_required\": false,
     \"sort_order\": 84,
     \"is_active\": false
 }"
@@ -4792,7 +4946,7 @@ let body = {
     "options": [
         "n"
     ],
-    "is_required": true,
+    "is_required": false,
     "sort_order": 84,
     "is_active": false
 };
@@ -4962,7 +5116,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>sort_order</code></b>&nbsp;&nbsp;
@@ -5845,149 +5999,6 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                         </form>
 
-                    <h2 id="endpoints-GETapi-api-tester-openapi">GET api/api-tester/openapi</h2>
-
-<p>
-<small class="badge badge-darkred">requires authentication</small>
-</p>
-
-
-
-<span id="example-requests-GETapi-api-tester-openapi">
-<blockquote>Example request:</blockquote>
-
-
-<div class="bash-example">
-    <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/api-tester/openapi" \
-    --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
-    --header "Content-Type: application/json" \
-    --header "Accept: application/json"</code></pre></div>
-
-
-<div class="javascript-example">
-    <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/api-tester/openapi"
-);
-
-const headers = {
-    "Authorization": "Bearer 6g43cv8PD1aE5beadkZfhV6",
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-};
-
-
-fetch(url, {
-    method: "GET",
-    headers,
-}).then(response =&gt; response.json());</code></pre></div>
-
-</span>
-
-<span id="example-responses-GETapi-api-tester-openapi">
-            <blockquote>
-            <p>Example response (401):</p>
-        </blockquote>
-                <details class="annotation">
-            <summary style="cursor: pointer;">
-                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
-            </summary>
-            <pre><code class="language-http">cache-control: no-cache, private
-content-type: application/json
-access-control-allow-origin: http://localhost:5174
-access-control-allow-credentials: true
- </code></pre></details>         <pre>
-
-<code class="language-json" style="max-height: 300px;">{
-    &quot;message&quot;: &quot;Unauthenticated.&quot;
-}</code>
- </pre>
-    </span>
-<span id="execution-results-GETapi-api-tester-openapi" hidden>
-    <blockquote>Received response<span
-                id="execution-response-status-GETapi-api-tester-openapi"></span>:
-    </blockquote>
-    <pre class="json"><code id="execution-response-content-GETapi-api-tester-openapi"
-      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
-</span>
-<span id="execution-error-GETapi-api-tester-openapi" hidden>
-    <blockquote>Request failed with error:</blockquote>
-    <pre><code id="execution-error-message-GETapi-api-tester-openapi">
-
-Tip: Check that you&#039;re properly connected to the network.
-If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
-You can check the Dev Tools console for debugging information.</code></pre>
-</span>
-<form id="form-GETapi-api-tester-openapi" data-method="GET"
-      data-path="api/api-tester/openapi"
-      data-authed="1"
-      data-hasfiles="0"
-      data-isarraybody="0"
-      autocomplete="off"
-      onsubmit="event.preventDefault(); executeTryOut('GETapi-api-tester-openapi', this);">
-    <h3>
-        Request&nbsp;&nbsp;&nbsp;
-                    <button type="button"
-                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
-                    id="btn-tryout-GETapi-api-tester-openapi"
-                    onclick="tryItOut('GETapi-api-tester-openapi');">Try it out ⚡
-            </button>
-            <button type="button"
-                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
-                    id="btn-canceltryout-GETapi-api-tester-openapi"
-                    onclick="cancelTryOut('GETapi-api-tester-openapi');" hidden>Cancel 🛑
-            </button>&nbsp;&nbsp;
-            <button type="submit"
-                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
-                    id="btn-executetryout-GETapi-api-tester-openapi"
-                    data-initial-text="Send Request 💥"
-                    data-loading-text="⏱ Sending..."
-                    hidden>Send Request 💥
-            </button>
-            </h3>
-            <p>
-            <small class="badge badge-green">GET</small>
-            <b><code>api/api-tester/openapi</code></b>
-        </p>
-                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Authorization" class="auth-value"               data-endpoint="GETapi-api-tester-openapi"
-               value="Bearer 6g43cv8PD1aE5beadkZfhV6"
-               data-component="header">
-    <br>
-<p>Example: <code>Bearer 6g43cv8PD1aE5beadkZfhV6</code></p>
-            </div>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Content-Type"                data-endpoint="GETapi-api-tester-openapi"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                                <div style="padding-left: 28px; clear: unset;">
-                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
-&nbsp;
- &nbsp;
- &nbsp;
-                <input type="text" style="display: none"
-                              name="Accept"                data-endpoint="GETapi-api-tester-openapi"
-               value="application/json"
-               data-component="header">
-    <br>
-<p>Example: <code>application/json</code></p>
-            </div>
-                        </form>
-
                 <h1 id="felhasznalok">Felhasználók</h1>
 
     
@@ -6484,7 +6495,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Accept: application/json" \
     --data "{
     \"name\": \"b\",
-    \"is_active\": true
+    \"is_active\": false
 }"
 </code></pre></div>
 
@@ -6502,7 +6513,7 @@ const headers = {
 
 let body = {
     "name": "b",
-    "is_active": true
+    "is_active": false
 };
 
 fetch(url, {
@@ -6648,7 +6659,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
@@ -8225,8 +8236,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"partner_id\": 16,
     \"payment_method_id\": 16,
-    \"issue_date\": \"2026-07-06T20:39:46\",
-    \"fulfillment_date\": \"2026-07-06T20:39:46\",
+    \"issue_date\": \"2026-07-07T11:50:19\",
+    \"fulfillment_date\": \"2026-07-07T11:50:19\",
     \"currency\": \"ngz\",
     \"exchange_rate\": 77,
     \"items\": [
@@ -8256,8 +8267,8 @@ const headers = {
 let body = {
     "partner_id": 16,
     "payment_method_id": 16,
-    "issue_date": "2026-07-06T20:39:46",
-    "fulfillment_date": "2026-07-06T20:39:46",
+    "issue_date": "2026-07-07T11:50:19",
+    "fulfillment_date": "2026-07-07T11:50:19",
     "currency": "ngz",
     "exchange_rate": 77,
     "items": [
@@ -8396,10 +8407,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="issue_date"                data-endpoint="POSTapi-receipts"
-               value="2026-07-06T20:39:46"
+               value="2026-07-07T11:50:19"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-06T20:39:46</code></p>
+<p>Must be a valid date. Example: <code>2026-07-07T11:50:19</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>fulfillment_date</code></b>&nbsp;&nbsp;
@@ -8408,10 +8419,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="fulfillment_date"                data-endpoint="POSTapi-receipts"
-               value="2026-07-06T20:39:46"
+               value="2026-07-07T11:50:19"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-06T20:39:46</code></p>
+<p>Must be a valid date. Example: <code>2026-07-07T11:50:19</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>currency</code></b>&nbsp;&nbsp;
@@ -9267,7 +9278,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"type\": \"customer\",
+    \"type\": \"supplier\",
     \"name\": \"b\",
     \"tax_number\": \"n\",
     \"eu_tax_number\": \"g\",
@@ -9283,7 +9294,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"email\": \"rempel.chadrick@example.org\",
     \"phone\": \"l\",
     \"bank_account_number\": \"j\",
-    \"is_active\": false
+    \"is_active\": true
 }"
 </code></pre></div>
 
@@ -9300,7 +9311,7 @@ const headers = {
 };
 
 let body = {
-    "type": "customer",
+    "type": "supplier",
     "name": "b",
     "tax_number": "n",
     "eu_tax_number": "g",
@@ -9316,7 +9327,7 @@ let body = {
     "email": "rempel.chadrick@example.org",
     "phone": "l",
     "bank_account_number": "j",
-    "is_active": false
+    "is_active": true
 };
 
 fetch(url, {
@@ -9420,10 +9431,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="type"                data-endpoint="POSTapi-partners"
-               value="customer"
+               value="supplier"
                data-component="body">
     <br>
-<p>Example: <code>customer</code></p>
+<p>Example: <code>supplier</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>customer</code></li> <li><code>supplier</code></li> <li><code>both</code></li></ul>
         </div>
@@ -9627,7 +9638,7 @@ Must be one of:
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>custom_fields</code></b>&nbsp;&nbsp;
@@ -9834,7 +9845,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"email\": \"rempel.chadrick@example.org\",
     \"phone\": \"l\",
     \"bank_account_number\": \"j\",
-    \"is_active\": false
+    \"is_active\": true
 }"
 </code></pre></div>
 
@@ -9867,7 +9878,7 @@ let body = {
     "email": "rempel.chadrick@example.org",
     "phone": "l",
     "bank_account_number": "j",
-    "is_active": false
+    "is_active": true
 };
 
 fetch(url, {
@@ -10195,7 +10206,7 @@ Must be one of:
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>custom_fields</code></b>&nbsp;&nbsp;
@@ -11312,9 +11323,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"partner_id\": 16,
     \"payment_method_id\": 16,
-    \"issue_date\": \"2026-07-06T20:39:46\",
-    \"fulfillment_date\": \"2026-07-06T20:39:46\",
-    \"due_date\": \"2052-07-29\",
+    \"issue_date\": \"2026-07-07T11:50:19\",
+    \"fulfillment_date\": \"2026-07-07T11:50:19\",
+    \"due_date\": \"2052-07-30\",
     \"currency\": \"ngz\",
     \"exchange_rate\": 77,
     \"notes\": \"architecto\",
@@ -11347,9 +11358,9 @@ const headers = {
 let body = {
     "partner_id": 16,
     "payment_method_id": 16,
-    "issue_date": "2026-07-06T20:39:46",
-    "fulfillment_date": "2026-07-06T20:39:46",
-    "due_date": "2052-07-29",
+    "issue_date": "2026-07-07T11:50:19",
+    "fulfillment_date": "2026-07-07T11:50:19",
+    "due_date": "2052-07-30",
     "currency": "ngz",
     "exchange_rate": 77,
     "notes": "architecto",
@@ -11491,10 +11502,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="issue_date"                data-endpoint="POSTapi-invoices"
-               value="2026-07-06T20:39:46"
+               value="2026-07-07T11:50:19"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-06T20:39:46</code></p>
+<p>Must be a valid date. Example: <code>2026-07-07T11:50:19</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>fulfillment_date</code></b>&nbsp;&nbsp;
@@ -11503,10 +11514,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="fulfillment_date"                data-endpoint="POSTapi-invoices"
-               value="2026-07-06T20:39:46"
+               value="2026-07-07T11:50:19"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-06T20:39:46</code></p>
+<p>Must be a valid date. Example: <code>2026-07-07T11:50:19</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>due_date</code></b>&nbsp;&nbsp;
@@ -11515,10 +11526,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="due_date"                data-endpoint="POSTapi-invoices"
-               value="2052-07-29"
+               value="2052-07-30"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>issue_date</code>. Example: <code>2052-07-29</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>issue_date</code>. Example: <code>2052-07-30</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>currency</code></b>&nbsp;&nbsp;
@@ -12414,11 +12425,11 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"name\": \"n\",
     \"description\": \"Eius et animi quos velit et.\",
     \"unit\": \"v\",
-    \"type\": \"service\",
+    \"type\": \"product\",
     \"vat_rate_id\": 16,
     \"base_price\": 39,
     \"base_currency\": \"gzm\",
-    \"is_active\": false
+    \"is_active\": true
 }"
 </code></pre></div>
 
@@ -12439,11 +12450,11 @@ let body = {
     "name": "n",
     "description": "Eius et animi quos velit et.",
     "unit": "v",
-    "type": "service",
+    "type": "product",
     "vat_rate_id": 16,
     "base_price": 39,
     "base_currency": "gzm",
-    "is_active": false
+    "is_active": true
 };
 
 fetch(url, {
@@ -12595,10 +12606,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="type"                data-endpoint="POSTapi-products"
-               value="service"
+               value="product"
                data-component="body">
     <br>
-<p>Example: <code>service</code></p>
+<p>Example: <code>product</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>product</code></li> <li><code>service</code></li></ul>
         </div>
@@ -12658,7 +12669,7 @@ Must be one of:
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>custom_fields</code></b>&nbsp;&nbsp;
@@ -12857,7 +12868,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"vat_rate_id\": 16,
     \"base_price\": 39,
     \"base_currency\": \"gzm\",
-    \"is_active\": true
+    \"is_active\": false
 }"
 </code></pre></div>
 
@@ -12882,7 +12893,7 @@ let body = {
     "vat_rate_id": 16,
     "base_price": 39,
     "base_currency": "gzm",
-    "is_active": true
+    "is_active": false
 };
 
 fetch(url, {
@@ -13114,7 +13125,7 @@ Must be one of:
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>custom_fields</code></b>&nbsp;&nbsp;

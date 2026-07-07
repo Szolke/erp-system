@@ -438,7 +438,7 @@ endpoints:
         name: is_active
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -449,7 +449,7 @@ endpoints:
         name: nav_environment
         description: ''
         required: true
-        example: production
+        example: test
         type: string
         enumValues:
           - test
@@ -471,8 +471,8 @@ endpoints:
       invoice_header_text: architecto
       invoice_footer_text: architecto
       base_currency: ngz
-      is_active: true
-      nav_environment: production
+      is_active: false
+      nav_environment: test
     fileParameters: []
     responses: []
     responseFields: []

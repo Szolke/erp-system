@@ -51,6 +51,7 @@
 - SimplePay integráció
 - Jelezz, ha egy implementációs döntés ütközne ezekkel az alapelvekkel.
 - Route model bindinget használó új végpontoknál kötelező az `EnforcesCompanyScope` minta (`assertBelongsToCurrentCompany()`) — a binding az `EnsureCompanyContext` middleware előtt fut, a globális scope önmagában nem elegendő. Részletesen: `docs/progress.md` Architekturális konvenciók.
+- Token-auth (külső kliensek / mobil): Sanctum Bearer token (`POST /api/auth/token`) párhuzamosan él a SPA cookie-session authhal; az `auth:sanctum` middleware mindkettőt kezeli. **Új middleware- vagy handler-kód NE hívjon `$request->session()` közvetlenül `$request->hasSession()` guard nélkül** — Bearer token kérésnél Sanctum nem indít session-t, a hívás `RuntimeException`-t dob. Cég-kontextus token-úton: `X-Company-Id` header → (session, ha van) → `users.default_company_id` fallback. Token soha nem jár le — kizárólag `POST /api/auth/token/revoke` érvényteleníti.
 
 ## Bizonytalanság kezelése
 - Ha valamit nem tudsz biztosan (pl. NAV Online Számla 3.0 XML-séma aktuális részletei, SimplePay API aktuális végpontjai), mondd meg egyértelműen, és ha szükséges, nézz utána friss dokumentációban — ne találgass.

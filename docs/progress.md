@@ -8,7 +8,7 @@
 > - **[CHANGELOG.md](CHANGELOG.md)** — történelmi lépés-napló: lépések leírása, commit hash-ek, fájllisták
 > - **[er-model.md](er-model.md)** — részletes tábla-/mezőszintű adatmodell
 
-Utolsó frissítés: 2026-07-07, Token-auth külső klienseknek elkészítve (`06f26f8`).
+Utolsó frissítés: 2026-07-08, Token-eszközkezelő elkészítve (`58213ac`).
 
 ## Kész modulok (összefoglaló)
 
@@ -26,10 +26,11 @@ Megvalósított főbb területek:
 - Felhasználói wiki (`docs/wiki/`, HU+EN, 17 Markdown-fájl, 8 fejezet)
 - **Superadmin user–cég M:N hozzárendelés:** `GET/POST/DELETE /api/users/{user}/companies[/{company}]` — superadmin hozzárendeli/leválasztja a usereket cégekhez; utolsó cégből nem lehet kivenni (422); audit log; `CompanyListPage` felhasználók modal; `UserDetailPage` cégek szekció; 13 feature teszt
 - **Token-auth külső klienseknek (mobil, API-integrációk):** `POST /api/auth/token` (Bearer token kiadás, soha nem jár le, visszavonásig érvényes, `throttle:5,1`) + `POST /api/auth/token/revoke`; cég-kontextus `default_company_id`-ből session nélkül; teljes RBAC-öröklés; `EnsureCompanyContext` `hasSession()` bugfix; 15 feature teszt
+- **Token-eszközkezelő (TKM):** `GET/DELETE /api/users/{user}/tokens` — ownership-alapú jogosultság (superadmin bárkiét, normál user saját tokeneit); `UserDetailPage` token-szekció (canViewTokens = superadmin || saját profil), visszavonás confirm dialóggal; sidebar profil-link; `UserController::show()` self-access kivétel; 7 feature teszt
 - Bizonylatlista (UNION ALL, szűrők), sidebar (összecsukó, accent-szín 18 paletta, CSS-változók)
 - Toast értesítések, pagination UI, szuperadmin-bootstrap (`erp:create-superadmin`)
 
-**Legutóbbi állapot:** TOKEN = `06f26f8` — teljes suite: **99 teszt / 278 assertion, mind zöld**
+**Legutóbbi állapot:** TKM = `58213ac` — teljes suite: **106 teszt / 295 assertion, mind zöld**
 
 ## Még hátravan
 
@@ -55,7 +56,7 @@ Ezek tervek, nem mai feladatok — rögzítve, hogy egy-egy munkamenet ne talál
 
 - **Hibajelentő / support-ticket modul:** a rendszer felhasználói hibajelentést vehetnek fel közvetlenül az ERP-ből; önálló közepes modul (saját tábla, státuszok, RBAC jogosultságok) — részletezés később szükséges.
 - **Konfiguráció átláthatóbbá tétele:** NEM külön `conf.php` (ütközne a Laravel `.env`/`config` rendszerével, és érzékeny adatot csábítana commitba), hanem dokumentált `.env.example` + egy `config/erp.php` a projekt-specifikus, nem-titkos beállításoknak — cél: egy helyen, Laravel-konform módon konfigurálható rendszer.
-- **Token-auth jövőbeli fázisai** (az alap `06f26f8`-ban kész): (1) **Eszközkezelő UI** — a userek lássák és vonják vissza saját aktív tokenjeiket a felületen (`GET /api/me/tokens`, `DELETE /api/me/tokens/{id}`); (2) **Mobil app** maga — a token-auth a szükséges backend API-t biztosítja; (3) **Token-scope** — opcionális, ha csak olvasási jogú integrációk is kellenek (`createToken(..., ['read'])` + képesség-ellenőrzés az egyes végpontokon).
+- **Token-auth jövőbeli fázisai** (az alap `06f26f8`-ban kész): (1) ~~**Eszközkezelő UI**~~ **KÉSZ (`58213ac`)** — `UserDetailPage` token-szekció, `GET/DELETE /api/users/{user}/tokens`, ownership-alapú jogosultság, sidebar profil-link; (2) **Mobil app** maga — a token-auth a szükséges backend API-t biztosítja; (3) **Token-scope** — opcionális, ha csak olvasási jogú integrációk is kellenek (`createToken(..., ['read'])` + képesség-ellenőrzés az egyes végpontokon).
 - ~~**Fejlesztői/felhasználói dokumentáció (wiki):**~~ **KÉSZ (`47176b8`)** — `docs/wiki/` alatt 17 Markdown-fájl: `README.md` index + `hu/` és `en/` alkönyvtárban 8-8 oldal (bejelentkezés, számla/nyugta kiállítás, bizonylatok, fizetések, beállítások, jogosultságok, egyéb).
 - ~~**Wiki viewer az ERP frontendben (kereshető):**~~ **KÉSZ (`70cd459`)** — Vite `?raw` import (bundled), `react-markdown` + `remark-gfm` renderer, két-paneles elrendezés (fejezetek bal, tartalom jobb), kliens-oldali keresés (≥2 kar., sárga kiemelés), locale-érzékeny (HU/EN; DE → HU fallback), `/wiki` útvonal sidebar `BookOpen` menüponttal. Backend-változtatás nem szükséges. A wiki-tartalom (`docs/wiki/`) minden nagyobb fejlesztés után frissítendő.
 

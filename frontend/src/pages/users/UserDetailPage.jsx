@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import client from '../../api/client'
 import { users as usersApi } from '../../api/users'
 import { groups as groupsApi } from '../../api/groups'
@@ -74,6 +75,11 @@ export default function UserDetailPage() {
   const canViewTokens = isSuperadmin || isOwnProfile
   const [tokens, setTokens]           = useState([])
   const [tokensLoading, setTokensLoading] = useState(false)
+
+  // Jelszócsere state (superadmin vagy saját profil)
+  const [newPassword, setNewPassword]     = useState('')
+  const [showPassword, setShowPassword]   = useState(false)
+  const [pwSaving, setPwSaving]           = useState(false)
 
   async function loadTokens() {
     if (!canViewTokens) return
@@ -211,6 +217,25 @@ export default function UserDetailPage() {
       loadTokens()
     } catch (err) {
       toast(err.response?.data?.message ?? t('common.error'), 'error')
+    }
+  }
+
+  async function handleChangePassword(e) {
+    e.preventDefault()
+    if (!newPassword) return
+    setPwSaving(true)
+    try {
+      await usersApi.changePassword(id, newPassword)
+      setNewPassword('')
+      setShowPassword(false)
+      toast(t('user.password_changed'), 'success')
+    } catch (err) {
+      const msg = err.response?.data?.errors?.password?.[0]
+        ?? err.response?.data?.message
+        ?? t('common.error')
+      toast(msg, 'error')
+    } finally {
+      setPwSaving(false)
     }
   }
 
@@ -360,6 +385,44 @@ export default function UserDetailPage() {
               </tbody>
             </table>
           )}
+        </div>
+      )}
+
+      {/* Jelszó módosítása — superadmin vagy saját profil */}
+      {canViewTokens && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <strong>{t('user.password_section')}</strong>
+          <form onSubmit={handleChangePassword} style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder={t('user.new_password')}
+                style={{ paddingRight: 36, minWidth: 220 }}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                title={showPassword ? t('user.password_hide') : t('user.password_show')}
+                style={{
+                  position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'var(--color-muted)', padding: 0, display: 'flex',
+                }}
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
+            <button
+              className="btn btn-primary btn-sm"
+              type="submit"
+              disabled={pwSaving || newPassword.length < 8}
+            >
+              {pwSaving ? t('common.saving') : t('user.password_save')}
+            </button>
+          </form>
         </div>
       )}
 

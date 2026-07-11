@@ -22,6 +22,23 @@ client.interceptors.request.use((config) => {
   return config
 })
 
+// Lejárt session (401) → automatikus kidobás a login oldalra.
+// A /api/login és /sanctum/* kérések ki vannak zárva (végtelen hurok elkerülése).
+client.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      error.response?.status === 401 &&
+      !window.location.pathname.startsWith('/login') &&
+      !error.config?.url?.includes('/login') &&
+      !error.config?.url?.includes('/sanctum/')
+    ) {
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
+
 // Bootstrap Sanctum SPA auth: must be called once before the first login attempt.
 export async function initCsrf() {
   await client.get('/sanctum/csrf-cookie')

@@ -358,6 +358,13 @@ class TranslationSeeder extends Seeder
             ['user', 'token_revoked',          'Eszköz visszavonva.',                             'Device revoked.',                              'Gerät widerrufen.'],
             ['user', 'no_tokens',              'Nincs kiadott token / eszköz.',                   'No active tokens / devices.',                  'Keine aktiven Token / Geräte.'],
 
+            ['user', 'password_section',   'Jelszó módosítása',                               'Change password',                              'Passwort ändern'],
+            ['user', 'new_password',       'Új jelszó',                                       'New password',                                 'Neues Passwort'],
+            ['user', 'password_show',      'Jelszó megjelenítése',                            'Show password',                                'Passwort anzeigen'],
+            ['user', 'password_hide',      'Jelszó elrejtése',                                'Hide password',                                'Passwort verbergen'],
+            ['user', 'password_save',      'Jelszó mentése',                                  'Save password',                                'Passwort speichern'],
+            ['user', 'password_changed',   'Jelszó sikeresen módosítva.',                     'Password changed successfully.',               'Passwort erfolgreich geändert.'],
+
             ['company', 'show_users',      'Felhasználók',                                    'Users',                                        'Benutzer'],
             ['company', 'users_section',   'Felhasználók kezelése',                           'Manage users',                                 'Benutzer verwalten'],
             ['company', 'add_user',        'Felhasználó hozzáadása',                          'Add user',                                     'Benutzer hinzufügen'],

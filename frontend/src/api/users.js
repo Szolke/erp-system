@@ -12,6 +12,8 @@ export const users = {
   attachCompany:  (userId, companyId)  => client.post(`/api/users/${userId}/companies/${companyId}`),
   detachCompany:  (userId, companyId)  => client.delete(`/api/users/${userId}/companies/${companyId}`),
 
-  listTokens:  (userId)             => client.get(`/api/users/${userId}/tokens`),
-  deleteToken: (userId, tokenId)    => client.delete(`/api/users/${userId}/tokens/${tokenId}`),
+  listTokens:     (userId)          => client.get(`/api/users/${userId}/tokens`),
+  deleteToken:    (userId, tokenId) => client.delete(`/api/users/${userId}/tokens/${tokenId}`),
+
+  changePassword: (userId, password) => client.put(`/api/users/${userId}/password`, { password }),
 }

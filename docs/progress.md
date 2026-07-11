@@ -8,7 +8,7 @@
 > - **[CHANGELOG.md](CHANGELOG.md)** — történelmi lépés-napló: lépések leírása, commit hash-ek, fájllisták
 > - **[er-model.md](er-model.md)** — részletes tábla-/mezőszintű adatmodell
 
-Utolsó frissítés: 2026-07-08, Token-eszközkezelő elkészítve (`58213ac`).
+Utolsó frissítés: 2026-07-11, Jelszócsere + session lejárat kezelés (`b85ef38`).
 
 ## Kész modulok (összefoglaló)
 
@@ -27,10 +27,11 @@ Megvalósított főbb területek:
 - **Superadmin user–cég M:N hozzárendelés:** `GET/POST/DELETE /api/users/{user}/companies[/{company}]` — superadmin hozzárendeli/leválasztja a usereket cégekhez; utolsó cégből nem lehet kivenni (422); audit log; `CompanyListPage` felhasználók modal; `UserDetailPage` cégek szekció; 13 feature teszt
 - **Token-auth külső klienseknek (mobil, API-integrációk):** `POST /api/auth/token` (Bearer token kiadás, soha nem jár le, visszavonásig érvényes, `throttle:5,1`) + `POST /api/auth/token/revoke`; cég-kontextus `default_company_id`-ből session nélkül; teljes RBAC-öröklés; `EnsureCompanyContext` `hasSession()` bugfix; 15 feature teszt
 - **Token-eszközkezelő (TKM):** `GET/DELETE /api/users/{user}/tokens` — ownership-alapú jogosultság (superadmin bárkiét, normál user saját tokeneit); `UserDetailPage` token-szekció (canViewTokens = superadmin || saját profil), visszavonás confirm dialóggal; sidebar profil-link; `UserController::show()` self-access kivétel; 7 feature teszt
+- **Jelszócsere:** `PUT /api/users/{user}/password` — ownership-alapú auth (saját: bárki; más user: csak superadmin, de másik superadmin jelszava nem változtatható, 422); frontend szekció Eye/EyeOff togglevel, 8 karakter minimum gating; globális axios 401-interceptor: lejárt session → automatikus kidobás `/login`-ra (login oldalon nem triggerel); 7 feature teszt
 - Bizonylatlista (UNION ALL, szűrők), sidebar (összecsukó, accent-szín 18 paletta, CSS-változók)
 - Toast értesítések, pagination UI, szuperadmin-bootstrap (`erp:create-superadmin`)
 
-**Legutóbbi állapot:** TKM = `58213ac` — teljes suite: **106 teszt / 295 assertion, mind zöld**
+**Legutóbbi állapot:** Jelszócsere + session interceptor = `b85ef38` — teljes suite: **113 teszt / 314 assertion, mind zöld**
 
 ## Még hátravan
 

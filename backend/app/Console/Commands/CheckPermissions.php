@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Module;
 use App\Models\Permission;
+use App\Modules\ModuleRegistry;
 use App\Modules\ModuleResolver;
 use Illuminate\Console\Command;
 
@@ -10,10 +12,30 @@ class CheckPermissions extends Command
 {
     protected $signature = 'erp:check-permissions';
 
-    protected $description = 'Audit the permission catalog: orphaned (DB-only) vs. missing (descriptor-only) keys.';
+    protected $description = 'Audit the permission catalog and module catalog sync status.';
 
-    public function handle(ModuleResolver $resolver): int
+    public function handle(ModuleResolver $resolver, ModuleRegistry $registry): int
     {
+        $exitCode = self::SUCCESS;
+
+        // ── Module catalog sync check ─────────────────────────────────────────
+        $registryKeys = array_map(fn ($d) => $d->key(), $registry->all());
+        $catalogKeys  = Module::pluck('key')->all();
+        $unsynced     = array_values(array_diff($registryKeys, $catalogKeys));
+        sort($unsynced);
+
+        $this->newLine();
+        if (! empty($unsynced)) {
+            $this->warn('SZINKRONIZÁLATLAN modulok (registry-ben van, DB-ben nincs):');
+            $this->table(['Kulcs'], array_map(fn ($k) => [$k], $unsynced));
+            $this->warn('  → Futtasd: php artisan erp:sync-modules');
+            $this->newLine();
+            $exitCode = self::FAILURE;
+        } else {
+            $this->info('Modulkatalógus szinkronizált (registry = DB).');
+        }
+
+        // ── Permission catalog check ──────────────────────────────────────────
         $dbKeys         = Permission::query()->orderBy('key')->pluck('key')->all();
         $map            = $resolver->permissionToModuleMap();
         $descriptorKeys = array_keys($map);
@@ -54,6 +76,6 @@ class CheckPermissions extends Command
             count($missing),
         ));
 
-        return self::SUCCESS;
+        return $exitCode;
     }
 }

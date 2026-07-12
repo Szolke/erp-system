@@ -31,6 +31,16 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
+        // Defense-in-depth: a DatabaseSeeder env-guardja csak a DatabaseSeeder-en
+        // keresztüli hívást védi. A `php artisan db:seed --class=DemoDataSeeder`
+        // közvetlen hívás megkerüli azt — ezért kell itt is saját guard.
+        if (! app()->environment('local', 'testing')) {
+            throw new \RuntimeException(
+                'A DemoDataSeeder csak local/testing környezetben futtatható. '
+                . 'Production-ban demo-adat nem hozható létre.'
+            );
+        }
+
         $user = User::query()->where('email', 'test@example.com')->first();
 
         if ($user === null) {

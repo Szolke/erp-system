@@ -7,7 +7,7 @@ import CompanySwitcher from './CompanySwitcher'
 import { applySidebarTheme } from '../utils/sidebarTheme'
 import {
   FileText, Users2, Package, BookOpen,
-  UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers,
+  UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers, Blocks,
   Settings2, ChevronLeft, ChevronRight,
   LogOut, Moon, Sun, Terminal,
 } from 'lucide-react'
@@ -66,6 +66,7 @@ export default function Layout() {
 
   const settingsItems = [
     { to: '/companies',                label: 'Cégek',                icon: Layers,     superadminOnly: true },
+    { to: '/settings/modules',         label: 'Modulok',              icon: Blocks,     superadminOnly: true },
     { to: '/users',                    label: t('nav.users'),         icon: UserRound,  perm: 'user.view' },
     { to: '/groups',                   label: t('nav.groups'),        icon: Users,      perm: 'group.view' },
     { to: '/company',                  label: t('nav.company'),       icon: Building2,  perm: 'company.view' },

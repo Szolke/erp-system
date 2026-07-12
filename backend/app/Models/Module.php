@@ -21,6 +21,10 @@ class Module extends Model
         ];
     }
 
+    // Route model binding uses 'key' (not 'id') — the key is the canonical identifier
+    // that matches descriptor code; numeric IDs can differ between environments.
+    public function getRouteKeyName(): string { return 'key'; }
+
     public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_module')

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ActiveCompanyController;
+use App\Http\Controllers\Api\ModuleController;
 use App\Http\Controllers\Api\ApiTesterController;
 use App\Http\Controllers\Api\CustomFieldDefinitionController;
 use App\Http\Controllers\Api\AuditLogController;
@@ -56,6 +57,10 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::get('/vat-rates', fn () => response()->json(['data' => VatRate::where('is_active', true)->get()]));
     Route::get('/payment-methods', fn () => response()->json(['data' => PaymentMethod::where('is_active', true)->get()]));
     Route::put('/active-company', [ActiveCompanyController::class, 'update']);
+
+    // Modul-katalógus + be/kikapcsolás (superadmin-only, module.manage)
+    Route::get('modules', [ModuleController::class, 'index']);
+    Route::patch('modules/{module}', [ModuleController::class, 'update']);
 
     // Cégek kezelése — szuperadmin: lista + létrehozás; aktív cég: show/update/logo
     Route::get('/companies', [CompanyController::class, 'index']);

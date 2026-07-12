@@ -8,7 +8,7 @@
 > - **[CHANGELOG.md](CHANGELOG.md)** — történelmi lépés-napló: lépések leírása, commit hash-ek, fájllisták
 > - **[er-model.md](er-model.md)** — részletes tábla-/mezőszintű adatmodell
 
-Utolsó frissítés: 2026-07-12, Modulkezelő 1. fázis — katalógus-infrastruktúra (`23a6328`).
+Utolsó frissítés: 2026-07-12, Modulkezelő 2. fázis — modul-gating stack (`64eeba5`).
 
 ## Kész modulok (összefoglaló)
 
@@ -31,19 +31,18 @@ Megvalósított főbb területek:
 - Bizonylatlista (UNION ALL, szűrők), sidebar (összecsukó, accent-szín 18 paletta, CSS-változók)
 - Toast értesítések, pagination UI, szuperadmin-bootstrap (`erp:create-superadmin`)
 - **Modulkezelő – 1. fázis (katalógus-infrastruktúra):** `modules` + `company_module` táblák, `Module`/`CompanyModule` (Pivot) modellek, `Company.enabledModules()` reláció, `ModuleDescriptor` absztrakt alap, `ModuleRegistry` (config-driven, singleton), 7 descriptor (invoicing/receipts/partners/products/nav/ntak/simplepay), `erp:sync-modules` artisan parancs (upsert, idempotens, sohasem töröl)
+- **Modulkezelő – 2. fázis (modul-gating stack):** `ModuleResolver` service (enabled-key cache per-company, `permissionToModuleMap()` duplikáció-validáció, `isAllowed()`, `filterPermissionKeys()`), `EnsureModuleEnabled` middleware (AND-logika több kulcsra, `abort(404)`, az `EnsureCompanyContext` után), `Gate::before` átrendezés (modul-check a superadmin-ág ELŐTT — a gating mindenkire vonatkozik), `PermissionChecker` frissítve (modul-szűrés mindkét ágon, cégfüggő superadmin cache-kulcs: `"superadmin:{companyId}"`), `erp:check-permissions` audit-parancs (ungated vs. orphaned kulcsok átláthatóságához), SimplePay route-ok felcímkézve (`module:simplepay`), `CompanySetting` NAV_ENABLED / SIMPLEPAY_ENABLED törlése; `ModuleGatingTest` 11 feature teszt (8 invariáns, 124/124 zöld)
 
-**Legutóbbi állapot:** Modulkezelő 1. fázis = `23a6328` (katalógus, registry, sync parancs kész; 2. fázis — resolver + RBAC gating — nem kezdődött még el). Jelszócsere + session interceptor = `b85ef38` — teljes suite: **113 teszt / 314 assertion, mind zöld**
+**Legutóbbi állapot:** Modulkezelő 2. fázis = `64eeba5` (modul-gating stack kész; 3. fázis — admin UI + sidebar-szűrés — nyitott). Teljes suite: **124 teszt / 337 assertion, mind zöld**
 
 ## Még hátravan
 
-A modulkezelő 2. fázisa nincs megkezdve — ez most a legközelebbi fejlesztési feladat:
+A modulkezelő 3. fázisa nincs megkezdve — ez most a legközelebbi fejlesztési feladat:
 
-- **Modulkezelő 2. fázis — resolver + RBAC gating:**
-  - `ModuleResolver` service: megmondja, hogy az adott cég számára egy modul aktív-e (core → mindig igen; optional → `company_module.enabled`)
-  - `EnsureModuleEnabled` middleware: kérés-szintű gating egy vagy több modul kulcsa alapján — ha a modul ki van kapcsolva, 403/404 válasz; **a gating a superadminra is vonatkozik**, kivéve magát a modulkezelő felületet
-  - Admin API + frontend UI a modulok be/ki kapcsolásához (superadmin only)
-  - RBAC: szétválasztani, hogy a modul aktív-e vs. a usernek van-e joga a modulon belül
-  - `company_settings` registry-bekötés: `NavModule` és `SimplePayModule` hangolható értékei (mode/kulcsok) ebben a fázisban kerülnek a `company_settings` táblába (a settings-séma már deklarált a descriptorokon)
+- **Modulkezelő 3. fázis — admin UI + sidebar-szűrés:**
+  - Admin API: `GET /api/modules` (katalógus + cég-állapot), `POST /api/modules/{key}/enable`, `DELETE /api/modules/{key}/disable` — superadmin only
+  - Frontend: modulkezelő oldal (be/ki kapcsoló kártyák per opcionális modul, állapot-badge: core / engedélyezett / letiltott)
+  - Sidebar-szűrés: modul-függő menüpontok elrejtése, ha a modul ki van kapcsolva (a frontend `permissions` tömbje már cégfüggő — a `/api/me` erre épül)
 
 Minden egyéb tervezett funkció implementálva van. Hátramaradó teendők kizárólag sandbox-tesztelés jellegűek (valódi hitelesítő adatok szükségesek):
 
@@ -88,7 +87,19 @@ Ezek tervek, nem mai feladatok — rögzítve, hogy egy-egy munkamenet ne talál
   - *`module_id → restrictOnDelete`:* ha egy cég hivatkozik egy modulra, a katalógus-sor nem törölhető — az `enabled_at`/`enabled_by` audit-előzmény megőrzése indokolja.
   - *`erp:sync-modules` sohasem töröl:* eltűnt descriptor → `is_available=false`; a sor megmarad.
   - *`sort_order`:* a `config/modules.php` felsorolási sorrendje × 10 — kézi DB-átrendezést egy újbóli sync felülír; a config az egyetlen forrás.
-  - *2. fázis nyitott:* `ModuleResolver` + `EnsureModuleEnabled` middleware + admin UI + RBAC gating. A gating **minden userre vonatkozik, beleértve a superadmint** — kivétel csak a modulkezelő saját felülete.
+  - *2. fázis döntések (`64eeba5`):*
+    - **Gating mindenkire vonatkozik, a superadminra is.** A `Gate::before` a `ModuleResolver::isAllowed()` ellenőrzést a superadmin-ág ELŐTT futtatja — kikapcsolt modul esetén mindenki visszautasítást kap, a privilege-szint nem számít.
+    - **KIVÉTEL: `module.*` kulcsok soha nem gated.** A `module.manage` és a jövőbeli `module.*` kulcsok az `isAllowed()` logikában a legelső ágon `true`-t adnak vissza — így egy kikapcsolt modulnak sosincs olyan mellékhatása, hogy a modulkezelő felületet is bezárja (lockout-védelem: nem lehet visszakapcsolni azt, amitől ki lettél zárva).
+    - **Permission key PREFIX ≠ modul-hovatartozás.** Az `invoice.send_nav` a `nav` modulhoz tartozik, nem az `invoicing`-hoz — mert a `NavModule` descriptor `permissions()` listája EXPLICIT deklarálja. A prefixum csupán névelési konvenció, a resolver a descriptor-indexet nézi, nem a pontok előtti részt.
+    - **`company_module.enabled` az egyetlen igazságforrás** a modul BE/KI állapotára. A korábbi `CompanySetting::NAV_ENABLED` / `SIMPLEPAY_ENABLED` enum-case-ek redundánssá váltak és eltávolításra kerültek.
+    - **Háromszintű config-modell** (az 1. fázis hibrid-döntésének árnyalása):
+      1. `company_module.enabled` → modul BE/KI állapot + audit (`enabled_at`, `enabled_by`)
+      2. `company_settings` → egyszerű, lapos, cég-szintű config-értékek (pl. `nav_environment`, `default_currency`)
+      3. Dedikált táblák → strukturált / ismétlő / titkosított adat (pl. per-devizás `company_simplepay_credentials`)
+    - **Superadmin permission-cache kulcsa cégfüggő:** `"superadmin:{companyId}"` — ha a kulcs csak `"superadmin"` lenne, a második cég kérésekor a már cachet-elt (első cég modul-állapotával szűrt) lista jönne vissza, cégváltás után is.
+    - **`payment.*` szándékosan ungated** — mert az `invoicing` és `receipts` core modulok, a fizetés-jogok önállóan értelmetlenek lenne modul-gating nélkül. **Felülvizsgálandó**, ha valaha az `invoicing` vagy `receipts` opcionálissá válik.
+    - **`erp:check-permissions`** — láthatóvá teszi az ungated (egyetlen descriptorban sem deklarált) permission-kulcsokat. Rendszeres futtatása javasolt új jog-kulcs felvételekor.
+  - *3. fázis nyitott:* modulkezelő admin API + frontend UI + sidebar-szűrés.
 - **`scribe:generate` — mindig `--user sail` flaggel:** `docker compose exec --user sail laravel.test php artisan scribe:generate`. Ha root-ként fut (flag nélkül), a generált könyvtárak (`storage/app/private/scribe/`, `.scribe/`, `public/vendor/scribe/`, `resources/views/scribe/`) `root:root` tulajdonba kerülnek (`700` jogokkal), a PHP-FPM `sail` user nem tudja olvasni → `file_exists()` visszaad `false`-t → 503 válasz. Ha root-tulajdonú fájlok keletkeztek: `docker compose exec laravel.test chown -R sail:sail .scribe storage/app/private/scribe public/vendor/scribe resources/views/scribe`.
 
 ## Demo bejelentkezés (helyi teszteléshez)

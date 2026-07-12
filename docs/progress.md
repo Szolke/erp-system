@@ -8,7 +8,7 @@
 > - **[CHANGELOG.md](CHANGELOG.md)** — történelmi lépés-napló: lépések leírása, commit hash-ek, fájllisták
 > - **[er-model.md](er-model.md)** — részletes tábla-/mezőszintű adatmodell
 
-Utolsó frissítés: 2026-07-11, Jelszócsere + session lejárat kezelés (`b85ef38`).
+Utolsó frissítés: 2026-07-12, Modulkezelő 1. fázis — katalógus-infrastruktúra (`23a6328`).
 
 ## Kész modulok (összefoglaló)
 
@@ -30,12 +30,22 @@ Megvalósított főbb területek:
 - **Jelszócsere:** `PUT /api/users/{user}/password` — ownership-alapú auth (saját: bárki; más user: csak superadmin, de másik superadmin jelszava nem változtatható, 422); frontend szekció Eye/EyeOff togglevel, 8 karakter minimum gating; globális axios 401-interceptor: lejárt session → automatikus kidobás `/login`-ra (login oldalon nem triggerel); 7 feature teszt
 - Bizonylatlista (UNION ALL, szűrők), sidebar (összecsukó, accent-szín 18 paletta, CSS-változók)
 - Toast értesítések, pagination UI, szuperadmin-bootstrap (`erp:create-superadmin`)
+- **Modulkezelő – 1. fázis (katalógus-infrastruktúra):** `modules` + `company_module` táblák, `Module`/`CompanyModule` (Pivot) modellek, `Company.enabledModules()` reláció, `ModuleDescriptor` absztrakt alap, `ModuleRegistry` (config-driven, singleton), 7 descriptor (invoicing/receipts/partners/products/nav/ntak/simplepay), `erp:sync-modules` artisan parancs (upsert, idempotens, sohasem töröl)
 
-**Legutóbbi állapot:** Jelszócsere + session interceptor = `b85ef38` — teljes suite: **113 teszt / 314 assertion, mind zöld**
+**Legutóbbi állapot:** Modulkezelő 1. fázis = `23a6328` (katalógus, registry, sync parancs kész; 2. fázis — resolver + RBAC gating — nem kezdődött még el). Jelszócsere + session interceptor = `b85ef38` — teljes suite: **113 teszt / 314 assertion, mind zöld**
 
 ## Még hátravan
 
-Minden tervezett funkció implementálva van. Hátramaradó teendők kizárólag sandbox-tesztelés jellegűek (valódi hitelesítő adatok szükségesek):
+A modulkezelő 2. fázisa nincs megkezdve — ez most a legközelebbi fejlesztési feladat:
+
+- **Modulkezelő 2. fázis — resolver + RBAC gating:**
+  - `ModuleResolver` service: megmondja, hogy az adott cég számára egy modul aktív-e (core → mindig igen; optional → `company_module.enabled`)
+  - `EnsureModuleEnabled` middleware: kérés-szintű gating egy vagy több modul kulcsa alapján — ha a modul ki van kapcsolva, 403/404 válasz; **a gating a superadminra is vonatkozik**, kivéve magát a modulkezelő felületet
+  - Admin API + frontend UI a modulok be/ki kapcsolásához (superadmin only)
+  - RBAC: szétválasztani, hogy a modul aktív-e vs. a usernek van-e joga a modulon belül
+  - `company_settings` registry-bekötés: `NavModule` és `SimplePayModule` hangolható értékei (mode/kulcsok) ebben a fázisban kerülnek a `company_settings` táblába (a settings-séma már deklarált a descriptorokon)
+
+Minden egyéb tervezett funkció implementálva van. Hátramaradó teendők kizárólag sandbox-tesztelés jellegűek (valódi hitelesítő adatok szükségesek):
 
 - **SimplePay sandbox-tesztelés** — start URL struktúra (1 vs. több callback URL), refund API pontos request/response formátum, IPN visszajelzés refundra. Valódi merchant-adatokkal kell ellenőrizni élesítés előtt.
 - **NAV sandbox-tesztelés** — `vatExemption` kódok (AAM/TAM stb.) XSD-konformitása `NavXmlBuilder`-ben.
@@ -70,6 +80,15 @@ Ezek tervek, nem mai feladatok — rögzítve, hogy egy-egy munkamenet ne talál
 - **DB-default mezők**: `Model::create()` után **mindig** `->refresh()` kell, ha a válaszban DB-szintű default értéket (pl. `is_active`, `nav_status`) akarunk visszaadni — enélkül `null` jön vissza a friss objektumból. Ez a hiba már kétszer előjött (Product/Partner, majd Invoice), `refresh()`-sel javítva.
 - **Seederek**: `PermissionSeeder`/`VatRateSeeder`/`PaymentMethodSeeder` = valódi katalógus-adat, mindig fusson. `DemoDataSeeder` = reprodukálható teszt-sandbox (1 cég, 2 csoport, override-ok, 1 termék/partner, NAV teszt+éles dummy hitelesítés) — idempotens (`updateOrCreate`/`sync`), bármikor újrafuttatható.
 - **Worker/scheduler**: a Sail image-et publikáltuk (`backend/docker/8.5/`, NEM a `vendor/`-ból épül többé), a `supervisord.conf` futtat egy `queue-worker` (NAV job) és egy `scheduler` (MNB) processzt — ezeknek menniük kell automatikusan, nem kell kézzel `queue:work`-öt indítani.
+- **Modulkezelő architektúra (1. fázis döntések):**
+  - *Scope:* a `modules` tábla globális katalógus — **NEM cég-szintű**, nincs `BelongsToCompany` trait. Minden cég maga dönt a be/ki kapcsolásról a `company_module` pivotban.
+  - *Hibrid config-tárolás:* BE/KI állapot + audit (ki, mikor kapcsolta be) a `company_module` pivotban (`enabled`, `enabled_at`, `enabled_by`). A modul hangolható értékei (NAV kulcsok, SimplePay merchant-adatok) **KÉSÖBB** a `company_settings` registrybe kerülnek — a settings-séma már deklarált a descriptorokon, az olvasás/írás külön fázis (TODO).
+  - *Core modulok:* `invoicing`, `receipts`, `partners`, `products` — `is_core=true`, mindig aktívak, soha nem kapnak pivot-sort, nem lehet őket kikapcsolni. Új cég létrehozásakor nincs seedelés (nulla opcionális sor = minden opcionális modul off).
+  - *Opcionális modulok:* `nav`, `ntak`, `simplepay` — alapból kikapcsolva; `ntak` egyelőre csak metaadat-descriptor (az integráció nem készült el, `version: 0.1.0`).
+  - *`module_id → restrictOnDelete`:* ha egy cég hivatkozik egy modulra, a katalógus-sor nem törölhető — az `enabled_at`/`enabled_by` audit-előzmény megőrzése indokolja.
+  - *`erp:sync-modules` sohasem töröl:* eltűnt descriptor → `is_available=false`; a sor megmarad.
+  - *`sort_order`:* a `config/modules.php` felsorolási sorrendje × 10 — kézi DB-átrendezést egy újbóli sync felülír; a config az egyetlen forrás.
+  - *2. fázis nyitott:* `ModuleResolver` + `EnsureModuleEnabled` middleware + admin UI + RBAC gating. A gating **minden userre vonatkozik, beleértve a superadmint** — kivétel csak a modulkezelő saját felülete.
 - **`scribe:generate` — mindig `--user sail` flaggel:** `docker compose exec --user sail laravel.test php artisan scribe:generate`. Ha root-ként fut (flag nélkül), a generált könyvtárak (`storage/app/private/scribe/`, `.scribe/`, `public/vendor/scribe/`, `resources/views/scribe/`) `root:root` tulajdonba kerülnek (`700` jogokkal), a PHP-FPM `sail` user nem tudja olvasni → `file_exists()` visszaad `false`-t → 503 válasz. Ha root-tulajdonú fájlok keletkeztek: `docker compose exec laravel.test chown -R sail:sail .scribe storage/app/private/scribe public/vendor/scribe resources/views/scribe`.
 
 ## Demo bejelentkezés (helyi teszteléshez)

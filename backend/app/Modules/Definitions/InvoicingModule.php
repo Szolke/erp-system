@@ -15,8 +15,8 @@ class InvoicingModule extends ModuleDescriptor
     public function permissions(): array
     {
         return [
-            'invoice.view', 'invoice.create', 'invoice.cancel',
-            'invoice.regenerate_pdf',
+            'invoice.view', 'invoice.create', 'invoice.edit',
+            'invoice.cancel', 'invoice.regenerate_pdf',
         ];
     }
 

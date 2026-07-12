@@ -72,9 +72,11 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::delete('company/settings/{key}', [CompanySettingController::class, 'destroy']);
 
     // SimplePay hitelesítő adatok (devizánként, titkosítva tárolva)
-    Route::get('company/simplepay', [CompanySimplePayController::class, 'index']);
-    Route::put('company/simplepay/{currency}', [CompanySimplePayController::class, 'upsert']);
-    Route::delete('company/simplepay/{currency}', [CompanySimplePayController::class, 'destroy']);
+    Route::middleware('module:simplepay')->group(function () {
+        Route::get('company/simplepay', [CompanySimplePayController::class, 'index']);
+        Route::put('company/simplepay/{currency}', [CompanySimplePayController::class, 'upsert']);
+        Route::delete('company/simplepay/{currency}', [CompanySimplePayController::class, 'destroy']);
+    });
 
     // Egyéni mezők definíciói (cég-szintű, company.manage jog)
     Route::get('custom-fields', [CustomFieldDefinitionController::class, 'index']);
@@ -96,8 +98,10 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     Route::get('invoices/{invoice}/payments', [PaymentController::class, 'index']);
     Route::post('invoices/{invoice}/payments', [PaymentController::class, 'store']);
-    Route::post('invoices/{invoice}/simplepay', [SimplePayController::class, 'start']);
-    Route::post('invoices/{invoice}/simplepay-refund', [SimplePayController::class, 'refund']);
+    Route::middleware('module:simplepay')->group(function () {
+        Route::post('invoices/{invoice}/simplepay', [SimplePayController::class, 'start']);
+        Route::post('invoices/{invoice}/simplepay-refund', [SimplePayController::class, 'refund']);
+    });
 
     Route::apiResource('receipts', ReceiptController::class)->only(['index', 'store', 'show']);
     Route::post('receipts/{receipt}/cancel', [ReceiptController::class, 'cancel']);

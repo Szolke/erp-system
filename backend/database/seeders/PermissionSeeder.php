@@ -54,6 +54,16 @@ class PermissionSeeder extends Seeder
             ['key' => 'audit.view', 'module' => 'audit', 'description' => 'Audit napló megtekintése', 'is_sensitive' => true],
 
             ['key' => 'api_tester.use', 'module' => 'api_tester', 'description' => 'Beépített API-tesztelő használata (élő kérések a bejelentkezett session jogaival)', 'is_sensitive' => true],
+
+            // Module manager — never gated by any module (see ModuleResolver::isAllowed).
+            ['key' => 'module.manage', 'module' => 'module', 'description' => 'Opcionális modulok be- és kikapcsolása cégenként', 'is_sensitive' => true],
+
+            // NAV module permissions (nav module must be enabled for these to be accessible).
+            ['key' => 'nav.view_log', 'module' => 'nav', 'description' => 'NAV beküldési napló megtekintése', 'is_sensitive' => false],
+
+            // SimplePay module permissions (simplepay module must be enabled).
+            ['key' => 'simplepay.use', 'module' => 'simplepay', 'description' => 'SimplePay fizetési folyamat indítása', 'is_sensitive' => false],
+            ['key' => 'simplepay.refund', 'module' => 'simplepay', 'description' => 'SimplePay visszatérítés (refund) indítása', 'is_sensitive' => true],
         ];
 
         foreach ($permissions as $permission) {

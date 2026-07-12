@@ -10,11 +10,7 @@ namespace App\Enums;
 enum CompanySetting: string
 {
     // ── NAV Online Számla (5. fázis) ──────────────────────────────────────
-    case NAV_ENABLED     = 'nav_enabled';      // boolean  – default: false
     case NAV_ENVIRONMENT = 'nav_environment';  // string   – 'test' | 'production'
-
-    // ── SimplePay (6. fázis) ──────────────────────────────────────────────
-    case SIMPLEPAY_ENABLED = 'simplepay_enabled';  // boolean – default: false
 
     // ── Általános számlázási beállítások ──────────────────────────────────
     case DEFAULT_CURRENCY = 'default_currency';  // string  – 'HUF' | 'EUR' | 'USD'
@@ -28,8 +24,6 @@ enum CompanySetting: string
     public function type(): string
     {
         return match ($this) {
-            self::NAV_ENABLED,
-            self::SIMPLEPAY_ENABLED       => 'boolean',
             self::INVOICE_DUE_DAYS        => 'integer',
             self::NAV_ENVIRONMENT,
             self::DEFAULT_CURRENCY,
@@ -42,8 +36,6 @@ enum CompanySetting: string
     public function default(): mixed
     {
         return match ($this) {
-            self::NAV_ENABLED             => false,
-            self::SIMPLEPAY_ENABLED       => false,
             self::NAV_ENVIRONMENT         => 'test',
             self::DEFAULT_CURRENCY        => 'HUF',
             self::INVOICE_LANGUAGE        => 'hu',
@@ -65,9 +57,7 @@ enum CompanySetting: string
     public function label(): string
     {
         return match ($this) {
-            self::NAV_ENABLED             => 'settings.nav_enabled',
             self::NAV_ENVIRONMENT         => 'settings.nav_environment',
-            self::SIMPLEPAY_ENABLED       => 'settings.simplepay_enabled',
             self::DEFAULT_CURRENCY        => 'settings.default_currency',
             self::INVOICE_LANGUAGE        => 'settings.invoice_language',
             self::INVOICE_DUE_DAYS        => 'settings.invoice_due_days',

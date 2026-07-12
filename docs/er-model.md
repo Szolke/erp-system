@@ -249,11 +249,44 @@ Index: (`company_id`,`created_at`); (`auditable_type`,`auditable_id`).
 
 ---
 
+## 10. Modulkezelő (1. fázis — katalógus)
+
+### `modules` (globális katalógus — NEM cég-szintű, nincs BelongsToCompany)
+| mező | típus | megjegyzés |
+|---|---|---|
+| id | bigIncrements | |
+| key | string, unique | pl. `invoicing`, `nav`, `simplepay` |
+| name | string | emberi névfeltüntetés |
+| description | text nullable | |
+| version | string | descriptor által adott verzió |
+| is_core | boolean default false | core modul = nem kapcsolható ki, nincs pivot-sora |
+| is_available | boolean default true | false = descriptor eltűnt a kódból (sor marad, nem törlődik) |
+| sort_order | int nullable | |
+| timestamps | | |
+
+Index: unique(`key`). Igazságforrás: a kódban élő `ModuleDescriptor` osztályok; a tábla az `erp:sync-modules` parancs futtatásakor frissül (upsert, sosem töröl sort).
+
+### `company_module` (pivot — cég ↔ modul M:N, tenant-szintű állapot)
+| mező | típus | megjegyzés |
+|---|---|---|
+| id | bigIncrements | |
+| company_id | FK → companies | `cascadeOnDelete`: cég törlésénél a pivot-sorai is törlődnek |
+| module_id | FK → modules | `restrictOnDelete`: modul NEM törölhető, amíg cég hivatkozik rá |
+| enabled | boolean default false | |
+| enabled_at | timestamp nullable | mikor kapcsolták be utoljára |
+| enabled_by | FK → users nullable | `nullOnDelete`: user törlésénél null lesz (audit-sor megmarad) |
+| timestamps | | |
+
+Index: unique(`company_id`, `module_id`). Core moduloknak (`is_core=true`) NINCS soruk ebben a táblában — azok mindig aktívak. Új cég létrehozásakor nem kap alapértelmezett sorokat (minden opcionális modul alapból ki van kapcsolva).
+
+---
+
 ## Kapcsolati összefoglaló (legfontosabbak)
 
 - `companies` 1—N `company_bank_accounts`, `company_nav_credentials`, `products`, `partners`, `invoices`,
   `receipts`, `groups`, `document_series`
 - `companies` M—N `users` (`company_user`)
+- `companies` M—N `modules` (`company_module`, csak opcionális modulok)
 - `groups` M—N `users` (`user_group`); `groups` M—N `permissions` (`group_permissions`)
 - `users` M—N `permissions` cégenként, override-dal (`user_permission_overrides`)
 - `invoices` 1—N `invoice_items`, `nav_submission_logs`, `payments` (polymorphic)

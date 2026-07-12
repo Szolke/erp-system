@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Modules\ModuleRegistry;
 use App\Services\PermissionChecker;
 use App\Support\CurrentCompany;
 use Illuminate\Support\Facades\Gate;
@@ -17,6 +18,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(CurrentCompany::class);
         $this->app->scoped(PermissionChecker::class);
+        $this->app->singleton(ModuleRegistry::class);
     }
 
     /**

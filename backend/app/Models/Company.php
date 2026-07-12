@@ -78,4 +78,12 @@ class Company extends Model
     {
         return $this->hasMany(Receipt::class);
     }
+
+    public function enabledModules(): BelongsToMany
+    {
+        return $this->belongsToMany(Module::class, 'company_module')
+            ->using(CompanyModule::class)
+            ->withPivot('enabled', 'enabled_at', 'enabled_by')
+            ->withTimestamps();
+    }
 }

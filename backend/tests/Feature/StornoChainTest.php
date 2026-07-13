@@ -57,8 +57,8 @@ class StornoChainTest extends TestCase
         parent::setUp();
 
         // Prevent SendInvoiceToNavJob from executing synchronously (QUEUE_CONNECTION=sync
-        // in phpunit.xml). The job would early-exit anyway (NAV_ENABLED defaults to false),
-        // but faking is cleaner and avoids the cache/settings lookup entirely.
+        // in phpunit.xml). Module gating handles the actual guard; faking is cleaner here
+        // and keeps storno tests focused on the cancel-chain logic.
         Queue::fake();
 
         self::$seq++;

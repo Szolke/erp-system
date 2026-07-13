@@ -2,11 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Enums\CompanySetting;
 use App\Enums\NavStatus;
 use App\Models\Invoice;
 use App\Models\NavSubmissionLog;
-use App\Services\CompanySettingService;
+use App\Modules\ModuleResolver;
 use App\Services\Nav\NavReporterFactory;
 use App\Services\Nav\NavXmlBuilder;
 use Illuminate\Bus\Queueable;
@@ -33,15 +32,19 @@ class SendInvoiceToNavJob implements ShouldQueue
         private readonly string $operation = 'CREATE',
     ) {}
 
-    public function handle(NavXmlBuilder $xmlBuilder, NavReporterFactory $reporterFactory, CompanySettingService $settings): void
+    public function handle(NavXmlBuilder $xmlBuilder, NavReporterFactory $reporterFactory, ModuleResolver $resolver): void
     {
-        $invoice = Invoice::with(['company.navCredentials', 'partner', 'paymentMethod', 'items.vatRate'])
+        // withoutGlobalScope('company'): queue workers have no CurrentCompany singleton
+        // set by EnsureCompanyContext middleware — the global scope must not filter here.
+        $invoice = Invoice::withoutGlobalScope('company')
+            ->with(['company.navCredentials', 'partner', 'paymentMethod', 'items.vatRate'])
             ->findOrFail($this->invoiceId);
 
-        // Skip NAV submission when nav_enabled is turned off for the company
-        if (! $settings->get($invoice->company_id, CompanySetting::NAV_ENABLED)) {
+        // Skip NAV submission when the nav module is disabled for this company.
+        // Uses the invoice's own company_id — no CurrentCompany singleton in queue context.
+        if (! $resolver->isAllowed('invoice.send_nav', $invoice->company_id)) {
             $invoice->update(['nav_status' => NavStatus::NotApplicable]);
-            \Illuminate\Support\Facades\Log::info('NAV submission skipped: nav_enabled=false', [
+            \Illuminate\Support\Facades\Log::info('NAV submission skipped: nav module disabled for company', [
                 'invoice_id' => $invoice->id,
                 'company_id' => $invoice->company_id,
             ]);

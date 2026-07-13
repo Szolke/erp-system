@@ -13,6 +13,14 @@ Az alábbi parancsokat **sorrendben** kell futtatni minden éles telepítésnél
 (első telepítés és minden frissítés). A sorrend nem cserélhető fel — minden
 lépés az előző kimenettől függ.
 
+> **Parancsok futtatási formája:** a `php artisan ...` minták ebben a dokumentumban
+> a **production** környezetre vonatkoznak — ott nincs Sail. Fejlesztői (Docker)
+> környezetben MINDIG `./vendor/bin/sail artisan ...` alakot kell használni
+> (ld. `docs/progress.md` → Architekturális konvenciók — *FEJLESZTŐI artisan/sail
+> parancsok — TILOS a `docker compose exec` root-ként*). Az éles szerveren az
+> artisan parancsok tényleges futtatási módja (pl. `sudo -u www-data php artisan`,
+> CI/CD pipeline, deploy script) **az éles környezet kialakításakor véglegesítendő**.
+
 ### 1. Adatbázis-séma frissítése
 
 ```bash
@@ -101,6 +109,41 @@ superadmin-fiók megmarad.
 **Interaktív**: emailt, nevet és jelszót kérdez. A jelszó nem kerül logba.
 Production környezetben futtatáskor a parancs megerősítést kér — ez kihagyható
 a `--force` flaggel (CI/automatizált deploy esetén).
+
+---
+
+### 6. Fájlrendszer-jogosultságok — PDF-tár
+
+A `storage/app/private/documents/` könyvtár **írható a webszerver user által** és
+**olvasható a backup user által** kell, hogy legyen. Ez **környezetfüggetlen elvárás**
+— a megvalósítás módja eltér:
+
+| Környezet | Webszerver user | Artisan futtatás | Elvárt tulajdonos |
+|-----------|-----------------|------------------|-------------------|
+| Fejlesztői (Docker/Sail) | `sail` (UID=1000) | `./vendor/bin/sail artisan` | `szolke:szolke 755` |
+| Éles (production) | pl. `www-data`, `nginx`, `deploy` | TBD az éles env kialakításakor | webszerver user |
+
+**Ha a könyvtár nem a webszerver user tulajdona** (pl. root hozta létre), a PHP
+process nem tud PDF-et menteni → `500 UnableToCreateDirectory` hiba keletkezik.
+
+Javítás (éles környezetben, webszerver user = pl. `www-data`):
+
+```bash
+chown -R www-data:www-data storage/app/private/documents
+chmod -R 755 storage/app/private/documents
+find storage/app/private/documents -type f -exec chmod 644 {} \;
+```
+
+**Ellenőrzés deploy után:**
+
+```bash
+ls -la storage/app/private/documents/
+# Elvárt: webszerver user tulajdona, drwxr-xr-x (755) könyvtárak, -rw-r--r-- (644) fájlok
+```
+
+**Backup-jogosultság:** a backup user-nek olvasási jogot kell kapnia a `documents/` fára
+(pl. ACL, group-hozzáadás). A tárolt PDF-ek jogi bizonyíték-értékűek — elvesztésük
+visszafordíthatatlan. Részletek: `docs/progress.md` Nyitott pont #7.
 
 ---
 

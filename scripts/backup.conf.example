@@ -1,0 +1,23 @@
+# backup.conf.example — ERP PDF-backup konfigurációs sablon
+#
+# Használat:
+#   cp scripts/backup.conf.example scripts/backup.conf
+#   nano scripts/backup.conf   # töltsd ki a valódi értékekkel
+#
+# FIGYELEM: a backup.conf gitignore-olt — soha ne kerüljön commitba!
+# (tartalmazza a célgép hostnevét/IP-jét és az SSH kulcs elérési útját)
+
+# Célgép SSH felhasználóneve
+BACKUP_REMOTE_USER="szolke"
+
+# Célgép hostname vagy IP-cím
+BACKUP_REMOTE_HOST="192.168.1.100"
+
+# Célkönyvtár a célgépen (teljes elérési út; az rsync automatikusan létrehozza)
+BACKUP_REMOTE_PATH="/backup/erp/documents"
+
+# SSH kulcs elérési útja (opcionális)
+# Ha üresen hagyod, az SSH az alapértelmezett kulcsot (~/.ssh/id_rsa / id_ed25519) használja.
+# Dedikált backup-kulcshoz add meg a teljes elérési utat, pl.:
+#   BACKUP_SSH_KEY="/home/szolke/.ssh/erp_backup_key"
+BACKUP_SSH_KEY=""

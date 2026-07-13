@@ -16,14 +16,4 @@ class SimplePayModule extends ModuleDescriptor
 
     public function permissions(): array { return ['simplepay.use', 'simplepay.refund']; }
 
-    public function settings(): array
-    {
-        // TODO: company_settings registry-bekötés (olvasás/írás) külön fázis feladata.
-        return [
-            ['key' => 'mode',         'type' => 'enum',   'options' => ['sandbox', 'live'], 'default' => 'sandbox'],
-            ['key' => 'currency',     'type' => 'enum',   'options' => ['HUF', 'EUR'],      'default' => 'HUF'],
-            ['key' => 'merchant_id',  'type' => 'string'],
-            ['key' => 'merchant_key', 'type' => 'string',  'sensitive' => true],
-        ];
-    }
 }

@@ -22,11 +22,16 @@ abstract class ModuleDescriptor
     public function permissions(): array { return []; }
 
     /**
-     * Config-kulcs DEFINÍCIÓK — csak séma, konkrét érték nélkül.
+     * Lapos company_settings config-kulcsok sémája — kizárólag egyszerű,
+     * dedikált táblát NEM igénylő beállításokhoz.
+     *
      * Egy elem: ['key' => ..., 'type' => 'string|bool|enum|int', 'options' => [...],
      *            'default' => ..., 'sensitive' => true]
      *
-     * TODO: a tényleges company_settings registry-bekötés (olvasás/írás) külön fázis feladata.
+     * FONTOS: dedikált táblát használó integrációk NEM töltik ki ezt.
+     * - NAV hitelesítők    → company_nav_credentials  (per-environment, encrypted)
+     * - SimplePay adatok   → company_simplepay_credentials (per-deviza, encrypted)
+     * Ezeknek saját controllerük és UI-juk van — a descriptor nem felelős a tárolásukért.
      */
     public function settings(): array { return []; }
 

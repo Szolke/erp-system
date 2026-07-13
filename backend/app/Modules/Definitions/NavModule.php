@@ -18,15 +18,4 @@ class NavModule extends ModuleDescriptor
     // the descriptor explicitly claims this key to gate it under the nav module.
     public function permissions(): array { return ['invoice.send_nav', 'nav.view_log']; }
 
-    public function settings(): array
-    {
-        // TODO: company_settings registry-bekötés (olvasás/írás) külön fázis feladata.
-        return [
-            ['key' => 'mode',          'type' => 'enum',   'options' => ['test', 'live'], 'default' => 'test'],
-            ['key' => 'tech_user',     'type' => 'string'],
-            ['key' => 'tech_password', 'type' => 'string',  'sensitive' => true],
-            ['key' => 'sign_key',      'type' => 'string',  'sensitive' => true],
-            ['key' => 'exchange_key',  'type' => 'string',  'sensitive' => true],
-        ];
-    }
 }

@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\NavEnvironment;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateCompanyRequest extends FormRequest
 {
@@ -30,7 +28,8 @@ class UpdateCompanyRequest extends FormRequest
             'invoice_footer_text' => ['nullable', 'string'],
             'base_currency' => ['required', 'string', 'size:3'],
             'is_active' => ['boolean'],
-            'nav_environment' => ['required', Rule::enum(NavEnvironment::class)],
+            // nav_environment NEM módosítható PUT /api/company úton — csak
+            // PATCH /api/company/nav/active-environment-en át (védőhálóval).
         ];
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\CompanySettingController;
+use App\Http\Controllers\Api\CompanyNavCredentialController;
 use App\Http\Controllers\Api\CompanySimplePayController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\TranslationController;
@@ -75,6 +76,15 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::get('company/settings', [CompanySettingController::class, 'index']);
     Route::put('company/settings/{key}', [CompanySettingController::class, 'update']);
     Route::delete('company/settings/{key}', [CompanySettingController::class, 'destroy']);
+
+    // NAV Online Számla hitelesítő adatok (environmentenként, titkosítva tárolva)
+    // A literal /active-environment ELŐBB van definiálva, mint a /{environment} param-route.
+    Route::middleware('module:nav')->group(function () {
+        Route::get('company/nav', [CompanyNavCredentialController::class, 'index']);
+        Route::patch('company/nav/active-environment', [CompanyNavCredentialController::class, 'setActiveEnvironment']);
+        Route::put('company/nav/{environment}', [CompanyNavCredentialController::class, 'upsert']);
+        Route::delete('company/nav/{environment}', [CompanyNavCredentialController::class, 'destroy']);
+    });
 
     // SimplePay hitelesítő adatok (devizánként, titkosítva tárolva)
     Route::middleware('module:simplepay')->group(function () {

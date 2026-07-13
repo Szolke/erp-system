@@ -1,18 +1,20 @@
-name: Partnerek
+name: 'Egyéni mezők'
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/partners
+    uri: api/custom-fields
     metadata:
       custom: []
-      groupName: Partnerek
+      groupName: 'Egyéni mezők'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
+      title: |-
+        GET /api/custom-fields?entity_type=partner
+        Returns all definitions for the active company, optionally filtered by entity type.
       description: ''
       authenticated: true
       deprecated: false
@@ -50,14 +52,14 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/partners
+    uri: api/custom-fields
     metadata:
       custom: []
-      groupName: Partnerek
+      groupName: 'Egyéni mezők'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
+      title: 'POST /api/custom-fields'
       description: ''
       authenticated: true
       deprecated: false
@@ -70,225 +72,105 @@ endpoints:
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
+      entity_type:
+        custom: []
+        name: entity_type
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      key:
+        custom: []
+        name: key
+        description: 'Must match the regex /^[a-z0-9_]+$/. Must not be greater than 50 characters.'
+        required: true
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      label:
+        custom: []
+        name: label
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: g
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
       type:
         custom: []
         name: type
         description: ''
         required: true
-        example: supplier
-        type: string
-        enumValues:
-          - customer
-          - supplier
-          - both
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      name:
-        custom: []
-        name: name
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: b
+        example: architecto
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      tax_number:
+      options:
         custom: []
-        name: tax_number
-        description: 'Must not be greater than 255 characters.'
+        name: options
+        description: 'Must not be greater than 100 characters.'
         required: false
-        example: 'n'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      eu_tax_number:
-        custom: []
-        name: eu_tax_number
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: g
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      registration_number:
-        custom: []
-        name: registration_number
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: z
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      billing_postal_code:
-        custom: []
-        name: billing_postal_code
-        description: 'Must not be greater than 10 characters.'
-        required: true
-        example: miyvdl
-        type: string
+        example:
+          - 'n'
+        type: 'string[]'
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      billing_city:
+      is_required:
         custom: []
-        name: billing_city
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: j
-        type: string
+        name: is_required
+        description: ''
+        required: false
+        example: false
+        type: boolean
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      billing_address_line:
+      sort_order:
         custom: []
-        name: billing_address_line
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: 'n'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      shipping_postal_code:
-        custom: []
-        name: shipping_postal_code
-        description: 'Must not be greater than 10 characters.'
+        name: sort_order
+        description: 'Must be at least 0.'
         required: false
-        example: ikhway
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      shipping_city:
-        custom: []
-        name: shipping_city
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: k
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      shipping_address_line:
-        custom: []
-        name: shipping_address_line
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: c
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      default_payment_method_id:
-        custom: []
-        name: default_payment_method_id
-        description: 'Must match an existing stored value.'
-        required: false
-        example: 16
+        example: 84
         type: integer
         enumValues: []
         exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      default_currency:
-        custom: []
-        name: default_currency
-        description: 'Must be 3 characters.'
-        required: true
-        example: ngz
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
         nullable: false
-        deprecated: false
-      email:
-        custom: []
-        name: email
-        description: 'Must be a valid email address. Must not be greater than 255 characters.'
-        required: false
-        example: rempel.chadrick@example.org
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      phone:
-        custom: []
-        name: phone
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: l
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      bank_account_number:
-        custom: []
-        name: bank_account_number
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: j
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
         deprecated: false
       is_active:
         custom: []
         name: is_active
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      custom_fields:
-        custom: []
-        name: custom_fields
-        description: ''
-        required: false
-        example: null
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
     cleanBodyParameters:
-      type: supplier
-      name: b
-      tax_number: 'n'
-      eu_tax_number: g
-      registration_number: z
-      billing_postal_code: miyvdl
-      billing_city: j
-      billing_address_line: 'n'
-      shipping_postal_code: ikhway
-      shipping_city: k
-      shipping_address_line: c
-      default_payment_method_id: 16
-      default_currency: ngz
-      email: rempel.chadrick@example.org
-      phone: l
-      bank_account_number: j
-      is_active: true
+      entity_type: architecto
+      key: 'n'
+      label: g
+      type: architecto
+      options:
+        - 'n'
+      is_required: false
+      sort_order: 84
+      is_active: false
     fileParameters: []
     responses: []
     responseFields: []
@@ -302,73 +184,15 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - GET
-    uri: 'api/partners/{id}'
-    metadata:
-      custom: []
-      groupName: Partnerek
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: ''
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      id:
-        custom: []
-        name: id
-        description: 'The ID of the partner.'
-        required: true
-        example: 23
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      id: 23
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
-        description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
       - PUT
-      - PATCH
-    uri: 'api/partners/{id}'
+    uri: 'api/custom-fields/{definition_id}'
     metadata:
       custom: []
-      groupName: Partnerek
+      groupName: 'Egyéni mezők'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
+      title: 'PUT /api/custom-fields/{definition}'
       description: ''
       authenticated: true
       deprecated: false
@@ -377,40 +201,26 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      id:
+      definition_id:
         custom: []
-        name: id
-        description: 'The ID of the partner.'
+        name: definition_id
+        description: 'The ID of the definition.'
         required: true
-        example: 23
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 23
+      definition_id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      type:
+      label:
         custom: []
-        name: type
-        description: ''
-        required: true
-        example: both
-        type: string
-        enumValues:
-          - customer
-          - supplier
-          - both
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      name:
-        custom: []
-        name: name
-        description: 'Must not be greater than 255 characters.'
+        name: label
+        description: 'Must not be greater than 100 characters.'
         required: true
         example: b
         type: string
@@ -418,159 +228,50 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      tax_number:
+      type:
         custom: []
-        name: tax_number
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: 'n'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      eu_tax_number:
-        custom: []
-        name: eu_tax_number
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: g
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      registration_number:
-        custom: []
-        name: registration_number
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: z
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      billing_postal_code:
-        custom: []
-        name: billing_postal_code
-        description: 'Must not be greater than 10 characters.'
+        name: type
+        description: ''
         required: true
-        example: miyvdl
+        example: architecto
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      billing_city:
+      options:
         custom: []
-        name: billing_city
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: j
-        type: string
+        name: options
+        description: 'Must not be greater than 100 characters.'
+        required: false
+        example:
+          - 'n'
+        type: 'string[]'
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      billing_address_line:
+      is_required:
         custom: []
-        name: billing_address_line
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: 'n'
-        type: string
+        name: is_required
+        description: ''
+        required: false
+        example: true
+        type: boolean
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      shipping_postal_code:
+      sort_order:
         custom: []
-        name: shipping_postal_code
-        description: 'Must not be greater than 10 characters.'
+        name: sort_order
+        description: 'Must be at least 0.'
         required: false
-        example: ikhway
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      shipping_city:
-        custom: []
-        name: shipping_city
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: k
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      shipping_address_line:
-        custom: []
-        name: shipping_address_line
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: c
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      default_payment_method_id:
-        custom: []
-        name: default_payment_method_id
-        description: 'Must match an existing stored value.'
-        required: false
-        example: 16
+        example: 84
         type: integer
         enumValues: []
         exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      default_currency:
-        custom: []
-        name: default_currency
-        description: 'Must be 3 characters.'
-        required: true
-        example: ngz
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
         nullable: false
-        deprecated: false
-      email:
-        custom: []
-        name: email
-        description: 'Must be a valid email address. Must not be greater than 255 characters.'
-        required: false
-        example: rempel.chadrick@example.org
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      phone:
-        custom: []
-        name: phone
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: l
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      bank_account_number:
-        custom: []
-        name: bank_account_number
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: j
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
         deprecated: false
       is_active:
         custom: []
@@ -583,34 +284,13 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      custom_fields:
-        custom: []
-        name: custom_fields
-        description: ''
-        required: false
-        example: null
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
     cleanBodyParameters:
-      type: both
-      name: b
-      tax_number: 'n'
-      eu_tax_number: g
-      registration_number: z
-      billing_postal_code: miyvdl
-      billing_city: j
-      billing_address_line: 'n'
-      shipping_postal_code: ikhway
-      shipping_city: k
-      shipping_address_line: c
-      default_payment_method_id: 16
-      default_currency: ngz
-      email: rempel.chadrick@example.org
-      phone: l
-      bank_account_number: j
+      label: b
+      type: architecto
+      options:
+        - 'n'
+      is_required: true
+      sort_order: 84
       is_active: true
     fileParameters: []
     responses: []
@@ -626,14 +306,14 @@ endpoints:
     custom: []
     httpMethods:
       - DELETE
-    uri: 'api/partners/{id}'
+    uri: 'api/custom-fields/{definition_id}'
     metadata:
       custom: []
-      groupName: Partnerek
+      groupName: 'Egyéni mezők'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
+      title: 'DELETE /api/custom-fields/{definition}'
       description: ''
       authenticated: true
       deprecated: false
@@ -642,19 +322,19 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      id:
+      definition_id:
         custom: []
-        name: id
-        description: 'The ID of the partner.'
+        name: definition_id
+        description: 'The ID of the definition.'
         required: true
-        example: 23
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 23
+      definition_id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

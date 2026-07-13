@@ -1,21 +1,21 @@
-name: 'Egyéni mezők'
+name: 'NAV Online Számla'
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/custom-fields
+    uri: api/company/nav
     metadata:
       custom: []
-      groupName: 'Egyéni mezők'
+      groupName: 'NAV Online Számla'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: |-
-        GET /api/custom-fields?entity_type=partner
-        Returns all definitions for the active company, optionally filtered by entity type.
-      description: ''
+      title: 'List NAV credentials for the active company, along with the active environment.'
+      description: |-
+        Secret fields (nav_login, nav_password, nav_signing_key, nav_exchange_key) are
+        never returned — only their presence is indicated via has_* boolean flags.
       authenticated: true
       deprecated: false
     headers:
@@ -51,16 +51,18 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/custom-fields
+      - PATCH
+    uri: api/company/nav/active-environment
     metadata:
       custom: []
-      groupName: 'Egyéni mezők'
+      groupName: 'NAV Online Számla'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'POST /api/custom-fields'
-      description: ''
+      title: 'Switch the active NAV environment for the company.'
+      description: |-
+        Returns 422 if the target environment has no is_active=true credential
+        (mirrors the job's where('is_active', true) guard — prevents silent NAV silence).
       authenticated: true
       deprecated: false
     headers:
@@ -72,105 +74,21 @@ endpoints:
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      entity_type:
+      environment:
         custom: []
-        name: entity_type
+        name: environment
         description: ''
         required: true
-        example: architecto
+        example: test
         type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      key:
-        custom: []
-        name: key
-        description: 'Must match the regex /^[a-z0-9_]+$/. Must not be greater than 50 characters.'
-        required: true
-        example: 'n'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      label:
-        custom: []
-        name: label
-        description: 'Must not be greater than 100 characters.'
-        required: true
-        example: g
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      type:
-        custom: []
-        name: type
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      options:
-        custom: []
-        name: options
-        description: 'Must not be greater than 100 characters.'
-        required: false
-        example:
-          - 'n'
-        type: 'string[]'
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      is_required:
-        custom: []
-        name: is_required
-        description: ''
-        required: false
-        example: true
-        type: boolean
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      sort_order:
-        custom: []
-        name: sort_order
-        description: 'Must be at least 0.'
-        required: false
-        example: 84
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      is_active:
-        custom: []
-        name: is_active
-        description: ''
-        required: false
-        example: true
-        type: boolean
-        enumValues: []
+        enumValues:
+          - test
+          - production
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      entity_type: architecto
-      key: 'n'
-      label: g
-      type: architecto
-      options:
-        - 'n'
-      is_required: true
-      sort_order: 84
-      is_active: true
+      environment: test
     fileParameters: []
     responses: []
     responseFields: []
@@ -185,15 +103,17 @@ endpoints:
     custom: []
     httpMethods:
       - PUT
-    uri: 'api/custom-fields/{definition_id}'
+    uri: 'api/company/nav/{environment}'
     metadata:
       custom: []
-      groupName: 'Egyéni mezők'
+      groupName: 'NAV Online Számla'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'PUT /api/custom-fields/{definition}'
-      description: ''
+      title: 'Create or update the NAV credential for a given environment (test|production).'
+      description: |-
+        Secret fields are only overwritten when a non-empty value is sent;
+        on a new record all four secret fields are required.
       authenticated: true
       deprecated: false
     headers:
@@ -201,36 +121,9 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      definition_id:
+      environment:
         custom: []
-        name: definition_id
-        description: 'The ID of the definition.'
-        required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      definition_id: 16
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      label:
-        custom: []
-        name: label
-        description: 'Must not be greater than 100 characters.'
-        required: true
-        example: b
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      type:
-        custom: []
-        name: type
+        name: environment
         description: ''
         required: true
         example: architecto
@@ -239,36 +132,62 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      options:
+    cleanUrlParameters:
+      environment: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      nav_tax_number:
         custom: []
-        name: options
-        description: 'Must not be greater than 100 characters.'
-        required: false
-        example:
-          - 'n'
-        type: 'string[]'
+        name: nav_tax_number
+        description: 'Must not be greater than 13 characters.'
+        required: true
+        example: bn
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      is_required:
+      nav_login:
         custom: []
-        name: is_required
+        name: nav_login
         description: ''
         required: false
-        example: false
-        type: boolean
+        example: null
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      sort_order:
+      nav_password:
         custom: []
-        name: sort_order
-        description: 'Must be at least 0.'
+        name: nav_password
+        description: ''
         required: false
-        example: 84
-        type: integer
+        example: null
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      nav_signing_key:
+        custom: []
+        name: nav_signing_key
+        description: ''
+        required: false
+        example: null
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      nav_exchange_key:
+        custom: []
+        name: nav_exchange_key
+        description: ''
+        required: false
+        example: null
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -277,7 +196,7 @@ endpoints:
         custom: []
         name: is_active
         description: ''
-        required: false
+        required: true
         example: false
         type: boolean
         enumValues: []
@@ -285,12 +204,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      label: b
-      type: architecto
-      options:
-        - 'n'
-      is_required: false
-      sort_order: 84
+      nav_tax_number: bn
       is_active: false
     fileParameters: []
     responses: []
@@ -306,15 +220,18 @@ endpoints:
     custom: []
     httpMethods:
       - DELETE
-    uri: 'api/custom-fields/{definition_id}'
+    uri: 'api/company/nav/{environment}'
     metadata:
       custom: []
-      groupName: 'Egyéni mezők'
+      groupName: 'NAV Online Számla'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'DELETE /api/custom-fields/{definition}'
-      description: ''
+      title: 'Delete the NAV credential for a given environment.'
+      description: |-
+        Blocked when the target environment is currently the active one:
+        deleting it would leave the job without a usable credential (silent non-send).
+        Switch to the other environment first, then delete.
       authenticated: true
       deprecated: false
     headers:
@@ -322,19 +239,19 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      definition_id:
+      environment:
         custom: []
-        name: definition_id
-        description: 'The ID of the definition.'
+        name: environment
+        description: ''
         required: true
-        example: 16
-        type: integer
+        example: architecto
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      definition_id: 16
+      environment: architecto
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

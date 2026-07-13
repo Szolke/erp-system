@@ -1,14 +1,14 @@
-name: 'SimplePay fizetés'
+name: 'Audit napló'
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: 'api/invoices/{invoice_id}/simplepay'
+      - GET
+    uri: api/audit-logs
     metadata:
       custom: []
-      groupName: 'SimplePay fizetés'
+      groupName: 'Audit napló'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
@@ -20,76 +20,24 @@ endpoints:
       Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      invoice_id:
-        custom: []
-        name: invoice_id
-        description: 'The ID of the invoice.'
-        required: true
-        example: 13
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      invoice_id: 13
+    urlParameters: []
+    cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: 'api/invoices/{invoice_id}/simplepay-refund'
-    metadata:
-      custom: []
-      groupName: 'SimplePay fizetés'
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Initiate a SimplePay refund and trigger the invoice storno chain.'
-      description: |-
-        Refunds are synchronous: if SimplePay accepts the request, we
-        immediately mark the transaction as refunded and cancel the invoice.
-        No IPN is expected for refunds (VERIFY against sandbox before production).
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      invoice_id:
+    responses:
+      -
         custom: []
-        name: invoice_id
-        description: 'The ID of the invoice.'
-        required: true
-        example: 13
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      invoice_id: 13
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5174'
+          access-control-allow-credentials: 'true'
+        description: null
     responseFields: []
     auth:
       - headers

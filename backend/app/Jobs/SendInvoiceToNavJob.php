@@ -64,6 +64,15 @@ class SendInvoiceToNavJob implements ShouldQueue
         if ($credential === null) {
             $invoice->update(['nav_status' => NavStatus::NotApplicable]);
 
+            // NAV modul BE van kapcsolva, de az aktív environmenthez nincs is_active=true
+            // credential → a számla NÉMÁN nem menne ki. Warning jelzi az operátornak.
+            \Illuminate\Support\Facades\Log::warning('NAV submission skipped: no active credential for environment', [
+                'invoice_id'     => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'company_id'     => $invoice->company_id,
+                'environment'    => $invoice->company->nav_environment?->value,
+            ]);
+
             return;
         }
 

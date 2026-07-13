@@ -346,6 +346,325 @@ function SimplePaySection({ can }) {
   )
 }
 
+const NAV_ENVS   = ['test', 'production']
+const NAV_LABELS = { test: 'Teszt', production: 'Éles' }
+
+const NAV_SECRET_FIELDS = [
+  ['nav_login',        'Bejelentkezési név'],
+  ['nav_password',     'Jelszó'],
+  ['nav_signing_key',  'Aláírókulcs'],
+  ['nav_exchange_key', 'Cserekulcs'],
+]
+
+function NavSection({ can }) {
+  const { t } = useTranslation()
+
+  const [navData, setNavData]         = useState(null)
+  const [loading, setLoading]         = useState(true)
+  const [editing, setEditing]         = useState(null)   // { environment, nav_tax_number, nav_login, …, is_active, isNew }
+  const [saving, setSaving]           = useState(false)
+  const [formError, setFormError]     = useState('')
+  const [switchTarget, setSwitchTarget] = useState(null) // 'test' | 'production'
+  const [switching, setSwitching]     = useState(false)
+  const [switchError, setSwitchError] = useState('')
+
+  useEffect(() => { loadNav() }, [])
+
+  async function loadNav() {
+    setLoading(true)
+    try {
+      const res = await companyApi.nav.list()
+      setNavData(res.data)
+    } catch {
+      /* 404 = modul ki, nem renderelődik ide */
+    } finally { setLoading(false) }
+  }
+
+  const activeEnv  = navData?.active_environment
+  const credForEnv = (env) => navData?.credentials.find((c) => c.environment === env) ?? null
+
+  // Figyelmeztető sáv feltétele: az aktív environmenthez nincs is_active=true sor
+  const showWarning = !!navData && !navData.credentials.some(
+    (c) => c.environment === activeEnv && c.is_active,
+  )
+
+  function startAdd(env) {
+    setEditing({ environment: env, nav_tax_number: '', nav_login: '', nav_password: '',
+                 nav_signing_key: '', nav_exchange_key: '', is_active: true, isNew: true })
+    setFormError('')
+  }
+
+  function startEdit(cred) {
+    // Titkos mezők üresen kezdenek — üres = meglévő érték megmarad (backend konvenció)
+    setEditing({ environment: cred.environment, nav_tax_number: cred.nav_tax_number,
+                 nav_login: '', nav_password: '', nav_signing_key: '', nav_exchange_key: '',
+                 is_active: cred.is_active, isNew: false })
+    setFormError('')
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    setFormError('')
+    try {
+      const payload = { nav_tax_number: editing.nav_tax_number, is_active: editing.is_active }
+      // Titkos mezők csak ha nem üresek — üres = backend megtartja a tárolt értéket
+      NAV_SECRET_FIELDS.forEach(([f]) => { if (editing[f]) payload[f] = editing[f] })
+      await companyApi.nav.upsert(editing.environment, payload)
+      setEditing(null)
+      await loadNav()
+    } catch (err) {
+      setFormError(err.response?.data?.message ?? t('common.error'))
+    } finally { setSaving(false) }
+  }
+
+  async function handleDelete(env) {
+    if (!window.confirm(`Biztosan törlöd a(z) ${NAV_LABELS[env]} environment hitelesítőjét?`)) return
+    try {
+      await companyApi.nav.delete(env)
+      await loadNav()
+    } catch (err) {
+      // A backend 422-t ad, ha az aktív environmentet próbálják törölni
+      alert(err.response?.data?.message ?? t('common.error'))
+    }
+  }
+
+  async function confirmSwitch() {
+    setSwitching(true)
+    setSwitchError('')
+    try {
+      await companyApi.nav.setActiveEnvironment(switchTarget)
+      setSwitchTarget(null)
+      await loadNav()
+    } catch (err) {
+      setSwitchError(err.response?.data?.message ?? t('common.error'))
+    } finally { setSwitching(false) }
+  }
+
+  return (
+    <div className="card" style={{ marginTop: 24 }}>
+      <h2 style={{ margin: '0 0 16px', fontSize: '1.1rem' }}>NAV Online Számla</h2>
+
+      {/* ── Figyelmeztető sáv ── */}
+      {showWarning && (
+        <div className="alert-error mb-4" style={{ fontWeight: 500 }}>
+          ⚠ Az aktív beküldési környezethez ({NAV_LABELS[activeEnv]}) nincs aktív NAV-hitelesítő
+          beállítva — a számlák <strong>NEM kerülnek beküldésre</strong> a NAV-hoz.
+        </div>
+      )}
+
+      {loading ? <p className="text-muted">{t('common.loading')}</p> : navData && (
+        <>
+          {/* ── Beküldési környezet váltó ── */}
+          <div style={{
+            display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10,
+            padding: '12px 16px', background: 'var(--color-surface-alt)',
+            borderRadius: 8, marginBottom: 20,
+          }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--color-muted)', marginRight: 4 }}>
+              Beküldési környezet:
+            </span>
+            {NAV_ENVS.map((env) => (
+              <span key={env} style={{
+                padding: '3px 12px', borderRadius: 16, fontSize: '0.82rem', fontWeight: 600,
+                background: activeEnv === env ? 'var(--color-primary)' : 'transparent',
+                color:      activeEnv === env ? '#fff' : 'var(--color-muted)',
+                border: `1px solid ${activeEnv === env ? 'var(--color-primary)' : 'var(--color-border)'}`,
+              }}>
+                {NAV_LABELS[env]}
+              </span>
+            ))}
+            {can('company.manage') && (
+              <button
+                className="btn btn-secondary btn-sm"
+                style={{ marginLeft: 'auto' }}
+                onClick={() => { setSwitchError(''); setSwitchTarget(activeEnv === 'test' ? 'production' : 'test') }}
+              >
+                Váltás {activeEnv === 'test' ? 'élesre →' : '← tesztre'}
+              </button>
+            )}
+          </div>
+
+          {/* ── Credential panelek ── */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            {NAV_ENVS.map((env) => {
+              const cred       = credForEnv(env)
+              const isActiveEnv = env === activeEnv
+              return (
+                <div key={env} style={{
+                  padding: 16, borderRadius: 8,
+                  background: 'var(--color-surface-alt)',
+                  border: `${isActiveEnv ? 2 : 1}px solid ${isActiveEnv ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                }}>
+                  {/* Panel fejléc */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <strong style={{ fontSize: '0.95rem' }}>{NAV_LABELS[env]}</strong>
+                    {isActiveEnv && (
+                      <span style={{
+                        fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.02em',
+                        background: 'var(--color-primary)', color: '#fff', borderRadius: 10, padding: '1px 8px',
+                      }}>
+                        AKTÍV
+                      </span>
+                    )}
+                  </div>
+
+                  {cred ? (
+                    <>
+                      <div style={{ fontSize: '0.84rem', display: 'grid', gap: 5, marginBottom: 14 }}>
+                        <div>
+                          <span style={{ color: 'var(--color-muted)' }}>Adószám: </span>
+                          <code style={{ fontSize: '0.82rem' }}>{cred.nav_tax_number}</code>
+                        </div>
+                        {NAV_SECRET_FIELDS.map(([hasKey, label]) => (
+                          <div key={hasKey}>
+                            <span style={{ color: 'var(--color-muted)' }}>{label}: </span>
+                            {cred[`has_${hasKey.replace('nav_', '')}`]
+                              ? <span style={{ color: 'var(--color-success-text)' }}>✓ Beállítva</span>
+                              : <span style={{ color: 'var(--color-muted)' }}>— Hiányzik</span>}
+                          </div>
+                        ))}
+                        <div style={{ marginTop: 4, paddingTop: 4, borderTop: '1px solid var(--color-border)' }}>
+                          <span style={{ color: 'var(--color-muted)' }}>Aktív hitelesítő: </span>
+                          {cred.is_active
+                            ? <span style={{ color: 'var(--color-success-text)' }}>✓ Igen</span>
+                            : <span style={{ color: 'var(--color-muted)' }}>— Nem</span>}
+                        </div>
+                      </div>
+                      {can('company.manage') && !editing && (
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button className="btn btn-secondary btn-sm" onClick={() => startEdit(cred)}>
+                            {t('common.edit')}
+                          </button>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(env)}>
+                            {t('common.delete')}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <p style={{ fontSize: '0.84rem', color: 'var(--color-muted)', marginBottom: 12 }}>
+                        Nincs hitelesítő beállítva.
+                      </p>
+                      {can('company.manage') && !editing && (
+                        <button className="btn btn-secondary btn-sm" onClick={() => startAdd(env)}>
+                          + Beállítás
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* ── Szerkesztő / hozzáadó űrlap ── */}
+          {editing && (
+            <div className="card" style={{ marginTop: 16, background: 'var(--color-surface-alt)' }}>
+              <div style={{ fontWeight: 600, marginBottom: 12 }}>
+                {editing.isNew
+                  ? `+ Hitelesítő beállítása — ${NAV_LABELS[editing.environment]}`
+                  : `Szerkesztés — ${NAV_LABELS[editing.environment]}`}
+              </div>
+              {formError && <div className="alert-error mb-4">{formError}</div>}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div className="form-group">
+                  <label>Adószám</label>
+                  <input
+                    value={editing.nav_tax_number}
+                    onChange={(e) => setEditing({ ...editing, nav_tax_number: e.target.value })}
+                    placeholder="12345678-1-41"
+                    maxLength={13}
+                  />
+                </div>
+                <div className="form-group" style={{ alignSelf: 'end', paddingBottom: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={editing.is_active}
+                      onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })}
+                    />
+                    Aktív hitelesítő
+                  </label>
+                </div>
+                {NAV_SECRET_FIELDS.map(([field, label]) => (
+                  <div className="form-group" key={field}>
+                    <label>
+                      {label}
+                      {!editing.isNew && (
+                        <span style={{ color: 'var(--color-muted)', fontWeight: 400, fontSize: '0.8rem' }}>
+                          {' '}(opcionális)
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="password"
+                      value={editing[field]}
+                      onChange={(e) => setEditing({ ...editing, [field]: e.target.value })}
+                      placeholder={editing.isNew ? '' : 'Változatlan — töltsd ki a cseréhez'}
+                      autoComplete="new-password"
+                    />
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+                  {saving ? t('common.saving') : t('common.save')}
+                </button>
+                <button className="btn btn-secondary" onClick={() => setEditing(null)}>
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── Környezetváltó megerősítő modal ── */}
+      {switchTarget && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+        }}>
+          <div className="card" style={{ maxWidth: 480, width: '90%', margin: 0 }}>
+            <h3 style={{ margin: '0 0 14px', fontSize: '1rem' }}>
+              Beküldési környezet váltása — {NAV_LABELS[switchTarget]}
+            </h3>
+
+            {switchTarget === 'production' && (
+              <div className="alert-error mb-4" style={{ fontWeight: 500 }}>
+                ⚠ Ettől a ponttól a számlák a <strong>VALÓDI NAV éles rendszerbe</strong> kerülnek beküldésre.
+              </div>
+            )}
+
+            {/* Figyelmeztető, ha a cél environmenthez nincs aktív credential */}
+            {!navData.credentials.some((c) => c.environment === switchTarget && c.is_active) && (
+              <div className="alert-error mb-4" style={{ fontSize: '0.875rem' }}>
+                A(z) {NAV_LABELS[switchTarget]} környezethez nincs aktív hitelesítő beállítva
+                — a váltás a szerver által el lesz utasítva.
+              </div>
+            )}
+
+            {switchError && <div className="alert-error mb-4">{switchError}</div>}
+
+            <p style={{ marginBottom: 16, fontSize: '0.9rem' }}>
+              Biztosan átvált a <strong>{NAV_LABELS[switchTarget].toLowerCase()}</strong> beküldési környezetre?
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn btn-primary" onClick={confirmSwitch} disabled={switching}>
+                {switching ? 'Váltás...' : `Igen, váltás ${NAV_LABELS[switchTarget].toLowerCase()}re`}
+              </button>
+              <button className="btn btn-secondary" onClick={() => setSwitchTarget(null)} disabled={switching}>
+                {t('common.cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function CompanyPage() {
   const { can } = useAuth()
   const { t } = useTranslation()
@@ -445,15 +764,6 @@ export default function CompanyPage() {
               <input type={type} value={form[key] ?? ''} onChange={(e) => setField(key, e.target.value)} required={req} />
             </div>
           ))}
-          {can('company.manage') && (
-            <div className="form-group">
-              <label>{t('company.nav_env')}</label>
-              <select value={form.nav_environment ?? 'test'} onChange={(e) => setField('nav_environment', e.target.value)}>
-                <option value="test">{t('company.nav_test')}</option>
-                <option value="production">{t('company.nav_prod')}</option>
-              </select>
-            </div>
-          )}
         </div>
         <div className="form-group card">
           <label>{t('company.inv_header')}</label>
@@ -469,6 +779,8 @@ export default function CompanyPage() {
       {can('company.manage') && <GeneralSettingsSection can={can} />}
       {can('company.manage') && <AccentColorSection can={can} />}
       {can('company.manage') && <SimplePaySection can={can} />}
+      {/* NAV szekció: can('invoice.send_nav') a modul-proxy — NAV modul ki = false, be = true */}
+      {can('invoice.send_nav') && <NavSection can={can} />}
     </div>
   )
 }

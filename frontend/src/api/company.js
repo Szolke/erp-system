@@ -25,4 +25,10 @@ export const company = {
     upsert: (currency, data) => client.put(`/api/company/simplepay/${currency}`, data),
     delete: (currency) => client.delete(`/api/company/simplepay/${currency}`),
   },
+  nav: {
+    list: () => client.get('/api/company/nav'),
+    upsert: (env, data) => client.put(`/api/company/nav/${env}`, data),
+    delete: (env) => client.delete(`/api/company/nav/${env}`),
+    setActiveEnvironment: (env) => client.patch('/api/company/nav/active-environment', { environment: env }),
+  },
 }

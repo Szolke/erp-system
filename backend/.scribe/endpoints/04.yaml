@@ -1,18 +1,234 @@
-name: 'Cég beállítások'
-description: ''
+name: Cég
+description: |-
+
+  Operates only on the caller's active company (docs/er-model.md tenant
+  model) — there is no index/store/destroy here; creating new companies
+  and onboarding their first user is a separate, not-yet-built flow.
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/company/settings
+    uri: api/companies
     metadata:
       custom: []
-      groupName: 'Cég beállítások'
-      groupDescription: ''
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
       subgroup: ''
       subgroupDescription: ''
-      title: 'GET /api/company/settings — all settings for the active company'
+      title: 'GET /api/companies — az összes cég listája (csak szuperadmin)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5174'
+          access-control-allow-credentials: 'true'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/companies
+    metadata:
+      custom: []
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/companies — új cég létrehozása (csak szuperadmin)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      tax_number:
+        custom: []
+        name: tax_number
+        description: 'Must match the regex /^\d{8}-\d-\d{2}$/.'
+        required: true
+        example: 64255931-4-23
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      registration_number:
+        custom: []
+        name: registration_number
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      postal_code:
+        custom: []
+        name: postal_code
+        description: 'Must not be greater than 10 characters.'
+        required: false
+        example: aykcmy
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      city:
+        custom: []
+        name: city
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: u
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      address_line:
+        custom: []
+        name: address_line
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      country_code:
+        custom: []
+        name: country_code
+        description: 'Must be 2 characters.'
+        required: false
+        example: pw
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      email:
+        custom: []
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: false
+        example: emelie.baumbach@example.net
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      phone:
+        custom: []
+        name: phone
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: s
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      base_currency:
+        custom: []
+        name: base_currency
+        description: 'Must be 3 characters.'
+        required: false
+        example: itc
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+      tax_number: 64255931-4-23
+      registration_number: w
+      postal_code: aykcmy
+      city: u
+      address_line: w
+      country_code: pw
+      email: emelie.baumbach@example.net
+      phone: s
+      base_currency: itc
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/company
+    metadata:
+      custom: []
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
       description: ''
       authenticated: true
       deprecated: false
@@ -50,14 +266,18 @@ endpoints:
     custom: []
     httpMethods:
       - PUT
-    uri: 'api/company/settings/{key}'
+    uri: api/company
     metadata:
       custom: []
-      groupName: 'Cég beállítások'
-      groupDescription: ''
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
       subgroup: ''
       subgroupDescription: ''
-      title: 'PUT /api/company/settings/{key} — update a single setting'
+      title: ''
       description: ''
       authenticated: true
       deprecated: false
@@ -65,36 +285,180 @@ endpoints:
       Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      key:
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
         custom: []
-        name: key
-        description: ''
+        name: name
+        description: 'Must not be greater than 255 characters.'
         required: true
-        example: architecto
+        example: b
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-    cleanUrlParameters:
-      key: architecto
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      value:
+      tax_number:
         custom: []
-        name: value
-        description: ''
+        name: tax_number
+        description: 'Must match the regex /^\d{8}-\d-\d{2}$/.'
         required: true
+        example: 64255931-4-23
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      eu_tax_number:
+        custom: []
+        name: eu_tax_number
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      registration_number:
+        custom: []
+        name: registration_number
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: a
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      postal_code:
+        custom: []
+        name: postal_code
+        description: 'Must not be greater than 10 characters.'
+        required: true
+        example: ykcmyu
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      city:
+        custom: []
+        name: city
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      address_line:
+        custom: []
+        name: address_line
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: p
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      country_code:
+        custom: []
+        name: country_code
+        description: 'Must be 2 characters.'
+        required: true
+        example: wl
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      email:
+        custom: []
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: false
+        example: wleuschke@example.net
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      phone:
+        custom: []
+        name: phone
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: s
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      invoice_header_text:
+        custom: []
+        name: invoice_header_text
+        description: ''
+        required: false
         example: architecto
         type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      invoice_footer_text:
+        custom: []
+        name: invoice_footer_text
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      base_currency:
+        custom: []
+        name: base_currency
+        description: 'Must be 3 characters.'
+        required: true
+        example: ngz
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      is_active:
+        custom: []
+        name: is_active
+        description: ''
+        required: false
+        example: false
+        type: boolean
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      value: architecto
+      name: b
+      tax_number: 64255931-4-23
+      eu_tax_number: w
+      registration_number: a
+      postal_code: ykcmyu
+      city: w
+      address_line: p
+      country_code: wl
+      email: wleuschke@example.net
+      phone: s
+      invoice_header_text: architecto
+      invoice_footer_text: architecto
+      base_currency: ngz
+      is_active: false
     fileParameters: []
     responses: []
     responseFields: []
@@ -108,15 +472,70 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - DELETE
-    uri: 'api/company/settings/{key}'
+      - POST
+    uri: api/company/logo
     metadata:
       custom: []
-      groupName: 'Cég beállítások'
-      groupDescription: ''
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
       subgroup: ''
       subgroupDescription: ''
-      title: 'DELETE /api/company/settings/{key} — reset to default'
+      title: 'POST /api/company/logo — feltölt egy logót (max 2 MB, jpeg/png/gif/webp)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      logo:
+        custom: []
+        name: logo
+        description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
+    fileParameters:
+      logo: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: api/company/logo
+    metadata:
+      custom: []
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'DELETE /api/company/logo — törli a logót'
       description: ''
       authenticated: true
       deprecated: false
@@ -124,20 +543,8 @@ endpoints:
       Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      key:
-        custom: []
-        name: key
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      key: architecto
+    urlParameters: []
+    cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

@@ -1,23 +1,19 @@
-name: Modulkezelő
+name: 'Bizonylat sorozatok'
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/modules
+    uri: api/settings/document-series
     metadata:
       custom: []
-      groupName: Modulkezelő
+      groupName: 'Bizonylat sorozatok'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'GET /api/modules — cég modul-listája (is_available=true, sort_order szerint).'
-      description: |-
-        Jogosultság: module.manage (superadmin-only jelenleg).
-        TODO: lazítható, ha egy sima user is lekérdezheti a cége aktív moduljait
-              feltételes UI-elemekhez — ekkor az index() joga csökkenthető, az update()
-              marad module.manage-en.
+      title: ''
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -53,23 +49,16 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - PATCH
-    uri: 'api/modules/{module_key}'
+      - PUT
+    uri: 'api/settings/document-series/{documentSeries_id}'
     metadata:
       custom: []
-      groupName: Modulkezelő
+      groupName: 'Bizonylat sorozatok'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'PATCH /api/modules/{module} — modul be/kikapcsolása.'
-      description: |-
-        A {module} route-paraméter a modul KEY-je (pl. "nav", "simplepay"), nem az ID —
-        lásd Module::getRouteKeyName(). Így a hívás önmagyarázó és env-független.
-
-        FONTOS: EnforcesCompanyScope::assertBelongsToCurrentCompany() NEM alkalmazható,
-        mert a Module globális katalógus — nincs company_id mező. A cég-kontextust az
-        EnsureCompanyContext middleware tölti fel (CurrentCompany singleton), és a pivot-
-        műveletek erre a companyId-re futnak.
+      title: ''
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -77,25 +66,36 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      module_key:
+      documentSeries_id:
         custom: []
-        name: module_key
-        description: ''
+        name: documentSeries_id
+        description: 'The ID of the documentSeries.'
         required: true
-        example: invoicing
-        type: string
+        example: 39
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      module_key: invoicing
+      documentSeries_id: 39
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      enabled:
+      prefix:
         custom: []
-        name: enabled
+        name: prefix
+        description: 'Must match the regex /^[A-Z0-9]+$/. Must not be greater than 20 characters.'
+        required: true
+        example: bngzmiyvdljnikhw
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      reset_yearly:
+        custom: []
+        name: reset_yearly
         description: ''
         required: true
         example: true
@@ -105,7 +105,8 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      enabled: true
+      prefix: bngzmiyvdljnikhw
+      reset_yearly: true
     fileParameters: []
     responses: []
     responseFields: []

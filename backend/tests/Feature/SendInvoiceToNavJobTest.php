@@ -244,6 +244,42 @@ class SendInvoiceToNavJobTest extends TestCase
         );
     }
 
+    // ─── Test 5: NAV modul ON + credential INAKTÍV → NotApplicable + warning ──
+    //
+    // Különbség Test 2-höz képest: a credential SOR létezik, de is_active=false.
+    // A job where('is_active', true) szűrője kizárja → ugyanúgy null → NotApplicable.
+    // A modul BE van kapcsolva, tehát ez nem szándékos kihagyás → Log::warning szükséges.
+
+    public function test_job_logs_warning_when_nav_module_is_on_but_credential_is_inactive(): void
+    {
+        $navModule = $this->makeNavModule();
+        $this->enableNavModule($this->company, $navModule);
+
+        // Credential létezik, de le van kapcsolva.
+        CompanyNavCredential::create([
+            'company_id'       => $this->company->id,
+            'environment'      => NavEnvironment::Test,
+            'nav_tax_number'   => $this->company->tax_number,
+            'nav_login'        => 'demo-test-login',
+            'nav_password'     => 'demo-test-password',
+            'nav_signing_key'  => 'demo-test-signing-key',
+            'nav_exchange_key' => 'demo-test-exchange-key',
+            'is_active'        => false,
+        ]);
+
+        Log::spy();
+
+        $job = new SendInvoiceToNavJob($this->invoice->id);
+        app()->call([$job, 'handle']);
+
+        $this->invoice->refresh();
+        $this->assertSame(NavStatus::NotApplicable, $this->invoice->nav_status);
+
+        Log::shouldHaveReceived('warning')
+            ->once()
+            ->withArgs(fn ($msg) => str_contains($msg, 'no active credential for environment'));
+    }
+
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
     private function makeNavModule(): Module

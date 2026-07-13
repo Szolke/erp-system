@@ -1,18 +1,18 @@
-name: SimplePay
+name: 'Cég beállítások'
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/company/simplepay
+    uri: api/company/settings
     metadata:
       custom: []
-      groupName: SimplePay
+      groupName: 'Cég beállítások'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'List all SimplePay credentials for the active company.'
+      title: 'GET /api/company/settings — all settings for the active company'
       description: ''
       authenticated: true
       deprecated: false
@@ -50,15 +50,15 @@ endpoints:
     custom: []
     httpMethods:
       - PUT
-    uri: 'api/company/simplepay/{currency}'
+    uri: 'api/company/settings/{key}'
     metadata:
       custom: []
-      groupName: SimplePay
+      groupName: 'Cég beállítások'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Create or update the credential for a given currency.'
-      description: 'Secret key is only updated when a non-empty value is sent.'
+      title: 'PUT /api/company/settings/{key} — update a single setting'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -66,9 +66,9 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      currency:
+      key:
         custom: []
-        name: currency
+        name: key
         description: ''
         required: true
         example: architecto
@@ -78,59 +78,23 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      currency: architecto
+      key: architecto
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      merchant_id:
+      value:
         custom: []
-        name: merchant_id
-        description: 'Must not be greater than 64 characters.'
-        required: true
-        example: b
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      secret_key:
-        custom: []
-        name: secret_key
-        description: 'Must not be greater than 256 characters.'
-        required: false
-        example: 'n'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      sandbox:
-        custom: []
-        name: sandbox
+        name: value
         description: ''
         required: true
-        example: true
-        type: boolean
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      is_active:
-        custom: []
-        name: is_active
-        description: ''
-        required: true
-        example: true
-        type: boolean
+        example: architecto
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      merchant_id: b
-      secret_key: 'n'
-      sandbox: true
-      is_active: true
+      value: architecto
     fileParameters: []
     responses: []
     responseFields: []
@@ -145,14 +109,14 @@ endpoints:
     custom: []
     httpMethods:
       - DELETE
-    uri: 'api/company/simplepay/{currency}'
+    uri: 'api/company/settings/{key}'
     metadata:
       custom: []
-      groupName: SimplePay
+      groupName: 'Cég beállítások'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
+      title: 'DELETE /api/company/settings/{key} — reset to default'
       description: ''
       authenticated: true
       deprecated: false
@@ -161,9 +125,9 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      currency:
+      key:
         custom: []
-        name: currency
+        name: key
         description: ''
         required: true
         example: architecto
@@ -173,7 +137,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      currency: architecto
+      key: architecto
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

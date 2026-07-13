@@ -8,7 +8,7 @@
 > - **[CHANGELOG.md](CHANGELOG.md)** — történelmi lépés-napló: lépések leírása, commit hash-ek, fájllisták
 > - **[er-model.md](er-model.md)** — részletes tábla-/mezőszintű adatmodell
 
-Utolsó frissítés: 2026-07-13, NAV credentials API+UI + audit-log — `56a6d17`.
+Utolsó frissítés: 2026-07-13, PDF backup scriptek + sail artisan konvenció — `457fe23` / `26ca782`.
 
 ## Kész modulok (összefoglaló)
 
@@ -52,7 +52,7 @@ Ezek a pontok **blokkolják** az éles üzembe helyezést. Mind addig nyitott, a
 
 - [x] **Szuperadmin-seed letiltása élesben** — `DatabaseSeeder` fix `test@example.com` / `password` kombinációt hoz létre `is_superadmin=true`-val. **MEGOLDVA (SA-BOOT):** production env-ben a demo-seed nem fut (`App::environment('local', 'testing')` feltétel); éles admin a `php artisan erp:create-superadmin` paranccsal hozható létre. **Kiegészítve (`7a372bb`):** a tényleges hiányosság a deploy-dokumentáció volt — pótolva: `docs/deploy.md`. Részletek: Nyitott pont #6.
 - [x] **PDF-tár Docker-jogosultság (fejlesztői env, javítva 2026-07-13)** — a `documents/` alatti könyvtárak és fájlok `root:root 700/644`-ről `szolke:szolke 755/644`-re javítva. Gyökérok: `docker compose exec laravel.test` (user flag nélkül) root-ként fut → `root:root 700` könyvtárak. Megelőzés: mindig `./vendor/bin/sail artisan ...` (ld. Architekturális konvenciók). Éles env-ben a webszerver user kell tulajdonolja a könyvtárat — ld. `docs/deploy.md` Fájlrendszer-jogosultságok. Részletek: Nyitott pont #7.
-- [ ] **PDF-tár külső backup** — `storage/app/private/documents/` gitben nincs (szándékos). Élesítésnél kötelező a napi külső mentés (S3 vagy egyenértékű) — a tárolt PDF-ek jogi bizonyíték-értékűek. Részletek: Nyitott pont #7.
+- [ ] **PDF-tár külső backup** — `storage/app/private/documents/` gitben nincs (szándékos). Élesítésnél kötelező a napi külső mentés — a tárolt PDF-ek jogi bizonyíték-értékűek. **Script MEGVAN (`457fe23`):** `scripts/backup-pdf.sh` (rsync/SSH, forrás-üresség + SSH-elérhetőség ellenőrzés, fájlszám-összevetés) + `scripts/verify-backup.sh` (checksum dry-run integritás-ellenőrzés) + `docs/backup.md` (visszaállítási eljárás 3 forgatókönyvre). **DE: a script megléte ≠ működő backup.** Még hiányzik: (1) célgép kijelölése és SSH-kulcs generálása + telepítése; (2) `scripts/backup.conf` kitöltése; (3) első éles futtatás (`bash scripts/backup-pdf.sh`); (4) **próba-visszaállítás** egy teszt-könyvtárba + egy PDF megnyitása — amíg ez nincs meg, a backup csak feltételezés; (5) ütemezés (cron/systemd); (6) retention policy (jogi utánanézés folyamatban). Részletek: Nyitott pont #7, `docs/backup.md`.
 - [ ] **NAV sandbox-tesztelés** — `vatExemption` kódok (AAM/TAM stb.) XSD-konformitása `NavXmlBuilder`-ben valódi NAV sandbox hitelesítő adatokkal ellenőrzendő. Részletek: Nyitott pont #1.
 - [ ] **SimplePay sandbox-tesztelés** — start URL struktúra (1 vs. több callback URL), refund request/response formátum, IPN visszajelzés refundra, valódi merchant-adatokkal. Részletek: Nyitott pont #3, #4.
 - [ ] **`.env` éles értékek** — `APP_ENV=production`, `APP_DEBUG=false`, `APP_KEY`, DB jelszó, `NAV_*`, `SIMPLEPAY_*` kulcsok cserélve fejlesztési értékekről (érzékeny adat — commitba soha ne kerüljön). Részletek: Nyitott pont #0.

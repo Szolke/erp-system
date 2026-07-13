@@ -48,6 +48,8 @@ Minden tervezett funkció implementálva van. Hátramaradó teendők kizárólag
 
 ## Élesítés előtti checklist
 
+Rendszerkövetelmények (hardver, szoftver, külső hozzáférések) telepítés előtt: [`docs/requirements.md`](requirements.md)
+
 Ezek a pontok **blokkolják** az éles üzembe helyezést. Mind addig nyitott, amíg be nem jelölve.
 
 - [x] **Szuperadmin-seed letiltása élesben** — `DatabaseSeeder` fix `test@example.com` / `password` kombinációt hoz létre `is_superadmin=true`-val. **MEGOLDVA (SA-BOOT):** production env-ben a demo-seed nem fut (`App::environment('local', 'testing')` feltétel); éles admin a `php artisan erp:create-superadmin` paranccsal hozható létre. **Kiegészítve (`7a372bb`):** a tényleges hiányosság a deploy-dokumentáció volt — pótolva: `docs/deploy.md`. Részletek: Nyitott pont #6.

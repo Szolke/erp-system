@@ -198,48 +198,78 @@ a rendszernek** — ez a rendszergazda feladata (ld. [6. szakasz](#6-ami-nem-ré
 
 ## 5. Tárhely és jogosultságok
 
-### PDF-archívum
+### A teljes `storage/` fa jogosultságai
 
-**Hely:** `backend/storage/app/private/documents/`
-(a Docker bind mount-on keresztül a hoszon él: `./backend/storage/app/private/documents/`)
+A `backend/storage/` könyvtár teljes tartalma a webszerver user (Sail-ben: `sail`,
+uid=1000) **kizárólagos tulajdonában** kell legyen. Ez NEM csak a PDF-archívumra
+vonatkozik — az érintett alkönyvtárak:
 
-**Jogosultsági követelmény:**
-- A **webszerver user** (Sail-ben: `sail`, uid=1000) **ÍRÁSI** jogot igényel
-- A **backup user** **OLVASÁSI** jogot igényel
+| Alkönyvtár | Mire kell | Következmény, ha root-tulajdonú |
+|---|---|---|
+| `app/private/documents/` | PDF-ek mentése | backup script csendben nulla fájlt lát |
+| `framework/testing/disks/` | teszt-suite fájlrendszer-fake | sail-ként 20 teszt bukik (`Unable to create a directory`) |
+| `framework/views/` | Blade template-cache | sail nem tudja felülírni a template-fordítást |
+| `framework/cache/` | Laravel alkalmazás-cache | sail nem tud cache-t írni |
+| `logs/` | Laravel hibanaplók | hibalog nem tud íródni |
 
 **Fejlesztői (Docker) esetén:**
 
 Minden artisan parancsot `./vendor/bin/sail artisan ...` alakban kell futtatni.
 A `docker compose exec laravel.test php artisan ...` (user flag nélkül)
-**root-ként fut** → a létrehozott könyvtárak `root:root 700` jogosultságot kapnak.
-Következmény: a hoston futó backup script **csendben nulla fájlt lát** —
-nem hibával, hanem üres eredménnyel. Ez a hiba egyszer már bekövetkezett.
+**root-ként fut** → a létrehozott könyvtárak és fájlok `root:root 700/755`
+jogosultságot kapnak. Ez a teljes `storage/` fát érinti.
 
-Ha a `documents/` könyvtár nem a sail user tulajdona (pl. frissen klónozott
-repo után root-os parancs hozta létre), **egyszeri javítás a hostról**:
+> **Konkrét eset (2026-07-13):** root-ként futtatott tesztek
+> `framework/testing/disks/` könyvtárat hoztak létre `root:root 700`-ként.
+> Sail-ként futtatva a teszt-suite 20 testtel bukott — miközben root-ként
+> 162/162 „zöldet" mutatott. A hamis zöld oka: root belép a `700`-as
+> könyvtárba, sail nem tud.
+
+**A teszteket is sail-ként kell futtatni:**
 
 ```bash
-# A host user UID=1000 = sail UID=1000 (Sail ezt hangolja össze WWWUSER-rel)
-sudo chown -R "$(whoami):$(whoami)" backend/storage/app/private/documents/
-find backend/storage/app/private/documents/ -type d -exec chmod 755 {} +
-find backend/storage/app/private/documents/ -type f -exec chmod 644 {} +
+# Helyes — sail userként fut, valódi eredményt ad
+./backend/vendor/bin/sail artisan test
+
+# TILOS — root-ként fut, hamis zöldet adhat és szennyezi a storage/-t
+docker compose exec laravel.test php artisan test
 ```
 
-Ez a JAVÍTÁS — a MEGELŐZÉS a `./vendor/bin/sail artisan` wrapper következetes
-használata, ami sail userként fut, és az új könyvtárakat azonnal helyes
-jogosultsággal hozza létre.
+**Ha root-tulajdonú fájlok keletkeztek a `storage/` alatt** (egyszeri javítás,
+Docker-rooton keresztül — interaktív sudo nem kell):
+
+```bash
+# A repo gyökeréből futtatva
+docker compose exec laravel.test chown -R sail:sail /var/www/html/storage/
+docker compose exec laravel.test find /var/www/html/storage/ -type d -exec chmod 755 {} +
+docker compose exec laravel.test find /var/www/html/storage/ -type f -exec chmod 644 {} +
+```
+
+Igazolás:
+```bash
+find backend/storage -user root  # → üres eredmény = rendben
+```
 
 **Éles (production) esetén:**
 
-A webszerver user (pl. `www-data`, `nginx`, `deploy`) tulajdonolja a könyvtárat.
-Az artisan parancsok futtatási módja (pl. `sudo -u www-data php artisan`) az éles
-környezet kialakításakor véglegesítendő (részletek: [`docs/deploy.md`](deploy.md)).
+A webszerver user (pl. `www-data`, `nginx`, `deploy`) tulajdonolja a `storage/`
+teljes fáját. Az artisan parancsok futtatási módja az éles környezet kialakításakor
+véglegesítendő (részletek: [`docs/deploy.md`](deploy.md)).
 
-### Backup
+### PDF-archívum (különleges követelmények)
 
-A `documents/` könyvtár gitből ki van zárva. Külső backup **kötelező** élesítés
-előtt — a git NEM menti, és a regenerált PDF nem bit-azonos az eredetivel (jogi
-következmény). Részletek és visszaállítási eljárás: [`docs/backup.md`](backup.md).
+**Hely:** `backend/storage/app/private/documents/`
+(a Docker bind mount-on keresztül a hoszon él: `./backend/storage/app/private/documents/`)
+
+A PDF-archívum a fenti általános `storage/` jogosultságon túl két **különleges**
+követelménnyel is bír:
+
+- A **backup user** is **OLVASÁSI** jogot igényel (a többi `storage/` alkönyvtárhoz
+  a backup usernek nincs szüksége hozzáférésre)
+- A könyvtár **gitből ki van zárva** → külső backup **kötelező** élesítés előtt;
+  a regenerált PDF nem bit-azonos az eredetivel (jogi következmény)
+
+Részletek és visszaállítási eljárás: [`docs/backup.md`](backup.md).
 
 ---
 

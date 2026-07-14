@@ -112,32 +112,52 @@ a `--force` flaggel (CI/automatizált deploy esetén).
 
 ---
 
-### 6. Fájlrendszer-jogosultságok — PDF-tár
+### 6. Fájlrendszer-jogosultságok — a `storage/` teljes fája
 
-A `storage/app/private/documents/` könyvtár **írható a webszerver user által** és
-**olvasható a backup user által** kell, hogy legyen. Ez **környezetfüggetlen elvárás**
-— a megvalósítás módja eltér:
+A `backend/storage/` könyvtár **teljes tartalma** a webszerver user tulajdonában
+kell legyen. Ez **NEM csak a `documents/`-re vonatkozik** — érintett minden
+alkönyvtár: `app/`, `framework/` (cache, views, sessions, testing), `logs/`.
 
 | Környezet | Webszerver user | Artisan futtatás | Elvárt tulajdonos |
 |-----------|-----------------|------------------|-------------------|
-| Fejlesztői (Docker/Sail) | `sail` (UID=1000) | `./vendor/bin/sail artisan` | `szolke:szolke 755` |
+| Fejlesztői (Docker/Sail) | `sail` (UID=1000) | `./vendor/bin/sail artisan` | `szolke:szolke 755/644` |
 | Éles (production) | pl. `www-data`, `nginx`, `deploy` | TBD az éles env kialakításakor | webszerver user |
 
-**Ha a könyvtár nem a webszerver user tulajdona** (pl. root hozta létre), a PHP
-process nem tud PDF-et menteni → `500 UnableToCreateDirectory` hiba keletkezik.
+**Ha a `storage/` fa (részben) nem a webszerver user tulajdona** — pl. mert valaki
+`docker compose exec laravel.test php artisan ...` (user flag nélkül, tehát root-ként)
+futtatott parancsot — a következmények nem mindig azonnaliak:
 
-Javítás (éles környezetben, webszerver user = pl. `www-data`):
+- `storage/app/private/documents/` root-tulajdonú → PDF-mentés `500 UnableToCreateDirectory`
+- `storage/framework/testing/disks/` root-tulajdonú → teszt-suite sail-ként 20 testtel bukik
+- `storage/framework/views/` root-tulajdonú → sail nem tudja felülírni a Blade-cache-t
+
+**Fejlesztői javítás** (Docker-root-on keresztül, interaktív sudo nélkül):
 
 ```bash
-chown -R www-data:www-data storage/app/private/documents
-chmod -R 755 storage/app/private/documents
-find storage/app/private/documents -type f -exec chmod 644 {} \;
+# A repo gyökeréből futtatva
+docker compose exec laravel.test chown -R sail:sail /var/www/html/storage/
+docker compose exec laravel.test find /var/www/html/storage/ -type d -exec chmod 755 {} +
+docker compose exec laravel.test find /var/www/html/storage/ -type f -exec chmod 644 {} +
+```
+
+Igazolás:
+```bash
+find backend/storage -user root  # → üres eredmény = rendben
+```
+
+**Éles (production) javítás** (webszerver user = pl. `www-data`):
+
+```bash
+chown -R www-data:www-data storage/
+chmod -R 755 storage/
+find storage/ -type f -exec chmod 644 {} \;
 ```
 
 **Ellenőrzés deploy után:**
 
 ```bash
 ls -la storage/app/private/documents/
+ls -la storage/framework/
 # Elvárt: webszerver user tulajdona, drwxr-xr-x (755) könyvtárak, -rw-r--r-- (644) fájlok
 ```
 

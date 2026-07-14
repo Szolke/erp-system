@@ -20,10 +20,4 @@ class InvoicingModule extends ModuleDescriptor
         ];
     }
 
-    public function sidebar(): array
-    {
-        return [
-            ['label' => 'Bizonylatok', 'route' => '/documents',  'permission' => 'invoice.view'],
-        ];
-    }
 }

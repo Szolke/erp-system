@@ -86,7 +86,7 @@ class ModuleManagementTest extends TestCase
         $this->inCompany($superadmin, $company)
             ->getJson('/api/modules')
             ->assertOk()
-            ->assertJsonStructure(['data' => [['id', 'key', 'name', 'enabled', 'is_core', 'dependencies']]]);
+            ->assertJsonStructure(['data' => [['id', 'key', 'name', 'enabled', 'is_core', 'dependencies', 'settings_route']]]);
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -341,6 +341,33 @@ class ModuleManagementTest extends TestCase
         $this->inCompany($superadmin, $companyB)
             ->getJson('/api/company/simplepay')
             ->assertNotFound();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 9. settings_route mező
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function test_settings_route_field_in_module_list(): void
+    {
+        // Valódi registry-t használunk (nem fake) — a tényleges NavModule,
+        // SimplePayModule és InvoicingModule settingsRoute() értékeit ellenőrizzük.
+        $company = $this->makeCompany();
+        Permission::create(['key' => 'module.manage', 'module' => 'module']);
+        $this->makeModule('nav');
+        $this->makeModule('simplepay');
+        $this->makeModule('invoicing', isCore: true);
+        $superadmin = $this->makeUser(superadmin: true);
+        $superadmin->companies()->attach($company->id, ['is_default' => true]);
+
+        $response = $this->inCompany($superadmin, $company)
+            ->getJson('/api/modules')
+            ->assertOk();
+
+        $data = collect($response->json('data'));
+
+        $this->assertSame('/company#section-nav',       $data->firstWhere('key', 'nav')['settings_route']);
+        $this->assertSame('/company#section-simplepay', $data->firstWhere('key', 'simplepay')['settings_route']);
+        $this->assertNull($data->firstWhere('key', 'invoicing')['settings_route']);
     }
 
     // ══════════════════════════════════════════════════════════════════════════

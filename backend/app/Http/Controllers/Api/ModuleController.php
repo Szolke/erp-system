@@ -29,6 +29,10 @@ class ModuleController extends Controller
      * TODO: lazítható, ha egy sima user is lekérdezheti a cége aktív moduljait
      *       feltételes UI-elemekhez — ekkor az index() joga csökkenthető, az update()
      *       marad module.manage-en.
+     *
+     * @responseField data[].settings_route string|null A modul konfigurációs útvonala a
+     *   frontend routerben (pl. '/company#section-nav'), vagy null ha nincs saját beállítási
+     *   felülete. Kizárólag navigációs mutató — nem tároló logika.
      */
     public function index(): JsonResponse
     {
@@ -266,15 +270,18 @@ class ModuleController extends Controller
 
     private function formatModule(Module $m, bool $enabled): array
     {
+        $descriptor = $this->registry->find($m->key);
+
         return [
-            'id'           => $m->id,
-            'key'          => $m->key,
-            'name'         => $m->name,
-            'description'  => $m->description,
-            'version'      => $m->version,
-            'is_core'      => $m->is_core,
-            'enabled'      => $enabled,
-            'dependencies' => $this->registry->find($m->key)?->dependencies() ?? [],
+            'id'             => $m->id,
+            'key'            => $m->key,
+            'name'           => $m->name,
+            'description'    => $m->description,
+            'version'        => $m->version,
+            'is_core'        => $m->is_core,
+            'enabled'        => $enabled,
+            'dependencies'   => $descriptor?->dependencies() ?? [],
+            'settings_route' => $descriptor?->settingsRoute(),
         ];
     }
 }

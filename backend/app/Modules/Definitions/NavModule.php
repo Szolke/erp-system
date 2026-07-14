@@ -18,4 +18,6 @@ class NavModule extends ModuleDescriptor
     // the descriptor explicitly claims this key to gate it under the nav module.
     public function permissions(): array { return ['invoice.send_nav', 'nav.view_log']; }
 
+    public function settingsRoute(): ?string { return '/company#section-nav'; }
+
 }

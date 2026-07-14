@@ -16,4 +16,6 @@ class SimplePayModule extends ModuleDescriptor
 
     public function permissions(): array { return ['simplepay.use', 'simplepay.refund']; }
 
+    public function settingsRoute(): ?string { return '/company#section-simplepay'; }
+
 }

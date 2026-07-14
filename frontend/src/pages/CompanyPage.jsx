@@ -674,7 +674,8 @@ export default function CompanyPage() {
   const [saving, setSaving]   = useState(false)
   const [logoUrl, setLogoUrl] = useState(null)
   const [logoUploading, setLogoUploading] = useState(false)
-  const logoInputRef = useRef(null)
+  const logoInputRef   = useRef(null)
+  const hasScrolled    = useRef(false)
 
   useEffect(() => {
     companyApi.get().then((res) => {
@@ -682,6 +683,21 @@ export default function CompanyPage() {
       setLogoUrl(res.data.data.logo_url ?? null)
     })
   }, [])
+
+  // Scroll to hash-target after form data loads. The 400ms delay lets
+  // section-level data (nav, simplepay) render before scrollIntoView fires,
+  // so the destination element already has its full height.
+  // hasScrolled guard prevents re-firing on every setField call.
+  useEffect(() => {
+    if (!form || hasScrolled.current) return
+    const hash = window.location.hash
+    if (!hash) return
+    hasScrolled.current = true
+    const timer = setTimeout(() => {
+      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth' })
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [form])
 
   function setField(k, v) { setForm((f) => ({ ...f, [k]: v })); setSuccess(false) }
 
@@ -778,9 +794,9 @@ export default function CompanyPage() {
 
       {can('company.manage') && <GeneralSettingsSection can={can} />}
       {can('company.manage') && <AccentColorSection can={can} />}
-      {can('company.manage') && <SimplePaySection can={can} />}
+      {can('company.manage') && <div id="section-simplepay"><SimplePaySection can={can} /></div>}
       {/* NAV szekció: can('invoice.send_nav') a modul-proxy — NAV modul ki = false, be = true */}
-      {can('invoice.send_nav') && <NavSection can={can} />}
+      {can('invoice.send_nav') && <div id="section-nav"><NavSection can={can} /></div>}
     </div>
   )
 }

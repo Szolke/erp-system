@@ -17,10 +17,4 @@ class ProductsModule extends ModuleDescriptor
         return ['product.view', 'product.create', 'product.edit', 'product.delete'];
     }
 
-    public function sidebar(): array
-    {
-        return [
-            ['label' => 'Termékek', 'route' => '/products', 'permission' => 'product.view'],
-        ];
-    }
 }

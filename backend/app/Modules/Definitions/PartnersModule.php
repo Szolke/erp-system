@@ -17,10 +17,4 @@ class PartnersModule extends ModuleDescriptor
         return ['partner.view', 'partner.create', 'partner.edit', 'partner.delete'];
     }
 
-    public function sidebar(): array
-    {
-        return [
-            ['label' => 'Partnerek', 'route' => '/partners', 'permission' => 'partner.view'],
-        ];
-    }
 }

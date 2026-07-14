@@ -17,10 +17,4 @@ class ReceiptsModule extends ModuleDescriptor
         return ['receipt.view', 'receipt.create', 'receipt.cancel', 'receipt.regenerate_pdf'];
     }
 
-    public function sidebar(): array
-    {
-        return [
-            ['label' => 'Bizonylatok', 'route' => '/documents', 'permission' => 'receipt.view'],
-        ];
-    }
 }

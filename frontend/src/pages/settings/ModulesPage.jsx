@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useToast } from '../../contexts/ToastContext'
@@ -118,6 +119,16 @@ function ModuleCard({ mod, onToggle, isToggling }) {
             </span>
           ))}
         </p>
+      )}
+      {/* Konfigurálás link — csak enabled + settings_route esetén.
+          ModulesPage superadmin-only, a superadmin mindig rendelkezik a szükséges
+          jogokkal (company.manage, invoice.send_nav) ahhoz, hogy a célszekció látható legyen. */}
+      {mod.enabled && mod.settings_route && (
+        <div style={{ paddingTop: 8, borderTop: '1px solid var(--color-border)', textAlign: 'right' }}>
+          <Link to={mod.settings_route} style={{ fontSize: 12, color: 'var(--color-primary)', textDecoration: 'none' }}>
+            Konfigurálás →
+          </Link>
+        </div>
       )}
     </div>
   )

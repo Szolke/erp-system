@@ -36,10 +36,14 @@ abstract class ModuleDescriptor
     public function settings(): array { return []; }
 
     /**
-     * Sidebar-bejegyzések, amelyeket ez a modul ad hozzá.
-     * Egy elem: ['label' => ..., 'route' => ..., 'permission' => ...]
+     * A modul konfigurációs útvonala a frontend routerben (pl. '/company#section-nav'),
+     * vagy null, ha a modulnak nincs saját beállítási felülete.
+     *
+     * NEM azonos a korábbi settings() metódussal, amelyet töröltünk — az
+     * company_settings sématározó volt (tároló logika). Ez kizárólag navigációs
+     * mutató: azt mondja meg, HOVA navigáljon a "Konfigurálás →" link a ModulesPage-ről.
      */
-    public function sidebar(): array { return []; }
+    public function settingsRoute(): ?string { return null; }
 
     /**
      * Side-effect a modul bekapcsolásakor. SOHA nem végezhet sémaváltoztatást.

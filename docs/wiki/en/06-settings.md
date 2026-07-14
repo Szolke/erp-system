@@ -55,6 +55,37 @@ its own merchant ID and secret key. The secret key is stored encrypted and is ne
 displayed — only a "set / not set" indicator is shown. The **Sandbox** toggle keeps the
 payment flow in test mode.
 
+This section is only visible to users with the `simplepay.manage` permission and only when
+the SimplePay module is enabled.
+
+### NAV Online Invoice Credentials
+
+Configure the technical user credentials required for the NAV Online Invoice 3.0 API. Two
+environments (test / production) are managed independently with separate credential sets.
+
+The active environment (set under **NAV Online Invoice environment** in the Company Data
+section) determines which credentials the system uses for automatic invoice reporting.
+
+**Warning banner:** if the NAV module is enabled but no `is_active=true` credential exists
+for the active environment, a yellow warning banner is displayed — in this state the NAV
+sending job skips reporting and writes a warning to the log.
+
+**Credentials per environment:**
+- Technical username
+- Technical user password
+- XML signing key
+- XML exchange key
+
+All secret fields are stored encrypted and are never returned to the UI — leaving a field
+blank when saving keeps the existing value unchanged.
+
+**Switching the active environment:** switching NAV environments (test → production) requires
+confirmation via a modal and is only possible when a credential already exists for the target
+environment.
+
+This section is only visible to users with the `invoice.send_nav` permission and only when
+the NAV Online Invoice module is enabled.
+
 ---
 
 ## Document Series (Settings → Document Series)
@@ -88,6 +119,28 @@ across three languages (HU / EN / DE). Changes take effect immediately on the us
 interface.
 
 Requires the `company.manage` permission.
+
+---
+
+## Module Manager (Settings → Modules)
+
+This page is only accessible to **superadmins**.
+
+The system is modular: certain features (NAV Online Invoice, SimplePay online payments) can
+be enabled or disabled per company. Core modules (marked **Always active**) — invoicing,
+receipts, partners, products — cannot be toggled and are always on.
+
+**Enabling / disabling a module:**
+Each module card shows a toggle. If a module has a dependency (e.g. NAV Online Invoice
+requires the invoicing module), the system checks that the dependency is active — if not,
+the toggle fails with a 422 error and shows the name of the missing module. Conversely, if
+an active module is depended on by another active module, the former cannot be disabled
+until the dependent module is disabled first.
+
+**"Configure →" link:**
+For enabled modules that have a settings page (e.g. NAV Online Invoice, SimplePay), a
+"Configure →" link appears at the bottom of the card. It navigates to the relevant section
+of the Company Settings page where the module's technical credentials can be entered.
 
 ---
 

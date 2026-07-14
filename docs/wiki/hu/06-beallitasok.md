@@ -51,6 +51,36 @@ külön merchant ID és titkos kulcs adható meg. A titkos kulcs titkosítva tá
 oldalon soha nem olvasható vissza — csak „be van állítva / nincs beállítva" jelzés látható.
 A **Sandbox** kapcsoló tesztkörnyezetben tartja a fizetési folyamatot.
 
+Ez a szekció csak `simplepay.manage` joggal rendelkező felhasználóknak látható, és csak ha a
+SimplePay modul engedélyezve van.
+
+### NAV Online Számla hitelesítő adatok
+
+A NAV Online Számla 3.0 API-hoz szükséges technikai felhasználói adatok beállítása. Két
+környezet (teszt / éles) kezelése egymástól független hitelesítőkkel.
+
+Az aktív környezet (`NAV Online Számla környezet` a Cégadatok szekcióban) határozza meg, melyik
+credential-készletet használja a rendszer az automatikus számlariportáláshoz.
+
+**Figyelmeztető sáv:** ha a NAV modul engedélyezve van, de az aktív környezethez nincs
+`is_active=true` credential beállítva, egy sárga figyelmeztető sáv jelenik meg — ilyenkor a
+NAV-küldési job nem indítja el a riportálást, és figyelmeztetést ír a naplóba.
+
+**Hitelesítő adatok:**
+- Technikai felhasználónév
+- Technikai felhasználó jelszava
+- XML aláírókulcs
+- XML cserekulcs
+
+Minden titkosmező titkosítva tárolódik, és soha nem olvasható vissza a felületen — mentéskor
+az üresen hagyott mezők a meglévő értéket tartják meg.
+
+**Környezetváltás:** az aktív NAV-környezet (teszt → éles) váltása megerősítő modallal történik,
+és csak akkor lehetséges, ha a célkörnyezethez már létezik aktív credential.
+
+Ez a szekció csak `invoice.send_nav` joggal rendelkező felhasználóknak látható, és csak ha a
+NAV Online Számla modul engedélyezve van.
+
 ---
 
 ## Sorszámtartományok (Beállítások → Sorszámtartományok)
@@ -83,6 +113,28 @@ a szerkesztőben három nyelven (HU / EN / DE). A változtatások azonnal érvé
 felhasználói felületen.
 
 Ez a szekció `company.manage` jogosultsághoz kötött.
+
+---
+
+## Modulkezelő (Beállítások → Modulok)
+
+Ez az oldal kizárólag **szuperadminok** számára érhető el.
+
+A rendszer moduláris: egyes funkciók (NAV Online Számla, SimplePay online fizetés) modul-alapon
+kapcsolhatók be és ki cégenként. Az alapmoduloknál (`Mindig aktív` jelzés) — számlázás, nyugta,
+partnerek, termékek — ez a lehetőség nem áll fenn, ezek mindig aktívak.
+
+**Modul engedélyezése / letiltása:**
+Minden modul-kártyán egy kapcsoló jelenik meg. Ha egy modulnak van függősége (pl. NAV Online
+Számla igényli a számlázás modult), a rendszer ellenőrzi, hogy a szükséges modul aktív-e —
+ha nem, a bekapcsolás 422-es hibával meghiúsul, és a hiányzó modul nevével jelez.
+Fordítva: ha egy aktív modul függőként hivatkozik egy másikra, az utóbbi csak akkor kapcsolható
+ki, ha az előbbit előbb letiltják.
+
+**„Konfigurálás →" link:**
+Egyes engedélyezett moduloknál (pl. NAV Online Számla, SimplePay) egy „Konfigurálás →" link
+jelenik meg a kártya alján. Ez a Cégbeállítások oldal megfelelő szekciójára ugrik, ahol a modul
+technikai hitelesítő adatai megadhatók.
 
 ---
 

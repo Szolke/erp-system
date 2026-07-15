@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { company as companyApi } from '../api/company'
+import { salesGroups as sgApi } from '../api/salesGroups'
 import { useAuth } from '../contexts/AuthContext'
 import { useTranslation } from '../contexts/TranslationContext'
 import { applySidebarTheme } from '../utils/sidebarTheme'
@@ -341,6 +342,137 @@ function SimplePaySection({ can }) {
             </div>
           )}
         </>
+      )}
+    </div>
+  )
+}
+
+function SalesGroupPrefixSection({ can }) {
+  const { t } = useTranslation()
+  const [prefix, setPrefix]         = useState('')
+  const [original, setOriginal]     = useState('')
+  const [company, setCompany]       = useState(null)
+  const [groupsExist, setGroupsExist] = useState(false)
+  const [loading, setLoading]       = useState(true)
+  const [saving, setSaving]         = useState(false)
+  const [error, setError]           = useState('')
+  const [success, setSuccess]       = useState(false)
+  const [confirmModal, setConfirmModal] = useState(false)
+
+  useEffect(() => { loadData() }, [])
+
+  async function loadData() {
+    setLoading(true)
+    try {
+      const [compRes, sgRes] = await Promise.all([
+        companyApi.get(),
+        sgApi.list({ per_page: 1 }),
+      ])
+      setCompany(compRes.data.data)
+      const p = compRes.data.data?.group_prefix ?? ''
+      setPrefix(p)
+      setOriginal(p)
+      setGroupsExist((sgRes.data.meta?.total ?? 0) > 0)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const dirty = prefix !== original
+
+  async function doSave() {
+    setSaving(true)
+    setError('')
+    setSuccess(false)
+    try {
+      await companyApi.update({ ...company, group_prefix: prefix || null })
+      setOriginal(prefix)
+      setSuccess(true)
+      // Ha prefixet töröltünk/módosítottunk, frissítjük a csoportlista-állapotot
+      if (!prefix) setGroupsExist(false)
+    } catch (err) {
+      const errs = err.response?.data?.errors
+      setError(errs ? Object.values(errs).flat().join(' | ') : err.response?.data?.message ?? t('common.error'))
+    } finally {
+      setSaving(false) }
+  }
+
+  async function handleSave(e) {
+    e.preventDefault()
+    setError('')
+    setSuccess(false)
+    // Ha módosítjuk (nem töröljük) a prefixet és vannak csoportok → megerősítő modal
+    if (dirty && prefix && groupsExist && prefix !== original) {
+      setConfirmModal(true)
+      return
+    }
+    await doSave()
+  }
+
+  if (loading) return null
+
+  return (
+    <div className="card" id="section-sales-group-prefix" style={{ marginTop: 24 }}>
+      <h2 style={{ margin: '0 0 16px', fontSize: '1.1rem' }}>Értékesítő csoport prefix</h2>
+      <p className="text-muted" style={{ fontSize: 13, marginBottom: 14 }}>
+        Legfeljebb 4 nagybetűs karakter (pl. <code>BUD</code>). A prefix az értékesítő csoportok
+        megjelenítőnevének első tagja: <code>PREFIX_CsoportNév</code>. A prefixet nem lehet törölni,
+        amíg van legalább egy értékesítő csoport.
+      </p>
+      {error && <div className="alert-error mb-4">{error}</div>}
+      {success && <div className="mb-4 alert-success">{t('common.saved')}</div>}
+      <form onSubmit={handleSave}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12 }}>
+          <div className="form-group" style={{ margin: 0, flex: '0 0 180px' }}>
+            <label>Prefix</label>
+            <input
+              value={prefix}
+              onChange={(e) => { setPrefix(e.target.value.toUpperCase()); setSuccess(false) }}
+              maxLength={4}
+              placeholder="pl. BUD"
+              style={{ textTransform: 'uppercase' }}
+              disabled={!can('company.manage')}
+            />
+          </div>
+          {can('company.manage') && (
+            <button className="btn btn-primary" type="submit" disabled={saving || !dirty}>
+              {saving ? t('common.saving') : t('common.save')}
+            </button>
+          )}
+        </div>
+      </form>
+
+      {/* Megerősítő modal — prefix módosítása meglévő csoportokkal */}
+      {confirmModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+        }}>
+          <div className="card" style={{ maxWidth: 460, width: '90%', margin: 0 }}>
+            <h3 style={{ margin: '0 0 14px', fontSize: '1rem' }}>Prefix módosítása</h3>
+            <div className="alert-error mb-4" style={{ fontWeight: 500 }}>
+              ⚠ A prefix módosítása az összes meglévő csoport megjelenített nevét megváltoztatja
+              (pl. <code>{original}_CsoportNév</code> → <code>{prefix}_CsoportNév</code>).
+            </div>
+            <p style={{ marginBottom: 16, fontSize: '0.9rem' }}>Biztosan módosítod a prefixet?</p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                className="btn btn-primary"
+                onClick={async () => { setConfirmModal(false); await doSave() }}
+                disabled={saving}
+              >
+                {saving ? 'Mentés...' : 'Igen, módosítom'}
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setConfirmModal(false)}
+                disabled={saving}
+              >
+                {t('common.cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
@@ -795,6 +927,8 @@ export default function CompanyPage() {
       {can('company.manage') && <GeneralSettingsSection can={can} />}
       {can('company.manage') && <AccentColorSection can={can} />}
       {can('company.manage') && <div id="section-simplepay"><SimplePaySection can={can} /></div>}
+      {/* Értékesítő csoport prefix: can('sales_group.view') a modul-proxy — modul ki = false, be = true */}
+      {can('sales_group.view') && <SalesGroupPrefixSection can={can} />}
       {/* NAV szekció: can('invoice.send_nav') a modul-proxy — NAV modul ki = false, be = true */}
       {can('invoice.send_nav') && <div id="section-nav"><NavSection can={can} /></div>}
     </div>

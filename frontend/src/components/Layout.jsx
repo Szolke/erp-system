@@ -9,7 +9,7 @@ import {
   FileText, Users2, Package, BookOpen,
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers, Blocks,
   Settings2, ChevronLeft, ChevronRight,
-  LogOut, Moon, Sun, Terminal,
+  LogOut, Moon, Sun, Terminal, UsersRound,
 } from 'lucide-react'
 
 export default function Layout() {
@@ -74,6 +74,7 @@ export default function Layout() {
     { to: '/settings/document-series', label: t('nav.doc_series'),    icon: Hash,       perm: 'document_series.manage' },
     { to: '/settings/translations',    label: t('nav.translations'),  icon: Languages,  perm: 'company.manage' },
     { to: '/settings/custom-fields',   label: t('nav.custom_fields'), icon: Sliders,    perm: 'company.manage' },
+    { to: '/settings/sales-groups',    label: 'Értékesítő csoportok', icon: UsersRound, perm: 'sales_group.view' },
     { to: '/settings/api-tester',      label: t('nav.api_tester'),    icon: Terminal,   perm: 'api_tester.use' },
   ]
 

@@ -25,6 +25,7 @@ import CustomFieldsPage from './pages/settings/CustomFieldsPage'
 import CompanyListPage from './pages/companies/CompanyListPage'
 import ApiTesterPage from './pages/settings/ApiTesterPage'
 import ModulesPage from './pages/settings/ModulesPage'
+import SalesGroupPage from './pages/settings/SalesGroupPage'
 import WikiPage from './pages/WikiPage'
 
 export default function App() {
@@ -64,6 +65,7 @@ export default function App() {
           <Route path="settings/custom-fields" element={<CustomFieldsPage />} />
           <Route path="companies" element={<CompanyListPage />} />
           <Route path="settings/modules" element={<ModulesPage />} />
+          <Route path="settings/sales-groups" element={<SalesGroupPage />} />
           <Route path="settings/api-tester" element={<ApiTesterPage />} />
           <Route path="wiki" element={<WikiPage />} />
         </Route>

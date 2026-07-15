@@ -64,6 +64,12 @@ class PermissionSeeder extends Seeder
             // SimplePay module permissions (simplepay module must be enabled).
             ['key' => 'simplepay.use', 'module' => 'simplepay', 'description' => 'SimplePay fizetési folyamat indítása', 'is_sensitive' => false],
             ['key' => 'simplepay.refund', 'module' => 'simplepay', 'description' => 'SimplePay visszatérítés (refund) indítása', 'is_sensitive' => true],
+
+            // Sales group module permissions (sales_group module must be enabled).
+            ['key' => 'sales_group.view', 'module' => 'sales_group', 'description' => 'Értékesítő csoportok megtekintése', 'is_sensitive' => false],
+            ['key' => 'sales_group.create', 'module' => 'sales_group', 'description' => 'Értékesítő csoport létrehozása', 'is_sensitive' => false],
+            ['key' => 'sales_group.edit', 'module' => 'sales_group', 'description' => 'Értékesítő csoport szerkesztése', 'is_sensitive' => false],
+            ['key' => 'sales_group.delete', 'module' => 'sales_group', 'description' => 'Értékesítő csoport törlése', 'is_sensitive' => false],
         ];
 
         foreach ($permissions as $permission) {

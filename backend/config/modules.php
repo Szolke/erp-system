@@ -11,4 +11,5 @@ return [
     App\Modules\Definitions\NavModule::class,
     App\Modules\Definitions\NtakModule::class,
     App\Modules\Definitions\SimplePayModule::class,
+    App\Modules\Definitions\SalesGroupModule::class,
 ];

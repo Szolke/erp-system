@@ -27,6 +27,7 @@ class CompanyResource extends JsonResource
             'base_currency' => $this->base_currency,
             'is_active' => $this->is_active,
             'nav_environment' => $this->nav_environment,
+            'group_prefix'    => $this->group_prefix,
             'logo_url'        => $this->logo_path
                 ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->logo_path)
                 : null,

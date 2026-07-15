@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\DocumentSeriesController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\PartnerController;
+use App\Http\Controllers\Api\SalesGroupController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReceiptController;
@@ -101,6 +102,10 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     Route::apiResource('products', ProductController::class);
     Route::apiResource('partners', PartnerController::class);
+
+    Route::middleware('module:sales_group')->group(function () {
+        Route::apiResource('sales-groups', SalesGroupController::class);
+    });
 
     // Bizonylatok — egységes lista (számla + nyugta + sztornók)
     Route::get('documents', [DocumentController::class, 'index']);

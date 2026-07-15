@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Support\CurrentCompany;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateCompanyRequest extends FormRequest
 {
@@ -11,8 +13,19 @@ class UpdateCompanyRequest extends FormRequest
         return $this->user()->can('company.manage');
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('group_prefix')) {
+            $value = $this->group_prefix;
+            // Üres string = prefix törlési szándék → null-lá alakítjuk
+            $this->merge(['group_prefix' => filled($value) ? strtoupper((string) $value) : null]);
+        }
+    }
+
     public function rules(): array
     {
+        $companyId = app(CurrentCompany::class)->id();
+
         return [
             'name' => ['required', 'string', 'max:255'],
             'tax_number' => ['required', 'regex:/^\d{8}-\d-\d{2}$/'],
@@ -30,6 +43,10 @@ class UpdateCompanyRequest extends FormRequest
             'is_active' => ['boolean'],
             // nav_environment NEM módosítható PUT /api/company úton — csak
             // PATCH /api/company/nav/active-environment-en át (védőhálóval).
+
+            // 'sometimes': ha a kliens nem küldi, kimarad a validated tömbből, és a prefix-guard nem lép életbe.
+            'group_prefix' => ['sometimes', 'nullable', 'string', 'max:4', 'alpha',
+                Rule::unique('companies', 'group_prefix')->ignore($companyId)],
         ];
     }
 }

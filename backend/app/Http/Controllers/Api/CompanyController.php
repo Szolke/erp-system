@@ -80,11 +80,36 @@ class CompanyController extends Controller
 
     public function update(UpdateCompanyRequest $request, CurrentCompany $currentCompany, AuditLogger $auditLogger)
     {
-        $company = Company::findOrFail($currentCompany->id());
+        $company   = Company::findOrFail($currentCompany->id());
+        $validated = $request->validated();
 
-        $oldValues = $company->only(array_keys($request->validated()));
-        $company->update($request->validated());
-        $newValues = $company->fresh()->only(array_keys($request->validated()));
+        // Guard: prefix nem null-ra állítható, amíg a cégnek vannak értékesítő csoportjai
+        if (array_key_exists('group_prefix', $validated)
+            && $validated['group_prefix'] === null
+            && $company->salesGroups()->exists()) {
+            return response()->json(
+                ['message' => 'Előbb töröld a csoportokat, vagy adj meg új prefixet.'],
+                422
+            );
+        }
+
+        $oldValues = $company->only(array_keys($validated));
+
+        try {
+            $company->update($validated);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // 23505 = PostgreSQL unique_violation — akkor fordul elő, ha két egyidejű kérés
+            // mindkettő átcsúszik a Rule::unique validáción, de csak az egyik nyeri a DB-versenyt
+            if ($e->getCode() === '23505') {
+                return response()->json(
+                    ['message' => 'Ez a prefix már foglalt, válassz másikat.'],
+                    422
+                );
+            }
+            throw $e;
+        }
+
+        $newValues = $company->fresh()->only(array_keys($validated));
 
         if ($oldValues !== $newValues) {
             $auditLogger->log('company.manage', $company->id, $request->user()->id, $company, $oldValues, $newValues);

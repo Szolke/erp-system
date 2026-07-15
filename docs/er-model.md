@@ -46,9 +46,10 @@ Státusz: tervezet (v1) — a Laravel migrations/modellek ez alapján készülne
 | base_currency | char(3) default `HUF` | |
 | is_active | boolean default true | |
 | nav_environment | enum(`test`,`production`) default `test` | melyik `company_nav_credentials.environment` sort használja a `SendInvoiceToNavJob` — utólag, 2026-06-30-án adva hozzá |
+| group_prefix | string(4) nullable, globally unique | értékesítő-csoport prefix (pl. `DEMO`); csak nagybetű, max 4 karakter; CHECK: IS NULL OR `^[A-Z]+$`; nem törölhető, ha a cégnek van `sales_groups` sora; utólag, 2026-07-15-én adva hozzá |
 | timestamps | | |
 
-Index: unique(`tax_number`).
+Index: unique(`tax_number`); unique(`group_prefix`).
 
 ### `company_bank_accounts`
 | mező | típus |
@@ -281,10 +282,38 @@ Index: unique(`company_id`, `module_id`). Core moduloknak (`is_core=true`) NINCS
 
 ---
 
+## 11. Értékesítő csoportok modul (`sales_group`)
+
+> Opcionális modul. Csak akkor aktív, ha a cég `companies.group_prefix` mezője ki van töltve.
+> A megjelenített csoportnév soha nem kerül tárolásra — mindig `prefix + '_' + name` alakban
+> kerül felhasználásra (pl. `DEMO_Észak`).
+
+### `companies.group_prefix` (meglévő tábla, utólag bővítve)
+Lásd fent a `companies` táblánál. Röviden: VARCHAR(4), nullable, globálisan unique,
+CHECK `(IS NULL OR '^[A-Z]+$')`, csak nagybetűk.
+
+### `sales_groups`
+| mező | típus | megjegyzés |
+|---|---|---|
+| id | bigIncrements | |
+| company_id | FK → companies, restrict | BelongsToCompany trait — globális Eloquent scope szűri |
+| name | string | tárolt „alapnév" (pl. `Észak`); megjelenítéskor: `prefix_name` |
+| timestamps | | |
+
+Index: `UNIQUE (company_id, LOWER(name))` — funkcionális PostgreSQL expression index, kis- és nagybetűtől független egyediség cégen belül. Sima `unique(company_id, name)` szándékosan NINCS.
+
+Üzleti szabályok:
+- Modul bekapcsolt → prefix kötelező (`companies.group_prefix NOT NULL`) a csoport létrehozása előtt (422 ha hiányzik)
+- Prefix `PUT /api/company`-on nem állítható NULL-ra, amíg van sales_groups sor (422)
+- Prefix megváltoztatható (csak törlés tilos, ha van csoport)
+- 2. fázisban (nem most): `sales_group_user` pivot (user_id, company_id, sales_group_id)
+
+---
+
 ## Kapcsolati összefoglaló (legfontosabbak)
 
 - `companies` 1—N `company_bank_accounts`, `company_nav_credentials`, `products`, `partners`, `invoices`,
-  `receipts`, `groups`, `document_series`
+  `receipts`, `groups`, `document_series`, `sales_groups`
 - `companies` M—N `users` (`company_user`)
 - `companies` M—N `modules` (`company_module`, csak opcionális modulok)
 - `groups` M—N `users` (`user_group`); `groups` M—N `permissions` (`group_permissions`)

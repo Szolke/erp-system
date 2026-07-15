@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'name', 'tax_number', 'eu_tax_number', 'registration_number',
     'postal_code', 'city', 'address_line', 'country_code',
     'email', 'phone', 'logo_path', 'invoice_header_text', 'invoice_footer_text',
-    'base_currency', 'is_active', 'nav_environment',
+    'base_currency', 'is_active', 'nav_environment', 'group_prefix',
 ])]
 class Company extends Model
 {
@@ -77,6 +77,11 @@ class Company extends Model
     public function receipts(): HasMany
     {
         return $this->hasMany(Receipt::class);
+    }
+
+    public function salesGroups(): HasMany
+    {
+        return $this->hasMany(SalesGroup::class);
     }
 
     public function enabledModules(): BelongsToMany

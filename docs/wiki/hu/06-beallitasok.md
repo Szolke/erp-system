@@ -19,6 +19,12 @@ számlalábjegyzet-szöveg. A „Mentés" gomb az összes adatot egyszerre menti
 
 A NAV-környezet (teszt / éles) mezőt `company.manage` joggal rendelkező felhasználók látják.
 
+**Értékesítő csoport prefix:** ha az Értékesítő csoportok modul engedélyezve van, az
+`Értékesítő csoport prefix` mező is megjelenik. Ez legfeljebb 4 nagybetűs karakterből álló
+prefix (pl. `BUD`), amelyet a rendszer automatikusan nagybetűsít. A prefix az értékesítő
+csoportok megjelenítőnevének első tagja: `PREFIX_CsoportNév`. A prefixet addig nem lehet
+törölni, amíg a cégnek legalább egy értékesítő csoportja van; előbb azokat kell eltávolítani.
+
 ### Céglogó feltöltése
 
 A céglogó a kiállított PDF-eken jelenik meg. Feltöltési feltételek: JPEG, PNG, GIF vagy WebP
@@ -120,9 +126,10 @@ Ez a szekció `company.manage` jogosultsághoz kötött.
 
 Ez az oldal kizárólag **szuperadminok** számára érhető el.
 
-A rendszer moduláris: egyes funkciók (NAV Online Számla, SimplePay online fizetés) modul-alapon
-kapcsolhatók be és ki cégenként. Az alapmoduloknál (`Mindig aktív` jelzés) — számlázás, nyugta,
-partnerek, termékek — ez a lehetőség nem áll fenn, ezek mindig aktívak.
+A rendszer moduláris: egyes funkciók (NAV Online Számla, SimplePay online fizetés,
+Értékesítő csoportok) modul-alapon kapcsolhatók be és ki cégenként. Az alapmoduloknál
+(`Mindig aktív` jelzés) — számlázás, nyugta, partnerek, termékek — ez a lehetőség nem
+áll fenn, ezek mindig aktívak.
 
 **Modul engedélyezése / letiltása:**
 Minden modul-kártyán egy kapcsoló jelenik meg. Ha egy modulnak van függősége (pl. NAV Online
@@ -132,9 +139,30 @@ Fordítva: ha egy aktív modul függőként hivatkozik egy másikra, az utóbbi 
 ki, ha az előbbit előbb letiltják.
 
 **„Konfigurálás →" link:**
-Egyes engedélyezett moduloknál (pl. NAV Online Számla, SimplePay) egy „Konfigurálás →" link
-jelenik meg a kártya alján. Ez a Cégbeállítások oldal megfelelő szekciójára ugrik, ahol a modul
-technikai hitelesítő adatai megadhatók.
+Egyes engedélyezett moduloknál (pl. NAV Online Számla, SimplePay, Értékesítő csoportok) egy
+„Konfigurálás →" link jelenik meg a kártya alján. Ez a modul saját beállítási oldalára, illetve
+a Cégbeállítások megfelelő szekciójára navigál.
+
+---
+
+## Értékesítő csoportok (Beállítások → Értékesítő csoportok)
+
+Ez az oldal csak akkor érhető el, ha az **Értékesítő csoportok** modul engedélyezve van, és
+`sales_group.view` jogosultság szükséges a megtekintéshez.
+
+Az értékesítő csoportok az érintett céghez kötöttek — más cég csoportjai nem láthatók. Minden
+csoport megjelenítőneve a cég prefixéből és a csoport nevéből áll össze:
+`PREFIX_CsoportNév` (pl. `BUD_Észak`).
+
+**Új csoport hozzáadása** (`sales_group.create` jog):
+A névnek egyedinek kell lennie a cégen belül (kis- és nagybetű-független). Ha a céghez nincs
+prefix beállítva, a rendszer 422-es hibaüzenettel jelzi, hogy előbb a Cégbeállításokban be
+kell állítani a prefixet.
+
+**Szerkesztés** (`sales_group.edit` jog): csak a csoport neve módosítható; a megjelenítőnév
+automatikusan frissül.
+
+**Törlés** (`sales_group.delete` jog): a csoport véglegesen törlődik.
 
 ---
 

@@ -21,6 +21,12 @@ all fields at once.
 The NAV environment (test / production) field is only visible to users with the
 `company.manage` permission.
 
+**Sales group prefix:** when the Sales Groups module is enabled, a **Sales Group Prefix**
+field also appears here. The prefix is up to 4 uppercase letters (e.g. `BUD`) — the
+system normalises it to uppercase automatically. It forms the first part of every sales
+group's display name: `PREFIX_GroupName`. The prefix cannot be cleared while the company
+still has sales groups; those must be removed first.
+
 ### Company Logo Upload
 
 The company logo appears on issued PDFs. Requirements: JPEG, PNG, GIF, or WebP format,
@@ -126,9 +132,9 @@ Requires the `company.manage` permission.
 
 This page is only accessible to **superadmins**.
 
-The system is modular: certain features (NAV Online Invoice, SimplePay online payments) can
-be enabled or disabled per company. Core modules (marked **Always active**) — invoicing,
-receipts, partners, products — cannot be toggled and are always on.
+The system is modular: certain features (NAV Online Invoice, SimplePay online payments,
+Sales Groups) can be enabled or disabled per company. Core modules (marked **Always
+active**) — invoicing, receipts, partners, products — cannot be toggled and are always on.
 
 **Enabling / disabling a module:**
 Each module card shows a toggle. If a module has a dependency (e.g. NAV Online Invoice
@@ -138,9 +144,30 @@ an active module is depended on by another active module, the former cannot be d
 until the dependent module is disabled first.
 
 **"Configure →" link:**
-For enabled modules that have a settings page (e.g. NAV Online Invoice, SimplePay), a
-"Configure →" link appears at the bottom of the card. It navigates to the relevant section
-of the Company Settings page where the module's technical credentials can be entered.
+For enabled modules that have a settings page (e.g. NAV Online Invoice, SimplePay,
+Sales Groups), a "Configure →" link appears at the bottom of the card. It navigates to
+the module's own settings page or to the relevant section of the Company Settings page.
+
+---
+
+## Sales Groups (Settings → Sales Groups)
+
+This page is only available when the **Sales Groups** module is enabled and requires the
+`sales_group.view` permission.
+
+Sales groups are scoped to the current company — groups belonging to other companies are
+not visible. Each group's display name is composed of the company prefix and the group
+name: `PREFIX_GroupName` (e.g. `BUD_North`).
+
+**Adding a group** (`sales_group.create`):
+The name must be unique within the company (case-insensitive). If no prefix has been
+configured for the company, the system returns a 422 error prompting you to set a prefix
+in Company Settings first.
+
+**Editing** (`sales_group.edit`): only the group name can be changed; the display name
+updates automatically.
+
+**Deleting** (`sales_group.delete`): the group is permanently removed.
 
 ---
 

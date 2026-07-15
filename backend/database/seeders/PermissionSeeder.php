@@ -70,6 +70,12 @@ class PermissionSeeder extends Seeder
             ['key' => 'sales_group.create', 'module' => 'sales_group', 'description' => 'Értékesítő csoport létrehozása', 'is_sensitive' => false],
             ['key' => 'sales_group.edit', 'module' => 'sales_group', 'description' => 'Értékesítő csoport szerkesztése', 'is_sensitive' => false],
             ['key' => 'sales_group.delete', 'module' => 'sales_group', 'description' => 'Értékesítő csoport törlése', 'is_sensitive' => false],
+
+            // Assets module permissions (assets module must be enabled).
+            ['key' => 'asset.view', 'module' => 'asset', 'description' => 'Eszközök megtekintése', 'is_sensitive' => false],
+            ['key' => 'asset.create', 'module' => 'asset', 'description' => 'Eszköz létrehozása', 'is_sensitive' => false],
+            ['key' => 'asset.edit', 'module' => 'asset', 'description' => 'Eszköz szerkesztése', 'is_sensitive' => false],
+            ['key' => 'asset.delete', 'module' => 'asset', 'description' => 'Eszköz törlése', 'is_sensitive' => false],
         ];
 
         foreach ($permissions as $permission) {

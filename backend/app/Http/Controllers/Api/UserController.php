@@ -10,6 +10,7 @@ use App\Models\UserPermissionOverride;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 /** @group Felhasználók */
@@ -22,7 +23,7 @@ class UserController extends Controller
         $this->authorize('user.view');
 
         $users = User::whereHas('companies', fn ($q) => $q->where('companies.id', $this->currentCompany->id()))
-            ->with(['groups' => fn ($q) => $q->where('company_id', $this->currentCompany->id())])
+            ->with(['groups' => fn ($q) => $q->where('company_id', $this->currentCompany->id()), 'jobPosition'])
             ->when($request->string('search')->trim()->isNotEmpty(), function ($q) use ($request) {
                 $s = $request->string('search')->trim()->value();
                 $q->where(fn ($q2) => $q2->where('name', 'ilike', "%{$s}%")->orWhere('email', 'ilike', "%{$s}%"));
@@ -37,13 +38,25 @@ class UserController extends Controller
     {
         $this->authorize('user.manage');
 
+        $companyId = $this->currentCompany->id();
+
         $data = $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255'],
             'password' => ['nullable', Password::min(8)],
+            // Csak globális VAGY az aktuális céghez tartozó, ÉS aktív munkakörre
+            // mutathat — egy cég-admin ne tudjon másik cég munkakörét rendelni,
+            // és inaktív munkakör új hozzárendelése tiltott (a StoreAssetRequest
+            // asset_type_id-mintáját követve).
+            'job_position_id' => [
+                'nullable', 'integer',
+                Rule::exists('job_positions', 'id')->where(
+                    fn ($query) => $query
+                        ->where(fn ($q) => $q->whereNull('company_id')->orWhere('company_id', $companyId))
+                        ->where('active', true)
+                ),
+            ],
         ]);
-
-        $companyId = $this->currentCompany->id();
 
         // Ha már létezik a felhasználó, csak hozzárendeljük a céghez
         $user = User::where('email', $data['email'])->first();
@@ -58,12 +71,16 @@ class UserController extends Controller
                 'email'              => $data['email'],
                 'password'           => Hash::make($data['password'] ?? str()->random(16)),
                 'default_company_id' => $companyId,
+                'job_position_id'    => $data['job_position_id'] ?? null,
             ]);
         }
 
         $user->companies()->attach($companyId);
 
-        return response()->json($user->load(['groups' => fn ($q) => $q->where('company_id', $companyId)]), 201);
+        return response()->json(
+            $user->load(['groups' => fn ($q) => $q->where('company_id', $companyId), 'jobPosition']),
+            201
+        );
     }
 
     public function update(Request $request, User $user)
@@ -72,10 +89,28 @@ class UserController extends Controller
 
         $this->ensureSameCompany($user);
 
+        $companyId = $this->currentCompany->id();
+        $currentJobPositionId = $user->job_position_id;
+
         $data = $request->validate([
             'name'      => ['sometimes', 'string', 'max:255'],
             'is_active' => ['sometimes', 'boolean'],
             'password'  => ['nullable', Password::min(8)],
+            // Ugyanaz a láthatósági kör, mint store-nál. Az 'active' feltétel
+            // CSAK akkor érvényesül, ha a beküldött érték ténylegesen ELTÉR a
+            // user jelenlegi munkakörétől — egy időközben inaktívvá vált, már
+            // hozzárendelt munkakör nem kényszerül eltávolításra, ha a kliens
+            // változatlanul küldi vissza ugyanazt az ID-t.
+            'job_position_id' => [
+                'sometimes', 'nullable', 'integer',
+                Rule::exists('job_positions', 'id')->where(function ($query) use ($companyId, $currentJobPositionId, $request) {
+                    $query->where(fn ($q) => $q->whereNull('company_id')->orWhere('company_id', $companyId));
+
+                    if ((int) $request->input('job_position_id') !== $currentJobPositionId) {
+                        $query->where('active', true);
+                    }
+                }),
+            ],
         ]);
 
         if ($user->is_superadmin) {
@@ -90,7 +125,7 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return response()->json($user);
+        return response()->json($user->load('jobPosition'));
     }
 
     public function destroy(User $user, Request $request)
@@ -127,6 +162,7 @@ class UserController extends Controller
 
         $user->load([
             'groups' => fn ($q) => $q->where('company_id', $companyId)->with('permissions'),
+            'jobPosition',
         ]);
 
         $overrides = UserPermissionOverride::where('user_id', $user->id)

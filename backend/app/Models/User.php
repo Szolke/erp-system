@@ -14,7 +14,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'default_company_id', 'is_active', 'is_superadmin', 'locale'])]
+#[Fillable(['name', 'email', 'password', 'default_company_id', 'job_position_id', 'is_active', 'is_superadmin', 'locale'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -39,6 +39,11 @@ class User extends Authenticatable
     public function defaultCompany(): BelongsTo
     {
         return $this->belongsTo(Company::class, 'default_company_id');
+    }
+
+    public function jobPosition(): BelongsTo
+    {
+        return $this->belongsTo(JobPosition::class);
     }
 
     public function companies(): BelongsToMany

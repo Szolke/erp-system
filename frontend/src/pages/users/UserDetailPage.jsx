@@ -8,6 +8,7 @@ import { companies as companiesApi } from '../../api/company'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useToast } from '../../contexts/ToastContext'
+import JobPositionSelect from '../../components/JobPositionSelect'
 
 const EFFECT_LABELS = {
   allow: { label: 'Engedélyezve', bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
@@ -81,6 +82,10 @@ export default function UserDetailPage() {
   const [showPassword, setShowPassword]   = useState(false)
   const [pwSaving, setPwSaving]           = useState(false)
 
+  // Munkakör state (user.manage jog kell a módosításhoz)
+  const [jobPositionId, setJobPositionId] = useState(null)
+  const [jpSaving, setJpSaving]           = useState(false)
+
   async function loadTokens() {
     if (!canViewTokens) return
     setTokensLoading(true)
@@ -116,6 +121,7 @@ export default function UserDetailPage() {
 
     const d = uRes.value.data
     setData(d)
+    setJobPositionId(d.user.job_position_id ?? null)
     setAllPerms(pRes.status === 'fulfilled' ? (pRes.value.data.data ?? []) : [])
     setAllGroups(gRes.status === 'fulfilled' ? (gRes.value.data.data ?? []) : [])
 
@@ -220,6 +226,25 @@ export default function UserDetailPage() {
     }
   }
 
+  async function handleSaveJobPosition() {
+    setJpSaving(true)
+    try {
+      const res = await usersApi.update(id, { job_position_id: jobPositionId })
+      setData((prev) => ({
+        ...prev,
+        user: { ...prev.user, job_position_id: res.data.job_position_id, job_position: res.data.job_position },
+      }))
+      toast(t('common.saved'), 'success')
+    } catch (err) {
+      const msg = err.response?.data?.errors?.job_position_id?.[0]
+        ?? err.response?.data?.message
+        ?? t('common.error')
+      toast(msg, 'error')
+    } finally {
+      setJpSaving(false)
+    }
+  }
+
   async function handleChangePassword(e) {
     e.preventDefault()
     if (!newPassword) return
@@ -244,8 +269,9 @@ export default function UserDetailPage() {
 
   const { user, from_groups: fromGroups } = data
   const fromGroupSet = new Set(fromGroups ?? [])
-  const canManage   = can('group.manage')
-  const canOverride = can('permission.override')
+  const canManage       = can('group.manage')
+  const canOverride     = can('permission.override')
+  const canManageUsers  = can('user.manage')
 
   const assignedCompanyIds = new Set(userCompanies.map((c) => c.id))
   const availableCompanies = allCompanies.filter((c) => !assignedCompanyIds.has(c.id))
@@ -276,6 +302,30 @@ export default function UserDetailPage() {
       {saved && (
         <div className="alert-success" style={{ fontSize: 13, marginBottom: 16 }}>
           Felülírások mentve.
+        </div>
+      )}
+
+      {/* Munkakör — user.manage jog kell a módosításhoz */}
+      {canManageUsers && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <strong>Munkakör</strong>
+          <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+            <div className="form-group" style={{ margin: 0, maxWidth: 280 }}>
+              <JobPositionSelect
+                value={jobPositionId}
+                onChange={setJobPositionId}
+                currentJobPosition={user.job_position}
+              />
+            </div>
+            <button
+              className="btn btn-primary btn-sm"
+              type="button"
+              onClick={handleSaveJobPosition}
+              disabled={jpSaving}
+            >
+              {jpSaving ? t('common.saving') : t('common.save')}
+            </button>
+          </div>
         </div>
       )}
 

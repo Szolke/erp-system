@@ -5,6 +5,7 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { users as usersApi } from '../../api/users'
 import PerPageSelector from '../../components/PerPageSelector'
 import Pagination from '../../components/Pagination'
+import JobPositionSelect from '../../components/JobPositionSelect'
 import { useToast } from '../../contexts/ToastContext'
 
 export default function UserListPage() {
@@ -17,7 +18,7 @@ export default function UserListPage() {
   const [perPage, setPerPage]   = useState(20)
   const [page, setPage]         = useState(1)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm]         = useState({ name: '', email: '', password: '' })
+  const [form, setForm]         = useState({ name: '', email: '', password: '', job_position_id: null })
   const [formErr, setFormErr]   = useState('')
   const [saving, setSaving]     = useState(false)
 
@@ -49,7 +50,7 @@ export default function UserListPage() {
     setSaving(true)
     try {
       await usersApi.create(form)
-      setForm({ name: '', email: '', password: '' })
+      setForm({ name: '', email: '', password: '', job_position_id: null })
       setShowForm(false)
       toast(t('common.saved'), 'success')
       load(search, perPage, page)
@@ -97,7 +98,7 @@ export default function UserListPage() {
             Ha az e-mail cím már regisztrált, a felhasználó egyszerűen hozzárendelésre kerül ehhez a céghez.
           </p>
           {formErr && <div className="alert-error mt-4">{formErr}</div>}
-          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 12, marginTop: 12, alignItems: 'flex-end' }}>
+          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: 12, marginTop: 12, alignItems: 'flex-end' }}>
             <div className="form-group" style={{ margin: 0 }}>
               <label>{t('user.name')}</label>
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
@@ -109,6 +110,13 @@ export default function UserListPage() {
             <div className="form-group" style={{ margin: 0 }}>
               <label>{t('user.password')} (elhagyható meglévőnél)</label>
               <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="min. 8 karakter" />
+            </div>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label>Munkakör</label>
+              <JobPositionSelect
+                value={form.job_position_id}
+                onChange={(v) => setForm({ ...form, job_position_id: v })}
+              />
             </div>
             <button className="btn btn-primary" type="submit" disabled={saving}>
               {saving ? t('common.saving') : t('common.add')}

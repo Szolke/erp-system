@@ -9,7 +9,7 @@ import {
   FileText, Users2, Package, BookOpen,
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers, Blocks,
   Settings2, ChevronLeft, ChevronRight,
-  LogOut, Moon, Sun, Terminal, UsersRound,
+  LogOut, Moon, Sun, Terminal, UsersRound, Boxes, Tags,
 } from 'lucide-react'
 
 export default function Layout() {
@@ -61,6 +61,7 @@ export default function Layout() {
     { to: '/documents', label: t('nav.documents'), icon: FileText,  anyPerm: ['invoice.view', 'receipt.view'] },
     { to: '/partners',  label: t('nav.partners'),  icon: Users2,    perm: 'partner.view' },
     { to: '/products',  label: t('nav.products'),  icon: Package,   perm: 'product.view' },
+    { to: '/assets',    label: t('nav.assets'),    icon: Boxes,     perm: 'asset.view' },
     { to: '/wiki',      label: t('nav.wiki'),       icon: BookOpen,  public: true },
   ]
 
@@ -75,6 +76,7 @@ export default function Layout() {
     { to: '/settings/translations',    label: t('nav.translations'),  icon: Languages,  perm: 'company.manage' },
     { to: '/settings/custom-fields',   label: t('nav.custom_fields'), icon: Sliders,    perm: 'company.manage' },
     { to: '/settings/sales-groups',    label: 'Értékesítő csoportok', icon: UsersRound, perm: 'sales_group.view' },
+    { to: '/settings/asset-types',     label: t('nav.asset_types'),   icon: Tags,       perm: 'asset.view' },
     { to: '/settings/api-tester',      label: t('nav.api_tester'),    icon: Terminal,   perm: 'api_tester.use' },
   ]
 

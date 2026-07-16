@@ -140,6 +140,10 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .badge-type-invoice-storno { background: #f3f4f6; color: #6b7280; }
 .badge-type-receipt { background: #d1fae5; color: #065f46; }
 .badge-type-receipt-storno { background: #f0fdf4; color: #9ca3af; }
+.badge-asset-active { background: #dcfce7; color: #15803d; }
+.badge-asset-issued { background: #dbeafe; color: #1d4ed8; }
+.badge-asset-service { background: #fef3c7; color: #b45309; }
+.badge-asset-scrapped { background: #f3f4f6; color: #6b7280; }
 .type-filter { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
 .type-filter button { padding: 4px 12px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); font-size: 12px; cursor: pointer; color: var(--color-muted); }
 .type-filter button.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }

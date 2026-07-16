@@ -12,6 +12,17 @@ export function InvoiceStatusBadge({ status }) {
   return <span className={`badge badge-inv-${status}`}>{label[status] ?? status}</span>
 }
 
+export function AssetStatusBadge({ status }) {
+  const { t } = useTranslation()
+  const label = {
+    active:   t('asset.status_active'),
+    issued:   t('asset.status_issued'),
+    service:  t('asset.status_service'),
+    scrapped: t('asset.status_scrapped'),
+  }
+  return <span className={`badge badge-asset-${status}`}>{label[status] ?? status}</span>
+}
+
 export function DocumentTypeBadge({ type }) {
   const { t } = useTranslation()
   const label = {

@@ -26,6 +26,9 @@ import CompanyListPage from './pages/companies/CompanyListPage'
 import ApiTesterPage from './pages/settings/ApiTesterPage'
 import ModulesPage from './pages/settings/ModulesPage'
 import SalesGroupPage from './pages/settings/SalesGroupPage'
+import AssetListPage from './pages/assets/AssetListPage'
+import AssetFormPage from './pages/assets/AssetFormPage'
+import AssetTypePage from './pages/settings/AssetTypePage'
 import WikiPage from './pages/WikiPage'
 
 export default function App() {
@@ -66,6 +69,10 @@ export default function App() {
           <Route path="companies" element={<CompanyListPage />} />
           <Route path="settings/modules" element={<ModulesPage />} />
           <Route path="settings/sales-groups" element={<SalesGroupPage />} />
+          <Route path="assets" element={<AssetListPage />} />
+          <Route path="assets/new" element={<AssetFormPage />} />
+          <Route path="assets/:id/edit" element={<AssetFormPage />} />
+          <Route path="settings/asset-types" element={<AssetTypePage />} />
           <Route path="settings/api-tester" element={<ApiTesterPage />} />
           <Route path="wiki" element={<WikiPage />} />
         </Route>

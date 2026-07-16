@@ -178,6 +178,20 @@ class AssetControllerTest extends TestCase
             ->assertOk();
     }
 
+    public function test_update_returns_422_when_serial_number_collides_with_another_asset(): void
+    {
+        $this->makeAsset($this->companyA, $this->globalType, 'SN-TAKEN');
+        $asset = $this->makeAsset($this->companyA, $this->globalType, 'SN-OWN');
+
+        $this->asAdmin($this->companyA)
+            ->putJson("/api/assets/{$asset->id}", [
+                'serial_number' => 'SN-TAKEN',
+                'status'        => 'active',
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('serial_number');
+    }
+
     public function test_destroy_deletes_asset(): void
     {
         $asset = $this->makeAsset($this->companyA, $this->globalType, 'SN-1');

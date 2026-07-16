@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\ActiveCompanyController;
+use App\Http\Controllers\Api\AssetController;
+use App\Http\Controllers\Api\AssetTypeController;
 use App\Http\Controllers\Api\ModuleController;
 use App\Http\Controllers\Api\ApiTesterController;
 use App\Http\Controllers\Api\CustomFieldDefinitionController;
@@ -105,6 +107,11 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     Route::middleware('module:sales_group')->group(function () {
         Route::apiResource('sales-groups', SalesGroupController::class);
+    });
+
+    Route::middleware('module:assets')->group(function () {
+        Route::apiResource('assets', AssetController::class);
+        Route::apiResource('asset-types', AssetTypeController::class)->only(['index', 'store']);
     });
 
     // Bizonylatok — egységes lista (számla + nyugta + sztornók)

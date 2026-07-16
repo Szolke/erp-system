@@ -21,4 +21,23 @@ trait EnforcesCompanyScope
             abort(404);
         }
     }
+
+    /**
+     * Like assertBelongsToCurrentCompany(), but also accepts a GLOBAL row
+     * (company_id IS NULL) — for models with a two-tier visibility scope
+     * (see JobPosition, AssetType) where NULL is a valid shared row, not
+     * tenant data that leaked through binding.
+     */
+    protected function assertBelongsToCurrentCompanyOrGlobal(Model $model): void
+    {
+        $currentId = app(CurrentCompany::class)->id();
+
+        if ($currentId === null) {
+            abort(404);
+        }
+
+        if ($model->company_id !== null && $model->company_id !== $currentId) {
+            abort(404);
+        }
+    }
 }

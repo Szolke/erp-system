@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Support\CurrentCompany;
+use Database\Factories\JobPositionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -23,6 +25,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['company_id', 'name', 'active', 'sort_order'])]
 class JobPosition extends Model
 {
+    /** @use HasFactory<JobPositionFactory> */
+    use HasFactory;
+
     protected static function booted(): void
     {
         static::addGlobalScope('visibility', function (Builder $builder) {

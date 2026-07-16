@@ -24,6 +24,8 @@ class PermissionSeeder extends Seeder
             ['key' => 'group.manage', 'module' => 'group', 'description' => 'Csoportok létrehozása, jogosultság-listák szerkesztése', 'is_sensitive' => true],
             ['key' => 'permission.override', 'module' => 'group', 'description' => 'Egyedi felhasználói jogosultság-felülbírálás kezelése', 'is_sensitive' => true],
 
+            ['key' => 'job_position.manage', 'module' => 'job_position', 'description' => 'Munkakörök létrehozása, szerkesztése, törlése', 'is_sensitive' => false],
+
             ['key' => 'product.view', 'module' => 'product', 'description' => 'Termékek/szolgáltatások megtekintése', 'is_sensitive' => false],
             ['key' => 'product.create', 'module' => 'product', 'description' => 'Termék/szolgáltatás létrehozása', 'is_sensitive' => false],
             ['key' => 'product.edit', 'module' => 'product', 'description' => 'Termék/szolgáltatás szerkesztése', 'is_sensitive' => false],

@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\Api\DocumentSeriesController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\JobPositionController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\SalesGroupController;
 use App\Http\Controllers\Api\PaymentController;
@@ -134,6 +135,9 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::post('receipts/{receipt}/cancel', [ReceiptController::class, 'cancel']);
     Route::get('receipts/{receipt}/pdf', [ReceiptController::class, 'pdf']);
     Route::post('receipts/{receipt}/regenerate-pdf', [ReceiptController::class, 'regeneratePdf']);
+
+    // Munkakörök (job_position — nem RBAC-szerep, csak user-kezelési törzsadat)
+    Route::apiResource('job-positions', JobPositionController::class)->only(['index', 'store', 'update', 'destroy']);
 
     // Felhasználók
     Route::apiResource('users', UserController::class)->only(['index', 'store', 'show', 'update', 'destroy']);

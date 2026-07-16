@@ -166,6 +166,30 @@ automatikusan frissül.
 
 ---
 
+## Eszközök és eszköztípusok (Eszközök / Beállítások → Eszköztípusok)
+
+Ez a funkció csak akkor érhető el, ha az **Eszközök** modul engedélyezve van. Az
+**Eszközök** menüpont (oldalsáv, felül) a cég fizikai eszközeit (pl. POS terminálok,
+telefonok) tartja nyilván — `asset.view` jogosultság szükséges a megtekintéshez.
+
+**Eszköz felvétele** (`asset.create` jog): meg kell adni a gyári számot és a
+eszköztípust; az IMEI opcionális. **A nevet a rendszer generálja** a típus kódja és
+egy sorszám alapján (pl. `DEMO_TEYA_00001`) — ez a mező a felvételkor nem
+szerkeszthető, csak mentés után jelenik meg.
+
+**Szerkesztés** (`asset.edit` jog): csak az állapot (aktív / kiadva / szervizben /
+selejtezve), a gyári szám és az IMEI módosítható. A név és az eszköztípus a
+létrehozás után véglegesen rögzített.
+
+**Törlés** (`asset.delete` jog): az eszköz véglegesen törlődik.
+
+Az **Eszköztípusok** oldal (Beállítások → Eszköztípusok, `asset.view` jog) mutatja a
+globális (minden cég számára elérhető, pl. Mobiltelefon, Teya POS terminál,
+Nyomtató) és a saját cég által létrehozott típusokat. **Új típus hozzáadása**
+(`asset.create` jog) mindig a saját céghez kerül — más cégek nem látják.
+
+---
+
 ## API tesztelő (Beállítások → API tesztelő)
 
 Interaktív felület az ERP saját REST API-jának böngészéséhez és teszteléséhez. A bal panelen

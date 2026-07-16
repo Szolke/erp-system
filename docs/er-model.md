@@ -310,10 +310,76 @@ Index: `UNIQUE (company_id, LOWER(name))` — funkcionális PostgreSQL expressio
 
 ---
 
+## 12. Eszközök modul (assets)
+
+> Opcionális modul. Fizikai eszközök (pl. POS terminálok, telefonok) cégenkénti
+> nyilvántartása. A megjelenített/tárolt eszköznév szerver-generált és soha nem
+> szerkeszthető — lásd lent.
+
+### `asset_types`
+| mező | típus | megjegyzés |
+|---|---|---|
+| id | bigIncrements | |
+| company_id | FK → companies, nullable, restrict | `NULL` = globális alaptípus (mindenki látja); kitöltött = egy adott cég saját bővítése (csak az a cég látja) |
+| code | string | rövid kód (pl. `TEYA`, `MOBIL`) — bekerül a generált eszköznévbe |
+| name | string | ember-olvasható címke (pl. „Teya POS terminál”) |
+| timestamps | | |
+
+Index: composite `unique(company_id, code)` (céges bővítések cégen belüli egyedisége) **+**
+külön parciális unique index `code`-ra `WHERE company_id IS NULL` (globális kódok
+egyedisége — a composite unique ezt NEM fedné, mert Postgres a NULL-t sosem tekinti
+egyenlőnek NULL-lal). Globális alaptípusok (`MOBIL`, `TEYA`, `PRINTER`) az
+`AssetTypeSeeder`-ből, idempotens upserttel.
+
+### `assets`
+| mező | típus | megjegyzés |
+|---|---|---|
+| id | bigIncrements | |
+| company_id | FK → companies, restrict | BelongsToCompany trait — globális Eloquent scope szűri |
+| name | string | **szerver-generált**, `{CÉG_PREFIX}_{TÍPUS_KÓD}_{5-jegyű sorszám}` (pl. `DEMO_TEYA_00001`); a `CÉG_PREFIX` a `companies.group_prefix`-ből jön (ugyanaz a mező, amit a sales_group modul is használ); soha nem módosítható update-ben |
+| serial_number | string | gyári szám, felhasználói bevitel |
+| imei | string nullable | opcionális, felhasználói bevitel |
+| asset_type_id | FK → asset_types, restrict | a típus nem módosítható a létrehozás után (a name kódolja a típus kódját) |
+| status | enum(`active`,`issued`,`service`,`scrapped`) default `active` | |
+| timestamps | | |
+
+Index: composite `unique(company_id, name)`, `unique(company_id, serial_number)`,
+`unique(company_id, imei)` (NULL-biztonságos — több eszköznek lehet üres IMEI-je,
+Postgres a NULL-okat nem tekinti egyenlőnek). A sorszámozás **szándékosan NEM
+gapless** (ellentétben a számla/nyugta sorszámozással) — megszakadt létrehozásnál
+keletkező hézag megengedett.
+
+### `asset_number_counters`
+| mező | típus | megjegyzés |
+|---|---|---|
+| id | bigIncrements | |
+| company_id | FK → companies, restrict | |
+| asset_type_id | FK → asset_types, restrict | |
+| next_seq | unsignedInteger default 1 | |
+| timestamps | | |
+
+Index: unique(`company_id`, `asset_type_id`). Minimál séma a `document_series`-hez
+képest (nincs prefix/reset_yearly/last_reset_year) — a névgenerálás a
+`document_series`/`InvoiceNumberGenerator` bevált `lockForUpdate()` +
+`DB::transaction()` + create-on-first-use mintáját veszi át (`AssetNumberGenerator`),
+de a hézag-megengedettség miatt a gapless-infrastruktúra súlya nem kell.
+
+Üzleti szabályok:
+- `AssetType` egyedi láthatósági scope: "company_id IS NULL VAGY = current" — NEM a
+  standard `BelongsToCompany` trait, mert az plain egyenlőséget szűrne, nem
+  "globális VAGY saját"-ot. Létrehozáskor nem tölti fel automatikusan a
+  `company_id`-t (ellentétben a trait-tel) — egy új típus alapból globális marad,
+  hacsak a hívó (az AssetType API) explicit meg nem adja.
+- `canBeDeleted()` az `Asset` modellen — ma mindig `true` (nincs hozzárendelés-funkció
+  még), de a döntési pont már él, jövőbeli bővítéshez előkészítve.
+
+---
+
 ## Kapcsolati összefoglaló (legfontosabbak)
 
 - `companies` 1—N `company_bank_accounts`, `company_nav_credentials`, `products`, `partners`, `invoices`,
-  `receipts`, `groups`, `document_series`, `sales_groups`
+  `receipts`, `groups`, `document_series`, `sales_groups`, `assets`, `asset_number_counters`
+- `asset_types` 1—N `assets`; `asset_types.company_id` nullable (globális VAGY céges sor)
 - `companies` M—N `users` (`company_user`)
 - `companies` M—N `modules` (`company_module`, csak opcionális modulok)
 - `groups` M—N `users` (`user_group`); `groups` M—N `permissions` (`group_permissions`)

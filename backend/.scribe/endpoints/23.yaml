@@ -1,14 +1,14 @@
-name: Bizonylatok
+name: 'API tesztelő'
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/documents
+    uri: api/api-tester/openapi
     metadata:
       custom: []
-      groupName: Bizonylatok
+      groupName: 'API tesztelő'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''

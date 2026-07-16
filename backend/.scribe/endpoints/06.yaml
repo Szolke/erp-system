@@ -197,7 +197,7 @@ endpoints:
         name: is_active
         description: ''
         required: true
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -205,7 +205,7 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       nav_tax_number: bn
-      is_active: false
+      is_active: true
     fileParameters: []
     responses: []
     responseFields: []

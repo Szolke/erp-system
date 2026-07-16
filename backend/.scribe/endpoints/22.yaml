@@ -1,23 +1,15 @@
-name: Eszköztípusok
-description: |-
-
-  v1 scope: list (global + own-company visibility scope) and create a
-  company-owned type. No update/destroy yet — this is catalog data, changes
-  are rare, and the endpoints can be added later without breaking the API.
+name: 'Bizonylat sorozatok'
+description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/asset-types
+    uri: api/settings/document-series
     metadata:
       custom: []
-      groupName: Eszköztípusok
-      groupDescription: |-
-
-        v1 scope: list (global + own-company visibility scope) and create a
-        company-owned type. No update/destroy yet — this is catalog data, changes
-        are rare, and the endpoints can be added later without breaking the API.
+      groupName: 'Bizonylat sorozatok'
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -57,16 +49,12 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/asset-types
+      - PUT
+    uri: 'api/settings/document-series/{documentSeries_id}'
     metadata:
       custom: []
-      groupName: Eszköztípusok
-      groupDescription: |-
-
-        v1 scope: list (global + own-company visibility scope) and create a
-        company-owned type. No update/destroy yet — this is catalog data, changes
-        are rare, and the endpoints can be added later without breaking the API.
+      groupName: 'Bizonylat sorozatok'
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -77,36 +65,48 @@ endpoints:
       Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
       Content-Type: application/json
       Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
+    urlParameters:
+      documentSeries_id:
+        custom: []
+        name: documentSeries_id
+        description: 'The ID of the documentSeries.'
+        required: true
+        example: 39
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      documentSeries_id: 39
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      code:
+      prefix:
         custom: []
-        name: code
-        description: 'Must not be greater than 255 characters.'
+        name: prefix
+        description: 'Must match the regex /^[A-Z0-9]+$/. Must not be greater than 20 characters.'
         required: true
-        example: b
+        example: bngzmiyvdljnikhw
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      name:
+      reset_yearly:
         custom: []
-        name: name
-        description: 'Must not be greater than 255 characters.'
+        name: reset_yearly
+        description: ''
         required: true
-        example: 'n'
-        type: string
+        example: false
+        type: boolean
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      code: b
-      name: 'n'
+      prefix: bngzmiyvdljnikhw
+      reset_yearly: false
     fileParameters: []
     responses: []
     responseFields: []

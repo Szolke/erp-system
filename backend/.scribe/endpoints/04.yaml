@@ -444,6 +444,17 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
+      group_prefix:
+        custom: []
+        name: group_prefix
+        description: 'Must contain only letters. Must not be greater than 4 characters.'
+        required: false
+        example: miyv
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
     cleanBodyParameters:
       name: b
       tax_number: 64255931-4-23
@@ -459,6 +470,7 @@ endpoints:
       invoice_footer_text: architecto
       base_currency: ngz
       is_active: false
+      group_prefix: miyv
     fileParameters: []
     responses: []
     responseFields: []

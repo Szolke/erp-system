@@ -66,6 +66,16 @@ class UserCompanyController extends Controller
         $user->companies()->detach($company->id);
 
         if ($wasMember) {
+            // If the detached company was the user's default, it would otherwise be
+            // left pointing at a company the user no longer belongs to — EnsureCompanyContext
+            // falls back to default_company_id when there's no session/header yet (e.g. the
+            // first request right after login), so a stale value 403s the user out immediately.
+            if ($user->default_company_id === $company->id) {
+                $user->update([
+                    'default_company_id' => $user->companies()->orderBy('companies.id')->value('companies.id'),
+                ]);
+            }
+
             $this->auditLogger->log(
                 'user.company_detached',
                 $company->id,

@@ -112,6 +112,36 @@ class UserCompanyAssignmentTest extends TestCase
         );
     }
 
+    // 5b. Ha a leválasztott cég volt a user default_company_id-je, átáll egy megmaradó cégre
+    //     (regresszió: EnsureCompanyContext a default_company_id-ra esik vissza session/header
+    //     nélkül — friss bejelentkezés után egy stale érték azonnal 403-at dob).
+    public function test_detach_reassigns_default_company_id_when_it_was_the_detached_company(): void
+    {
+        $this->targetUser->companies()->attach($this->companyB->id);
+        $this->targetUser->update(['default_company_id' => $this->companyA->id]);
+
+        $this->asSuperadmin()
+            ->deleteJson("/api/users/{$this->targetUser->id}/companies/{$this->companyA->id}")
+            ->assertNoContent();
+
+        $this->targetUser->refresh();
+        $this->assertSame($this->companyB->id, $this->targetUser->default_company_id);
+    }
+
+    // 5c. Ha a leválasztott cég NEM volt a default, a default_company_id változatlan marad
+    public function test_detach_does_not_change_default_company_id_when_different_company_detached(): void
+    {
+        $this->targetUser->companies()->attach($this->companyB->id);
+        $this->targetUser->update(['default_company_id' => $this->companyA->id]);
+
+        $this->asSuperadmin()
+            ->deleteJson("/api/users/{$this->targetUser->id}/companies/{$this->companyB->id}")
+            ->assertNoContent();
+
+        $this->targetUser->refresh();
+        $this->assertSame($this->companyA->id, $this->targetUser->default_company_id);
+    }
+
     // 6. Az utolsó cégről is leválasztható (0-ra csökkenés engedett)
     public function test_detach_from_last_company_is_rejected(): void
     {

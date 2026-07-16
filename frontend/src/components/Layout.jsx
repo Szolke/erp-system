@@ -9,7 +9,7 @@ import {
   FileText, Users2, Package, BookOpen,
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers, Blocks,
   Settings2, ChevronLeft, ChevronRight,
-  LogOut, Moon, Sun, Terminal, UsersRound, Boxes, Tags,
+  LogOut, Moon, Sun, Terminal, UsersRound, Boxes, Tags, Briefcase,
 } from 'lucide-react'
 
 export default function Layout() {
@@ -77,6 +77,7 @@ export default function Layout() {
     { to: '/settings/custom-fields',   label: t('nav.custom_fields'), icon: Sliders,    perm: 'company.manage' },
     { to: '/settings/sales-groups',    label: 'Értékesítő csoportok', icon: UsersRound, perm: 'sales_group.view' },
     { to: '/settings/asset-types',     label: t('nav.asset_types'),   icon: Tags,       perm: 'asset.view' },
+    { to: '/settings/job-positions',   label: 'Munkakörök',           icon: Briefcase,  perm: 'job_position.manage' },
     { to: '/settings/api-tester',      label: t('nav.api_tester'),    icon: Terminal,   perm: 'api_tester.use' },
   ]
 

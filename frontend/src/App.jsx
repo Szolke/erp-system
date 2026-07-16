@@ -29,6 +29,7 @@ import SalesGroupPage from './pages/settings/SalesGroupPage'
 import AssetListPage from './pages/assets/AssetListPage'
 import AssetFormPage from './pages/assets/AssetFormPage'
 import AssetTypePage from './pages/settings/AssetTypePage'
+import JobPositionPage from './pages/settings/JobPositionPage'
 import WikiPage from './pages/WikiPage'
 
 export default function App() {
@@ -73,6 +74,7 @@ export default function App() {
           <Route path="assets/new" element={<AssetFormPage />} />
           <Route path="assets/:id/edit" element={<AssetFormPage />} />
           <Route path="settings/asset-types" element={<AssetTypePage />} />
+          <Route path="settings/job-positions" element={<JobPositionPage />} />
           <Route path="settings/api-tester" element={<ApiTesterPage />} />
           <Route path="wiki" element={<WikiPage />} />
         </Route>

@@ -95,6 +95,43 @@ class JobPositionControllerTest extends TestCase
             ->assertJsonCount(1, 'data');
     }
 
+    public function test_index_all_param_includes_inactive_for_manage_permission_holder(): void
+    {
+        JobPosition::create(['company_id' => $this->companyA->id, 'name' => 'Aktív', 'active' => true]);
+        JobPosition::create(['company_id' => $this->companyA->id, 'name' => 'Inaktív', 'active' => false]);
+        $user = $this->makeUserWithManagePermission($this->companyA);
+
+        $this->asUser($user, $this->companyA)
+            ->getJson('/api/job-positions?all=1')
+            ->assertOk()
+            ->assertJsonCount(2, 'data');
+    }
+
+    public function test_index_all_param_ignored_without_manage_permission(): void
+    {
+        JobPosition::create(['company_id' => $this->companyA->id, 'name' => 'Aktív', 'active' => true]);
+        JobPosition::create(['company_id' => $this->companyA->id, 'name' => 'Inaktív', 'active' => false]);
+
+        $user = $this->makeUser();
+        $user->companies()->attach($this->companyA->id, ['is_default' => true]);
+
+        $this->asUser($user, $this->companyA)
+            ->getJson('/api/job-positions?all=1')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+    }
+
+    public function test_index_all_param_includes_inactive_for_superadmin(): void
+    {
+        JobPosition::create(['company_id' => $this->companyA->id, 'name' => 'Aktív', 'active' => true]);
+        JobPosition::create(['company_id' => $this->companyA->id, 'name' => 'Inaktív', 'active' => false]);
+
+        $this->asAdmin($this->companyA)
+            ->getJson('/api/job-positions?all=1')
+            ->assertOk()
+            ->assertJsonCount(2, 'data');
+    }
+
     // ══════════════════════════════════════════════════════════════════════════
     // store — céges admin csak saját cégéhez; globálisat csak superadmin
     // ══════════════════════════════════════════════════════════════════════════

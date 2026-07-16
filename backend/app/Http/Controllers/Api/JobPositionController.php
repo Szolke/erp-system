@@ -25,10 +25,17 @@ class JobPositionController extends Controller
 {
     use EnforcesCompanyScope;
 
-    public function index()
+    public function index(Request $request)
     {
+        // A selector (user-űrlap) csak az aktív listát látja, jog nélkül.
+        // Az admin-felület (munkakör-kezelő oldal) az inaktív tételeket is
+        // látnia kell, hogy egy inaktívvá tett sor ne "tűnjön el" véglegesen —
+        // ezt csak job_position.manage joggal rendelkező user kérheti explicit
+        // ?all=1 paraméterrel; mindenki másnál a paraméter figyelmen kívül marad.
+        $includeInactive = $request->boolean('all') && $request->user()->can('job_position.manage');
+
         $jobPositions = JobPosition::query()
-            ->where('active', true)
+            ->when(! $includeInactive, fn ($q) => $q->where('active', true))
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();

@@ -20,6 +20,7 @@ class PartnerResource extends JsonResource
             'billing_postal_code' => $this->billing_postal_code,
             'billing_city' => $this->billing_city,
             'billing_address_line' => $this->billing_address_line,
+            'billing_country_code' => $this->billing_country_code,
             'shipping_postal_code' => $this->shipping_postal_code,
             'shipping_city' => $this->shipping_city,
             'shipping_address_line' => $this->shipping_address_line,

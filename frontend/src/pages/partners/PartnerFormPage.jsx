@@ -4,8 +4,9 @@ import { partners } from '../../api/partners'
 import { customFields as cfApi } from '../../api/customFields'
 import { useTranslation } from '../../contexts/TranslationContext'
 import CustomFieldsForm from '../../components/CustomFieldsForm'
+import CountrySelect from '../../components/CountrySelect'
 
-const empty = { type: 'customer', name: '', tax_number: '', billing_postal_code: '', billing_city: '', billing_address_line: '', default_currency: 'HUF', email: '', phone: '', custom_fields: {} }
+const empty = { type: 'customer', name: '', tax_number: '', billing_postal_code: '', billing_city: '', billing_address_line: '', billing_country_code: 'HU', default_currency: 'HUF', email: '', phone: '', custom_fields: {} }
 
 export default function PartnerFormPage() {
   const { id } = useParams()
@@ -93,6 +94,14 @@ export default function PartnerFormPage() {
               <input type={type} value={form[key] ?? ''} onChange={(e) => setField(key, e.target.value)} required={req} />
             </div>
           ))}
+          <div className="form-group">
+            <label htmlFor="billing_country_code">{t('partner.country')}</label>
+            <CountrySelect
+              id="billing_country_code"
+              value={form.billing_country_code}
+              onChange={(code) => setField('billing_country_code', code)}
+            />
+          </div>
         </div>
 
         {hasCustomFields && (

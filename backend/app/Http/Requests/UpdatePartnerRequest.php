@@ -13,6 +13,13 @@ class UpdatePartnerRequest extends FormRequest
         return $this->user()->can('partner.edit');
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('billing_country_code')) {
+            $this->merge(['billing_country_code' => strtoupper((string) $this->billing_country_code)]);
+        }
+    }
+
     public function rules(): array
     {
         return [
@@ -24,6 +31,7 @@ class UpdatePartnerRequest extends FormRequest
             'billing_postal_code' => ['required', 'string', 'max:10'],
             'billing_city' => ['required', 'string', 'max:255'],
             'billing_address_line' => ['required', 'string', 'max:255'],
+            'billing_country_code' => ['required', 'string', 'size:2', Rule::in(config('countries'))],
             'shipping_postal_code' => ['nullable', 'string', 'max:10'],
             'shipping_city' => ['nullable', 'string', 'max:255'],
             'shipping_address_line' => ['nullable', 'string', 'max:255'],

@@ -1,6 +1,7 @@
 import client from './client'
 
 export const countries = {
+  list:        ()      => client.get('/api/countries'),
   adminList:   ()      => client.get('/api/admin/countries'),
   adminUpdate: (codes) => client.put('/api/admin/countries', { codes }),
 }

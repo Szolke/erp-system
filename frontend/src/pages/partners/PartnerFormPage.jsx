@@ -37,12 +37,20 @@ export default function PartnerFormPage() {
     } finally { setSaving(false) }
   }
 
-  const fields = [
-    ['name', t('partner.company_name'), 'text', true], ['tax_number', t('partner.tax_number'), 'text', false], ['email', t('partner.email'), 'email', false],
-    ['phone', t('partner.phone'), 'text', false], ['billing_postal_code', t('partner.postal'), 'text', true],
-    ['billing_city', t('partner.city'), 'text', true], ['billing_address_line', t('partner.address'), 'text', true],
-    ['default_currency', t('common.currency'), 'text', true],
+  const basicFields = [
+    ['name', t('partner.company_name'), 'text', true],
+    ['tax_number', t('partner.tax_number'), 'text', false],
+    ['email', t('partner.email'), 'email', false],
+    ['phone', t('partner.phone'), 'text', false],
   ]
+
+  const addressFields = [
+    ['billing_postal_code', t('partner.postal'), 'text', true],
+    ['billing_city', t('partner.city'), 'text', true],
+    ['billing_address_line', t('partner.address'), 'text', true],
+  ]
+
+  const hasCustomFields = cfDefs.some((d) => d.is_active)
 
   return (
     <div>
@@ -52,27 +60,52 @@ export default function PartnerFormPage() {
       </div>
       {error && <div className="alert-error mb-4">{error}</div>}
       <form onSubmit={handleSubmit}>
-        <div className="card" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="card" style={{ maxWidth: 480 }}>
           <div className="form-group">
-            <label>Típus</label>
+            <label>{t('partner.type')}</label>
             <select value={form.type} onChange={(e) => setField('type', e.target.value)}>
-              <option value="customer">Vevő</option>
-              <option value="supplier">Szállító</option>
-              <option value="both">Mindkettő</option>
+              <option value="customer">{t('partner.type_customer')}</option>
+              <option value="supplier">{t('partner.type_supplier')}</option>
+              <option value="both">{t('partner.type_both')}</option>
             </select>
           </div>
-          {fields.map(([key, label, type, req]) => (
+          {basicFields.map(([key, label, type, req]) => (
             <div className="form-group" key={key}>
               <label>{label}</label>
               <input type={type} value={form[key] ?? ''} onChange={(e) => setField(key, e.target.value)} required={req} />
             </div>
           ))}
-          <CustomFieldsForm
-            definitions={cfDefs}
-            values={form.custom_fields}
-            onChange={(cf) => setField('custom_fields', cf)}
-          />
+          <div className="form-group">
+            <label>{t('common.currency')}</label>
+            <select value={form.default_currency} onChange={(e) => setField('default_currency', e.target.value)}>
+              <option value="HUF">HUF</option>
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+            </select>
+          </div>
         </div>
+
+        <div className="card" style={{ maxWidth: 480 }}>
+          <h2 style={{ margin: '0 0 14px', fontSize: '1.1rem' }}>{t('partner.address_section')}</h2>
+          {addressFields.map(([key, label, type, req]) => (
+            <div className="form-group" key={key}>
+              <label>{label}</label>
+              <input type={type} value={form[key] ?? ''} onChange={(e) => setField(key, e.target.value)} required={req} />
+            </div>
+          ))}
+        </div>
+
+        {hasCustomFields && (
+          <div className="card" style={{ maxWidth: 480 }}>
+            <h2 style={{ margin: '0 0 14px', fontSize: '1.1rem' }}>{t('nav.custom_fields')}</h2>
+            <CustomFieldsForm
+              definitions={cfDefs}
+              values={form.custom_fields}
+              onChange={(cf) => setField('custom_fields', cf)}
+            />
+          </div>
+        )}
+
         <div className="flex">
           <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? t('common.saving') : t('common.save')}</button>
           <Link to="/partners" className="btn btn-secondary">{t('common.cancel')}</Link>

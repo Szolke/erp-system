@@ -186,6 +186,11 @@ class TranslationSeeder extends Seeder
             ['partner', 'email',           'E-mail',                            'Email',                             'E-Mail'],
             ['partner', 'phone',           'Telefon',                           'Phone',                             'Telefon'],
             ['partner', 'bank_account',    'Bankszámlaszám',                    'Bank account',                      'Bankkontonummer'],
+            ['partner', 'type',             'Típus',                             'Type',                              'Typ'],
+            ['partner', 'type_customer',    'Vevő',                              'Customer',                          'Kunde'],
+            ['partner', 'type_supplier',    'Szállító',                          'Supplier',                          'Lieferant'],
+            ['partner', 'type_both',        'Mindkettő',                         'Both',                              'Beide'],
+            ['partner', 'address_section',  'Címadatok',                         'Address details',                  'Adressdaten'],
 
             // ── Termék ────────────────────────────────────────────────
             ['product', 'title',           'Termékek',                          'Products',                          'Produkte'],

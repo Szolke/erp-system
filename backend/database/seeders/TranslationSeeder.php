@@ -28,6 +28,7 @@ class TranslationSeeder extends Seeder
             ['nav', 'custom_fields', 'Egyéni mezők',         'Custom fields',      'Benutzerdefinierte Felder'],
             ['nav', 'api_tester',    'API tesztelő',         'API tester',         'API-Tester'],
             ['nav', 'wiki',          'Kézikönyv',            'User guide',         'Benutzerhandbuch'],
+            ['nav', 'countries',     'Országok',             'Countries',          'Länder'],
             ['nav', 'simplepay',      'SimplePay',            'SimplePay',          'SimplePay'],
             ['nav', 'collapse',       'Összecsukás',          'Collapse',           'Einklappen'],
             ['nav', 'dark_mode',      'Sötét mód',            'Dark mode',          'Dunkler Modus'],
@@ -407,6 +408,15 @@ class TranslationSeeder extends Seeder
             ['company', 'no_users',        'Nincs felhasználó ebben a cégben.',               'No users in this company.',                    'Keine Benutzer in dieser Firma.'],
 
             ['common', 'no_permission',    'Nincs jogosultságod ehhez a művelethez.',         'You do not have permission for this.',         'Keine Berechtigung für diese Aktion.'],
+
+            // ── Országok (superadmin admin-UI) ────────────────────────
+            ['country', 'title',              'Országok',                                       'Countries',                                    'Länder'],
+            ['country', 'search_placeholder', 'Keresés név vagy kód szerint…',                  'Search by name or code…',                     'Suche nach Name oder Code…'],
+            ['country', 'select_all',         'Mind bejelöl',                                   'Select all',                                   'Alle auswählen'],
+            ['country', 'deselect_all',       'Mind töröl',                                     'Deselect all',                                 'Alle abwählen'],
+            ['country', 'selected_count',     '{selected} / {total} kiválasztva',               '{selected} / {total} selected',               '{selected} / {total} ausgewählt'],
+            ['country', 'save_success',       'Országlista mentve.',                            'Countries saved.',                            'Länderliste gespeichert.'],
+            ['country', 'no_results',         'Nincs találat.',                                 'No results.',                                 'Keine Treffer.'],
         ];
 
         $now = now();

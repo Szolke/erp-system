@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\CompanySettingController;
 use App\Http\Controllers\Api\CompanyNavCredentialController;
 use App\Http\Controllers\Api\CompanySimplePayController;
+use App\Http\Controllers\Api\CountryController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\Api\DocumentSeriesController;
@@ -61,11 +62,16 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     // Global catalog lookups (no write, no tenant scoping needed)
     Route::get('/vat-rates', fn () => response()->json(['data' => VatRate::where('is_active', true)->get()]));
     Route::get('/payment-methods', fn () => response()->json(['data' => PaymentMethod::where('is_active', true)->get()]));
+    Route::get('/countries', [CountryController::class, 'index']);
     Route::put('/active-company', [ActiveCompanyController::class, 'update']);
 
     // Modul-katalógus + be/kikapcsolás (superadmin-only, module.manage)
     Route::get('modules', [ModuleController::class, 'index']);
     Route::patch('modules/{module}', [ModuleController::class, 'update']);
+
+    // Országkatalógus kezelése (superadmin-only, globális, nincs company_id)
+    Route::get('admin/countries', [CountryController::class, 'adminIndex']);
+    Route::put('admin/countries', [CountryController::class, 'adminUpdate']);
 
     // Cégek kezelése — szuperadmin: lista + létrehozás; aktív cég: show/update/logo
     Route::get('/companies', [CompanyController::class, 'index']);

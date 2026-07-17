@@ -256,7 +256,7 @@ endpoints:
         name: is_required
         description: ''
         required: false
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -278,7 +278,7 @@ endpoints:
         name: is_active
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -289,9 +289,9 @@ endpoints:
       type: architecto
       options:
         - 'n'
-      is_required: false
+      is_required: true
       sort_order: 84
-      is_active: true
+      is_active: false
     fileParameters: []
     responses: []
     responseFields: []

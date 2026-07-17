@@ -1,15 +1,29 @@
-name: Felhasználók
-description: ''
+name: Munkakörök
+description: |-
+
+  A list végpont NEM igényel job_position.manage jogot — bejelentkezett user
+  cég-kontextusban bárhonnan olvashatja (a user-űrlap selectora is ezt hívja,
+  amit olyan usernek is működnie kell tudnia, akinek nincs munkakör-kezelési
+  joga). A job_position.manage kizárólag az írás-műveleteket kapuzza —
+  ugyanaz a minta, mint a /api/vat-rates és /api/payment-methods katalógus-
+  lekérdezéseknél (routes/api.php).
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/users
+    uri: api/job-positions
     metadata:
       custom: []
-      groupName: Felhasználók
-      groupDescription: ''
+      groupName: Munkakörök
+      groupDescription: |-
+
+        A list végpont NEM igényel job_position.manage jogot — bejelentkezett user
+        cég-kontextusban bárhonnan olvashatja (a user-űrlap selectora is ezt hívja,
+        amit olyan usernek is működnie kell tudnia, akinek nincs munkakör-kezelési
+        joga). A job_position.manage kizárólag az írás-műveleteket kapuzza —
+        ugyanaz a minta, mint a /api/vat-rates és /api/payment-methods katalógus-
+        lekérdezéseknél (routes/api.php).
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -50,11 +64,18 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/users
+    uri: api/job-positions
     metadata:
       custom: []
-      groupName: Felhasználók
-      groupDescription: ''
+      groupName: Munkakörök
+      groupDescription: |-
+
+        A list végpont NEM igényel job_position.manage jogot — bejelentkezett user
+        cég-kontextusban bárhonnan olvashatja (a user-űrlap selectora is ezt hívja,
+        amit olyan usernek is működnie kell tudnia, akinek nincs munkakör-kezelési
+        joga). A job_position.manage kizárólag az írás-műveleteket kapuzza —
+        ugyanaz a minta, mint a /api/vat-rates és /api/payment-methods katalógus-
+        lekérdezéseknél (routes/api.php).
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -70,101 +91,57 @@ endpoints:
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      name:
+      global:
         custom: []
-        name: name
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: b
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      email:
-        custom: []
-        name: email
-        description: 'Must be a valid email address. Must not be greater than 255 characters.'
-        required: true
-        example: zbailey@example.net
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      password:
-        custom: []
-        name: password
+        name: global
         description: ''
         required: false
-        example: null
-        type: string
+        example: false
+        type: boolean
         enumValues: []
         exampleWasSpecified: false
-        nullable: true
+        nullable: false
         deprecated: false
-    cleanBodyParameters:
-      name: b
-      email: zbailey@example.net
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: 'api/users/{id}'
-    metadata:
-      custom: []
-      groupName: Felhasználók
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: ''
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      id:
+      active:
         custom: []
-        name: id
-        description: 'The ID of the user.'
-        required: true
-        example: 24
+        name: active
+        description: ''
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sort_order:
+        custom: []
+        name: sort_order
+        description: 'Must be at least 0.'
+        required: false
+        example: 27
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-    cleanUrlParameters:
-      id: 24
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
+      name:
         custom: []
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
-        description: null
+        name: name
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      global: false
+      active: false
+      sort_order: 27
+      name: 'n'
+    fileParameters: []
+    responses: []
     responseFields: []
     auth:
       - headers
@@ -178,11 +155,18 @@ endpoints:
     httpMethods:
       - PUT
       - PATCH
-    uri: 'api/users/{id}'
+    uri: 'api/job-positions/{id}'
     metadata:
       custom: []
-      groupName: Felhasználók
-      groupDescription: ''
+      groupName: Munkakörök
+      groupDescription: |-
+
+        A list végpont NEM igényel job_position.manage jogot — bejelentkezett user
+        cég-kontextusban bárhonnan olvashatja (a user-űrlap selectora is ezt hívja,
+        amit olyan usernek is működnie kell tudnia, akinek nincs munkakör-kezelési
+        joga). A job_position.manage kizárólag az írás-műveleteket kapuzza —
+        ugyanaz a minta, mint a /api/vat-rates és /api/payment-methods katalógus-
+        lekérdezéseknél (routes/api.php).
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -197,33 +181,22 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the user.'
+        description: 'The ID of the job position.'
         required: true
-        example: 24
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 24
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      name:
+      active:
         custom: []
-        name: name
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: b
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      is_active:
-        custom: []
-        name: is_active
+        name: active
         description: ''
         required: false
         example: false
@@ -232,20 +205,32 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      password:
+      sort_order:
         custom: []
-        name: password
-        description: ''
+        name: sort_order
+        description: 'Must be at least 0.'
         required: false
-        example: null
+        example: 27
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: 'n'
         type: string
         enumValues: []
         exampleWasSpecified: false
-        nullable: true
+        nullable: false
         deprecated: false
     cleanBodyParameters:
-      name: b
-      is_active: false
+      active: false
+      sort_order: 27
+      name: 'n'
     fileParameters: []
     responses: []
     responseFields: []
@@ -260,11 +245,18 @@ endpoints:
     custom: []
     httpMethods:
       - DELETE
-    uri: 'api/users/{id}'
+    uri: 'api/job-positions/{id}'
     metadata:
       custom: []
-      groupName: Felhasználók
-      groupDescription: ''
+      groupName: Munkakörök
+      groupDescription: |-
+
+        A list végpont NEM igényel job_position.manage jogot — bejelentkezett user
+        cég-kontextusban bárhonnan olvashatja (a user-űrlap selectora is ezt hívja,
+        amit olyan usernek is működnie kell tudnia, akinek nincs munkakör-kezelési
+        joga). A job_position.manage kizárólag az írás-műveleteket kapuzza —
+        ugyanaz a minta, mint a /api/vat-rates és /api/payment-methods katalógus-
+        lekérdezéseknél (routes/api.php).
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -279,376 +271,16 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the user.'
+        description: 'The ID of the job position.'
         required: true
-        example: 24
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 24
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - PUT
-    uri: 'api/users/{user_id}/overrides'
-    metadata:
-      custom: []
-      groupName: Felhasználók
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: ''
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      user_id:
-        custom: []
-        name: user_id
-        description: 'The ID of the user.'
-        required: true
-        example: 24
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      user_id: 24
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      overrides:
-        custom: []
-        name: overrides
-        description: ''
-        required: false
-        example:
-          - allow
-        type: 'string[]'
-        enumValues:
-          - allow
-          - deny
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-    cleanBodyParameters:
-      overrides:
-        - allow
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: 'api/users/{user_id}/companies'
-    metadata:
-      custom: []
-      groupName: Felhasználók
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'GET /api/users/{user}/companies — a user jelenlegi cégei (superadmin)'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      user_id:
-        custom: []
-        name: user_id
-        description: 'The ID of the user.'
-        required: true
-        example: 24
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      user_id: 24
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
-        description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: 'api/users/{user_id}/companies/{company_id}'
-    metadata:
-      custom: []
-      groupName: Felhasználók
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'POST /api/users/{user}/companies/{company} — hozzárendelés (superadmin, idempotens)'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      user_id:
-        custom: []
-        name: user_id
-        description: 'The ID of the user.'
-        required: true
-        example: 24
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      company_id:
-        custom: []
-        name: company_id
-        description: 'The ID of the company.'
-        required: true
-        example: 43
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      user_id: 24
-      company_id: 43
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - DELETE
-    uri: 'api/users/{user_id}/companies/{company_id}'
-    metadata:
-      custom: []
-      groupName: Felhasználók
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'DELETE /api/users/{user}/companies/{company} — leválasztás (superadmin; az utolsó cégből nem lehet kivenni)'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      user_id:
-        custom: []
-        name: user_id
-        description: 'The ID of the user.'
-        required: true
-        example: 24
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      company_id:
-        custom: []
-        name: company_id
-        description: 'The ID of the company.'
-        required: true
-        example: 43
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      user_id: 24
-      company_id: 43
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: 'api/users/{user_id}/tokens'
-    metadata:
-      custom: []
-      groupName: Felhasználók
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'GET /api/users/{user}/tokens'
-      description: |-
-        Superadmin: bármely user aktív tokenjei.
-        Normál user: csak saját tokenjeinek listája.
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      user_id:
-        custom: []
-        name: user_id
-        description: 'The ID of the user.'
-        required: true
-        example: 24
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      user_id: 24
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
-        description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - DELETE
-    uri: 'api/users/{user_id}/tokens/{tokenId}'
-    metadata:
-      custom: []
-      groupName: Felhasználók
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'DELETE /api/users/{user}/tokens/{tokenId}'
-      description: |-
-        Törli a megadott tokent, de csak akkor, ha az valóban a {user}-hez tartozik.
-        Idegen {user} alá tartozó tokenId → 404 (kereszt-user törlés megakadályozva).
-        Superadmin: bármely user tokenjét törölheti.
-        Normál user: csak saját tokenjét törölheti.
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      user_id:
-        custom: []
-        name: user_id
-        description: 'The ID of the user.'
-        required: true
-        example: 24
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      tokenId:
-        custom: []
-        name: tokenId
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      user_id: 24
-      tokenId: architecto
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

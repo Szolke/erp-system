@@ -75,7 +75,7 @@ endpoints:
         name: type
         description: ''
         required: true
-        example: both
+        example: supplier
         type: string
         enumValues:
           - customer
@@ -272,7 +272,7 @@ endpoints:
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      type: both
+      type: supplier
       name: b
       tax_number: 'n'
       eu_tax_number: g
@@ -577,7 +577,7 @@ endpoints:
         name: is_active
         description: ''
         required: false
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -611,7 +611,7 @@ endpoints:
       email: rempel.chadrick@example.org
       phone: l
       bank_account_number: j
-      is_active: false
+      is_active: true
     fileParameters: []
     responses: []
     responseFields: []

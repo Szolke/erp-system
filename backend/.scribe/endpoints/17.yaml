@@ -133,7 +133,7 @@ endpoints:
         name: paid_at
         description: 'Must be a valid date.'
         required: true
-        example: '2026-07-16T11:52:33'
+        example: '2026-07-17T10:38:42'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -153,7 +153,7 @@ endpoints:
     cleanBodyParameters:
       payment_method_id: 16
       amount: 39
-      paid_at: '2026-07-16T11:52:33'
+      paid_at: '2026-07-17T10:38:42'
       reference: g
     fileParameters: []
     responses: []

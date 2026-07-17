@@ -23,6 +23,8 @@
   --color-warning-bg: #fffbeb;
   --color-accent-bg: #dbeafe;
   --color-accent-text: #1d4ed8;
+  --color-btn-secondary-bg: #e2e8f0;
+  --color-btn-secondary-hover: #cbd5e1;
   --sidebar-width: 220px;
   --sidebar-width-collapsed: 54px;
   --sidebar-accent-color: #1e293b;
@@ -43,6 +45,8 @@
   --color-warning-bg: #2d2200;
   --color-accent-bg: #1e3a5f;
   --color-accent-text: #93c5fd;
+  --color-btn-secondary-bg: #334155;
+  --color-btn-secondary-hover: #475569;
 }
 
 body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; color: var(--color-text); background: var(--color-bg); }
@@ -123,8 +127,8 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .btn-primary:hover { background: var(--color-primary-dark); }
 .btn-danger { background: var(--color-danger); color: #fff; }
 .btn-danger:hover { background: #b91c1c; }
-.btn-secondary { background: #e2e8f0; color: var(--color-text); }
-.btn-secondary:hover { background: #cbd5e1; }
+.btn-secondary { background: var(--color-btn-secondary-bg); color: var(--color-text); }
+.btn-secondary:hover { background: var(--color-btn-secondary-hover); }
 .btn-link { background: none; border: none; color: var(--color-sidebar-text); cursor: pointer; font-size: 12px; text-align: left; padding: 0; }
 .btn-link:hover { color: #fff; }
 .btn-sm { padding: 4px 10px; font-size: 12px; }

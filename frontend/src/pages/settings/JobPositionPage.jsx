@@ -33,15 +33,25 @@ function JobPositionForm({ initial, allowGlobal, onSave, onCancel, saving }) {
         <label>Sorrend</label>
         <input type="number" min={0} value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} style={{ maxWidth: 120 }} />
       </div>
-      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
-        <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
-        Aktív (inaktív munkakör nem választható újonnan a felhasználó-űrlapon)
-      </label>
-      {!initial && allowGlobal && (
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
-          <input type="checkbox" checked={global} onChange={(e) => setGlobal(e.target.checked)} />
-          Globális (minden céget érint, nem csak a jelenlegit)
+      <div className="form-group" style={{ margin: 0 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, textTransform: 'none', fontWeight: 400, letterSpacing: 'normal', fontSize: 13, color: 'var(--color-text)' }}>
+          <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} style={{ width: 'auto' }} />
+          Aktív
         </label>
+        <p className="text-muted" style={{ fontSize: 12, margin: '4px 0 0' }}>
+          Inaktív munkakör nem választható újonnan a felhasználó-űrlapon.
+        </p>
+      </div>
+      {!initial && allowGlobal && (
+        <div className="form-group" style={{ margin: 0 }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, textTransform: 'none', fontWeight: 400, letterSpacing: 'normal', fontSize: 13, color: 'var(--color-text)' }}>
+            <input type="checkbox" checked={global} onChange={(e) => setGlobal(e.target.checked)} style={{ width: 'auto' }} />
+            Globális
+          </label>
+          <p className="text-muted" style={{ fontSize: 12, margin: '4px 0 0' }}>
+            Minden céget érint, nem csak a jelenlegit.
+          </p>
+        </div>
       )}
       <div style={{ display: 'flex', gap: 8 }}>
         <button className="btn btn-primary btn-sm" type="submit" disabled={saving || !name.trim()}>

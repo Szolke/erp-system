@@ -71,7 +71,7 @@ export default function GroupListPage() {
         <h1 className="page-title">{t('group.title')}</h1>
         {canManage && (
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-            {showForm ? t('common.cancel') : `+ ${t('group.new')}`}
+            {showForm ? t('common.cancel') : t('group.new')}
           </button>
         )}
       </div>

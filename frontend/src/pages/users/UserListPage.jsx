@@ -86,7 +86,7 @@ export default function UserListPage() {
         <h1 className="page-title">{t('user.title')}</h1>
         {canManage && (
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-            {showForm ? t('common.cancel') : `+ ${t('user.new')}`}
+            {showForm ? t('common.cancel') : t('user.new')}
           </button>
         )}
       </div>

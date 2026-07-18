@@ -239,6 +239,9 @@ class TranslationSeeder extends Seeder
             ['user', 'overrides',          'Jogosultság felülírások',           'Permission overrides',              'Berechtigungsüberschreibungen'],
             ['user', 'language',           'Felhasználói nyelv',                'User language',                     'Benutzersprache'],
             ['user', 'save_overrides',     'Felülírások mentése',               'Save overrides',                    'Überschreibungen speichern'],
+            ['user', 'tab_profile',        'Adatlap',                           'Profile',                           'Profil'],
+            ['user', 'tab_permissions',    'Jogosultságok',                     'Permissions',                       'Berechtigungen'],
+            ['user', 'permission_search',  'Keresés a jogosultságok között…',   'Search permissions…',               'Berechtigungen durchsuchen…'],
 
             // ── Csoport ───────────────────────────────────────────────
             ['group', 'title',             'Csoportok',                         'Groups',                            'Gruppen'],
@@ -258,6 +261,8 @@ class TranslationSeeder extends Seeder
             ['company', 'postal',          'Irányítószám',                      'Postal code',                       'Postleitzahl'],
             ['company', 'city',            'Város',                             'City',                              'Stadt'],
             ['company', 'address',         'Cím',                               'Address',                           'Adresse'],
+            ['company', 'address_section', 'Címadatok',                         'Address details',                   'Adressdaten'],
+            ['company', 'phone',           'Telefon',                           'Phone',                             'Telefon'],
             ['company', 'base_currency',   'Alap deviza',                       'Base currency',                     'Basiswährung'],
             ['company', 'nav_env',         'NAV környezet',                     'NAV environment',                   'NAV-Umgebung'],
             ['company', 'nav_test',        'Teszt (sandbox)',                   'Test (sandbox)',                     'Test (Sandbox)'],

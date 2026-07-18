@@ -868,12 +868,19 @@ export default function CompanyPage() {
 
   if (!form) return <p className="text-muted">{t('common.loading')}</p>
 
-  const fields = [
-    ['name', t('company.name'), 'text', true], ['tax_number', t('company.tax_number'), 'text', true],
-    ['eu_tax_number', t('company.eu_tax'), 'text', false], ['registration_number', t('company.reg_number'), 'text', true],
-    ['postal_code', t('company.postal'), 'text', true], ['city', t('company.city'), 'text', true],
-    ['address_line', t('company.address'), 'text', true], ['email', t('common.email'), 'email', false],
-    ['phone', 'Telefon', 'text', false], ['base_currency', t('company.base_currency'), 'text', true],
+  const basicFields = [
+    ['name', t('company.name'), 'text', true],
+    ['tax_number', t('company.tax_number'), 'text', true],
+    ['eu_tax_number', t('company.eu_tax'), 'text', false],
+    ['registration_number', t('company.reg_number'), 'text', true],
+    ['email', t('common.email'), 'email', false],
+    ['phone', t('company.phone'), 'text', false],
+  ]
+
+  const addressFields = [
+    ['postal_code', t('company.postal'), 'text', true],
+    ['city', t('company.city'), 'text', true],
+    ['address_line', t('company.address'), 'text', true],
   ]
 
   return (
@@ -905,14 +912,33 @@ export default function CompanyPage() {
       )}
 
       <form onSubmit={handleSubmit}>
-        <div className="card" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          {fields.map(([key, label, type, req]) => (
+        <div className="card">
+          {basicFields.map(([key, label, type, req]) => (
+            <div className="form-group" key={key}>
+              <label>{label}</label>
+              <input type={type} value={form[key] ?? ''} onChange={(e) => setField(key, e.target.value)} required={req} />
+            </div>
+          ))}
+          <div className="form-group">
+            <label>{t('company.base_currency')}</label>
+            <select value={form.base_currency ?? 'HUF'} onChange={(e) => setField('base_currency', e.target.value)}>
+              <option value="HUF">HUF</option>
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="card">
+          <h2 style={{ margin: '0 0 14px', fontSize: '1.1rem' }}>{t('company.address_section')}</h2>
+          {addressFields.map(([key, label, type, req]) => (
             <div className="form-group" key={key}>
               <label>{label}</label>
               <input type={type} value={form[key] ?? ''} onChange={(e) => setField(key, e.target.value)} required={req} />
             </div>
           ))}
         </div>
+
         <div className="form-group card">
           <label>{t('company.inv_header')}</label>
           <textarea rows={3} value={form.invoice_header_text ?? ''} onChange={(e) => setField('invoice_header_text', e.target.value)} />

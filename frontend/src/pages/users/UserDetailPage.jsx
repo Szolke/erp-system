@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, ChevronDown, ChevronRight } from 'lucide-react'
 import client from '../../api/client'
 import { users as usersApi } from '../../api/users'
 import { groups as groupsApi } from '../../api/groups'
@@ -66,6 +66,9 @@ export default function UserDetailPage() {
   const [saved, setSaved]         = useState(false)
   const [error, setError]         = useState('')
   const [addGroupId, setAddGroupId] = useState('')
+  const [activeTab, setActiveTab] = useState('profile')
+  const [openModules, setOpenModules] = useState(() => new Set())
+  const [permSearch, setPermSearch]   = useState('')
 
   // Cég-szekció state (csak superadminnak)
   const [userCompanies, setUserCompanies] = useState([])
@@ -141,6 +144,22 @@ export default function UserDetailPage() {
     load()
     loadTokens()
   }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Első betöltéskor minden modul-szekció nyitva induljon
+  useEffect(() => {
+    if (allPerms.length > 0 && openModules.size === 0) {
+      setOpenModules(new Set(allPerms.map((p) => p.module)))
+    }
+  }, [allPerms]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function toggleModule(module) {
+    setOpenModules((prev) => {
+      const next = new Set(prev)
+      if (next.has(module)) next.delete(module)
+      else next.add(module)
+      return next
+    })
+  }
 
   function setOverride(permId, effect) {
     setOverrides((prev) => ({ ...prev, [permId]: effect }))
@@ -281,6 +300,19 @@ export default function UserDetailPage() {
     return acc
   }, {})
 
+  // Kereséskor minden modul kinyílik, és csak az egyező sorok jelennek meg
+  const permSearchLower = permSearch.trim().toLowerCase()
+  const filteredByModule = Object.fromEntries(
+    Object.entries(byModule)
+      .map(([module, perms]) => [
+        module,
+        permSearchLower
+          ? perms.filter((p) => p.description.toLowerCase().includes(permSearchLower) || p.key.toLowerCase().includes(permSearchLower))
+          : perms,
+      ])
+      .filter(([, perms]) => perms.length > 0),
+  )
+
   return (
     <div>
       <div className="page-header">
@@ -289,7 +321,7 @@ export default function UserDetailPage() {
           <p className="text-muted">{user.email}</p>
         </div>
         <div className="flex">
-          {canOverride && (
+          {canOverride && activeTab === 'permissions' && (
             <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
               {saving ? t('common.saving') : t('user.save_overrides')}
             </button>
@@ -305,6 +337,24 @@ export default function UserDetailPage() {
         </div>
       )}
 
+      {/* Fülek */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+        <button
+          className={`btn ${activeTab === 'profile' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setActiveTab('profile')}
+        >
+          {t('user.tab_profile')}
+        </button>
+        <button
+          className={`btn ${activeTab === 'permissions' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setActiveTab('permissions')}
+        >
+          {t('user.tab_permissions')}
+        </button>
+      </div>
+
+      {activeTab === 'profile' && (
+        <>
       {/* Munkakör — user.manage jog kell a módosításhoz */}
       {canManageUsers && (
         <div className="card" style={{ marginBottom: 16 }}>
@@ -515,62 +565,90 @@ export default function UserDetailPage() {
             </table>
           )}
       </div>
+        </>
+      )}
 
       {/* Jogosultságok */}
-      <div className="card">
-        <div style={{ marginBottom: 16 }}>
-          <strong>{t('user.overrides')}</strong>
-          <p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
-            A csoporttól kapott jog <span style={{ fontWeight: 700, color: '#1d4ed8' }}>kék</span> háttérrel jelölt.
-            A felülírás felülbírálja a csoport döntését — engedélyezés (zöld) vagy tiltás (piros).
-            „Nincs felülírás" esetén a csoport jogosultsága érvényes.
-          </p>
-        </div>
+      {activeTab === 'permissions' && (
+        <div className="card">
+          <div style={{ marginBottom: 16 }}>
+            <strong>{t('user.overrides')}</strong>
+            <p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
+              A csoporttól kapott jog <span style={{ fontWeight: 700, color: '#1d4ed8' }}>kék</span> háttérrel jelölt.
+              A felülírás felülbírálja a csoport döntését — engedélyezés (zöld) vagy tiltás (piros).
+              „Nincs felülírás" esetén a csoport jogosultsága érvényes.
+            </p>
+          </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 24 }}>
-          {Object.entries(byModule).map(([module, perms]) => (
-            <div key={module}>
-              <div style={{ fontWeight: 700, fontSize: 11, textTransform: 'uppercase', color: 'var(--color-muted)', marginBottom: 8, letterSpacing: '.05em' }}>
-                {module}
+          <input
+            type="text"
+            value={permSearch}
+            onChange={(e) => setPermSearch(e.target.value)}
+            placeholder={t('user.permission_search')}
+            style={{ marginBottom: 16, maxWidth: 320 }}
+          />
+
+          {Object.entries(filteredByModule).map(([module, perms]) => {
+            const isOpen = !!permSearchLower || openModules.has(module)
+            return (
+              <div key={module} style={{ borderTop: '1px solid var(--color-border)' }}>
+                <button
+                  type="button"
+                  onClick={() => toggleModule(module)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                    padding: '10px 4px', background: 'none', border: 'none', cursor: 'pointer',
+                    textAlign: 'left', fontWeight: 700, fontSize: 11, textTransform: 'uppercase',
+                    color: 'var(--color-muted)', letterSpacing: '.05em',
+                  }}
+                >
+                  {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                  {module}
+                  <span style={{ marginLeft: 'auto', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>
+                    {perms.length}
+                  </span>
+                </button>
+                {isOpen && (
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, marginBottom: 8 }}>
+                    <tbody>
+                      {perms.map((p) => {
+                        const fromGroup = fromGroupSet.has(p.id)
+                        const effect    = overrides[p.id] ?? null
+                        return (
+                          <tr
+                            key={p.id}
+                            style={{
+                              background: fromGroup ? '#eff6ff' : 'transparent',
+                              borderBottom: '1px solid var(--color-border)',
+                            }}
+                          >
+                            <td style={{ padding: '7px 8px' }}>
+                              <span>{p.description}</span>
+                              {p.is_sensitive && (
+                                <span className="badge badge-inv-storno" style={{ fontSize: 10, marginLeft: 6 }}>érzékeny</span>
+                              )}
+                              {fromGroup && (
+                                <span style={{ fontSize: 10, color: '#1d4ed8', marginLeft: 6 }}>● csoport</span>
+                              )}
+                            </td>
+                            <td style={{ padding: '7px 8px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                              <EffectToggle
+                                effect={effect}
+                                onChange={(v) => setOverride(p.id, v)}
+                                disabled={!canOverride}
+                              />
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                )}
               </div>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                <tbody>
-                  {perms.map((p) => {
-                    const fromGroup = fromGroupSet.has(p.id)
-                    const effect    = overrides[p.id] ?? null
-                    return (
-                      <tr
-                        key={p.id}
-                        style={{
-                          background: fromGroup ? '#eff6ff' : 'transparent',
-                          borderBottom: '1px solid var(--color-border)',
-                        }}
-                      >
-                        <td style={{ padding: '7px 8px', flex: 1 }}>
-                          <span>{p.description}</span>
-                          {p.is_sensitive && (
-                            <span className="badge badge-inv-storno" style={{ fontSize: 10, marginLeft: 6 }}>érzékeny</span>
-                          )}
-                          {fromGroup && (
-                            <span style={{ fontSize: 10, color: '#1d4ed8', marginLeft: 6 }}>● csoport</span>
-                          )}
-                        </td>
-                        <td style={{ padding: '7px 8px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                          <EffectToggle
-                            effect={effect}
-                            onChange={(v) => setOverride(p.id, v)}
-                            disabled={!canOverride}
-                          />
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ))}
+            )
+          })}
         </div>
-      </div>
+      )}
     </div>
   )
 }

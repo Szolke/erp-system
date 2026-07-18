@@ -13,6 +13,7 @@ class TranslationSeeder extends Seeder
         $translations = [
 
             // ── Navigáció ────────────────────────────────────────────
+            ['nav', 'dashboard',      'Nyitólap',             'Dashboard',          'Übersicht'],
             ['nav', 'documents',      'Bizonylatok',          'Documents',          'Belege'],
             ['nav', 'partners',       'Partnerek',            'Partners',           'Partner'],
             ['nav', 'products',       'Termékek',             'Products',           'Produkte'],
@@ -56,6 +57,7 @@ class TranslationSeeder extends Seeder
             ['common', 'no',          'Nem',                  'No',                 'Nein'],
             ['common', 'rows',        'Sorok',                'Rows',               'Zeilen'],
             ['common', 'error',       'Hiba',                 'Error',              'Fehler'],
+            ['common', 'retry',       'Újrapróbálom',         'Retry',              'Erneut versuchen'],
             ['common', 'saved',       'Mentve.',              'Saved.',             'Gespeichert.'],
             ['common', 'not_found',   'Nem található.',       'Not found.',         'Nicht gefunden.'],
             ['common', 'active',      'Aktív',                'Active',             'Aktiv'],
@@ -429,6 +431,22 @@ class TranslationSeeder extends Seeder
             ['country', 'selected_count',     '{selected} / {total} kiválasztva',               '{selected} / {total} selected',               '{selected} / {total} ausgewählt'],
             ['country', 'save_success',       'Országlista mentve.',                            'Countries saved.',                            'Länderliste gespeichert.'],
             ['country', 'no_results',         'Nincs találat.',                                 'No results.',                                 'Keine Treffer.'],
+
+            // ── Dashboard ─────────────────────────────────────────────
+            ['dashboard', 'title',              'Áttekintés',                          'Overview',                          'Übersicht'],
+            ['dashboard', 'unpaid_label',       'Kifizetetlen',                        'Unpaid',                            'Unbezahlt'],
+            ['dashboard', 'overdue_label',      'Lejárt',                              'Overdue',                           'Überfällig'],
+            ['dashboard', 'monthly_label',      'E havi számlázás',                    "This month's invoicing",            'Rechnungsstellung diesen Monat'],
+            ['dashboard', 'nav_label',          'NAV állapot',                         'NAV status',                        'NAV-Status'],
+            ['dashboard', 'gross_label',        'bruttó',                              'gross',                             'brutto'],
+            ['dashboard', 'oldest_overdue',     'legrégebbi {days} napja',             'oldest {days} days ago',            'älteste seit {days} Tagen'],
+            ['dashboard', 'last_sync',          'Utolsó szinkron: {datetime}',         'Last sync: {datetime}',             'Letzte Synchronisierung: {datetime}'],
+            ['dashboard', 'no_sync',            'Még nem volt beküldés',               'No submission yet',                 'Noch keine Übermittlung'],
+            ['dashboard', 'oldest_unpaid_title', 'Legrégebbi kifizetetlen számlák',    'Oldest unpaid invoices',            'Älteste unbezahlte Rechnungen'],
+            ['dashboard', 'col_days',           'Késés',                               'Days overdue',                      'Verzug'],
+            ['dashboard', 'days_value',         '{days} nap',                          '{days} days',                       '{days} Tage'],
+            ['dashboard', 'empty_no_invoices',  'Nincs kifizetetlen számla.',          'No unpaid invoices.',               'Keine unbezahlten Rechnungen.'],
+            ['dashboard', 'load_error',         'Nem sikerült betölteni az áttekintés adatait.', 'Failed to load the overview data.', 'Die Übersichtsdaten konnten nicht geladen werden.'],
         ];
 
         $now = now();

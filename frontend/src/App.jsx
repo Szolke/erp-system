@@ -1,7 +1,8 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
+import DashboardPage from './pages/DashboardPage'
 import InvoiceListPage from './pages/invoices/InvoiceListPage'
 import InvoiceDetailPage from './pages/invoices/InvoiceDetailPage'
 import InvoiceCreatePage from './pages/invoices/InvoiceCreatePage'
@@ -45,7 +46,7 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/documents" replace />} />
+          <Route index element={<DashboardPage />} />
           <Route path="documents" element={<DocumentListPage />} />
           <Route path="invoices" element={<InvoiceListPage />} />
           <Route path="invoices/new" element={<InvoiceCreatePage />} />

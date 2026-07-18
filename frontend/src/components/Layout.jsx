@@ -6,7 +6,7 @@ import { company as companyApi } from '../api/company'
 import CompanySwitcher from './CompanySwitcher'
 import { applySidebarTheme } from '../utils/sidebarTheme'
 import {
-  FileText, Users2, Package, BookOpen,
+  LayoutDashboard, FileText, Users2, Package, BookOpen,
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers, Blocks,
   Settings2, ChevronLeft, ChevronRight,
   LogOut, Moon, Sun, Terminal, UsersRound, Boxes, Tags, Briefcase, Globe,
@@ -58,6 +58,7 @@ export default function Layout() {
   async function handleLocale(loc) { await setLocale(loc, true) }
 
   const topNavItems = [
+    { to: '/',          label: t('nav.dashboard'), icon: LayoutDashboard, public: true },
     { to: '/documents', label: t('nav.documents'), icon: FileText,  anyPerm: ['invoice.view', 'receipt.view'] },
     { to: '/partners',  label: t('nav.partners'),  icon: Users2,    perm: 'partner.view' },
     { to: '/products',  label: t('nav.products'),  icon: Package,   perm: 'product.view' },

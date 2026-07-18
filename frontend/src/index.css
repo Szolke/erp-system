@@ -178,6 +178,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .search-clear { position: absolute; right: 6px; background: none; border: none; cursor: pointer; color: var(--color-muted); font-size: 13px; line-height: 1; padding: 0; width: auto; }
 .search-clear:hover { color: var(--color-danger); }
 .text-muted { color: var(--color-muted); font-size: 13px; }
+.text-danger { color: var(--color-danger); font-weight: 600; }
 .text-right { text-align: right; }
 .mb-4 { margin-bottom: 16px; }
 .mt-4 { margin-top: 16px; }
@@ -270,3 +271,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 
 .wiki-highlight { background: rgba(234,179,8,0.35); border-radius: 2px; padding: 0 1px; color: inherit; }
 [data-theme="dark"] .wiki-highlight { background: rgba(234,179,8,0.22); }
+
+/* ── Dashboard KPI-kártyák ───────────────────────────────────── */
+.dashboard-kpis { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.kpi-card { flex: 1 1 220px; min-width: 220px; margin-bottom: 0; }
+.kpi-card--alert { border-left: 4px solid var(--color-danger); }
+.kpi-label { font-size: 12px; font-weight: 600; color: var(--color-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.kpi-value { font-size: 28px; font-weight: 700; color: var(--color-text); line-height: 1.1; }
+.kpi-secondary { font-size: 12px; color: var(--color-muted); margin-top: 6px; }

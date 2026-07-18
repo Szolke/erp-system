@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\CompanySettingController;
 use App\Http\Controllers\Api\CompanyNavCredentialController;
 use App\Http\Controllers\Api\CompanySimplePayController;
 use App\Http\Controllers\Api\CountryController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\Api\DocumentSeriesController;
@@ -58,6 +59,7 @@ Route::post('/simplepay/ipn', [SimplePayIpnController::class, 'handle']);
 
 Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
     // Global catalog lookups (no write, no tenant scoping needed)
     Route::get('/vat-rates', fn () => response()->json(['data' => VatRate::where('is_active', true)->get()]));

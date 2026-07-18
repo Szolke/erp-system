@@ -7,6 +7,7 @@ use App\Enums\NavStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -92,5 +93,16 @@ class Invoice extends Model
     public function simplepayTransactions(): HasMany
     {
         return $this->hasMany(SimplepayTransaction::class);
+    }
+
+    /**
+     * Kizárja azokat a számlákat, amikhez tartozik sztornó. A sztornózáskor az
+     * eredeti számla `status`-a `issued` marad (l. InvoiceService::cancel()) —
+     * ezért a sztornó-kizárást a stornos() relációval kell eldönteni, nem a
+     * status mezővel.
+     */
+    public function scopeNotCancelled(Builder $query): Builder
+    {
+        return $query->whereDoesntHave('stornos');
     }
 }

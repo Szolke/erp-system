@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { RotateCcw } from 'lucide-react'
 import { invoices } from '../../api/invoices'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
@@ -67,7 +68,17 @@ export default function InvoiceListPage() {
                 <td>{inv.issue_date}</td>
                 <td className="text-right">{Number(inv.gross_total).toLocaleString('hu')} {inv.currency}</td>
                 <td>{inv.currency}</td>
-                <td><InvoiceStatusBadge status={inv.status} /></td>
+                <td style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <InvoiceStatusBadge status={inv.status} />
+                  {inv.has_storno && (
+                    <RotateCcw
+                      size={13}
+                      color="var(--color-accent-text)"
+                      aria-label={t('invoice.has_storno_tooltip')}
+                      title={t('invoice.has_storno_tooltip')}
+                    />
+                  )}
+                </td>
                 <td><PaymentStatusBadge status={inv.payment_status} /></td>
               </tr>
             ))}

@@ -165,6 +165,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .login-title { font-size: 22px; font-weight: 700; margin-bottom: 24px; text-align: center; }
 .alert-error { background: var(--color-danger-bg); color: var(--color-danger); padding: 10px 12px; border-radius: 5px; font-size: 13px; margin-bottom: 14px; }
 .alert-success { background: var(--color-success-bg); color: var(--color-success-text); padding: 10px 12px; border-radius: 5px; font-size: 13px; }
+.alert-info { background: var(--color-accent-bg); color: var(--color-accent-text); padding: 10px 12px; border-radius: 5px; font-size: 13px; margin-bottom: 14px; }
 
 .filter-row { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
 .filter-select-wrap { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--color-muted); }

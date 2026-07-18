@@ -8,6 +8,22 @@ import { PaymentStatusBadge, InvoiceStatusBadge } from '../../components/StatusB
 
 const todayStr = () => new Date().toISOString().split('T')[0]
 
+// A fordított szöveg {number} helyőrzőjét vágja szét, és a helyére react-router
+// Link-et illeszt — így más nyelvben a szám a mondat közepére is kerülhet.
+function StornoNoticeLink({ text, to, number }) {
+  const parts = text.split('{number}')
+  // Ha a fordításból hiányzik a {number} helyőrző (pl. szerkesztési hiba egy
+  // locale-nál), a link akkor se vesszen el — a szöveg után, szóközzel fűzve.
+  const missingPlaceholder = parts.length === 1
+  const [before, after] = missingPlaceholder ? [parts[0], null] : parts
+
+  return (
+    <div className="alert-info">
+      {before}{missingPlaceholder && ' '}<Link to={to} className="table-link">{number}</Link>{after}
+    </div>
+  )
+}
+
 export default function InvoiceDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -89,9 +105,9 @@ export default function InvoiceDetailPage() {
   if (loading) return <p className="text-muted">{t('common.loading')}</p>
   if (!invoice) return <p className="text-muted">{t('common.not_found')}</p>
 
-  const canCancel = can('invoice.cancel') && invoice.status === 'issued' && !invoice.storno_of_invoice_id
+  const canCancel = can('invoice.cancel') && invoice.status === 'issued' && !invoice.storno_of_invoice_id && !invoice.storno
   const canPay = can('payment.create') && invoice.payment_status !== 'paid'
-  const canRefund = can('invoice.cancel') && invoice.status === 'issued' && invoice.simplepay_transaction?.status === 'success'
+  const canRefund = can('invoice.cancel') && invoice.status === 'issued' && !invoice.storno && invoice.simplepay_transaction?.status === 'success'
 
   const paidTotal = payments.reduce((sum, p) => sum + Number(p.amount), 0)
   const openAmount = invoice.currency === 'HUF'
@@ -123,6 +139,21 @@ export default function InvoiceDetailPage() {
           <Link to="/documents" className="btn btn-secondary">{t('common.back')}</Link>
         </div>
       </div>
+
+      {invoice.storno && (
+        <StornoNoticeLink
+          text={t('invoice.storno_notice')}
+          to={`/invoices/${invoice.storno.id}`}
+          number={invoice.storno.invoice_number}
+        />
+      )}
+      {invoice.storno_of && (
+        <StornoNoticeLink
+          text={t('invoice.storno_of_notice')}
+          to={`/invoices/${invoice.storno_of.id}`}
+          number={invoice.storno_of.invoice_number}
+        />
+      )}
 
       {refundMsg && (
         <div className={refundMsg === t('simplepay.refund_ok') ? 'alert-success mb-4' : 'alert-error mb-4'}>

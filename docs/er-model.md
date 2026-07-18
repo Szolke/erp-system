@@ -192,7 +192,7 @@ Index: unique(`company_id`, `document_type`, `prefix`).
 | timestamps | | nincs soft delete |
 
 Index: unique(`company_id`, `invoice_number`); (`company_id`,`status`); (`company_id`,`payment_status`);
-(`company_id`,`issue_date`); (`storno_of_invoice_id`).
+(`company_id`,`issue_date`); unique(`storno_of_invoice_id`) — egy eredeti számlához legfeljebb egy sztornó tartozhat.
 
 ### `invoice_items`
 id, invoice_id (FK), product_id (FK nullable — szabad szöveges tétel is lehet), description,

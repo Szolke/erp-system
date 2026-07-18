@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable([
@@ -73,6 +74,16 @@ class Invoice extends Model
     public function stornos(): HasMany
     {
         return $this->hasMany(Invoice::class, 'storno_of_invoice_id');
+    }
+
+    /**
+     * A DB-szinten unique storno_of_invoice_id garantálja az 1:1-et — ez a
+     * reláció a stornos() HasMany mellett kényelmi HasOne a Resource/eager
+     * loading oldalára, ahol egyetlen objektum kell, nem kollekció.
+     */
+    public function storno(): HasOne
+    {
+        return $this->hasOne(Invoice::class, 'storno_of_invoice_id');
     }
 
     public function items(): HasMany

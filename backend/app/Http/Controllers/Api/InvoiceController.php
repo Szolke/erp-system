@@ -39,6 +39,7 @@ class InvoiceController extends Controller
 
         $invoices = Invoice::query()
             ->with('partner')
+            ->withExists(['storno as has_storno'])
             ->when($request->string('search')->trim()->isNotEmpty(), function ($query) use ($request) {
                 $search = $request->string('search')->trim()->value();
                 $query->where(fn ($q) => $q->where('invoice_number', 'ilike', "%{$search}%")
@@ -65,7 +66,7 @@ class InvoiceController extends Controller
         $this->authorize('invoice.view');
 
         return InvoiceResource::make(
-            $invoice->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod', 'simplepayTransactions'])
+            $invoice->load(['items.vatRate', 'items.product', 'partner', 'paymentMethod', 'simplepayTransactions', 'stornoOf', 'storno'])
         );
     }
 

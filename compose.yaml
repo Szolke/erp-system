@@ -58,7 +58,9 @@ services:
             timeout: 5s
 
     frontend:
-        image: 'node:20-alpine'
+        build:
+            context: './frontend/docker'
+            dockerfile: Dockerfile
         working_dir: /app
         command: sh -c "npm install && npm run dev -- --host"
         ports:

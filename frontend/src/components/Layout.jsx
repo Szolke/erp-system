@@ -65,28 +65,44 @@ export default function Layout() {
     { to: '/wiki',      label: t('nav.wiki'),       icon: BookOpen,  public: true },
   ]
 
-  const settingsItems = [
-    { to: '/companies',                label: 'Cégek',                icon: Layers,     superadminOnly: true },
-    { to: '/settings/modules',         label: 'Modulok',              icon: Blocks,     superadminOnly: true },
-    { to: '/users',                    label: t('nav.users'),         icon: UserRound,  perm: 'user.view' },
-    { to: '/groups',                   label: t('nav.groups'),        icon: Users,      perm: 'group.view' },
-    { to: '/company',                  label: t('nav.company'),       icon: Building2,  perm: 'company.view' },
-    { to: '/audit-logs',               label: t('nav.audit_log'),     icon: ScrollText, perm: 'audit.view' },
-    { to: '/settings/document-series', label: t('nav.doc_series'),    icon: Hash,       perm: 'document_series.manage' },
-    { to: '/settings/translations',    label: t('nav.translations'),  icon: Languages,  perm: 'company.manage' },
-    { to: '/settings/custom-fields',   label: t('nav.custom_fields'), icon: Sliders,    perm: 'company.manage' },
-    { to: '/settings/sales-groups',    label: 'Értékesítő csoportok', icon: UsersRound, perm: 'sales_group.view' },
-    { to: '/settings/asset-types',     label: t('nav.asset_types'),   icon: Tags,       perm: 'asset.view' },
-    { to: '/settings/job-positions',   label: 'Munkakörök',           icon: Briefcase,  perm: 'job_position.manage' },
-    { to: '/settings/countries',       label: t('nav.countries'),     icon: Globe,      superadminOnly: true },
-    { to: '/settings/api-tester',      label: t('nav.api_tester'),    icon: Terminal,   perm: 'api_tester.use' },
+  const settingsGroups = [
+    {
+      label: t('nav.settings_general'),
+      items: [
+        { to: '/companies',                label: 'Cégek',                icon: Layers,     superadminOnly: true },
+        { to: '/settings/modules',         label: 'Modulok',              icon: Blocks,     superadminOnly: true },
+        { to: '/company',                  label: t('nav.company'),       icon: Building2,  perm: 'company.view' },
+        { to: '/audit-logs',               label: t('nav.audit_log'),     icon: ScrollText, perm: 'audit.view' },
+        { to: '/settings/document-series', label: t('nav.doc_series'),    icon: Hash,       perm: 'document_series.manage' },
+        { to: '/settings/custom-fields',   label: t('nav.custom_fields'), icon: Sliders,    perm: 'company.manage' },
+        { to: '/settings/api-tester',      label: t('nav.api_tester'),    icon: Terminal,   perm: 'api_tester.use' },
+      ],
+    },
+    {
+      label: t('nav.settings_users'),
+      items: [
+        { to: '/users',  label: t('nav.users'),  icon: UserRound, perm: 'user.view' },
+        { to: '/groups', label: t('nav.groups'), icon: Users,     perm: 'group.view' },
+      ],
+    },
+    {
+      label: t('nav.settings_dictionaries'),
+      items: [
+        { to: '/settings/countries',     label: t('nav.countries'),     icon: Globe,      superadminOnly: true },
+        { to: '/settings/job-positions', label: 'Munkakörök',           icon: Briefcase,  perm: 'job_position.manage' },
+        { to: '/settings/asset-types',   label: t('nav.asset_types'),   icon: Tags,       perm: 'asset.view' },
+        { to: '/settings/sales-groups',  label: 'Értékesítő csoportok', icon: UsersRound, perm: 'sales_group.view' },
+        { to: '/settings/translations',  label: t('nav.translations'),  icon: Languages,  perm: 'company.manage' },
+      ],
+    },
   ]
 
-  const visibleTop      = topNavItems.filter((i) => i.public || (i.anyPerm ? i.anyPerm.some((p) => can(p)) : can(i.perm)))
-  const visibleSettings = settingsItems.filter((i) =>
-    i.superadminOnly ? user?.is_superadmin : can(i.perm)
-  )
-  const collapsed       = !sidebarOpen
+  const visibleTop = topNavItems.filter((i) => i.public || (i.anyPerm ? i.anyPerm.some((p) => can(p)) : can(i.perm)))
+  const visibleSettingsGroups = settingsGroups
+    .map((g) => ({ ...g, items: g.items.filter((i) => (i.superadminOnly ? user?.is_superadmin : can(i.perm))) }))
+    .filter((g) => g.items.length > 0)
+  const hasVisibleSettings = visibleSettingsGroups.some((g) => g.items.length > 0)
+  const collapsed = !sidebarOpen
 
   return (
     <div className="layout">
@@ -112,7 +128,7 @@ export default function Layout() {
             </NavLink>
           ))}
 
-          {visibleSettings.length > 0 && (
+          {hasVisibleSettings && (
             <>
               {collapsed
                 ? <div className="nav-divider" />
@@ -121,12 +137,17 @@ export default function Layout() {
                     <span>{t('nav.settings')}</span>
                   </div>
               }
-              {visibleSettings.map((i) => (
-                <NavLink key={i.to} to={i.to} title={collapsed ? i.label : undefined}
-                  className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>
-                  <i.icon size={16} className="nav-icon" />
-                  {!collapsed && <span>{i.label}</span>}
-                </NavLink>
+              {visibleSettingsGroups.map((g) => (
+                <div key={g.label}>
+                  {!collapsed && <div className="nav-subsection-label">{g.label}</div>}
+                  {g.items.map((i) => (
+                    <NavLink key={i.to} to={i.to} title={collapsed ? i.label : undefined}
+                      className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>
+                      <i.icon size={16} className="nav-icon" />
+                      {!collapsed && <span>{i.label}</span>}
+                    </NavLink>
+                  ))}
+                </div>
               ))}
             </>
           )}

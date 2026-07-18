@@ -80,6 +80,7 @@ body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; color
 
 /* Szekció-cím (Beállítások) */
 .nav-section-label { display: flex; align-items: center; gap: 6px; padding: 14px 16px 4px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: color-mix(in srgb, var(--sidebar-text-color, #fff) 50%, transparent); white-space: nowrap; }
+.nav-subsection-label { padding: 10px 16px 4px 22px; font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: color-mix(in srgb, var(--sidebar-text-color, #fff) 36%, transparent); white-space: nowrap; }
 
 /* Elválasztó (collapsed módban szekciók közt) */
 .nav-divider { height: 1px; background: color-mix(in srgb, var(--sidebar-accent-color, #1e293b) 75%, #000); margin: 8px 10px; }

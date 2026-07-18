@@ -138,11 +138,16 @@ Index: (`product_id`, `currency`, `valid_from`).
 ### `partners`
 id, company_id (FK), type (enum: `customer`,`supplier`,`both`), name, tax_number nullable,
 eu_tax_number nullable, registration_number nullable,
-billing_postal_code, billing_city, billing_address_line,
+billing_postal_code, billing_city, billing_address_line, billing_country_code (char 2, default `HU` — utólag, 2026-07-17-én adva hozzá, l. `countries` katalógus),
 shipping_postal_code nullable, shipping_city nullable, shipping_address_line nullable,
 default_payment_method_id (FK nullable → payment_methods), default_currency (char 3),
 email nullable, phone nullable, bank_account_number nullable, is_active, timestamps.
 Index: (`company_id`, `tax_number`), unique(`company_id`, `name`) opcionális.
+
+`billing_country_code` validációja mindig a TELJES `config('countries')` listán fut
+(nem a `countries.enabled` szűrt halmazon) — az `enabled` mező csak a partner-űrlap
+legördülőjét szűri, hogy egy utólag letiltott ország ne törje meg a már mentett
+partnereket.
 
 ---
 
@@ -372,6 +377,29 @@ de a hézag-megengedettség miatt a gapless-infrastruktúra súlya nem kell.
   hacsak a hívó (az AssetType API) explicit meg nem adja.
 - `canBeDeleted()` az `Asset` modellen — ma mindig `true` (nincs hozzárendelés-funkció
   még), de a döntési pont már él, jövőbeli bővítéshez előkészítve.
+
+---
+
+## 13. Országtörzs (`countries`)
+
+> Globális, superadmin által kezelt katalógus — a `modules` tábla mintáját követi.
+> Igazságforrás-elv: `config/countries.php` a teljes ISO 3166-1 alpha-2 kódlista (249
+> kód) MESTERE, ez a validáció egyetlen forrása; a `countries` tábla ennek
+> PROJEKCIÓJA + a kapcsolható `enabled` állapot. A kódlista nem a DB-ből "születik",
+> a DB-t a configból szinkronizálja az `erp:sync-countries` parancs (idempotens,
+> sosem ír felül meglévő `enabled` állapotot, sosem töröl sort).
+
+### `countries` (globális katalógus — NEM cég-szintű, nincs BelongsToCompany)
+| mező | típus | megjegyzés |
+|---|---|---|
+| id | bigIncrements | |
+| code | char(2), unique | ISO 3166-1 alpha-2, a `config('countries')` egy eleme |
+| enabled | boolean default true | superadmin kapcsolja; csak a partner-űrlap legördülőjét szűri, a validációt nem |
+| timestamps | | |
+
+Index: unique(`code`). API: `GET /api/countries` (bármely authentikált user, csak az
+`enabled=true` kódok — a nevet a frontend adja `Intl.DisplayNames`-szel), `GET/PUT
+/api/admin/countries` (superadmin-only, a PUT "replace the enabled set" szemantikával).
 
 ---
 

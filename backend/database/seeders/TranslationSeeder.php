@@ -19,6 +19,7 @@ class TranslationSeeder extends Seeder
             ['nav', 'assets',         'Eszközök',             'Assets',             'Anlagen'],
             ['nav', 'asset_types',    'Eszköztípusok',        'Asset types',        'Anlagentypen'],
             ['nav', 'settings',       'Beállítások',          'Settings',           'Einstellungen'],
+            ['nav', 'settings_company_data', 'Cégesadatok', 'Company data', 'Firmendaten'],
             ['nav', 'settings_general',     'Általános',   'General',      'Allgemein'],
             ['nav', 'settings_users',       'Felhasználók', 'Users',       'Benutzer'],
             ['nav', 'settings_dictionaries', 'Szótárak',   'Dictionaries', 'Verzeichnisse'],

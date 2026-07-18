@@ -67,13 +67,18 @@ export default function Layout() {
 
   const settingsGroups = [
     {
+      label: t('nav.settings_company_data'),
+      items: [
+        { to: '/companies',                label: 'Cégek',              icon: Layers, superadminOnly: true },
+        { to: '/company',                  label: t('nav.company'),     icon: Building2, perm: 'company.view' },
+        { to: '/settings/document-series', label: t('nav.doc_series'),  icon: Hash,   perm: 'document_series.manage' },
+      ],
+    },
+    {
       label: t('nav.settings_general'),
       items: [
-        { to: '/companies',                label: 'Cégek',                icon: Layers,     superadminOnly: true },
         { to: '/settings/modules',         label: 'Modulok',              icon: Blocks,     superadminOnly: true },
-        { to: '/company',                  label: t('nav.company'),       icon: Building2,  perm: 'company.view' },
         { to: '/audit-logs',               label: t('nav.audit_log'),     icon: ScrollText, perm: 'audit.view' },
-        { to: '/settings/document-series', label: t('nav.doc_series'),    icon: Hash,       perm: 'document_series.manage' },
         { to: '/settings/custom-fields',   label: t('nav.custom_fields'), icon: Sliders,    perm: 'company.manage' },
         { to: '/settings/api-tester',      label: t('nav.api_tester'),    icon: Terminal,   perm: 'api_tester.use' },
       ],

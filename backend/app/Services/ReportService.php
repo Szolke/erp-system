@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\Partner;
+use App\Support\HufConversion;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +49,9 @@ use Illuminate\Support\Facades\DB;
  *    változatlan). Az exchange_rate DB-szinten NOT NULL, ezért a "hiányzó
  *    árfolyam" eset normál API-forgalomból nem fordulhat elő — a
  *    skip/warning-mechanizmus mégis megvan, védekező jelleggel (l.
- *    skipExpr()), közvetlen DB-beszúrással tesztelve.
+ *    App\Support\HufConversion::skipExpr() — ezt a DocumentController
+ *    bizonylatlista-összesítője is újrahasznosítja), közvetlen
+ *    DB-beszúrással tesztelve.
  *
  * 4. DÁTUM-ALAP — `date_basis` paraméter (fulfillment|issue, default
  *    fulfillment). Kivétel: a kintlévőség-korosítás mindig `due_date`
@@ -100,11 +103,11 @@ class ReportService
         $periods = $this->periodSequence(Carbon::parse($from), Carbon::parse($to), $granularity);
         $periodFormat = $granularity === 'month' ? 'Y-m' : 'Y-m-d';
 
-        $skip = $this->skipExpr('invoices.currency', 'invoices.exchange_rate');
-        $netHuf = $this->hufExpr('invoices.net_total', 'invoices.currency', 'invoices.exchange_rate');
-        $vatHuf = $this->hufExpr('invoices.vat_total', 'invoices.currency', 'invoices.exchange_rate');
-        $grossHuf = $this->hufExpr('invoices.gross_total', 'invoices.currency', 'invoices.exchange_rate');
-        $paidHuf = $this->hufExpr('COALESCE(inv_payments.paid_amount, 0)', 'invoices.currency', 'invoices.exchange_rate');
+        $skip = HufConversion::skipExpr('invoices.currency', 'invoices.exchange_rate');
+        $netHuf = HufConversion::amountExpr('invoices.net_total', 'invoices.currency', 'invoices.exchange_rate');
+        $vatHuf = HufConversion::amountExpr('invoices.vat_total', 'invoices.currency', 'invoices.exchange_rate');
+        $grossHuf = HufConversion::amountExpr('invoices.gross_total', 'invoices.currency', 'invoices.exchange_rate');
+        $paidHuf = HufConversion::amountExpr('COALESCE(inv_payments.paid_amount, 0)', 'invoices.currency', 'invoices.exchange_rate');
 
         $paymentsSub = DB::table('payments')
             ->select('payable_id', 'currency', DB::raw('SUM(amount) as paid_amount'))
@@ -140,7 +143,7 @@ class ReportService
         $receiptRows = collect();
         if ($includeReceipts) {
             $receiptDateExpr = $dateBasis === 'fulfillment' ? 'COALESCE(fulfillment_date, issue_date)' : 'issue_date';
-            $receiptHuf = $this->hufExpr('gross_total', 'currency', 'exchange_rate');
+            $receiptHuf = HufConversion::amountExpr('gross_total', 'currency', 'exchange_rate');
 
             $receiptRows = DB::table('receipts')
                 ->where('company_id', $company->id)
@@ -235,8 +238,8 @@ class ReportService
 
         [$from, $to] = $this->resolveDateRange($filters['from'], $filters['to'], 'month');
 
-        $skip = $this->skipExpr('i.currency', 'i.exchange_rate');
-        $netHuf = $this->hufExpr('ii.net_amount', 'i.currency', 'i.exchange_rate');
+        $skip = HufConversion::skipExpr('i.currency', 'i.exchange_rate');
+        $netHuf = HufConversion::amountExpr('ii.net_amount', 'i.currency', 'i.exchange_rate');
 
         // A megjelenítendő név/mértékegység MINDIG a tételből jön (historikus,
         // számlázáskori érték), soha a products táblából — törölt termék tétele
@@ -312,12 +315,12 @@ class ReportService
 
     private function computeReceivablesAging(Company $company, array $filters): array
     {
-        $asOf = isset($filters['as_of']) ? Carbon::parse($filters['as_of'])->toDateString() : $this->today();
+        $asOf = isset($filters['as_of']) ? Carbon::parse($filters['as_of'])->toDateString() : HufConversion::todayBudapest();
         $partnerId = $filters['partner_id'] ?? null;
 
-        $skip = $this->skipExpr('i.currency', 'i.exchange_rate');
-        $grossHuf = $this->hufExpr('i.gross_total', 'i.currency', 'i.exchange_rate');
-        $paidHuf = $this->hufExpr('COALESCE(p.paid_amount, 0)', 'i.currency', 'i.exchange_rate');
+        $skip = HufConversion::skipExpr('i.currency', 'i.exchange_rate');
+        $grossHuf = HufConversion::amountExpr('i.gross_total', 'i.currency', 'i.exchange_rate');
+        $paidHuf = HufConversion::amountExpr('COALESCE(p.paid_amount, 0)', 'i.currency', 'i.exchange_rate');
         $remaining = "CASE WHEN {$skip} = 0 THEN {$grossHuf} - {$paidHuf} ELSE 0 END";
         // Postgres date - date = egész napok száma; pozitív = lejárt, negatív = még esedékes.
         $daysOverdue = "('{$asOf}'::date - i.due_date)";
@@ -410,9 +413,9 @@ class ReportService
 
         [$from, $to] = $this->resolveDateRange($filters['from'], $filters['to'], 'month');
 
-        $skip = $this->skipExpr('i.currency', 'i.exchange_rate');
-        $netHuf = $this->hufExpr('ii.net_amount', 'i.currency', 'i.exchange_rate');
-        $vatHuf = $this->hufExpr('ii.vat_amount', 'i.currency', 'i.exchange_rate');
+        $skip = HufConversion::skipExpr('i.currency', 'i.exchange_rate');
+        $netHuf = HufConversion::amountExpr('ii.net_amount', 'i.currency', 'i.exchange_rate');
+        $vatHuf = HufConversion::amountExpr('ii.vat_amount', 'i.currency', 'i.exchange_rate');
 
         $rows = DB::table('invoice_items as ii')
             ->join('invoices as i', 'i.id', '=', 'ii.invoice_id')
@@ -502,23 +505,6 @@ class ReportService
         return Cache::store('redis')->tags(['reports']);
     }
 
-    /** HUF-konverziós CASE-kifejezés — l. osztály-docblock 3. pont. */
-    private function hufExpr(string $amountExpr, string $currencyCol, string $rateCol): string
-    {
-        return "CASE WHEN {$currencyCol} = 'HUF' THEN {$amountExpr} ELSE {$amountExpr} * {$rateCol} END";
-    }
-
-    /**
-     * 1, ha a sor nem-HUF devizájú ÉS az árfolyam hiányzik/érvénytelen — ilyen
-     * sor kimarad az összegekből, de a warnings.skipped_count-ba beleszámít.
-     * A jelenlegi validáció mellett (exchange_rate NOT NULL) ez normál
-     * API-forgalomból nem fordul elő — védekező jelleggel implementálva.
-     */
-    private function skipExpr(string $currencyCol, string $rateCol): string
-    {
-        return "CASE WHEN {$currencyCol} <> 'HUF' AND ({$rateCol} IS NULL OR {$rateCol} <= 0) THEN 1 ELSE 0 END";
-    }
-
     /**
      * 'YYYY-MM' vagy 'YYYY-MM-DD' bemenetet fogad; a 'to' hónap-alakot a
      * hónap UTOLSÓ napjára zárja (inkluzív tartomány).
@@ -562,12 +548,6 @@ class ReportService
         }
 
         return $periods;
-    }
-
-    /** "Ma", Europe/Budapest szerint — l. osztály-docblock 5. pont (app timezone UTC). */
-    private function today(): string
-    {
-        return Carbon::now('Europe/Budapest')->toDateString();
     }
 
     private function cacheKey(string $report, int $companyId, array $filters): string

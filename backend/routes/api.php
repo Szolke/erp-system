@@ -126,6 +126,7 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     // Bizonylatok — egységes lista (számla + nyugta + sztornók)
     Route::get('documents', [DocumentController::class, 'index']);
+    Route::get('documents/export', [DocumentController::class, 'export']);
 
     Route::apiResource('invoices', InvoiceController::class)->only(['index', 'store', 'show']);
     Route::post('invoices/{invoice}/cancel', [InvoiceController::class, 'cancel']);

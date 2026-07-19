@@ -10,6 +10,7 @@ import Pagination from '../../components/Pagination'
 import DateRangePicker from '../../components/reports/DateRangePicker'
 import DocumentFiltersPopover from '../../components/documents/DocumentFiltersPopover'
 import NewDocumentButton from '../../components/documents/NewDocumentButton'
+import ExportButton from '../../components/ExportButton'
 import { useUrlFilters } from '../../utils/useUrlFilters'
 import { formatCurrency } from '../../utils/format'
 import { statusLabel } from '../../utils/documentStatus'
@@ -136,6 +137,18 @@ export default function DocumentListPage() {
   const isEmptyResult = data && data.data.length === 0
   const isTrulyEmpty = isEmptyResult && !hasAnyFilter
 
+  const exportParams = {
+    type: filters.type || undefined,
+    status: filters.status || undefined,
+    currency: filters.currency || undefined,
+    search: filters.search || undefined,
+    date_from: filters.date_from || undefined,
+    date_to: filters.date_to || undefined,
+  }
+  const exportFilename = (filters.date_from && filters.date_to)
+    ? `bizonylatok-${filters.date_from}-${filters.date_to}.csv`
+    : 'bizonylatok-export.csv'
+
   return (
     <div className="fc-card">
       <div className="fc-row fc-row--header">
@@ -155,7 +168,17 @@ export default function DocumentListPage() {
             ))}
           </div>
         </div>
-        <NewDocumentButton />
+        <div className="fc-header-actions">
+          <ExportButton
+            visible={can('invoice.view') || can('receipt.view')}
+            onExport={() => documents.export(exportParams)}
+            filename={exportFilename}
+            label={t('document.export_button')}
+            exportingLabel={t('document.exporting')}
+            errorLabel={t('document.export_error')}
+          />
+          <NewDocumentButton />
+        </div>
       </div>
 
       <div className="fc-row fc-row--filters">

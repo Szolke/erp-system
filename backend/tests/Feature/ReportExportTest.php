@@ -137,6 +137,22 @@ class ReportExportTest extends TestCase
         $this->assertStringContainsString('reports-invoices-2026-05-2026-05.csv', $disposition);
     }
 
+    public function test_aging_export_filename_falls_back_to_a_single_export_without_as_of(): void
+    {
+        $this->makeInvoice('2026-06-05', 1000);
+
+        $response = $this->actingAs($this->superadmin)
+            ->withHeader('Origin', 'http://localhost')
+            ->withSession(['current_company_id' => $this->company->id])
+            ->withHeader('X-Company-Id', (string) $this->company->id)
+            ->get('/api/reports/receivables-aging/export'); // se from/to, se as_of
+
+        $response->assertOk();
+        $disposition = $response->headers->get('Content-Disposition');
+        $this->assertStringContainsString('reports-receivables-aging-export.csv', $disposition);
+        $this->assertStringNotContainsString('export-export', $disposition);
+    }
+
     // ─── Helpers ─────────────────────────────────────────────────────────
 
     private function exportContent(string $report, array $query): string

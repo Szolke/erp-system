@@ -23,6 +23,12 @@ function statusLabel(t, status) {
   return { open: t('invoice.pay_open'), partial: t('invoice.pay_partial'), paid: t('invoice.pay_paid') }[status] ?? status
 }
 
+function exportFilename(report, filters) {
+  const from = filters.from ?? filters.as_of ?? null
+  const to = filters.to ?? filters.as_of ?? null
+  return (from !== null && to !== null) ? `reports-${report}-${from}-${to}.csv` : `reports-${report}-export.csv`
+}
+
 /**
  * A Kimutatások oldal EGYETLEN szűrő-kártyája — a `variant` (tab-típus)
  * dönti el, mely sorok/mezők jelennek meg, nincs négyszeres másolat.
@@ -125,7 +131,7 @@ export default function ReportFilterCard({
         <ExportButton
           visible={can('report.export')}
           onExport={() => reports.export(exportReport, exportFilters)}
-          filename={`reports-${exportReport}-${exportFilters.from ?? exportFilters.as_of ?? 'export'}-${exportFilters.to ?? exportFilters.as_of ?? 'export'}.csv`}
+          filename={exportFilename(exportReport, exportFilters)}
           label={t('reports.export_button')}
           exportingLabel={t('reports.exporting')}
           errorLabel={t('reports.export_error')}

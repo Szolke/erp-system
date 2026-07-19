@@ -119,6 +119,9 @@ class TranslationSeeder extends Seeder
             ['document', 'load_error',     'Nem sikerült betölteni a bizonylatokat.', 'Failed to load the documents.', 'Die Belege konnten nicht geladen werden.'],
             ['document', 'summary_line',   'Összesen {count} bizonylat · {amount}', '{count} documents total · {amount}', 'Insgesamt {count} Belege · {amount}'],
             ['document', 'summary_warning', '{count} bizonylat kimaradt az összegből érvénytelen árfolyam miatt.', '{count} document(s) excluded from the total due to an invalid exchange rate.', '{count} Beleg(e) wegen ungültigem Wechselkurs von der Summe ausgeschlossen.'],
+            ['document', 'export_button',   'CSV',                               'CSV',                               'CSV'],
+            ['document', 'exporting',       'Exportálás…',                       'Exporting…',                        'Exportieren…'],
+            ['document', 'export_error',    'Nem sikerült exportálni a bizonylatokat.', 'Failed to export the documents.', 'Die Belege konnten nicht exportiert werden.'],
 
             // ── Számla ────────────────────────────────────────────────
             ['invoice', 'title',           'Számlák',                           'Invoices',                          'Rechnungen'],

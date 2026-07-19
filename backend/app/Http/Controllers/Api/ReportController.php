@@ -93,9 +93,11 @@ class ReportController extends Controller
 
         [$headers, $rows] = $this->toCsvRows($report, $data);
 
-        $from = $filters['from'] ?? $filters['as_of'] ?? 'export';
-        $to = $filters['to'] ?? $filters['as_of'] ?? 'export';
-        $filename = "reports-{$report}-{$from}-{$to}.csv";
+        $from = $filters['from'] ?? $filters['as_of'] ?? null;
+        $to = $filters['to'] ?? $filters['as_of'] ?? null;
+        $filename = ($from !== null && $to !== null)
+            ? "reports-{$report}-{$from}-{$to}.csv"
+            : "reports-{$report}-export.csv";
 
         return response()->streamDownload(function () use ($headers, $rows) {
             $handle = fopen('php://output', 'w');

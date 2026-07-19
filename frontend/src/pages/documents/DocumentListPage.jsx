@@ -1,171 +1,291 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Search, AlertTriangle } from 'lucide-react'
 import { documents } from '../../api/documents'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
-import { DocumentTypeBadge, InvoiceStatusBadge, PaymentStatusBadge } from '../../components/StatusBadge'
+import { DisplayStatusBadge } from '../../components/StatusBadge'
 import PerPageSelector from '../../components/PerPageSelector'
 import Pagination from '../../components/Pagination'
+import DateRangePicker from '../../components/reports/DateRangePicker'
+import DocumentFiltersPopover from '../../components/documents/DocumentFiltersPopover'
+import NewDocumentButton from '../../components/documents/NewDocumentButton'
+import { useUrlFilters } from '../../utils/useUrlFilters'
+import { formatCurrency } from '../../utils/format'
+import { statusLabel } from '../../utils/documentStatus'
+
+const TABS = [
+  { key: '', labelKey: 'document.type_all' },
+  { key: 'invoice', labelKey: 'document.type_invoice', needsPerm: 'invoice.view' },
+  { key: 'receipt', labelKey: 'document.type_receipt', needsPerm: 'receipt.view' },
+  { key: 'storno', labelKey: 'document.type_storno' },
+]
+
+const TYPE_LABEL_KEYS = {
+  invoice: 'document.type_invoice',
+  invoice_storno: 'document.type_inv_st',
+  receipt: 'document.type_receipt',
+  receipt_storno: 'document.type_rec_st',
+}
+
+const DEFAULTS = {
+  type: '', status: '', currency: '', search: '',
+  date_from: '', date_to: '', per_page: '20', page: '1',
+}
+
+function isWithinOneYear(from, to) {
+  if (!from || !to) return false
+  return (new Date(to) - new Date(from)) <= 366 * 24 * 60 * 60 * 1000
+}
+
+function formatIssueDate(dateStr, locale, short) {
+  const opts = short ? { month: 'short', day: 'numeric' } : { year: 'numeric', month: 'short', day: 'numeric' }
+  return new Intl.DateTimeFormat(locale, opts).format(new Date(dateStr))
+}
 
 export default function DocumentListPage() {
-  const { can }  = useAuth()
-  const { t }    = useTranslation()
+  const { can } = useAuth()
+  const { t, locale } = useTranslation()
+  const [filters, setFilters] = useUrlFilters(DEFAULTS)
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+  const [openPopover, setOpenPopover] = useState(null)
+  const [searchInput, setSearchInput] = useState(filters.search)
+  const debounceRef = useRef(null)
 
-  const [data, setData]                     = useState(null)
-  const [loading, setLoading]               = useState(true)
-  const [type, setType]                     = useState('')
-  const [search, setSearch]                 = useState('')
-  const [dateFrom, setDateFrom]             = useState('')
-  const [dateTo, setDateTo]                 = useState('')
-  const [currency, setCurrency]             = useState('')
-  const [paymentStatus, setPaymentStatus]   = useState('')
-  const [perPage, setPerPage]               = useState(20)
-  const [page, setPage]                     = useState(1)
+  const page = Number(filters.page) || 1
+  const perPage = Number(filters.per_page) || 20
 
-  const TYPE_FILTERS = [
-    { value: '',               label: t('document.type_all') },
-    { value: 'invoice',        label: t('document.type_invoice'),  needsPerm: 'invoice.view' },
-    { value: 'invoice_storno', label: t('document.type_inv_st'),   needsPerm: 'invoice.view' },
-    { value: 'receipt',        label: t('document.type_receipt'),  needsPerm: 'receipt.view' },
-    { value: 'receipt_storno', label: t('document.type_rec_st'),   needsPerm: 'receipt.view' },
-  ]
-
-  async function load({ t: tp, s, df, dt, cur, ps, pp, pg } = {}) {
-    const params = {
-      type:           (tp  ?? type)          || undefined,
-      search:         (s   ?? search)        || undefined,
-      date_from:      (df  ?? dateFrom)      || undefined,
-      date_to:        (dt  ?? dateTo)        || undefined,
-      currency:       (cur ?? currency)      || undefined,
-      payment_status: (ps  ?? paymentStatus) || undefined,
-      per_page:       pp ?? perPage,
-      page:           pg ?? page,
-    }
+  async function load() {
     setLoading(true)
+    setError(false)
     try {
-      const res = await documents.list(params)
+      const res = await documents.list({
+        type: filters.type || undefined,
+        status: filters.status || undefined,
+        currency: filters.currency || undefined,
+        search: filters.search || undefined,
+        date_from: filters.date_from || undefined,
+        date_to: filters.date_to || undefined,
+        per_page: perPage,
+        page,
+      })
       setData(res.data)
+    } catch {
+      setError(true)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load() }, [filters.type, filters.status, filters.currency, filters.search, filters.date_from, filters.date_to, filters.per_page, filters.page]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  function handleTypeChange(value) {
-    setType(value); setSearch(''); setPage(1)
-    const clearedPs = (value === 'receipt' || value === 'receipt_storno') ? '' : paymentStatus
-    if (clearedPs !== paymentStatus) setPaymentStatus('')
-    load({ t: value, s: '', ps: clearedPs, pg: 1 })
+  // Debounce (~400ms): a React state minden leütést megőriz, csak a
+  // lekérdezés-indítás késleltetett — karakter emiatt sosem vész el.
+  useEffect(() => {
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      if (searchInput !== filters.search) {
+        setFilters({ search: searchInput, page: '1' })
+      }
+    }, 400)
+    return () => clearTimeout(debounceRef.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput])
+
+  function handleTabChange(type) {
+    setFilters({ type, page: '1' })
   }
-  function clearSearch()           { setSearch(''); setPage(1); load({ s: '', pg: 1 }) }
-  function handleDateFrom(value)   { setDateFrom(value); setPage(1); load({ df: value, pg: 1 }) }
-  function handleDateTo(value)     { setDateTo(value); setPage(1); load({ dt: value, pg: 1 }) }
-  function clearDates()            { setDateFrom(''); setDateTo(''); setPage(1); load({ df: '', dt: '', pg: 1 }) }
-  function handleCurrency(value)   { setCurrency(value); setPage(1); load({ cur: value, pg: 1 }) }
-  function handlePaymentStatus(v)  { setPaymentStatus(v); setPage(1); load({ ps: v, pg: 1 }) }
-  function handlePerPage(value)    { setPerPage(value); setPage(1); load({ pp: value, pg: 1 }) }
-  function handleSearch(e)         { e.preventDefault(); setPage(1); load({ pg: 1 }) }
+  function handleDateRangeApply(dateFrom, dateTo) {
+    setFilters({ date_from: dateFrom, date_to: dateTo, page: '1' })
+  }
+  function handleFiltersChange(patch) {
+    setFilters({ ...patch, page: '1' })
+  }
+  function handlePerPage(value) {
+    setFilters({ per_page: String(value), page: '1' })
+  }
+  function handlePageChange(p) {
+    setFilters({ page: String(p) })
+  }
+  function clearAllFilters() {
+    setSearchInput('')
+    setFilters({ type: '', status: '', currency: '', search: '', date_from: '', date_to: '', page: '1' })
+  }
+  function clearChipFilters() {
+    setFilters({ status: '', currency: '', page: '1' })
+  }
 
   function docLink(doc) {
     return doc.model_type === 'invoice' ? `/invoices/${doc.id}` : `/receipts/${doc.id}`
   }
 
-  const visibleFilters = TYPE_FILTERS.filter((f) => !f.needsPerm || can(f.needsPerm))
-  const hasDateFilter  = dateFrom || dateTo
+  const visibleTabs = TABS.filter((tabDef) => !tabDef.needsPerm || can(tabDef.needsPerm))
+  const shortDate = isWithinOneYear(filters.date_from, filters.date_to)
+
+  const chips = []
+  if (filters.status) {
+    chips.push({ key: 'status', label: statusLabel(t, filters.status), onRemove: () => handleFiltersChange({ status: '' }) })
+  }
+  if (filters.currency) {
+    chips.push({ key: 'currency', label: filters.currency, onRemove: () => handleFiltersChange({ currency: '' }) })
+  }
+
+  const hasAnyFilter = !!(filters.type || filters.status || filters.currency || filters.search || filters.date_from || filters.date_to)
+  const isEmptyResult = data && data.data.length === 0
+  const isTrulyEmpty = isEmptyResult && !hasAnyFilter
 
   return (
-    <div>
-      <div className="page-header">
-        <h1 className="page-title">{t('document.title')}</h1>
-        <div className="flex">
-          {can('invoice.create') && <Link to="/invoices/new" className="btn btn-primary">{t('document.new_invoice')}</Link>}
-          {can('receipt.create') && <Link to="/receipts/new" className="btn btn-secondary">{t('document.new_receipt')}</Link>}
+    <div className="fc-card">
+      <div className="fc-row fc-row--header">
+        <div className="fc-title-tabs">
+          <h1 className="fc-title">{t('document.title')}</h1>
+          <div className="fc-tabs" role="tablist">
+            {visibleTabs.map((tabDef) => (
+              <button
+                key={tabDef.key || 'all'}
+                role="tab"
+                aria-selected={filters.type === tabDef.key}
+                className={'fc-tab' + (filters.type === tabDef.key ? ' active' : '')}
+                onClick={() => handleTabChange(tabDef.key)}
+              >
+                {t(tabDef.labelKey)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <NewDocumentButton />
+      </div>
+
+      <div className="fc-row fc-row--filters">
+        <div className="fc-row-left doc-filters-left">
+          <div className="doc-search-wrap">
+            <Search size={14} className="doc-search-icon" aria-hidden="true" />
+            <input
+              type="text"
+              className="doc-search-input"
+              placeholder={t('document.search_ph')}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              aria-label={t('document.search_ph')}
+            />
+            {loading && <span className="doc-search-spinner" aria-hidden="true" />}
+          </div>
+
+          <DateRangePicker
+            unit="day"
+            align="right"
+            from={filters.date_from}
+            to={filters.date_to}
+            onApply={handleDateRangeApply}
+            open={openPopover === 'daterange'}
+            onOpenChange={(o) => setOpenPopover(o ? 'daterange' : null)}
+            id="document-daterange"
+          />
+
+          <DocumentFiltersPopover
+            filters={filters}
+            onChange={handleFiltersChange}
+            open={openPopover === 'filters'}
+            onOpenChange={(o) => setOpenPopover(o ? 'filters' : null)}
+            id="document-filters"
+          />
         </div>
       </div>
 
-      <div className="type-filter">
-        {visibleFilters.map((f) => (
-          <button key={f.value} className={type === f.value ? 'active' : ''} onClick={() => handleTypeChange(f.value)}>
-            {f.label}
-          </button>
-        ))}
-      </div>
+      {chips.length > 0 && (
+        <div className="fc-row fc-row--chips">
+          <div className="fc-chip-row">
+            {chips.map((chip) => (
+              <span key={chip.key} className="fc-chip">
+                {chip.label}
+                <button type="button" onClick={chip.onRemove} aria-label={t('reports.remove_filter', { name: chip.label })}>×</button>
+              </span>
+            ))}
+            <button type="button" className="fc-clear-all" onClick={clearChipFilters}>{t('reports.clear_all')}</button>
+          </div>
+        </div>
+      )}
 
-      <div className="filter-row">
-        <label className="filter-select-wrap">
-          <span>{t('common.currency')}</span>
-          <select value={currency} onChange={(e) => handleCurrency(e.target.value)}>
-            <option value="">{t('document.curr_all')}</option>
-            <option value="HUF">HUF</option>
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
-          </select>
-        </label>
-        {type !== 'receipt' && type !== 'receipt_storno' && (
-          <label className="filter-select-wrap">
-            <span>{t('document.pay_status')}</span>
-            <select value={paymentStatus} onChange={(e) => handlePaymentStatus(e.target.value)}>
-              <option value="">{t('document.pay_all')}</option>
-              <option value="open">{t('document.pay_open')}</option>
-              <option value="partial">{t('document.pay_partial')}</option>
-              <option value="paid">{t('document.pay_paid')}</option>
-            </select>
-          </label>
+      <div className="doc-table-wrap">
+        {loading && !data ? (
+          <p className="text-muted doc-state-message">{t('common.loading')}</p>
+        ) : error ? (
+          <div className="doc-state-message">
+            <p className="alert-error">{t('document.load_error')}</p>
+            <button className="btn btn-secondary" onClick={load}>{t('common.retry')}</button>
+          </div>
+        ) : isEmptyResult ? (
+          <div className="doc-state-message">
+            {isTrulyEmpty ? (
+              <>
+                <p>{t('document.empty_title')}</p>
+                <p className="text-muted">{t('document.empty_hint')}</p>
+              </>
+            ) : (
+              <>
+                <p>{t('document.no_results_title')}</p>
+                <button className="btn btn-secondary" onClick={clearAllFilters}>{t('document.clear_filters')}</button>
+              </>
+            )}
+          </div>
+        ) : (
+          <table className="doc-table">
+            <thead>
+              <tr>
+                <th scope="col" style={{ width: '34%' }}>{t('document.number')}</th>
+                <th scope="col" style={{ width: '24%' }}>{t('document.partner')}</th>
+                <th scope="col" style={{ width: '14%' }}>{t('document.issued_at')}</th>
+                <th scope="col" className="text-right" style={{ width: '15%' }}>{t('document.gross')}</th>
+                <th scope="col" style={{ width: '13%' }}>{t('document.status_col')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.data.map((doc) => {
+                const typeLabel = t(TYPE_LABEL_KEYS[doc.document_type] ?? doc.document_type)
+                const isNegative = Number(doc.gross_total) < 0
+                return (
+                  <tr key={`${doc.model_type}-${doc.id}`}>
+                    <td>
+                      <Link to={docLink(doc)} className="table-link">{doc.document_number}</Link>
+                      <div className="doc-subline">
+                        {typeLabel}
+                        {doc.currency !== 'HUF' && <span className="doc-currency-marker"> · {doc.currency}</span>}
+                      </div>
+                    </td>
+                    <td className="doc-ellipsis" title={doc.partner_name ?? ''}>{doc.partner_name ?? '—'}</td>
+                    <td>{formatIssueDate(doc.issue_date, locale, shortDate)}</td>
+                    <td className={'text-right doc-amount' + (isNegative ? ' text-danger' : '')}>
+                      {formatCurrency(doc.gross_total, null, locale)}
+                    </td>
+                    <td><DisplayStatusBadge status={doc.display_status} /></td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         )}
       </div>
 
-      <form className="search-row" onSubmit={handleSearch}>
-        <div className="search-input-wrap">
-          <input placeholder={t('document.search_ph')} value={search} onChange={(e) => setSearch(e.target.value)} />
-          {search && <button type="button" className="search-clear" onClick={clearSearch}>✕</button>}
+      <div className="fc-row fc-row--status">
+        <div className="doc-summary">
+          {data && data.data.length > 0 && (
+            <span>
+              {t('document.summary_line', { count: data.summary.count, amount: formatCurrency(data.summary.gross_total_huf, 'HUF', locale) })}
+              {data.summary.skipped_count > 0 && (
+                <span className="doc-summary-warning" title={t('document.summary_warning', { count: data.summary.skipped_count })}>
+                  <AlertTriangle size={13} aria-hidden="true" />
+                </span>
+              )}
+            </span>
+          )}
         </div>
-        <button className="btn btn-secondary" type="submit">{t('common.search')}</button>
-        <span className="date-range">
-          <label>{t('document.date_from')}</label>
-          <input type="date" value={dateFrom} onChange={(e) => handleDateFrom(e.target.value)} />
-          <label>{t('document.date_to')}</label>
-          <input type="date" value={dateTo} onChange={(e) => handleDateTo(e.target.value)} />
-          {hasDateFilter && <button type="button" className="btn-link date-clear" onClick={clearDates}>✕</button>}
-        </span>
-        <PerPageSelector value={perPage} onChange={handlePerPage} />
-      </form>
-
-      {loading ? (
-        <p className="text-muted">{t('common.loading')}</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>{t('document.number')}</th>
-              <th>{t('document.type_col')}</th>
-              <th>{t('document.partner')}</th>
-              <th>{t('document.issued_at')}</th>
-              <th className="text-right">{t('document.gross')}</th>
-              <th>{t('common.currency')}</th>
-              <th>{t('document.status_col')}</th>
-              <th>{t('document.payment_col')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.data.map((doc) => (
-              <tr key={`${doc.model_type}-${doc.id}`}>
-                <td><Link to={docLink(doc)} className="table-link">{doc.document_number}</Link></td>
-                <td><DocumentTypeBadge type={doc.document_type} /></td>
-                <td>{doc.partner_name ?? '—'}</td>
-                <td>{doc.issue_date}</td>
-                <td className="text-right">{Number(doc.gross_total).toLocaleString('hu')}</td>
-                <td>{doc.currency}</td>
-                <td><InvoiceStatusBadge status={doc.status} /></td>
-                <td>{doc.payment_status ? <PaymentStatusBadge status={doc.payment_status} /> : <span className="text-muted">—</span>}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      {data && <p className="text-muted mt-4">{t('common.total')}: {data.meta?.total} {t('common.pieces')}</p>}
-      <Pagination meta={data?.meta} onChange={(p) => { setPage(p); load({ pg: p }) }} />
+        <div className="doc-footer-controls">
+          <PerPageSelector value={perPage} onChange={handlePerPage} />
+          <Pagination meta={data?.meta} onChange={handlePageChange} />
+        </div>
+      </div>
     </div>
   )
 }

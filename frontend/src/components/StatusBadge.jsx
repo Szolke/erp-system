@@ -1,4 +1,5 @@
 import { useTranslation } from '../contexts/TranslationContext'
+import { statusLabel } from '../utils/documentStatus'
 
 export function PaymentStatusBadge({ status }) {
   const { t } = useTranslation()
@@ -10,6 +11,19 @@ export function InvoiceStatusBadge({ status }) {
   const { t } = useTranslation()
   const label = { draft: t('invoice.st_draft'), issued: t('invoice.st_issued'), storno: t('invoice.st_storno') }
   return <span className={`badge badge-inv-${status}`}>{label[status] ?? status}</span>
+}
+
+/**
+ * A bizonylatlista EGY állapot-oszlopa — a backend display_status
+ * (l. DocumentController) mezőjéből, ami már eldöntötte a prioritást
+ * (sztornó > piszkozat > fizetve > lejárt > részben fizetve > kiállított).
+ * A "Részben fizetve"/"Fizetve"/"Piszkozat"/"Kiállított"/"Sztornózott"
+ * szövegeket a meglévő invoice.* kulcsokból veszi újra — csak a "Lejárt"
+ * kategória új.
+ */
+export function DisplayStatusBadge({ status }) {
+  const { t } = useTranslation()
+  return <span className={`badge badge-ds-${status}`}>{statusLabel(t, status)}</span>
 }
 
 export function AssetStatusBadge({ status }) {

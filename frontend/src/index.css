@@ -149,6 +149,16 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .badge-asset-issued { background: #dbeafe; color: #1d4ed8; }
 .badge-asset-service { background: #fef3c7; color: #b45309; }
 .badge-asset-scrapped { background: #f3f4f6; color: #6b7280; }
+
+/* Bizonylatlista display_status badge — design-tokenekkel (nem hardkódolt hex),
+   hogy a fényes/sötét témát automatikusan kövesse. A jelentést a SZÖVEG is
+   mindig hordozza, nem csak a szín (l. DisplayStatusBadge). */
+.badge-ds-paid { background: var(--color-success-bg); color: var(--color-success-text); }
+.badge-ds-overdue { background: var(--color-danger-bg); color: var(--color-danger); }
+.badge-ds-partially_paid { background: var(--color-warning-bg); color: var(--color-warning); }
+.badge-ds-issued { background: var(--color-surface-alt); color: var(--color-text); border: 1px solid var(--color-border); }
+.badge-ds-draft { background: var(--color-surface-alt); color: var(--color-muted); }
+.badge-ds-storno { background: var(--color-surface-alt); color: var(--color-muted); }
 .type-filter { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
 .type-filter button { padding: 4px 12px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); font-size: 12px; cursor: pointer; color: var(--color-muted); }
 .type-filter button.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
@@ -399,6 +409,33 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 @media (max-width: 720px) {
   .fc-row-right { margin-left: 0; }
 }
+
+/* ── Bizonylatlista (Documents) — a filter-kártya (fc-*) itt is a teljes
+   oldalt magába foglalja: fejléc+fülek+új gomb / szűrők / chipek / TÁBLÁZAT /
+   lábléc mind egyetlen .fc-card-on belül (a Kimutatásokkal ellentétben, ahol
+   a táblázat/diagram a kártyán KÍVÜL él). ───────────────────────────────── */
+.fc-row--chips { padding: 10px 20px; background: var(--color-surface-alt); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); min-height: 44px; }
+
+.doc-filters-left { flex: 1; min-width: 0; }
+.doc-search-wrap { position: relative; display: flex; align-items: center; flex: 1 1 280px; min-width: 180px; height: 34px; }
+.doc-search-icon { position: absolute; left: 10px; color: var(--color-muted); }
+.doc-search-input { width: 100%; height: 34px; padding: 0 30px; border: 1px solid var(--color-border); border-radius: 7px; font-size: 13px; background: var(--color-surface); color: var(--color-text); }
+.doc-search-input:focus { outline: none; border-color: var(--color-primary); }
+.doc-search-spinner { position: absolute; right: 10px; width: 12px; height: 12px; border: 2px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: doc-spin .6s linear infinite; }
+@keyframes doc-spin { to { transform: rotate(360deg); } }
+
+.doc-table-wrap { overflow-x: auto; }
+.fc-card table.doc-table { border: none; border-radius: 0; margin: 0; border-top: 1px solid var(--color-border); table-layout: fixed; width: 100%; }
+.doc-table th, .doc-table td { padding: 10px 20px; }
+.doc-subline { font-size: 11px; color: var(--color-muted); margin-top: 2px; }
+.doc-currency-marker { color: var(--color-accent-text); font-weight: 600; }
+.doc-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-amount { font-variant-numeric: tabular-nums; }
+.doc-state-message { padding: 40px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+.doc-summary { font-size: 12px; color: var(--color-muted); display: flex; align-items: center; gap: 6px; }
+.doc-summary-warning { display: inline-flex; color: var(--color-warning); cursor: help; }
+.doc-footer-controls { display: flex; align-items: center; gap: 16px; }
 
 /* Kintlévőség-sávok: a súlyosság színnel ÉS a sávnév szövegként is mindig
    olvasható marad (a táblázat/kártya fejléce sosem csak színre épül). */

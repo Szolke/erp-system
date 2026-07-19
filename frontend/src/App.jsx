@@ -33,6 +33,7 @@ import AssetTypePage from './pages/settings/AssetTypePage'
 import JobPositionPage from './pages/settings/JobPositionPage'
 import CountriesPage from './pages/settings/CountriesPage'
 import WikiPage from './pages/WikiPage'
+import ReportsPage from './pages/reports/ReportsPage'
 
 export default function App() {
   return (
@@ -80,6 +81,7 @@ export default function App() {
           <Route path="settings/countries" element={<CountriesPage />} />
           <Route path="settings/api-tester" element={<ApiTesterPage />} />
           <Route path="wiki" element={<WikiPage />} />
+          <Route path="reports" element={<ReportsPage />} />
         </Route>
       </Routes>
   )

@@ -279,3 +279,131 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .kpi-label { font-size: 12px; font-weight: 600; color: var(--color-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
 .kpi-value { font-size: 28px; font-weight: 700; color: var(--color-text); line-height: 1.1; }
 .kpi-secondary { font-size: 12px; color: var(--color-muted); margin-top: 6px; }
+
+/* ── Kimutatások (reports) ──────────────────────────────────────── */
+.alert-warning { background: var(--color-warning-bg); color: var(--color-warning); padding: 10px 12px; border-radius: 5px; font-size: 13px; margin-bottom: 14px; }
+
+/* Egyetlen kártya, négy sorral (fejléc+fülek+export / elsődleges szűrők /
+   gyorsválasztók / aktív szűrő-chipek+eredmény). A kártya-háttér a projekt
+   meglévő .card tónusát követi (--color-surface), a 4. (állapot-)sor egy
+   fokkal halványabb --color-surface-alt hátteret kap, hogy elváljon a
+   szűrőktől. Radius/padding szándékosan nagyvonalúbb, mint a sima .card-nál
+   (12px / 20px) — ez az oldal "hero" eleme. */
+/* NINCS overflow:hidden a kártyán — a dátum-tartomány popover ennek gyerekeként,
+   position:absolute-tel túllóg a kártya alján, egy overflow:hidden ős levágná.
+   A lekerekített alsó sarkot ehelyett a mindig-utolsó .fc-row--status
+   saját border-radius-a adja. */
+.fc-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; margin-bottom: 20px; }
+.fc-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; row-gap: 12px; flex-wrap: wrap; padding: 16px 20px; }
+.fc-row--header { border-bottom: 1px solid var(--color-border); }
+.fc-header-actions { display: flex; align-items: center; gap: 10px; }
+.fc-row--filters { padding-bottom: 14px; }
+.fc-row--quick { padding-top: 0; padding-bottom: 14px; }
+.fc-row--status { background: var(--color-surface-alt); border-top: 1px solid var(--color-border); border-radius: 0 0 11px 11px; padding: 10px 20px; min-height: 44px; }
+
+.fc-title-tabs { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.fc-title { font-size: 18px; font-weight: 700; white-space: nowrap; }
+.fc-tabs { display: flex; gap: 4px; overflow-x: auto; }
+.fc-tab { padding: 6px 14px; border: none; border-radius: 6px; background: none; cursor: pointer; font-size: 13px; font-weight: 400; color: var(--color-muted); white-space: nowrap; }
+.fc-tab:hover { color: var(--color-text); }
+.fc-tab.active { background: var(--color-accent-bg); color: var(--color-accent-text); font-weight: 500; }
+
+.fc-row-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.fc-row-right { display: flex; align-items: center; margin-left: auto; }
+
+/* Trigger-gombok (dátum-tartomány / dátum-alapja / szűrők) egységes magassága */
+.fc-trigger-btn { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border: 1px solid var(--color-border); border-radius: 7px; background: var(--color-surface); color: var(--color-text); font-size: 13px; cursor: pointer; }
+.fc-trigger-btn:hover { background: var(--color-hover); }
+.fc-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--color-accent-bg); color: var(--color-accent-text); font-size: 10px; font-weight: 700; }
+
+.fc-popover-root { position: relative; }
+.fc-popover-panel { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); padding: 14px; }
+.fc-popover-panel--right { left: auto; right: 0; }
+
+/* Dátum-tartomány popover: két hónap-rács egymás mellett */
+.fc-daterange-panel { display: flex; flex-direction: column; gap: 12px; width: min(560px, 90vw); }
+.fc-daterange-grids { display: flex; gap: 16px; flex-wrap: wrap; }
+.fc-daterange-grid { flex: 1 1 240px; min-width: 220px; }
+.fc-daterange-grid-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--color-muted); }
+.fc-daterange-nav { border: none; background: none; cursor: pointer; color: var(--color-muted); font-size: 16px; padding: 2px 8px; border-radius: 4px; }
+.fc-daterange-nav:hover { background: var(--color-hover); color: var(--color-text); }
+.fc-daterange-months { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.fc-daterange-month { padding: 7px 4px; border: 1px solid transparent; border-radius: 5px; background: none; cursor: pointer; font-size: 12px; color: var(--color-text); text-align: center; }
+.fc-daterange-month:hover { background: var(--color-hover); }
+.fc-daterange-month.is-in-range { background: var(--color-accent-bg); color: var(--color-accent-text); }
+.fc-daterange-month.is-endpoint { background: var(--color-primary); color: #fff; font-weight: 600; }
+.fc-popover-footer { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--color-border); padding-top: 12px; }
+
+/* Nap-rács (Bizonylatok napi pontosságú tartomány-választója, unit="day") */
+.fc-daterange-panel--day .fc-daterange-grid { flex-basis: 260px; }
+.fc-daterange-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 2px; }
+.fc-daterange-weekdays span { text-align: center; font-size: 10px; color: var(--color-muted); text-transform: uppercase; }
+.fc-daterange-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.fc-daterange-day { padding: 6px 0; border: 1px solid transparent; border-radius: 5px; background: none; cursor: pointer; font-size: 12px; color: var(--color-text); text-align: center; }
+.fc-daterange-day:hover { background: var(--color-hover); }
+.fc-daterange-day.is-in-range { background: var(--color-accent-bg); color: var(--color-accent-text); }
+.fc-daterange-day.is-endpoint { background: var(--color-primary); color: #fff; font-weight: 600; }
+
+/* Dátum-alapja dropdown */
+.report-datebasis-panel { width: min(320px, 90vw); padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.report-datebasis-option { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 10px; border: none; border-radius: 6px; background: none; cursor: pointer; text-align: left; }
+.report-datebasis-option:hover { background: var(--color-hover); }
+.report-datebasis-option.is-selected { background: var(--color-accent-bg); }
+.report-datebasis-option-label { font-size: 13px; font-weight: 500; color: var(--color-text); }
+.report-datebasis-option-hint { font-size: 12px; color: var(--color-muted); }
+
+/* Szűrők popover */
+.fc-filters-panel { width: min(260px, 90vw); display: flex; flex-direction: column; gap: 12px; }
+
+/* "Új bizonylat" split-gomb legördülője — jobbról horgonyozva, mert a
+   trigger maga is jobbra igazított elsődleges gomb. */
+.fc-menu-panel { left: auto; right: 0; min-width: 170px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.fc-menu-item { display: block; width: 100%; text-align: left; padding: 8px 10px; border: none; border-radius: 6px; background: none; color: var(--color-text); font-size: 13px; cursor: pointer; }
+.fc-menu-item:hover { background: var(--color-hover); }
+.fc-popover-field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: var(--color-muted); }
+.fc-popover-field select { padding: 5px 8px; border: 1px solid var(--color-border); border-radius: 5px; font-size: 13px; background: var(--color-surface); color: var(--color-text); }
+.fc-checkbox { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--color-text); cursor: pointer; white-space: nowrap; }
+
+/* Egységes "címke fent, vezérlő lent" mező (pl. a kintlévőség as_of dátuma) */
+.fc-field { display: flex; flex-direction: column; gap: 6px; }
+.fc-field-label { font-size: 11px; font-weight: 600; color: var(--color-muted); text-transform: uppercase; letter-spacing: .04em; }
+.fc-field input { height: 34px; padding: 0 10px; border: 1px solid var(--color-border); border-radius: 7px; font-size: 13px; background: var(--color-surface); color: var(--color-text); box-sizing: border-box; }
+
+/* Szegmentált kontroll (granularitás / rendezés) — ÖSSZEFÜGGŐ keret, közös
+   elválasztóval (nem külön pill-ek, ellentétben a .type-filter mintával). */
+.fc-segmented { display: inline-flex; height: 34px; border: 1px solid var(--color-border); border-radius: 7px; overflow: hidden; }
+.fc-segmented button { border: none; border-right: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-muted); font-size: 13px; font-weight: 400; padding: 0 16px; cursor: pointer; }
+.fc-segmented button:last-child { border-right: none; }
+.fc-segmented button:hover { background: var(--color-hover); }
+.fc-segmented button.active { background: var(--color-accent-bg); color: var(--color-accent-text); font-weight: 500; }
+
+/* Gyorsválasztó pill-sor */
+.report-quick-label { font-size: 12px; color: var(--color-muted); flex-shrink: 0; }
+.report-quick-pills { display: flex; gap: 6px; overflow-x: auto; }
+.report-quick-pill { flex-shrink: 0; padding: 5px 12px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface); color: var(--color-muted); font-size: 12px; font-weight: 400; cursor: pointer; }
+.report-quick-pill:hover { background: var(--color-hover); }
+.report-quick-pill.active { background: var(--color-accent-bg); color: var(--color-accent-text); border-color: var(--color-accent-bg); font-weight: 500; }
+
+/* Aktív szűrő-chipek + eredmény-visszajelzés */
+.fc-chip-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fc-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px 4px 10px; border-radius: 12px; background: var(--color-accent-bg); color: var(--color-accent-text); font-size: 12px; font-weight: 500; }
+.fc-chip button { border: none; background: none; cursor: pointer; color: inherit; font-size: 14px; line-height: 1; padding: 0 2px; opacity: .7; }
+.fc-chip button:hover { opacity: 1; }
+.fc-clear-all { border: none; background: none; cursor: pointer; color: var(--color-primary); font-size: 12px; text-decoration: underline; padding: 0; }
+.fc-result-status { font-size: 12px; color: var(--color-muted); white-space: nowrap; }
+
+.report-chart-title { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--color-muted); }
+.report-secondary-chart { margin-top: 16px; }
+.report-grand-total-row td { border-top: 2px solid var(--color-text); }
+
+@media (max-width: 720px) {
+  .fc-row-right { margin-left: 0; }
+}
+
+/* Kintlévőség-sávok: a súlyosság színnel ÉS a sávnév szövegként is mindig
+   olvasható marad (a táblázat/kártya fejléce sosem csak színre épül). */
+.aging-card.aging--warn, td.aging--warn { color: var(--color-warning); }
+.aging-card.aging--warn-strong, td.aging--warn-strong { color: var(--color-warning); font-weight: 700; }
+.aging-card.aging--danger, td.aging--danger { color: var(--color-danger); }
+.aging-card.aging--danger-strong, td.aging--danger-strong { color: var(--color-danger); font-weight: 700; }
+.aging-card.aging--warn-strong, .aging-card.aging--danger, .aging-card.aging--danger-strong { border-left: 4px solid currentColor; }

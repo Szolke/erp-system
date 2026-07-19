@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\SalesGroupController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReceiptController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SimplePayController;
 use App\Http\Controllers\Api\SimplePayIpnController;
 use App\Http\Controllers\Api\TokenAuthController;
@@ -143,6 +144,15 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::post('receipts/{receipt}/cancel', [ReceiptController::class, 'cancel']);
     Route::get('receipts/{receipt}/pdf', [ReceiptController::class, 'pdf']);
     Route::post('receipts/{receipt}/regenerate-pdf', [ReceiptController::class, 'regeneratePdf']);
+
+    // Kimutatások (reports) — nincs module:reports middleware, l. ReportController docblock:
+    // a jogosultság-feloldás (Gate::before + ModuleResolver) önmagában 403-at ad kikapcsolt
+    // modulnál a report.view/report.export kulcsokon keresztül.
+    Route::get('reports/invoices', [ReportController::class, 'invoices']);
+    Route::get('reports/products', [ReportController::class, 'products']);
+    Route::get('reports/receivables-aging', [ReportController::class, 'receivablesAging']);
+    Route::get('reports/vat-summary', [ReportController::class, 'vatSummary']);
+    Route::get('reports/{report}/export', [ReportController::class, 'export']);
 
     // Munkakörök (job_position — nem RBAC-szerep, csak user-kezelési törzsadat)
     Route::apiResource('job-positions', JobPositionController::class)->only(['index', 'store', 'update', 'destroy']);

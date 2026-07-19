@@ -78,6 +78,10 @@ class PermissionSeeder extends Seeder
             ['key' => 'asset.create', 'module' => 'asset', 'description' => 'Eszköz létrehozása', 'is_sensitive' => false],
             ['key' => 'asset.edit', 'module' => 'asset', 'description' => 'Eszköz szerkesztése', 'is_sensitive' => false],
             ['key' => 'asset.delete', 'module' => 'asset', 'description' => 'Eszköz törlése', 'is_sensitive' => false],
+
+            // Reports module permissions (reports module must be enabled).
+            ['key' => 'report.view', 'module' => 'report', 'description' => 'Kimutatások megtekintése', 'is_sensitive' => false],
+            ['key' => 'report.export', 'module' => 'report', 'description' => 'Kimutatások exportálása CSV-be', 'is_sensitive' => false],
         ];
 
         foreach ($permissions as $permission) {

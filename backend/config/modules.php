@@ -13,4 +13,5 @@ return [
     App\Modules\Definitions\SimplePayModule::class,
     App\Modules\Definitions\SalesGroupModule::class,
     App\Modules\Definitions\AssetsModule::class,
+    App\Modules\Definitions\ReportsModule::class,
 ];

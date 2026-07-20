@@ -87,6 +87,11 @@ class PermissionSeeder extends Seeder
             // Reports module permissions (reports module must be enabled).
             ['key' => 'report.view', 'module' => 'report', 'description' => 'Kimutatások megtekintése', 'is_sensitive' => false],
             ['key' => 'report.export', 'module' => 'report', 'description' => 'Kimutatások exportálása CSV-be', 'is_sensitive' => false],
+
+            // eNyugta module permissions (enyugta module must be enabled).
+            ['key' => 'enyugta.view', 'module' => 'enyugta', 'description' => 'NAV eNyugta jelentések és beállítások megtekintése', 'is_sensitive' => false],
+            ['key' => 'enyugta.manage', 'module' => 'enyugta', 'description' => 'NAV eNyugta hitelesítő adatok és üzemmód szerkesztése', 'is_sensitive' => true],
+            ['key' => 'enyugta.submit', 'module' => 'enyugta', 'description' => 'NAV eNyugta napi jelentés beküldése / újraküldése', 'is_sensitive' => true],
         ];
 
         foreach ($permissions as $permission) {

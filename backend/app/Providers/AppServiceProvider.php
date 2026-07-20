@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
+use App\Enums\EnyugtaMode;
 use App\Models\User;
 use App\Modules\ModuleRegistry;
 use App\Modules\ModuleResolver;
+use App\Services\Enyugta\EnyugtaClientInterface;
+use App\Services\Enyugta\HttpEnyugtaClient;
+use App\Services\Enyugta\MockEnyugtaClient;
 use App\Services\PermissionChecker;
 use App\Support\CurrentCompany;
 use Illuminate\Support\Facades\Gate;
@@ -21,6 +25,20 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(PermissionChecker::class);
         $this->app->singleton(ModuleRegistry::class);
         $this->app->scoped(ModuleResolver::class);
+
+        // Mode alapú feloldás: config('erp.enyugta.default_mode') dönti el, melyik
+        // implementáció szolgálja ki az EnyugtaClientInterface-t. Alapértelmezés
+        // 'mock' (l. .env.example) — ez teszi tesztkörnyezetben is NAV-kapcsolat
+        // nélkül futtathatóvá az erp:sync-enyugta-vat-categories parancsot.
+        // Per-céges mode-override (company_enyugta_credentials.mode) a tényleges
+        // beküldő logikával együtt, egy következő fázisban kerül bekötésre.
+        $this->app->bind(EnyugtaClientInterface::class, function () {
+            $mode = EnyugtaMode::tryFrom(config('erp.enyugta.default_mode')) ?? EnyugtaMode::Mock;
+
+            return $mode === EnyugtaMode::Mock
+                ? new MockEnyugtaClient()
+                : new HttpEnyugtaClient(mode: $mode);
+        });
     }
 
     /**

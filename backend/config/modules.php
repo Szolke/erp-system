@@ -14,4 +14,5 @@ return [
     App\Modules\Definitions\SalesGroupModule::class,
     App\Modules\Definitions\AssetsModule::class,
     App\Modules\Definitions\ReportsModule::class,
+    App\Modules\Definitions\EnyugtaModule::class,
 ];

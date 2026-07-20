@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\Api\DocumentSeriesController;
+use App\Http\Controllers\Api\EnyugtaSettingsController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\JobPositionController;
@@ -191,6 +192,13 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     // Beállítások — bizonylat-sorszámtartományok
     Route::get('settings/document-series', [DocumentSeriesController::class, 'index']);
     Route::put('settings/document-series/{documentSeries}', [DocumentSeriesController::class, 'update']);
+
+    // NAV eNyugta — 1. fázis: csak beállítások (hitelesítő adat + üzemmód), nincs beküldés.
+    Route::middleware('module:enyugta')->group(function () {
+        Route::get('settings/enyugta', [EnyugtaSettingsController::class, 'show']);
+        Route::put('settings/enyugta', [EnyugtaSettingsController::class, 'update']);
+        Route::post('settings/enyugta/copy-from-nav', [EnyugtaSettingsController::class, 'copyFromNav']);
+    });
 
     // API-tesztelő
     Route::get('api-tester/openapi', [ApiTesterController::class, 'openapi']);

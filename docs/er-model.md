@@ -118,7 +118,12 @@ Index: unique(`user_id`, `company_id`, `permission_id`).
 
 ### `vat_rates` (globális, NAV-kompatibilis kategóriák)
 id, name (pl. "27% normál"), rate_percent (decimal 5,2 nullable — % alapú kulcsnál), nav_code (string —
-NAV XML-hez, pl. `AAM`, `TAM`, `EUKIVETEL`, vagy a százalék-kód), is_active, timestamps.
+NAV XML-hez, pl. `AAM`, `TAM`, `EUKIVETEL`, vagy a százalék-kód), is_active,
+**nav_receipt_category (string nullable — utólag, eNyugta 1. fázisban adva hozzá)**, timestamps.
+
+`nav_receipt_category` a NAV eNyugta interfész ÁFA-kategória NEVÉT tárolja (l. `enyugta_vat_categories.name`),
+NEM kódot — ez a NAV eNyugta `/vat-category/list` katalógusa, MÁS értékkészlet, mint a `nav_code` (ami az
+Online Számla `vatExemption` case-kódjaira, AAM/TAM/… való). L. 14. fejezet.
 
 ### `products`
 id, company_id (FK), sku, name, description nullable, unit (string, pl. `db`, `óra`, `kg`),
@@ -403,9 +408,54 @@ Index: unique(`code`). API: `GET /api/countries` (bármely authentikált user, c
 
 ---
 
+## 14. NAV eNyugta modul (1. fázis — alapinfrastruktúra)
+
+> Opcionális modul (`enyugta`), függ a `receipts` modultól (ma core, l.
+> `docs/progress.md` NAV eNyugta 1. fázis bejegyzés). Ez a fázis csak
+> hitelesítő adatot + üzemmódot + globális áfa-kategória cache-t tárol —
+> NINCS napi összesítő aggregáció, XML-builder, tényleges HTTP-hívás vagy
+> frontend UI (azok a 2-3. fázisban). Forrás:
+> [nav-enyugta-spec-jegyzetek.md](nav-enyugta-spec-jegyzetek.md).
+
+### `company_enyugta_credentials`
+| mező | típus | megjegyzés |
+|---|---|---|
+| id, company_id (FK, **unique**) | | cégenként EGY sor — ellentétben a `company_nav_credentials` environmentenkénti több sorával (l. D1 indoklás progress.md-ben) |
+| login | string encrypted | technikai felhasználó (nem tudni, megosztható-e az Online Számláéval) |
+| password | text encrypted | SHA3-512 hash-elve épül be a kérésbe, nyersen soha nem megy ki |
+| signing_key | text encrypted | |
+| exchange_key | text encrypted | |
+| tax_number | string | bare 8 jegyű törzsszám, ugyanaz a formátum, mint `company_nav_credentials.nav_tax_number` |
+| mode | enum(`mock`,`test`,`live`) default `mock` | D2 döntés — `mock` HTTP-hívás nélkül fut le, séma-konform fix választ ad |
+| base_url_override | string nullable | a spec nem közöl teljes base URL-t (csak a `/receipt-if` context rootot), cégenkénti felülbírálásra |
+| send_empty_reports | boolean default false | D4 döntés — nullás nap jelentése legyártásra kerül, de alapból nem kerül beküldésre |
+| last_verified_at | timestamp nullable | |
+| timestamps | | |
+
+Index: unique(`company_id`). Titkos mezők (`login`/`password`/`signing_key`/`exchange_key`) `encrypted`
+cast + `#[Hidden]` a modellen — a `GET /api/settings/enyugta` csak `has_*` boolokat ad vissza, sosem a
+nyers értéket.
+
+### `enyugta_vat_categories` (globális cache — NEM cég-szintű, nincs BelongsToCompany)
+| mező | típus | megjegyzés |
+|---|---|---|
+| id | bigIncrements | |
+| name | string, **unique** | a NAV `/vat-category/list` válaszának `categories/category/name` mezője, szó szerint |
+| synced_at | timestamp | utolsó szinkronizálás időpontja |
+| timestamps | | |
+
+Index: unique(`name`) — ez az upsert kulcsa is (`erp:sync-enyugta-vat-categories`, idempotens).
+**A séma D3 döntés szerint egyszerűsítve lett a tervezett `code`/`rate`/`valid_from`/`valid_to` mezőkből
+`name`-re** — a NAV válasz (jegyzet 2.1.9.2, 30. oldal) kizárólag nevet ad vissza, és a `valid_from`
+Postgres NULL-szemantikája miatt az eredeti összetett unique index nem védett volna duplikátum ellen. Ha a
+NAV a jövőben bővíti a választ, külön migrációval vezetendő be.
+
+---
+
 ## Kapcsolati összefoglaló (legfontosabbak)
 
-- `companies` 1—N `company_bank_accounts`, `company_nav_credentials`, `products`, `partners`, `invoices`,
+- `companies` 1—N `company_bank_accounts`, `company_nav_credentials`, `company_enyugta_credentials`,
+  `products`, `partners`, `invoices`,
   `receipts`, `groups`, `document_series`, `sales_groups`, `assets`, `asset_number_counters`
 - `asset_types` 1—N `assets`; `asset_types.company_id` nullable (globális VAGY céges sor)
 - `companies` M—N `users` (`company_user`)

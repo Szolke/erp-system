@@ -87,6 +87,23 @@ az üresen hagyott mezők a meglévő értéket tartják meg.
 Ez a szekció csak `invoice.send_nav` joggal rendelkező felhasználóknak látható, és csak ha a
 NAV Online Számla modul engedélyezve van.
 
+### NAV napló (Beállítások → Általános → NAV napló)
+
+Minden NAV-beküldési kísérlet — a számla feladása ÉS a NAV-verdikt utólagos lekérdezése is —
+naplózódik. Ez a lista mutatja meg, hogy van-e bárhol probléma: alapértelmezetten a hibás,
+elutasított vagy 24 órán belül verdikt nélkül maradt (beavatkozást igénylő) számlákra szűrve
+jelenik meg. Egy sor egy érintett számlát jelent, a kísérletek számával együtt — nem minden
+egyes próbálkozás külön sorban.
+
+Soronként megnyitható a legutolsó kísérlet részletei, ahol a NAV-nak elküldött és a NAV-tól
+kapott nyers adat is megtekinthető (csak ekkor töltődik be, nem a lista részeként). A számla
+saját részletező oldalán is megjelenik egy „NAV beküldési előzmények" panel, ami az adott
+számla teljes, időrendi történetét mutatja.
+
+Ez a lista/panel csak `nav.log.view` joggal rendelkező felhasználóknak látható — ez a jog
+KÜLÖN a NAV-hitelesítők kezeléséhez szükséges `invoice.send_nav`-tól, mert a napló nyers
+NAV-kommunikációt tartalmaz, érzékenyebb, mint maga a számla megtekintése.
+
 ---
 
 ## Sorszámtartományok (Beállítások → Sorszámtartományok)

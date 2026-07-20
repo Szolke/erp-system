@@ -92,6 +92,23 @@ environment.
 This section is only visible to users with the `invoice.send_nav` permission and only when
 the NAV Online Invoice module is enabled.
 
+### NAV Log (Settings → General → NAV Log)
+
+Every NAV submission attempt is logged — both the initial invoice send and any later
+verdict check. This list shows whether anything is wrong: by default it's filtered to
+invoices that are failed, rejected, or stuck without a verdict after 24 hours (needs
+attention). One row represents one affected invoice, together with its attempt count —
+not one row per individual attempt.
+
+Each row can be expanded to show the latest attempt's details, including the raw data
+sent to and received from NAV (loaded only on demand, not as part of the list). The
+invoice's own detail page also shows a "NAV submission history" panel with that invoice's
+full chronological history.
+
+This list/panel is only visible to users with the `nav.log.view` permission — a SEPARATE
+permission from `invoice.send_nav` (used for managing NAV credentials), because the log
+contains raw NAV communication and is more sensitive than viewing the invoice itself.
+
 ---
 
 ## Document Series (Settings → Document Series)

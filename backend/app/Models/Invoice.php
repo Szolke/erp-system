@@ -116,4 +116,17 @@ class Invoice extends Model
     {
         return $query->whereDoesntHave('stornos');
     }
+
+    /**
+     * The NAV queryTransactionStatus polling target set: successfully sent to NAV
+     * (a transactionId exists) but no final verdict has been recorded yet. This
+     * set size is itself the health metric for the polling mechanism — see
+     * CheckNavSubmissionStatuses. Callers in queue/scheduler context must chain
+     * withoutGlobalScope('company') — see that command for why.
+     */
+    public function scopeAwaitingNavVerification(Builder $query): Builder
+    {
+        return $query->where('nav_status', NavStatus::Sent)
+            ->whereNotNull('nav_transaction_id');
+    }
 }

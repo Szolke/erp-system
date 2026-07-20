@@ -8,6 +8,7 @@ use App\Enums\NavEnvironment;
 use App\Enums\NavStatus;
 use App\Enums\NavSubmissionStatus;
 use App\Enums\PaymentStatus;
+use App\Jobs\CheckNavTransactionStatusJob;
 use App\Jobs\SendInvoiceToNavJob;
 use App\Models\Company;
 use App\Models\CompanyNavCredential;
@@ -25,6 +26,7 @@ use App\Services\Nav\NavXmlBuilder;
 use App\Support\CurrentCompany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 use NavOnlineInvoice\Reporter;
 use Tests\TestCase;
 
@@ -172,6 +174,12 @@ class SendInvoiceToNavJobTest extends TestCase
 
     public function test_job_marks_sent_when_nav_is_enabled_and_credential_exists(): void
     {
+        // Queue::fake(): SendInvoiceToNavJob's success branch also dispatches
+        // CheckNavTransactionStatusJob; with the sync queue driver (phpunit.xml)
+        // that would run inline here and consume the same mocks a second time.
+        // This test only cares about SendInvoiceToNavJob's own effects.
+        Queue::fake();
+
         $navModule = $this->makeNavModule();
         $this->enableNavModule($this->company, $navModule);
         $this->makeNavCredential($this->company);
@@ -204,10 +212,49 @@ class SendInvoiceToNavJobTest extends TestCase
         $this->assertNotNull($this->invoice->nav_sent_at);
     }
 
+    // ─── Test 3a: sikeres ág — CheckNavTransactionStatusJob eldobva 60s
+    //     késleltetéssel (a "kényelem" mechanizmus, l. docs/nav-logging-audit.md) ─
+
+    public function test_job_dispatches_delayed_status_check_on_success(): void
+    {
+        Queue::fake();
+
+        $navModule = $this->makeNavModule();
+        $this->enableNavModule($this->company, $navModule);
+        $this->makeNavCredential($this->company);
+
+        $xmlElement = new \SimpleXMLElement('<root/>');
+        $this->mock(NavXmlBuilder::class)
+            ->shouldReceive('build')
+            ->once()
+            ->andReturn($xmlElement);
+
+        $mockReporter = \Mockery::mock(Reporter::class);
+        $mockReporter->shouldReceive('manageInvoice')
+            ->once()
+            ->andReturn('TEST-TRX-005');
+
+        $this->mock(NavReporterFactory::class)
+            ->shouldReceive('make')
+            ->once()
+            ->andReturn($mockReporter);
+
+        $job = new SendInvoiceToNavJob($this->invoice->id, 'CREATE');
+        app()->call([$job, 'handle']);
+
+        Queue::assertPushed(CheckNavTransactionStatusJob::class, function ($dispatched) {
+            return $dispatched->delay instanceof \DateTimeInterface
+                && $dispatched->delay->getTimestamp() >= now()->addSeconds(55)->getTimestamp()
+                && $dispatched->delay->getTimestamp() <= now()->addSeconds(65)->getTimestamp();
+        });
+    }
+
     // ─── Test 3b: sikeres ág — nav_submission_logs mezők helyesen kitöltve ───
 
     public function test_job_records_submission_log_fields_on_success(): void
     {
+        Queue::fake(); // avoid the delayed CheckNavTransactionStatusJob running inline (sync driver)
+
         $navModule = $this->makeNavModule();
         $this->enableNavModule($this->company, $navModule);
         $this->makeNavCredential($this->company);
@@ -294,6 +341,8 @@ class SendInvoiceToNavJobTest extends TestCase
 
     public function test_job_records_invoice_operation_from_dispatch_argument_not_invoice_state(): void
     {
+        Queue::fake(); // avoid the delayed CheckNavTransactionStatusJob running inline (sync driver)
+
         $this->assertNull(
             $this->invoice->storno_of_invoice_id,
             'Az invoice szándékosan NEM sztornó — a teszt épp azt bizonyítja, hogy az '
@@ -377,6 +426,8 @@ class SendInvoiceToNavJobTest extends TestCase
 
     public function test_job_writes_log_company_id_from_invoice_when_current_company_is_unset(): void
     {
+        Queue::fake(); // avoid the delayed CheckNavTransactionStatusJob running inline (sync driver)
+
         $navModule = $this->makeNavModule();
         $this->enableNavModule($this->company, $navModule);
         $this->makeNavCredential($this->company);

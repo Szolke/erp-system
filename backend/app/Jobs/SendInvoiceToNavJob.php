@@ -118,6 +118,12 @@ class SendInvoiceToNavJob implements ShouldQueue
                 'nav_sent_at' => now(),
             ]);
 
+            // The "convenience" verdict check (see docs/nav-logging-audit.md phase 2)
+            // — a single attempt, not rescheduled if it fails. The scheduled
+            // nav:check-submission-status command is the mechanism actually relied
+            // upon to resolve every submission; this just makes the common case fast.
+            CheckNavTransactionStatusJob::dispatch($invoice->id)->delay(now()->addSeconds(60));
+
         } catch (Throwable $e) {
             NavSubmissionLog::create([
                 ...$logBase,

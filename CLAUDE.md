@@ -10,23 +10,31 @@
 
 ## Kommunikáció
 - Magyar nyelven kommunikálj, érthetően; technikai zsargon esetén adj rövid magyarázatot.
-- Mielőtt parancsot futtatsz vagy fájlt módosítasz, írd le röviden, mit és miért csinálsz.
+- A munka elején vázold röviden, mit tervezel; a végén foglald össze, mit csináltál. Az egyes parancsokat/fájlmódosításokat nem kell külön-külön előre bejelentened.
 
-## Lépésenkénti haladás
-- Egy logikai egységnyi módosítás/parancs után állj meg, és kérj visszajelzést, mielőtt továbblépsz.
-- Ha egy feladat több lépésre van bontva a promptban, MINDEN köztes megállásnál állj meg és kérj visszajelzést — akkor is, ha a következő lépés triviálisnak tűnik. Ne csináld végig egyben a több lépésre bontott feladatot; a köztes jóváhagyás a lényeg, nem formalitás.
-- Kockázatos lépések előtt (adatbázis-migráció, konténer törlése, force push, .env módosítás) MINDIG kérj explicit megerősítést.
-- Ha egy parancs hibát ad, ne találgass: kérd el a pontos hibaüzenetet/logot, és csak az alapján javíts.
+## Haladás és megállások
+- Haladj végig a feladaton önállóan. Az apró döntéseket (komponens-tagolás, fájlszervezés, elnevezések) hozd meg magad a kódbázis meglévő mintái alapján, és a munka végén foglald össze, mit választottál.
+- ÁLLJ MEG, ha valódi döntési pont merül fel: több járható út van, a választásnak érdemi következménye van, és nincs egyértelmű precedens a kódbázisban.
+- ÁLLJ MEG, ha ellentmondást találsz a feladatleírás és a tényleges kód között. Ne oldd fel magadtól.
+- Kockázatos lépések előtt MINDIG kérj explicit megerősítést: adatbázis-migráció, `.env` módosítás, konténer törlése, force push.
+- Commit előtt MINDIG állj meg: írd le, mely fájlok kerülnek be és mi lesz a commit üzenet, majd várd meg a jóváhagyást.
+- Ha egy parancs hibát ad, ne találgass: nézd meg a pontos hibaüzenetet/logot, és csak az alapján javíts.
 
 ## Környezet
 - A projekt WSL2 Ubuntu alatt fut, natív Linux fájlrendszeren: `/home/szolke/projects/erp-system`.
 - SOHA ne dolgozz vagy hozz létre fájlokat a `/mnt/c/` vagy Windows-os elérési úton.
 - Docker Compose alapú (`compose.yaml` a gyökérben): `laravel.test`, `pgsql` (PostgreSQL 18), `redis`, frontend szolgáltatások.
+- A compose-projekt a repó GYÖKERÉBŐL fut. A `./vendor/bin/sail` a `backend/` alkönyvtárból nem indul ("Sail is not running") — a gyökérből futtasd, vagy használd a `docker compose exec laravel.test php artisan ...` formát.
 - Backend: http://localhost
 - Frontend: http://localhost:5174
+- git checkout / bisect után mindig `docker compose restart frontend` build vagy teszt előtt (stale bind-mount, l. docs/requirements.md).
 
 ## Adatbázis
 - Minden DB-módosítást migráción keresztül végezz, SOHA kézi SQL-lel a konténerben.
+
+## Tesztelés
+- Backend/unit teszteket futtass le magad; a zöld teszteredmény a commit előfeltétele.
+- A böngészős, end-to-end végigjátszást a FELHASZNÁLÓ végzi manuálisan: a Sanctum SPA session-auth cookie `localhost`-domainhez van kötve, a konténerek belső IP-jéről nem authentikálható. Frontend-változásnál készíts rövid kézi tesztelési listát ahelyett, hogy magad próbálnád végigkattintani.
 
 ## Kódminőség
 - Tiszta, jól kommentezett kód — különösen ott, ahol a magyar számlázási/NAV-specifikus logika nem magától értetődő.
@@ -35,6 +43,7 @@
 - Commit üzenetek angolul, rövidek, tárgyilagosak (pl. "Add company model and migration").
 - NE commitolj és NE pusholj automatikusan anélkül, hogy előtte jeleznéd, mit fogsz commitolni.
 - Force push csak explicit jóváhagyással.
+- Commit előtt ellenőrizd a `git status`-t: ha a munkakönyvtárban a feladathoz NEM tartozó módosítás is van, azt zárd ki a commitból, és jelezd.
 - Minden commit-csoport végén a `docs/progress.md` a TÉNYLEGES commit-hasheket kapja (ne "folyamatban" jelzést, ne hiányos hasht). Commit után mutass `git log --oneline`-t megerősítésül, hogy a napló a valós git-állapotot tükrözi.
 
 ## Érzékeny adatok
@@ -51,6 +60,7 @@
 - SimplePay integráció
 - Jelezz, ha egy implementációs döntés ütközne ezekkel az alapelvekkel.
 - Route model bindinget használó új végpontoknál kötelező az `EnforcesCompanyScope` minta (`assertBelongsToCurrentCompany()`) — a binding az `EnsureCompanyContext` middleware előtt fut, a globális scope önmagában nem elegendő. Részletesen: `docs/progress.md` Architekturális konvenciók.
+- Jogosultság-feloldás KÉT úton történik: `Gate::before` (backend `authorize`/`can`) és `PermissionChecker::effectivePermissionKeys()` (`/api/me` → frontend `can()`). Superadmin-szabályt és minden globális jog-kivételt MINDKÉT helyen implementálni kell.
 - Token-auth (külső kliensek / mobil): Sanctum Bearer token (`POST /api/auth/token`) párhuzamosan él a SPA cookie-session authhal; az `auth:sanctum` middleware mindkettőt kezeli. **Új middleware- vagy handler-kód NE hívjon `$request->session()` közvetlenül `$request->hasSession()` guard nélkül** — Bearer token kérésnél Sanctum nem indít session-t, a hívás `RuntimeException`-t dob. Cég-kontextus token-úton: `X-Company-Id` header → (session, ha van) → `users.default_company_id` fallback. Token soha nem jár le — kizárólag `POST /api/auth/token/revoke` érvényteleníti.
 
 ## Bizonytalanság kezelése

@@ -271,6 +271,51 @@ követelménnyel is bír:
 
 Részletek és visszaállítási eljárás: [`docs/backup.md`](backup.md).
 
+### Git checkout és bind-mountok (fejlesztői Docker-környezet)
+
+A `compose.yaml` három host-könyvtárat bind-mountol a futó konténerekbe:
+
+| Host-útvonal | Konténer-útvonal | Konténer |
+|---|---|---|
+| `./backend` | `/var/www/html` | `laravel.test` |
+| `./frontend` | `/app` | `frontend` |
+| `./docs/wiki` | `/app/wiki` | `frontend` |
+
+**A `git checkout` (ág-váltás, adott commit-ra állás, `git bisect`) egy
+bind-mountolt könyvtárat inode-szinten cserélhet** — ha a checkout azt a
+KÖNYVTÁRAT magát törli és hozza létre újra (nem csak a benne lévő fájlokat
+módosítja), a már futó konténer bind-mountja a régi, immár nem létező
+inode-ra mutat tovább. A konténer ezután úgy látja, mintha a könyvtár üres
+vagy nem is létezne — a build/teszt hiányzó fájlokra panaszkodik, miközben a
+hoszton minden a helyén van.
+
+**Konkrét eset (2026-07-20):** a bizonylatlista-export commitok egyenkénti
+visszaellenőrzésekor (`git checkout <hash>`, majd `npm run build` a
+`frontend` konténerben) a build `ENOENT`-tel bukott a `docs/wiki/en/*.md`
+fájlokra — holott azok a hoszton változatlanul megvoltak. Ok: a
+`docs/wiki` egy NESZTELT (nem repó-gyökér-szintű) könyvtár, saját bind-mount
+ponttal — ezt érintette a checkout okozta inode-csere. **Ez NEM kódhiba** —
+`docker compose restart frontend` minden esetben helyreállította a mountot,
+utána a build hibátlanul lefutott.
+
+**Kockázat mértéke útvonalanként:** a `./docs/wiki` mount a leginkább
+érintett (nesztelt alkönyvtár, egy commit-tartományban akár teljesen
+hiányozhat/újra létrejöhet). A `./backend` és `./frontend` mount a repó
+GYÖKÉR-szintű könyvtárait célozza, amik a projekt szinte teljes története
+alatt léteznek — ezért a gyakorlatban ritkábban törnek el egy checkout-tól,
+de a jelenség ugyanúgy elméletileg fennáll bármelyikükre (pl. ha valaha egy,
+a könyvtár létrehozása ELŐTTI commit-ra állnál).
+
+**Szabály:** minden `git checkout`/`git switch`/`git bisect` lépés után,
+MIELŐTT buildet vagy tesztet futtatnál a konténerekben:
+
+```bash
+docker compose restart frontend   # a docs/wiki és frontend mount frissítéséhez
+```
+
+(A `laravel.test`-nél eddig nem figyeltünk meg ilyet, de checkout után
+gyanús hiba esetén ugyanez a `docker compose restart laravel.test` a teendő.)
+
 ---
 
 ## 6. Ami NEM része a rendszernek

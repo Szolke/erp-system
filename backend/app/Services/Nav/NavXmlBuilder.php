@@ -12,13 +12,25 @@ use SimpleXMLElement;
  * Builds a NAV Online Számla 3.0 invoiceData.xsd-conformant SimpleXMLElement
  * from a fully-loaded Invoice model.
  *
- * IMPORTANT — NAV SANDBOX VERIFICATION REQUIRED:
- * The XSD namespaces and element names were derived from the official
- * nav-gov-hu/Online-Invoice repository and the pzs/nav-online-invoice library
- * (v3.0.5, May 2026). The VatExemption case values (AAM, TAM) come from
- * the Hungarian Áfa törvény and common NAV practice; they MUST be verified
- * against the current invoiceData.xsd before submitting to production.
- * Test using the NAV test environment (api-test.onlineszamla.nav.gov.hu).
+ * Element order within each type is checked against the actual bundled schema
+ * (vendor/pzs/nav-online-invoice/src/NavOnlineInvoice/xsd/invoiceData.xsd) —
+ * NOT guessed. Real NAV test-environment submissions caught bugs no prior test
+ * covered (all fixed, each now guarded by NavXmlBuilderTest's schema-validation
+ * tests): lineVatRate belongs inside lineAmountsNormal (2nd child, after
+ * lineNetAmountData), not directly under <line>; invoiceNetAmount/
+ * invoiceVatAmount are direct children of summaryNormal (after the
+ * summaryByVatRate entries) — summaryGrossData is a SIBLING of summaryNormal
+ * that carries only invoiceGrossAmount/invoiceGrossAmountHUF, not net/vat data;
+ * and discountValue is a MonetaryType (the discount's forint amount) while the
+ * percentage belongs in the separate discountRate (RateType, 0-1) — NOT a
+ * "10.00%" string stuffed into discountValue.
+ *
+ * STILL OPEN — NAV SANDBOX VERIFICATION REQUIRED:
+ * the VatExemption `case` element (AAM, TAM, …) is a free-text field in the
+ * XSD (DetailedReasonType — no enumeration to check against), so the XSD
+ * cannot confirm whether these are the NAV-accepted case codes; that is a
+ * business-rule question only NAV's actual acceptance can answer. Test using
+ * the NAV test environment (api-test.onlineszamla.nav.gov.hu).
  */
 class NavXmlBuilder
 {
@@ -136,11 +148,25 @@ class NavXmlBuilder
         $lines->addChild('mergedItemIndicator', 'false');
 
         foreach ($invoice->items as $item) {
+            $exchangeRate = (float) $invoice->exchange_rate;
+            $isHuf = ($invoice->currency === 'HUF');
+
+            // Sorrend a NAV invoiceData.xsd LineType szekvenciája szerint (vendor
+            // pzs/nav-online-invoice xsd/invoiceData.xsd — NEM találgatva):
+            // lineNumber, lineExpressionIndicator, lineDescription, quantity,
+            // unitOfMeasure(+Own), unitPrice(+HUF), lineDiscountData, lineAmountsNormal.
             $line = $lines->addChild('line');
             $line->addChild('lineNumber', (string) ($item->sort_order + 1));
-            $line->addChild('lineDescription', htmlspecialchars($item->description));
 
             $unitMapped = $this->mapUnit(strtolower(trim($item->unit)));
+
+            // Kötelező mező (LineType-ban NINCS minOccurs="0"): true, ha a mennyiségi
+            // egység természetes NAV-mértékegységben (nem 'OWN') fejezhető ki.
+            $line->addChild('lineExpressionIndicator', $unitMapped !== 'OWN' ? 'true' : 'false');
+
+            $line->addChild('lineDescription', htmlspecialchars($item->description));
+            $line->addChild('quantity', rtrim(rtrim(number_format((float) $item->quantity, 10, '.', ''), '0'), '.'));
+
             if ($unitMapped !== 'OWN') {
                 $line->addChild('unitOfMeasure', $unitMapped);
             } else {
@@ -148,26 +174,34 @@ class NavXmlBuilder
                 $line->addChild('unitOfMeasureOwn', htmlspecialchars($item->unit));
             }
 
-            $line->addChild('quantity', rtrim(rtrim(number_format((float) $item->quantity, 10, '.', ''), '0'), '.'));
             $line->addChild('unitPrice', number_format((float) $item->unit_price, 2, '.', ''));
-
-            $lineVatRate = $line->addChild('lineVatRate');
-            $this->addVatRate($lineVatRate, $item->vatRate);
+            $line->addChild('unitPriceHUF', $this->fmtHuf($item->unit_price, $exchangeRate, $isHuf));
 
             if ((float) $item->discount_percent > 0) {
+                // discountValue = MonetaryType (a kedvezmény pénzösszege), discountRate =
+                // RateType (0-1 közötti arány, ugyanaz a formátum, mint a vatPercentage-nál)
+                // — a NAV séma két KÜLÖN mezőt vár, nem egy "10.00%" stringet a
+                // discountValue-ban (ez volt az eredeti hiba). net_amount már a kedvezmény
+                // UTÁNI érték (l. InvoiceService::create()), ezért a kedvezmény pénzben
+                // kifejezett összege quantity×unitPrice − net_amount.
+                $discountAmount = ((float) $item->quantity * (float) $item->unit_price) - (float) $item->net_amount;
+
                 $lineDiscount = $line->addChild('lineDiscountData');
                 $lineDiscount->addChild('discountDescription', 'Engedmény');
-                $lineDiscount->addChild('discountValue', number_format((float) $item->discount_percent, 2, '.', '').'%');
+                $lineDiscount->addChild('discountValue', $this->fmt($discountAmount));
+                $lineDiscount->addChild('discountRate', number_format((float) $item->discount_percent / 100, 4, '.', ''));
             }
-
-            $exchangeRate = (float) $invoice->exchange_rate;
-            $isHuf = ($invoice->currency === 'HUF');
 
             $lineAmounts = $line->addChild('lineAmountsNormal');
 
             $lineNetAmountData = $lineAmounts->addChild('lineNetAmountData');
             $lineNetAmountData->addChild('lineNetAmount', $this->fmt($item->net_amount));
             $lineNetAmountData->addChild('lineNetAmountHUF', $this->fmtHuf($item->net_amount, $exchangeRate, $isHuf));
+
+            // lineVatRate a LineAmountsNormalType MÁSODIK gyermeke — NEM a <line>
+            // önálló, közvetlen gyermeke (ez volt az eredeti sorrendhiba).
+            $lineVatRate = $lineAmounts->addChild('lineVatRate');
+            $this->addVatRate($lineVatRate, $item->vatRate);
 
             $lineVatData = $lineAmounts->addChild('lineVatData');
             $lineVatData->addChild('lineVatAmount', $this->fmt($item->vat_amount));
@@ -213,11 +247,18 @@ class NavXmlBuilder
             $vatRateGrossData->addChild('vatRateGrossAmountHUF', $this->fmtHuf($grossSum, $exchangeRate, $isHuf));
         }
 
+        // invoiceNetAmount/invoiceVatAmount a SummaryNormalType KÖZVETLEN gyermekei
+        // (a summaryByVatRate sorok UTÁN) — NEM egy külön summaryGrossData wrapperben,
+        // ez volt az eredeti hiba. A summaryGrossData egy ÖNÁLLÓ, a summaryNormal-lal
+        // TESTVÉR elem (l. lent), ami kizárólag a bruttó összeget hordozza.
+        $summaryNormal->addChild('invoiceNetAmount', $this->fmt($invoice->net_total));
+        $summaryNormal->addChild('invoiceNetAmountHUF', $this->fmtHuf($invoice->net_total, $exchangeRate, $isHuf));
+        $summaryNormal->addChild('invoiceVatAmount', $this->fmt($invoice->vat_total));
+        $summaryNormal->addChild('invoiceVatAmountHUF', $this->fmtHuf($invoice->vat_total, $exchangeRate, $isHuf));
+
         $summaryGrossData = $summary->addChild('summaryGrossData');
-        $summaryGrossData->addChild('invoiceNetAmount', $this->fmt($invoice->net_total));
-        $summaryGrossData->addChild('invoiceNetAmountHUF', $this->fmtHuf($invoice->net_total, $exchangeRate, $isHuf));
-        $summaryGrossData->addChild('invoiceVatAmount', $this->fmt($invoice->vat_total));
-        $summaryGrossData->addChild('invoiceVatAmountHUF', $this->fmtHuf($invoice->vat_total, $exchangeRate, $isHuf));
+        $summaryGrossData->addChild('invoiceGrossAmount', $this->fmt($invoice->gross_total));
+        $summaryGrossData->addChild('invoiceGrossAmountHUF', $this->fmtHuf($invoice->gross_total, $exchangeRate, $isHuf));
     }
 
     private function addVatRate(SimpleXMLElement $parent, ?VatRate $vatRate): void

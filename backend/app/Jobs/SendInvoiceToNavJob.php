@@ -79,6 +79,21 @@ class SendInvoiceToNavJob implements ShouldQueue
         $attemptNumber = NavSubmissionLog::where('invoice_id', $invoice->id)->count() + 1;
         $requestXml = null;
         $responseXml = null;
+        $transactionId = null;
+
+        // Common fields for the nav_submission_logs row, filled on BOTH the success
+        // and the error branch below — reconstructing a failed submission requires
+        // knowing the company/operation/environment even when it never got a
+        // transactionId back. company_id comes from the invoice, not CurrentCompany
+        // (queue context — see NavSubmissionLog docblock).
+        $logBase = [
+            'invoice_id' => $invoice->id,
+            'company_id' => $invoice->company_id,
+            'attempt_number' => $attemptNumber,
+            'operation' => 'manageInvoice',
+            'invoice_operation' => $this->operation,
+            'environment' => $credential->environment->value,
+        ];
 
         try {
             $xmlElement = $xmlBuilder->build($invoice);
@@ -90,8 +105,8 @@ class SendInvoiceToNavJob implements ShouldQueue
             $responseXml = 'transactionId: '.$transactionId;
 
             NavSubmissionLog::create([
-                'invoice_id' => $invoice->id,
-                'attempt_number' => $attemptNumber,
+                ...$logBase,
+                'transaction_id' => $transactionId,
                 'request_xml' => $requestXml,
                 'response_xml' => $responseXml,
                 'status' => 'success',
@@ -105,8 +120,8 @@ class SendInvoiceToNavJob implements ShouldQueue
 
         } catch (Throwable $e) {
             NavSubmissionLog::create([
-                'invoice_id' => $invoice->id,
-                'attempt_number' => $attemptNumber,
+                ...$logBase,
+                'transaction_id' => $transactionId,
                 'request_xml' => $requestXml,
                 'response_xml' => $responseXml,
                 'status' => 'error',

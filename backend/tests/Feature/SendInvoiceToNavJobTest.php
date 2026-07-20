@@ -6,6 +6,7 @@ use App\Enums\DocumentType;
 use App\Enums\InvoiceStatus;
 use App\Enums\NavEnvironment;
 use App\Enums\NavStatus;
+use App\Enums\NavSubmissionStatus;
 use App\Enums\PaymentStatus;
 use App\Jobs\SendInvoiceToNavJob;
 use App\Models\Company;
@@ -13,6 +14,7 @@ use App\Models\CompanyNavCredential;
 use App\Models\DocumentSeries;
 use App\Models\Invoice;
 use App\Models\Module;
+use App\Models\NavSubmissionLog;
 use App\Models\Partner;
 use App\Models\PaymentMethod;
 use App\Models\User;
@@ -202,6 +204,130 @@ class SendInvoiceToNavJobTest extends TestCase
         $this->assertNotNull($this->invoice->nav_sent_at);
     }
 
+    // ─── Test 3b: sikeres ág — nav_submission_logs mezők helyesen kitöltve ───
+
+    public function test_job_records_submission_log_fields_on_success(): void
+    {
+        $navModule = $this->makeNavModule();
+        $this->enableNavModule($this->company, $navModule);
+        $this->makeNavCredential($this->company);
+
+        $xmlElement = new \SimpleXMLElement('<root/>');
+        $this->mock(NavXmlBuilder::class)
+            ->shouldReceive('build')
+            ->once()
+            ->andReturn($xmlElement);
+
+        $mockReporter = \Mockery::mock(Reporter::class);
+        $mockReporter->shouldReceive('manageInvoice')
+            ->once()
+            ->with($xmlElement, 'CREATE')
+            ->andReturn('TEST-TRX-002');
+
+        $this->mock(NavReporterFactory::class)
+            ->shouldReceive('make')
+            ->once()
+            ->andReturn($mockReporter);
+
+        $job = new SendInvoiceToNavJob($this->invoice->id, 'CREATE');
+        app()->call([$job, 'handle']);
+
+        $log = NavSubmissionLog::where('invoice_id', $this->invoice->id)->firstOrFail();
+        $this->assertSame($this->company->id, $log->company_id);
+        $this->assertSame('manageInvoice', $log->operation);
+        $this->assertSame('CREATE', $log->invoice_operation);
+        $this->assertSame('test', $log->environment);
+        $this->assertSame('TEST-TRX-002', $log->transaction_id);
+        $this->assertSame(NavSubmissionStatus::Success, $log->status);
+    }
+
+    // ─── Test 3c: hibaág — company_id/operation/invoice_operation is kitöltött,
+    //     transaction_id null marad (nem jött vissza NAV-tól) ──────────────────
+
+    public function test_job_records_submission_log_fields_on_error(): void
+    {
+        $navModule = $this->makeNavModule();
+        $this->enableNavModule($this->company, $navModule);
+        $this->makeNavCredential($this->company);
+
+        $xmlElement = new \SimpleXMLElement('<root/>');
+        $this->mock(NavXmlBuilder::class)
+            ->shouldReceive('build')
+            ->once()
+            ->andReturn($xmlElement);
+
+        $mockReporter = \Mockery::mock(Reporter::class);
+        $mockReporter->shouldReceive('manageInvoice')
+            ->once()
+            ->with($xmlElement, 'CREATE')
+            ->andThrow(new \Exception('NAV rejected the submission'));
+
+        $this->mock(NavReporterFactory::class)
+            ->shouldReceive('make')
+            ->once()
+            ->andReturn($mockReporter);
+
+        $job = new SendInvoiceToNavJob($this->invoice->id, 'CREATE');
+
+        try {
+            app()->call([$job, 'handle']);
+            $this->fail('A jobnak újra kellett volna dobnia a kivételt a queue-retry miatt.');
+        } catch (\Exception $e) {
+            $this->assertSame('NAV rejected the submission', $e->getMessage());
+        }
+
+        $this->invoice->refresh();
+        $this->assertSame(NavStatus::Error, $this->invoice->nav_status);
+
+        $log = NavSubmissionLog::where('invoice_id', $this->invoice->id)->firstOrFail();
+        $this->assertSame($this->company->id, $log->company_id);
+        $this->assertSame('manageInvoice', $log->operation);
+        $this->assertSame('CREATE', $log->invoice_operation);
+        $this->assertSame('test', $log->environment);
+        $this->assertNull($log->transaction_id);
+        $this->assertSame(NavSubmissionStatus::Error, $log->status);
+        $this->assertSame('NAV rejected the submission', $log->error_message);
+    }
+
+    // ─── Test 3d: invoice_operation a DISPATCH-paramétert tükrözi, nem a számla
+    //     jelenlegi állapotából (pl. storno_of_invoice_id) levezetett értéket ──
+
+    public function test_job_records_invoice_operation_from_dispatch_argument_not_invoice_state(): void
+    {
+        $this->assertNull(
+            $this->invoice->storno_of_invoice_id,
+            'Az invoice szándékosan NEM sztornó — a teszt épp azt bizonyítja, hogy az '
+            .'invoice_operation a job dispatch-paraméteréből jön, nem a számla állapotából.'
+        );
+
+        $navModule = $this->makeNavModule();
+        $this->enableNavModule($this->company, $navModule);
+        $this->makeNavCredential($this->company);
+
+        $xmlElement = new \SimpleXMLElement('<root/>');
+        $this->mock(NavXmlBuilder::class)
+            ->shouldReceive('build')
+            ->once()
+            ->andReturn($xmlElement);
+
+        $mockReporter = \Mockery::mock(Reporter::class);
+        $mockReporter->shouldReceive('manageInvoice')
+            ->once()
+            ->with($xmlElement, 'STORNO')
+            ->andReturn('TEST-TRX-004');
+
+        $this->mock(NavReporterFactory::class)
+            ->shouldReceive('make')
+            ->once()
+            ->andReturn($mockReporter);
+
+        $job = new SendInvoiceToNavJob($this->invoice->id, 'STORNO');
+        app()->call([$job, 'handle']);
+
+        $log = NavSubmissionLog::where('invoice_id', $this->invoice->id)->firstOrFail();
+        $this->assertSame('STORNO', $log->invoice_operation);
+    }
+
     // ─── Test 4: multi-tenant — a job az invoice company_id-jét használja ────
     //
     // Ha a job véletlenül a CurrentCompany singletonból olvasna (ami HTTP-kéréshez
@@ -242,6 +368,42 @@ class SendInvoiceToNavJobTest extends TestCase
             $this->invoice->nav_status,
             'A job companyB modul-állapotát kell hogy vizsgálja (NAV OFF), nem a CurrentCompany-ét (NAV ON)'
         );
+    }
+
+    // ─── Test 4b: nav_submission_logs.company_id akkor is a SZÁMLA cégét kapja,
+    //     ha a CurrentCompany singleton EGYÁLTALÁN nincs beállítva (nem csak
+    //     máshova mutat, mint Test 4-ben) — ez a valódi queue-worker indulási
+    //     állapot, ahol az EnsureCompanyContext middleware sosem futott le.
+
+    public function test_job_writes_log_company_id_from_invoice_when_current_company_is_unset(): void
+    {
+        $navModule = $this->makeNavModule();
+        $this->enableNavModule($this->company, $navModule);
+        $this->makeNavCredential($this->company);
+
+        app(CurrentCompany::class)->clear();
+
+        $xmlElement = new \SimpleXMLElement('<root/>');
+        $this->mock(NavXmlBuilder::class)
+            ->shouldReceive('build')
+            ->once()
+            ->andReturn($xmlElement);
+
+        $mockReporter = \Mockery::mock(Reporter::class);
+        $mockReporter->shouldReceive('manageInvoice')
+            ->once()
+            ->andReturn('TEST-TRX-003');
+
+        $this->mock(NavReporterFactory::class)
+            ->shouldReceive('make')
+            ->once()
+            ->andReturn($mockReporter);
+
+        $job = new SendInvoiceToNavJob($this->invoice->id, 'CREATE');
+        app()->call([$job, 'handle']);
+
+        $log = NavSubmissionLog::where('invoice_id', $this->invoice->id)->firstOrFail();
+        $this->assertSame($this->company->id, $log->company_id);
     }
 
     // ─── Test 5: NAV modul ON + credential INAKTÍV → NotApplicable + warning ──

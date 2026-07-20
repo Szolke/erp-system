@@ -1,14 +1,14 @@
-name: 'Audit napló'
+name: 'API tesztelő'
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/audit-logs
+    uri: api/api-tester/openapi
     metadata:
       custom: []
-      groupName: 'Audit napló'
+      groupName: 'API tesztelő'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''

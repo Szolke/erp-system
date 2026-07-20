@@ -37,6 +37,27 @@ export function AssetStatusBadge({ status }) {
   return <span className={`badge badge-asset-${status}`}>{label[status] ?? status}</span>
 }
 
+/**
+ * `invoice.nav_status` — a NAV-verdikt, NEM a beküldés-hívás kimenetele (l.
+ * NavSubmissionLog.status, ami külön mező). A `needs_attention` szándékosan
+ * NEM ugyanaz a szín, mint a `rejected` — az emberi beavatkozást igénylő,
+ * lejárt-verdiktű eset más jellegű probléma, mint egy NAV-elutasítás.
+ */
+export function NavStatusBadge({ status }) {
+  const { t } = useTranslation()
+  const label = {
+    not_applicable: t('navlog.status_not_applicable'),
+    pending: t('navlog.status_pending'),
+    sent: t('navlog.status_sent'),
+    confirmed: t('navlog.status_confirmed'),
+    confirmed_with_warnings: t('navlog.status_confirmed_with_warnings'),
+    rejected: t('navlog.status_rejected'),
+    needs_attention: t('navlog.status_needs_attention'),
+    error: t('navlog.status_error'),
+  }
+  return <span className={`badge badge-nav-${status}`}>{label[status] ?? status}</span>
+}
+
 export function DocumentTypeBadge({ type }) {
   const { t } = useTranslation()
   const label = {

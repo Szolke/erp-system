@@ -1,19 +1,39 @@
-name: Termékek
-description: ''
+name: 'NAV napló'
+description: |-
+
+  Read-only nézetek a nav_submission_logs táblára — l. docs/nav-logging-audit.md
+  (1-2. fázis: a napló eddig csak íródott, ez a fázis teszi visszaolvashatóvá).
+  A NavSubmissionLog modellen szándékosan NINCS BelongsToCompany trait (l. a
+  modell kommentje) — minden lekérdezés a scopeForCompany()-n vagy explicit
+  assertBelongsToCurrentCompany()-n át megy, sosem globális scope-ra hagyatkozva.
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/products
+    uri: api/nav-submissions
     metadata:
       custom: []
-      groupName: Termékek
-      groupDescription: ''
+      groupName: 'NAV napló'
+      groupDescription: |-
+
+        Read-only nézetek a nav_submission_logs táblára — l. docs/nav-logging-audit.md
+        (1-2. fázis: a napló eddig csak íródott, ez a fázis teszi visszaolvashatóvá).
+        A NavSubmissionLog modellen szándékosan NINCS BelongsToCompany trait (l. a
+        modell kommentje) — minden lekérdezés a scopeForCompany()-n vagy explicit
+        assertBelongsToCurrentCompany()-n át megy, sosem globális scope-ra hagyatkozva.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: |-
+        Cégszintű beküldés-lista — ALAPÉRTELMEZETTEN a hibás/elutasított/beavatkozást
+        igénylő számlák beküldéseire szűrve (?status=errors, az alapértelmezett) —
+        ez a napló egész célja: a hibás/függő halmaz mérete a monitorozható mutató.
+      description: |-
+        ?status=pending a verdiktre váró beküldések, bármi más (pl. ?status=all) a
+        teljes napló. A szűrés a KAPCSOLÓDÓ SZÁMLA jelenlegi nav_status-án fut, nem
+        az egyes napló-sor saját (történeti) status/processing_result mezőjén — így
+        egy időközben sikerrel lezárt számla korábbi hibás kísérlete nem tartja
+        tévesen a "hibás" listán.
       authenticated: true
       deprecated: false
     headers:
@@ -35,165 +55,8 @@ endpoints:
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
+          vary: Origin
         description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/products
-    metadata:
-      custom: []
-      groupName: Termékek
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: ''
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      sku:
-        custom: []
-        name: sku
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: b
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      name:
-        custom: []
-        name: name
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: 'n'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      description:
-        custom: []
-        name: description
-        description: ''
-        required: false
-        example: 'Eius et animi quos velit et.'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      unit:
-        custom: []
-        name: unit
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: v
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      type:
-        custom: []
-        name: type
-        description: ''
-        required: true
-        example: service
-        type: string
-        enumValues:
-          - product
-          - service
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      vat_rate_id:
-        custom: []
-        name: vat_rate_id
-        description: 'Must match an existing stored value.'
-        required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      base_price:
-        custom: []
-        name: base_price
-        description: 'Must be at least 0.'
-        required: true
-        example: 39
-        type: number
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      base_currency:
-        custom: []
-        name: base_currency
-        description: 'Must be 3 characters.'
-        required: true
-        example: gzm
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      is_active:
-        custom: []
-        name: is_active
-        description: ''
-        required: false
-        example: false
-        type: boolean
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      custom_fields:
-        custom: []
-        name: custom_fields
-        description: ''
-        required: false
-        example: null
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-    cleanBodyParameters:
-      sku: b
-      name: 'n'
-      description: 'Eius et animi quos velit et.'
-      unit: v
-      type: service
-      vat_rate_id: 16
-      base_price: 39
-      base_currency: gzm
-      is_active: false
-    fileParameters: []
-    responses: []
     responseFields: []
     auth:
       - headers
@@ -206,14 +69,20 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: 'api/products/{id}'
+    uri: 'api/nav-submissions/{nav_submission_log}'
     metadata:
       custom: []
-      groupName: Termékek
-      groupDescription: ''
+      groupName: 'NAV napló'
+      groupDescription: |-
+
+        Read-only nézetek a nav_submission_logs táblára — l. docs/nav-logging-audit.md
+        (1-2. fázis: a napló eddig csak íródott, ez a fázis teszi visszaolvashatóvá).
+        A NavSubmissionLog modellen szándékosan NINCS BelongsToCompany trait (l. a
+        modell kommentje) — minden lekérdezés a scopeForCompany()-n vagy explicit
+        assertBelongsToCurrentCompany()-n át megy, sosem globális scope-ra hagyatkozva.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
+      title: 'Egyetlen naplóbejegyzés részletei — EZ adja vissza a request_xml/response_xml-t.'
       description: ''
       authenticated: true
       deprecated: false
@@ -222,19 +91,19 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      id:
+      nav_submission_log:
         custom: []
-        name: id
-        description: 'The ID of the product.'
+        name: nav_submission_log
+        description: ''
         required: true
-        example: 1
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 1
+      nav_submission_log: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -248,8 +117,7 @@ endpoints:
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
+          vary: Origin
         description: null
     responseFields: []
     auth:
@@ -262,17 +130,24 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - PUT
-      - PATCH
-    uri: 'api/products/{id}'
+      - GET
+    uri: 'api/invoices/{invoice_id}/nav-submissions'
     metadata:
       custom: []
-      groupName: Termékek
-      groupDescription: ''
+      groupName: 'NAV napló'
+      groupDescription: |-
+
+        Read-only nézetek a nav_submission_logs táblára — l. docs/nav-logging-audit.md
+        (1-2. fázis: a napló eddig csak íródott, ez a fázis teszi visszaolvashatóvá).
+        A NavSubmissionLog modellen szándékosan NINCS BelongsToCompany trait (l. a
+        modell kommentje) — minden lekérdezés a scopeForCompany()-n vagy explicit
+        assertBelongsToCurrentCompany()-n át megy, sosem globális scope-ra hagyatkozva.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Egy adott számla NAV-beküldési előzményei, időrendben — nyers XML nélkül.'
+      description: |-
+        Route model binding az EnsureCompanyContext middleware ELŐTT fut, ezért
+        kötelező az assertBelongsToCurrentCompany().
       authenticated: true
       deprecated: false
     headers:
@@ -280,83 +155,10 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      id:
+      invoice_id:
         custom: []
-        name: id
-        description: 'The ID of the product.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      sku:
-        custom: []
-        name: sku
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: b
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      name:
-        custom: []
-        name: name
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: 'n'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      description:
-        custom: []
-        name: description
-        description: ''
-        required: false
-        example: 'Eius et animi quos velit et.'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      unit:
-        custom: []
-        name: unit
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: v
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      type:
-        custom: []
-        name: type
-        description: ''
-        required: true
-        example: service
-        type: string
-        enumValues:
-          - product
-          - service
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      vat_rate_id:
-        custom: []
-        name: vat_rate_id
-        description: 'Must match an existing stored value.'
+        name: invoice_id
+        description: 'The ID of the invoice.'
         required: true
         example: 16
         type: integer
@@ -364,109 +166,23 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      base_price:
-        custom: []
-        name: base_price
-        description: 'Must be at least 0.'
-        required: true
-        example: 39
-        type: number
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      base_currency:
-        custom: []
-        name: base_currency
-        description: 'Must be 3 characters.'
-        required: true
-        example: gzm
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      is_active:
-        custom: []
-        name: is_active
-        description: ''
-        required: false
-        example: true
-        type: boolean
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      custom_fields:
-        custom: []
-        name: custom_fields
-        description: ''
-        required: false
-        example: null
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-    cleanBodyParameters:
-      sku: b
-      name: 'n'
-      description: 'Eius et animi quos velit et.'
-      unit: v
-      type: service
-      vat_rate_id: 16
-      base_price: 39
-      base_currency: gzm
-      is_active: true
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - DELETE
-    uri: 'api/products/{id}'
-    metadata:
-      custom: []
-      groupName: Termékek
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: ''
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      id:
-        custom: []
-        name: id
-        description: 'The ID of the product.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
     cleanUrlParameters:
-      id: 1
+      invoice_id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
-    responses: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
     responseFields: []
     auth:
       - headers

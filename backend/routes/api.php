@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\DocumentSeriesController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\JobPositionController;
+use App\Http\Controllers\Api\NavSubmissionLogController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\SalesGroupController;
 use App\Http\Controllers\Api\PaymentController;
@@ -97,6 +98,9 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
         Route::patch('company/nav/active-environment', [CompanyNavCredentialController::class, 'setActiveEnvironment']);
         Route::put('company/nav/{environment}', [CompanyNavCredentialController::class, 'upsert']);
         Route::delete('company/nav/{environment}', [CompanyNavCredentialController::class, 'destroy']);
+
+        Route::get('nav-submissions', [NavSubmissionLogController::class, 'index']);
+        Route::get('nav-submissions/{nav_submission_log}', [NavSubmissionLogController::class, 'show']);
     });
 
     // SimplePay hitelesítő adatok (devizánként, titkosítva tárolva)
@@ -139,6 +143,9 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::middleware('module:simplepay')->group(function () {
         Route::post('invoices/{invoice}/simplepay', [SimplePayController::class, 'start']);
         Route::post('invoices/{invoice}/simplepay-refund', [SimplePayController::class, 'refund']);
+    });
+    Route::middleware('module:nav')->group(function () {
+        Route::get('invoices/{invoice}/nav-submissions', [NavSubmissionLogController::class, 'forInvoice']);
     });
 
     Route::apiResource('receipts', ReceiptController::class)->only(['index', 'store', 'show']);

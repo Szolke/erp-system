@@ -1,21 +1,27 @@
-name: 'NAV Online Számla'
-description: ''
+name: Cég
+description: |-
+
+  Operates only on the caller's active company (docs/er-model.md tenant
+  model) — there is no index/store/destroy here; creating new companies
+  and onboarding their first user is a separate, not-yet-built flow.
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/company/nav
+    uri: api/companies
     metadata:
       custom: []
-      groupName: 'NAV Online Számla'
-      groupDescription: ''
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
       subgroup: ''
       subgroupDescription: ''
-      title: 'List NAV credentials for the active company, along with the active environment.'
-      description: |-
-        Secret fields (nav_login, nav_password, nav_signing_key, nav_exchange_key) are
-        never returned — only their presence is indicated via has_* boolean flags.
+      title: 'GET /api/companies — az összes cég listája (csak szuperadmin)'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -37,8 +43,7 @@ endpoints:
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
+          vary: Origin
         description: null
     responseFields: []
     auth:
@@ -51,18 +56,20 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - PATCH
-    uri: api/company/nav/active-environment
+      - POST
+    uri: api/companies
     metadata:
       custom: []
-      groupName: 'NAV Online Számla'
-      groupDescription: ''
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Switch the active NAV environment for the company.'
-      description: |-
-        Returns 422 if the target environment has no is_active=true credential
-        (mirrors the job's where('is_active', true) guard — prevents silent NAV silence).
+      title: 'POST /api/companies — új cég létrehozása (csak szuperadmin)'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -74,21 +81,127 @@ endpoints:
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      environment:
+      name:
         custom: []
-        name: environment
-        description: ''
+        name: name
+        description: 'Must not be greater than 255 characters.'
         required: true
-        example: test
+        example: b
         type: string
-        enumValues:
-          - test
-          - production
+        enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
+      tax_number:
+        custom: []
+        name: tax_number
+        description: 'Must match the regex /^\d{8}-\d-\d{2}$/.'
+        required: true
+        example: 64255931-4-23
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      registration_number:
+        custom: []
+        name: registration_number
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      postal_code:
+        custom: []
+        name: postal_code
+        description: 'Must not be greater than 10 characters.'
+        required: false
+        example: aykcmy
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      city:
+        custom: []
+        name: city
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: u
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      address_line:
+        custom: []
+        name: address_line
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      country_code:
+        custom: []
+        name: country_code
+        description: 'Must be 2 characters.'
+        required: false
+        example: pw
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      email:
+        custom: []
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: false
+        example: emelie.baumbach@example.net
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      phone:
+        custom: []
+        name: phone
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: s
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      base_currency:
+        custom: []
+        name: base_currency
+        description: 'Must be 3 characters.'
+        required: false
+        example: itc
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
     cleanBodyParameters:
-      environment: test
+      name: b
+      tax_number: 64255931-4-23
+      registration_number: w
+      postal_code: aykcmy
+      city: u
+      address_line: w
+      country_code: pw
+      email: emelie.baumbach@example.net
+      phone: s
+      base_currency: itc
     fileParameters: []
     responses: []
     responseFields: []
@@ -102,91 +215,217 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - PUT
-    uri: 'api/company/nav/{environment}'
+      - GET
+    uri: api/company
     metadata:
       custom: []
-      groupName: 'NAV Online Számla'
-      groupDescription: ''
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Create or update the NAV credential for a given environment (test|production).'
-      description: |-
-        Secret fields are only overwritten when a non-empty value is sent;
-        on a new record all four secret fields are required.
+      title: ''
+      description: ''
       authenticated: true
       deprecated: false
     headers:
       Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      environment:
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
         custom: []
-        name: environment
-        description: ''
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: api/company
+    metadata:
+      custom: []
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
         required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      tax_number:
+        custom: []
+        name: tax_number
+        description: 'Must match the regex /^\d{8}-\d-\d{2}$/.'
+        required: true
+        example: 64255931-4-23
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      eu_tax_number:
+        custom: []
+        name: eu_tax_number
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      registration_number:
+        custom: []
+        name: registration_number
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: a
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      postal_code:
+        custom: []
+        name: postal_code
+        description: 'Must not be greater than 10 characters.'
+        required: true
+        example: ykcmyu
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      city:
+        custom: []
+        name: city
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      address_line:
+        custom: []
+        name: address_line
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: p
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      country_code:
+        custom: []
+        name: country_code
+        description: 'Must be 2 characters.'
+        required: true
+        example: wl
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      email:
+        custom: []
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: false
+        example: wleuschke@example.net
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      phone:
+        custom: []
+        name: phone
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: s
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      invoice_header_text:
+        custom: []
+        name: invoice_header_text
+        description: ''
+        required: false
         example: architecto
         type: string
         enumValues: []
         exampleWasSpecified: false
-        nullable: false
+        nullable: true
         deprecated: false
-    cleanUrlParameters:
-      environment: architecto
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      nav_tax_number:
+      invoice_footer_text:
         custom: []
-        name: nav_tax_number
-        description: 'Must not be greater than 13 characters.'
+        name: invoice_footer_text
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      base_currency:
+        custom: []
+        name: base_currency
+        description: 'Must be 3 characters.'
         required: true
-        example: bn
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      nav_login:
-        custom: []
-        name: nav_login
-        description: ''
-        required: false
-        example: null
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      nav_password:
-        custom: []
-        name: nav_password
-        description: ''
-        required: false
-        example: null
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      nav_signing_key:
-        custom: []
-        name: nav_signing_key
-        description: ''
-        required: false
-        example: null
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      nav_exchange_key:
-        custom: []
-        name: nav_exchange_key
-        description: ''
-        required: false
-        example: null
+        example: ngz
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -196,17 +435,92 @@ endpoints:
         custom: []
         name: is_active
         description: ''
-        required: true
-        example: true
+        required: false
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
+      group_prefix:
+        custom: []
+        name: group_prefix
+        description: 'Must contain only letters. Must not be greater than 4 characters.'
+        required: false
+        example: miyv
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
     cleanBodyParameters:
-      nav_tax_number: bn
-      is_active: true
+      name: b
+      tax_number: 64255931-4-23
+      eu_tax_number: w
+      registration_number: a
+      postal_code: ykcmyu
+      city: w
+      address_line: p
+      country_code: wl
+      email: wleuschke@example.net
+      phone: s
+      invoice_header_text: architecto
+      invoice_footer_text: architecto
+      base_currency: ngz
+      is_active: false
+      group_prefix: miyv
     fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/company/logo
+    metadata:
+      custom: []
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/company/logo — feltölt egy logót (max 2 MB, jpeg/png/gif/webp)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      logo:
+        custom: []
+        name: logo
+        description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
+    fileParameters:
+      logo: null
     responses: []
     responseFields: []
     auth:
@@ -220,38 +534,27 @@ endpoints:
     custom: []
     httpMethods:
       - DELETE
-    uri: 'api/company/nav/{environment}'
+    uri: api/company/logo
     metadata:
       custom: []
-      groupName: 'NAV Online Számla'
-      groupDescription: ''
+      groupName: Cég
+      groupDescription: |-
+
+        Operates only on the caller's active company (docs/er-model.md tenant
+        model) — there is no index/store/destroy here; creating new companies
+        and onboarding their first user is a separate, not-yet-built flow.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Delete the NAV credential for a given environment.'
-      description: |-
-        Blocked when the target environment is currently the active one:
-        deleting it would leave the job without a usable credential (silent non-send).
-        Switch to the other environment first, then delete.
+      title: 'DELETE /api/company/logo — törli a logót'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
       Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      environment:
-        custom: []
-        name: environment
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      environment: architecto
+    urlParameters: []
+    cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

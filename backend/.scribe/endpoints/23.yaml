@@ -1,15 +1,29 @@
-name: 'Bizonylat sorozatok'
-description: ''
+name: Kimutatások
+description: |-
+
+  Modul kikapcsolt állapotában 403-at ad, NEM 404-et — szándékosan nincs
+  `module:reports` middleware a route-okon (az a meglévő konvenció szerint
+  mindig 404-et adna). Ehelyett a `report.view`/`report.export` kulcsok a
+  ReportsModule::permissions()-ben regisztráltak, és a Gate::before-ban futó
+  ModuleResolver::isAllowed() miatt kikapcsolt modulnál a $this->authorize()
+  hívás magától AuthorizationException-t (403) dob.
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/settings/document-series
+    uri: api/reports/invoices
     metadata:
       custom: []
-      groupName: 'Bizonylat sorozatok'
-      groupDescription: ''
+      groupName: Kimutatások
+      groupDescription: |-
+
+        Modul kikapcsolt állapotában 403-at ad, NEM 404-et — szándékosan nincs
+        `module:reports` middleware a route-okon (az a meglévő konvenció szerint
+        mindig 404-et adna). Ehelyett a `report.view`/`report.export` kulcsok a
+        ReportsModule::permissions()-ben regisztráltak, és a Gate::before-ban futó
+        ModuleResolver::isAllowed() miatt kikapcsolt modulnál a $this->authorize()
+        hívás magától AuthorizationException-t (403) dob.
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -24,8 +38,99 @@ endpoints:
     cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    bodyParameters:
+      from:
+        custom: []
+        name: from
+        description: 'Must match the regex /^\d{4}-\d{2}(-\d{2})?$/.'
+        required: true
+        example: 4255-93
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      to:
+        custom: []
+        name: to
+        description: 'Must match the regex /^\d{4}-\d{2}(-\d{2})?$/.'
+        required: true
+        example: 4255-93
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      date_basis:
+        custom: []
+        name: date_basis
+        description: ''
+        required: false
+        example: fulfillment
+        type: string
+        enumValues:
+          - fulfillment
+          - issue
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      granularity:
+        custom: []
+        name: granularity
+        description: ''
+        required: false
+        example: month
+        type: string
+        enumValues:
+          - month
+          - day
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      partner_id:
+        custom: []
+        name: partner_id
+        description: 'Must match an existing stored value.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: false
+        example: open
+        type: string
+        enumValues:
+          - open
+          - partial
+          - paid
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      include_receipts:
+        custom: []
+        name: include_receipts
+        description: ''
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      from: 4255-93
+      to: 4255-93
+      date_basis: fulfillment
+      granularity: month
+      partner_id: 16
+      status: open
+      include_receipts: false
     fileParameters: []
     responses:
       -
@@ -35,8 +140,7 @@ endpoints:
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
+          vary: Origin
         description: null
     responseFields: []
     auth:
@@ -49,12 +153,19 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - PUT
-    uri: 'api/settings/document-series/{documentSeries_id}'
+      - GET
+    uri: api/reports/products
     metadata:
       custom: []
-      groupName: 'Bizonylat sorozatok'
-      groupDescription: ''
+      groupName: Kimutatások
+      groupDescription: |-
+
+        Modul kikapcsolt állapotában 403-at ad, NEM 404-et — szándékosan nincs
+        `module:reports` middleware a route-okon (az a meglévő konvenció szerint
+        mindig 404-et adna). Ehelyett a `report.view`/`report.export` kulcsok a
+        ReportsModule::permissions()-ben regisztráltak, és a Gate::before-ban futó
+        ModuleResolver::isAllowed() miatt kikapcsolt modulnál a $this->authorize()
+        hívás magától AuthorizationException-t (403) dob.
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -65,50 +176,326 @@ endpoints:
       Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      documentSeries_id:
-        custom: []
-        name: documentSeries_id
-        description: 'The ID of the documentSeries.'
-        required: true
-        example: 39
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      documentSeries_id: 39
+    urlParameters: []
+    cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      prefix:
+      from:
         custom: []
-        name: prefix
-        description: 'Must match the regex /^[A-Z0-9]+$/. Must not be greater than 20 characters.'
+        name: from
+        description: 'Must match the regex /^\d{4}-\d{2}(-\d{2})?$/.'
         required: true
-        example: bngzmiyvdljnikhw
+        example: 4255-93
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      reset_yearly:
+      to:
         custom: []
-        name: reset_yearly
-        description: ''
+        name: to
+        description: 'Must match the regex /^\d{4}-\d{2}(-\d{2})?$/.'
         required: true
-        example: true
-        type: boolean
+        example: 4255-93
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
+      date_basis:
+        custom: []
+        name: date_basis
+        description: ''
+        required: false
+        example: issue
+        type: string
+        enumValues:
+          - fulfillment
+          - issue
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      limit:
+        custom: []
+        name: limit
+        description: 'Must be at least 1. Must not be greater than 500.'
+        required: false
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      offset:
+        custom: []
+        name: offset
+        description: 'Must be at least 0.'
+        required: false
+        example: 8
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      order_by:
+        custom: []
+        name: order_by
+        description: ''
+        required: false
+        example: revenue
+        type: string
+        enumValues:
+          - revenue
+          - quantity
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
     cleanBodyParameters:
-      prefix: bngzmiyvdljnikhw
-      reset_yearly: true
+      from: 4255-93
+      to: 4255-93
+      date_basis: issue
+      limit: 17
+      offset: 8
+      order_by: revenue
     fileParameters: []
-    responses: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/reports/receivables-aging
+    metadata:
+      custom: []
+      groupName: Kimutatások
+      groupDescription: |-
+
+        Modul kikapcsolt állapotában 403-at ad, NEM 404-et — szándékosan nincs
+        `module:reports` middleware a route-okon (az a meglévő konvenció szerint
+        mindig 404-et adna). Ehelyett a `report.view`/`report.export` kulcsok a
+        ReportsModule::permissions()-ben regisztráltak, és a Gate::before-ban futó
+        ModuleResolver::isAllowed() miatt kikapcsolt modulnál a $this->authorize()
+        hívás magától AuthorizationException-t (403) dob.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      as_of:
+        custom: []
+        name: as_of
+        description: 'Must be a valid date in the format <code>Y-m-d</code>.'
+        required: false
+        example: '2026-07-20'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      partner_id:
+        custom: []
+        name: partner_id
+        description: 'Must match an existing stored value.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      as_of: '2026-07-20'
+      partner_id: 16
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/reports/vat-summary
+    metadata:
+      custom: []
+      groupName: Kimutatások
+      groupDescription: |-
+
+        Modul kikapcsolt állapotában 403-at ad, NEM 404-et — szándékosan nincs
+        `module:reports` middleware a route-okon (az a meglévő konvenció szerint
+        mindig 404-et adna). Ehelyett a `report.view`/`report.export` kulcsok a
+        ReportsModule::permissions()-ben regisztráltak, és a Gate::before-ban futó
+        ModuleResolver::isAllowed() miatt kikapcsolt modulnál a $this->authorize()
+        hívás magától AuthorizationException-t (403) dob.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      from:
+        custom: []
+        name: from
+        description: 'Must match the regex /^\d{4}-\d{2}(-\d{2})?$/.'
+        required: true
+        example: 4255-93
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      to:
+        custom: []
+        name: to
+        description: 'Must match the regex /^\d{4}-\d{2}(-\d{2})?$/.'
+        required: true
+        example: 4255-93
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      date_basis:
+        custom: []
+        name: date_basis
+        description: ''
+        required: false
+        example: fulfillment
+        type: string
+        enumValues:
+          - fulfillment
+          - issue
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      from: 4255-93
+      to: 4255-93
+      date_basis: fulfillment
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/reports/{report}/export'
+    metadata:
+      custom: []
+      groupName: Kimutatások
+      groupDescription: |-
+
+        Modul kikapcsolt állapotában 403-at ad, NEM 404-et — szándékosan nincs
+        `module:reports` middleware a route-okon (az a meglévő konvenció szerint
+        mindig 404-et adna). Ehelyett a `report.view`/`report.export` kulcsok a
+        ReportsModule::permissions()-ben regisztráltak, és a Gate::before-ban futó
+        ModuleResolver::isAllowed() miatt kikapcsolt modulnál a $this->authorize()
+        hívás magától AuthorizationException-t (403) dob.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/reports/{report}/export?format=csv — ugyanazok a paraméterek, mint a megfelelő JSON-végpontnál.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      report:
+        custom: []
+        name: report
+        description: 'The report.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      report: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
     responseFields: []
     auth:
       - headers

@@ -1,19 +1,23 @@
-name: 'Cég beállítások'
+name: Modulkezelő
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/company/settings
+    uri: api/modules
     metadata:
       custom: []
-      groupName: 'Cég beállítások'
+      groupName: Modulkezelő
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'GET /api/company/settings — all settings for the active company'
-      description: ''
+      title: 'GET /api/modules — cég modul-listája (is_available=true, sort_order szerint).'
+      description: |-
+        Jogosultság: module.manage (superadmin-only jelenleg).
+        TODO: lazítható, ha egy sima user is lekérdezheti a cége aktív moduljait
+              feltételes UI-elemekhez — ekkor az index() joga csökkenthető, az update()
+              marad module.manage-en.
       authenticated: true
       deprecated: false
     headers:
@@ -35,10 +39,23 @@ endpoints:
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
+          vary: Origin
         description: null
-    responseFields: []
+    responseFields:
+      'data[].settings_route':
+        custom: []
+        name: 'data[].settings_route'
+        description: |-
+          A modul konfigurációs útvonala a
+            frontend routerben (pl. '/company#section-nav'), vagy null ha nincs saját beállítási
+            felülete. Kizárólag navigációs mutató — nem tároló logika.
+        required: false
+        example: null
+        type: string|null
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
     auth:
       - headers
       - Authorization
@@ -49,16 +66,23 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - PUT
-    uri: 'api/company/settings/{key}'
+      - PATCH
+    uri: 'api/modules/{module_key}'
     metadata:
       custom: []
-      groupName: 'Cég beállítások'
+      groupName: Modulkezelő
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'PUT /api/company/settings/{key} — update a single setting'
-      description: ''
+      title: 'PATCH /api/modules/{module} — modul be/kikapcsolása.'
+      description: |-
+        A {module} route-paraméter a modul KEY-je (pl. "nav", "simplepay"), nem az ID —
+        lásd Module::getRouteKeyName(). Így a hívás önmagyarázó és env-független.
+
+        FONTOS: EnforcesCompanyScope::assertBelongsToCurrentCompany() NEM alkalmazható,
+        mert a Module globális katalógus — nincs company_id mező. A cég-kontextust az
+        EnsureCompanyContext middleware tölti fel (CurrentCompany singleton), és a pivot-
+        műveletek erre a companyId-re futnak.
       authenticated: true
       deprecated: false
     headers:
@@ -66,82 +90,35 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      key:
+      module_key:
         custom: []
-        name: key
+        name: module_key
         description: ''
         required: true
-        example: architecto
+        example: invoicing
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      key: architecto
+      module_key: invoicing
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      value:
+      enabled:
         custom: []
-        name: value
+        name: enabled
         description: ''
         required: true
-        example: architecto
-        type: string
+        example: true
+        type: boolean
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      value: architecto
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - DELETE
-    uri: 'api/company/settings/{key}'
-    metadata:
-      custom: []
-      groupName: 'Cég beállítások'
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'DELETE /api/company/settings/{key} — reset to default'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      key:
-        custom: []
-        name: key
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      key: architecto
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+      enabled: true
     fileParameters: []
     responses: []
     responseFields: []

@@ -1,14 +1,58 @@
-name: 'SimplePay fizetés'
+name: 'Bizonylat sorozatok'
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: 'api/invoices/{invoice_id}/simplepay'
+      - GET
+    uri: api/settings/document-series
     metadata:
       custom: []
-      groupName: 'SimplePay fizetés'
+      groupName: 'Bizonylat sorozatok'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/settings/document-series/{documentSeries_id}'
+    metadata:
+      custom: []
+      groupName: 'Bizonylat sorozatok'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
@@ -21,73 +65,47 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      invoice_id:
+      documentSeries_id:
         custom: []
-        name: invoice_id
-        description: 'The ID of the invoice.'
+        name: documentSeries_id
+        description: 'The ID of the documentSeries.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      invoice_id: 16
+      documentSeries_id: 1
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: 'api/invoices/{invoice_id}/simplepay-refund'
-    metadata:
-      custom: []
-      groupName: 'SimplePay fizetés'
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Initiate a SimplePay refund and trigger the invoice storno chain.'
-      description: |-
-        Refunds are synchronous: if SimplePay accepts the request, we
-        immediately mark the transaction as refunded and cancel the invoice.
-        No IPN is expected for refunds (VERIFY against sandbox before production).
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      invoice_id:
+    bodyParameters:
+      prefix:
         custom: []
-        name: invoice_id
-        description: 'The ID of the invoice.'
+        name: prefix
+        description: 'Must match the regex /^[A-Z0-9]+$/. Must not be greater than 20 characters.'
         required: true
-        example: 16
-        type: integer
+        example: bngzmiyvdljnikhw
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-    cleanUrlParameters:
-      invoice_id: 16
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+      reset_yearly:
+        custom: []
+        name: reset_yearly
+        description: ''
+        required: true
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      prefix: bngzmiyvdljnikhw
+      reset_yearly: false
     fileParameters: []
     responses: []
     responseFields: []

@@ -15,6 +15,7 @@ import ProductListPage from './pages/products/ProductListPage'
 import ProductFormPage from './pages/products/ProductFormPage'
 import CompanyPage from './pages/CompanyPage'
 import AuditLogPage from './pages/AuditLogPage'
+import NavSubmissionsPage from './pages/NavSubmissionsPage'
 import UserListPage from './pages/users/UserListPage'
 import UserDetailPage from './pages/users/UserDetailPage'
 import GroupListPage from './pages/groups/GroupListPage'
@@ -63,6 +64,7 @@ export default function App() {
           <Route path="products/:id/edit" element={<ProductFormPage />} />
           <Route path="company" element={<CompanyPage />} />
           <Route path="audit-logs" element={<AuditLogPage />} />
+          <Route path="nav-submissions" element={<NavSubmissionsPage />} />
           <Route path="users" element={<UserListPage />} />
           <Route path="users/:id" element={<UserDetailPage />} />
           <Route path="groups" element={<GroupListPage />} />

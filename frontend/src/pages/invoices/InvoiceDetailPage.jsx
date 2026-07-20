@@ -5,6 +5,7 @@ import client from '../../api/client'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { PaymentStatusBadge, InvoiceStatusBadge } from '../../components/StatusBadge'
+import NavSubmissionHistoryPanel from '../../components/nav/NavSubmissionHistoryPanel'
 
 const todayStr = () => new Date().toISOString().split('T')[0]
 
@@ -281,6 +282,8 @@ export default function InvoiceDetailPage() {
           </form>
         )}
       </div>
+
+      {can('nav.log.view') && <NavSubmissionHistoryPanel invoiceId={invoice.id} />}
     </div>
   )
 }

@@ -1,23 +1,15 @@
-name: Számlák
-description: |-
-
-  Invoices are immutable once issued — there is no update endpoint.
-  Cancellation is handled by the dedicated 'cancel' action which creates
-  a storno (credit note) document via InvoiceService::cancel().
+name: Eszközök
+description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/invoices
+    uri: api/assets
     metadata:
       custom: []
-      groupName: Számlák
-      groupDescription: |-
-
-        Invoices are immutable once issued — there is no update endpoint.
-        Cancellation is handled by the dedicated 'cancel' action which creates
-        a storno (credit note) document via InvoiceService::cancel().
+      groupName: Eszközök
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -43,8 +35,7 @@ endpoints:
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
+          vary: Origin
         description: null
     responseFields: []
     auth:
@@ -58,15 +49,11 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/invoices
+    uri: api/assets
     metadata:
       custom: []
-      groupName: Számlák
-      groupDescription: |-
-
-        Invoices are immutable once issued — there is no update endpoint.
-        Cancellation is handled by the dedicated 'cancel' action which creates
-        a storno (credit note) document via InvoiceService::cancel().
+      groupName: Eszközök
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -82,201 +69,59 @@ endpoints:
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      partner_id:
+      serial_number:
         custom: []
-        name: partner_id
-        description: 'Must match an existing stored value.'
+        name: serial_number
+        description: 'Must not be greater than 255 characters.'
         required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      payment_method_id:
-        custom: []
-        name: payment_method_id
-        description: 'Must match an existing stored value.'
-        required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      issue_date:
-        custom: []
-        name: issue_date
-        description: 'Must be a valid date.'
-        required: true
-        example: '2026-07-17T10:38:42'
+        example: b
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      fulfillment_date:
+      imei:
         custom: []
-        name: fulfillment_date
-        description: 'Must be a valid date.'
-        required: true
-        example: '2026-07-17T10:38:42'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      due_date:
-        custom: []
-        name: due_date
-        description: 'Must be a valid date. Must be a date after or equal to <code>issue_date</code>.'
-        required: true
-        example: '2052-08-09'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      currency:
-        custom: []
-        name: currency
-        description: 'Must be 3 characters.'
-        required: true
-        example: ngz
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      exchange_rate:
-        custom: []
-        name: exchange_rate
-        description: 'Must be at least 0.000001.'
+        name: imei
+        description: 'Must not be greater than 255 characters.'
         required: false
-        example: 77
-        type: number
+        example: 'n'
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
-      notes:
+      asset_type_id:
         custom: []
-        name: notes
+        name: asset_type_id
+        description: ''
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      status:
+        custom: []
+        name: status
         description: ''
         required: false
-        example: architecto
+        example: active
         type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      items:
-        custom: []
-        name: items
-        description: 'Must have at least 1 items.'
-        required: true
-        example:
-          - []
-        type: 'object[]'
-        enumValues: []
+        enumValues:
+          - active
+          - issued
+          - service
+          - scrapped
         exampleWasSpecified: false
         nullable: false
-        deprecated: false
-      'items[].product_id':
-        custom: []
-        name: 'items[].product_id'
-        description: 'Must match an existing stored value.'
-        required: false
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      'items[].description':
-        custom: []
-        name: 'items[].description'
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: 'Et animi quos velit et fugiat.'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      'items[].quantity':
-        custom: []
-        name: 'items[].quantity'
-        description: 'Must be at least 0.001.'
-        required: true
-        example: 42
-        type: number
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      'items[].unit':
-        custom: []
-        name: 'items[].unit'
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: l
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      'items[].unit_price':
-        custom: []
-        name: 'items[].unit_price'
-        description: 'Must be at least 0.'
-        required: true
-        example: 9
-        type: number
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      'items[].vat_rate_id':
-        custom: []
-        name: 'items[].vat_rate_id'
-        description: 'Must match an existing stored value.'
-        required: true
-        example: 16
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      'items[].discount_percent':
-        custom: []
-        name: 'items[].discount_percent'
-        description: 'Must be at least 0. Must not be greater than 100.'
-        required: false
-        example: 22
-        type: number
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
         deprecated: false
     cleanBodyParameters:
-      partner_id: 16
-      payment_method_id: 16
-      issue_date: '2026-07-17T10:38:42'
-      fulfillment_date: '2026-07-17T10:38:42'
-      due_date: '2052-08-09'
-      currency: ngz
-      exchange_rate: 77
-      notes: architecto
-      items:
-        -
-          product_id: 16
-          description: 'Et animi quos velit et fugiat.'
-          quantity: 42
-          unit: l
-          unit_price: 9
-          vat_rate_id: 16
-          discount_percent: 22
+      serial_number: b
+      imei: 'n'
+      asset_type_id: 16
+      status: active
     fileParameters: []
     responses: []
     responseFields: []
@@ -291,15 +136,11 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: 'api/invoices/{id}'
+    uri: 'api/assets/{id}'
     metadata:
       custom: []
-      groupName: Számlák
-      groupDescription: |-
-
-        Invoices are immutable once issued — there is no update endpoint.
-        Cancellation is handled by the dedicated 'cancel' action which creates
-        a storno (credit note) document via InvoiceService::cancel().
+      groupName: Eszközök
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -314,16 +155,16 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the invoice.'
+        description: 'The ID of the asset.'
         required: true
-        example: 13
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 13
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -337,8 +178,7 @@ endpoints:
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
+          vary: Origin
         description: null
     responseFields: []
     auth:
@@ -351,16 +191,13 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: 'api/invoices/{invoice_id}/cancel'
+      - PUT
+      - PATCH
+    uri: 'api/assets/{id}'
     metadata:
       custom: []
-      groupName: Számlák
-      groupDescription: |-
-
-        Invoices are immutable once issued — there is no update endpoint.
-        Cancellation is handled by the dedicated 'cancel' action which creates
-        a storno (credit note) document via InvoiceService::cancel().
+      groupName: Eszközök
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -372,23 +209,63 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      invoice_id:
+      id:
         custom: []
-        name: invoice_id
-        description: 'The ID of the invoice.'
+        name: id
+        description: 'The ID of the asset.'
         required: true
-        example: 13
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      invoice_id: 13
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    bodyParameters:
+      serial_number:
+        custom: []
+        name: serial_number
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      imei:
+        custom: []
+        name: imei
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: true
+        example: issued
+        type: string
+        enumValues:
+          - active
+          - issued
+          - service
+          - scrapped
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      serial_number: b
+      imei: 'n'
+      status: issued
     fileParameters: []
     responses: []
     responseFields: []
@@ -402,19 +279,15 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - GET
-    uri: 'api/invoices/{invoice_id}/pdf'
+      - DELETE
+    uri: 'api/assets/{id}'
     metadata:
       custom: []
-      groupName: Számlák
-      groupDescription: |-
-
-        Invoices are immutable once issued — there is no update endpoint.
-        Cancellation is handled by the dedicated 'cancel' action which creates
-        a storno (credit note) document via InvoiceService::cancel().
+      groupName: Eszközök
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'GET /api/invoices/{invoice}/pdf — archivált vagy on-the-fly PDF letöltés'
+      title: ''
       description: ''
       authenticated: true
       deprecated: false
@@ -423,80 +296,19 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      invoice_id:
+      id:
         custom: []
-        name: invoice_id
-        description: 'The ID of the invoice.'
+        name: id
+        description: 'The ID of the asset.'
         required: true
-        example: 13
+        example: 16
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      invoice_id: 13
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 401
-        content: '{"message":"Unauthenticated."}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
-        description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: 'api/invoices/{invoice_id}/regenerate-pdf'
-    metadata:
-      custom: []
-      groupName: Számlák
-      groupDescription: |-
-
-        Invoices are immutable once issued — there is no update endpoint.
-        Cancellation is handled by the dedicated 'cancel' action which creates
-        a storno (credit note) document via InvoiceService::cancel().
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'POST /api/invoices/{invoice}/regenerate-pdf — kontrollált PDF újragenerálás'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      invoice_id:
-        custom: []
-        name: invoice_id
-        description: 'The ID of the invoice.'
-        required: true
-        example: 13
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      invoice_id: 13
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

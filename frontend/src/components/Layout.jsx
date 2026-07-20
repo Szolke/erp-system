@@ -10,6 +10,7 @@ import {
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers, Blocks,
   Settings2, ChevronLeft, ChevronRight,
   LogOut, Moon, Sun, Terminal, UsersRound, Boxes, Tags, Briefcase, Globe, BarChart3,
+  AlertTriangle,
 } from 'lucide-react'
 
 export default function Layout() {
@@ -81,6 +82,7 @@ export default function Layout() {
       items: [
         { to: '/settings/modules',         label: 'Modulok',              icon: Blocks,     superadminOnly: true },
         { to: '/audit-logs',               label: t('nav.audit_log'),     icon: ScrollText, perm: 'audit.view' },
+        { to: '/nav-submissions',          label: t('nav.nav_submissions'), icon: AlertTriangle, perm: 'nav.log.view' },
         { to: '/settings/custom-fields',   label: t('nav.custom_fields'), icon: Sliders,    perm: 'company.manage' },
         { to: '/settings/api-tester',      label: t('nav.api_tester'),    icon: Terminal,   perm: 'api_tester.use' },
       ],

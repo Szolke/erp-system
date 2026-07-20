@@ -444,3 +444,60 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .aging-card.aging--danger, td.aging--danger { color: var(--color-danger); }
 .aging-card.aging--danger-strong, td.aging--danger-strong { color: var(--color-danger); font-weight: 700; }
 .aging-card.aging--warn-strong, .aging-card.aging--danger, .aging-card.aging--danger-strong { border-left: 4px solid currentColor; }
+
+/* NAV beküldés-napló (3. fázis) — l. docs/nav-logging-audit.md.
+   nav_status badge-ek: a needs_attention SZÁNDÉKOSAN nem ugyanaz a szín, mint
+   a rejected — emberi beavatkozást igénylő, más jellegű probléma. */
+.badge-nav-not_applicable { background: var(--color-surface-alt); color: var(--color-muted); }
+.badge-nav-pending { background: var(--color-surface-alt); color: var(--color-muted); }
+.badge-nav-sent { background: var(--color-accent-bg); color: var(--color-accent-text); }
+.badge-nav-confirmed { background: var(--color-success-bg); color: var(--color-success-text); }
+.badge-nav-confirmed_with_warnings { background: var(--color-warning-bg); color: var(--color-warning); }
+.badge-nav-rejected { background: var(--color-danger-bg); color: var(--color-danger); }
+.badge-nav-needs_attention { background: var(--color-warning); color: #fff; }
+.badge-nav-error { background: var(--color-danger-bg); color: var(--color-danger); }
+
+/* Validációs üzenetek súlyosság szerint — a WARN SOSE piros, elfogadott
+   számlát jelöl (l. NavTransactionStatusChecker). */
+.navlog-messages { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.navlog-message { display: flex; gap: 8px; align-items: baseline; padding: 6px 10px; border-radius: 5px; font-size: 12px; }
+.navlog-message--error { background: var(--color-danger-bg); color: var(--color-danger); }
+.navlog-message--warn { background: var(--color-warning-bg); color: var(--color-warning); }
+.navlog-message--info { background: var(--color-surface-alt); color: var(--color-muted); }
+.navlog-message-severity { font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: .04em; flex-shrink: 0; }
+.navlog-message-code { font-family: monospace; flex-shrink: 0; opacity: .8; }
+.navlog-message-text { color: var(--color-text); }
+
+/* Egyetlen napló-bejegyzés részletei (kérésre betöltve) */
+.navlog-detail { padding: 12px 0 4px; }
+.navlog-detail-meta { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.navlog-detail-state { padding: 10px 0; }
+.navlog-xml-block { margin-top: 10px; border: 1px solid var(--color-border); border-radius: 6px; padding: 8px 10px; }
+.navlog-xml-block summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--color-muted); text-transform: uppercase; letter-spacing: .04em; }
+.navlog-xml-toolbar { display: flex; justify-content: flex-end; margin-top: 6px; }
+.navlog-xml-pre { margin: 6px 0 0; max-height: 320px; overflow: auto; background: var(--color-surface-alt); border-radius: 4px; padding: 10px; font-family: monospace; font-size: 11px; white-space: pre-wrap; word-break: break-word; }
+.navlog-copy-btn { display: inline-flex; align-items: center; gap: 4px; }
+
+/* Számla-részletező panel — időrendi lista */
+.navlog-timeline { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
+.navlog-timeline-item { border-bottom: 1px solid var(--color-border); }
+.navlog-timeline-item:last-child { border-bottom: none; }
+.navlog-timeline-row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 4px; background: none; border: none; cursor: pointer; text-align: left; color: var(--color-text); font-size: 13px; }
+.navlog-timeline-row:hover { background: var(--color-surface-alt); }
+.navlog-timeline-time { flex: 0 0 140px; color: var(--color-muted); font-size: 12px; }
+.navlog-timeline-op { flex: 0 0 140px; }
+.navlog-timeline-trx { flex: 1 1 auto; font-family: monospace; font-size: 11px; text-align: right; }
+.navlog-timeline-detail { padding: 0 4px 12px 30px; }
+.navlog-outcome { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+.navlog-outcome--success { background: var(--color-surface-alt); color: var(--color-muted); }
+.navlog-outcome--error { background: var(--color-danger-bg); color: var(--color-danger); }
+
+/* processing_result — a SAVED/RECEIVED/PROCESSING KÖZTES, sose "lezárva" stílus */
+.navlog-pr { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+.navlog-pr--pending { background: var(--color-surface-alt); color: var(--color-muted); }
+.navlog-pr--done { background: var(--color-success-bg); color: var(--color-success-text); }
+.navlog-pr--aborted { background: var(--color-danger-bg); color: var(--color-danger); }
+
+/* Önálló beküldés-lista — NeedsAttention sor kiemelve, elkülönítve a sima elutasítástól */
+.navlog-row--needs-attention { background: var(--color-warning-bg); }
+.navlog-attention-hint { display: inline-flex; color: var(--color-warning); cursor: help; margin-left: 6px; vertical-align: middle; }

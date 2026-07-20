@@ -16,7 +16,8 @@ class NavModule extends ModuleDescriptor
 
     // 'invoice.send_nav' is the canonical DB key; the prefix does NOT imply ownership —
     // the descriptor explicitly claims this key to gate it under the nav module.
-    public function permissions(): array { return ['invoice.send_nav', 'nav.view_log']; }
+    // 'nav.log.view' is deliberately separate from 'nav.view_log' — see PermissionSeeder.
+    public function permissions(): array { return ['invoice.send_nav', 'nav.view_log', 'nav.log.view']; }
 
     public function settingsRoute(): ?string { return '/company#section-nav'; }
 

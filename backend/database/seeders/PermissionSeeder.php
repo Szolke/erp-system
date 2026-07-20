@@ -62,6 +62,11 @@ class PermissionSeeder extends Seeder
 
             // NAV module permissions (nav module must be enabled for these to be accessible).
             ['key' => 'nav.view_log', 'module' => 'nav', 'description' => 'NAV beküldési napló megtekintése', 'is_sensitive' => false],
+            // Deliberately separate from nav.view_log (Dashboard-widget-szintű, csak
+            // összesített error_count/last_sent_at) — ez a RÉSZLETES napló (nyers
+            // request/response XML, NAV-válaszok) elérését védi, érzékenyebb, mint
+            // maga a számla megtekintése.
+            ['key' => 'nav.log.view', 'module' => 'nav', 'description' => 'NAV beküldési napló RÉSZLETES megtekintése (nyers XML, NAV-válaszok)', 'is_sensitive' => true],
 
             // SimplePay module permissions (simplepay module must be enabled).
             ['key' => 'simplepay.use', 'module' => 'simplepay', 'description' => 'SimplePay fizetési folyamat indítása', 'is_sensitive' => false],

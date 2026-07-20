@@ -1,15 +1,29 @@
-name: 'API tesztelő'
-description: ''
+name: Munkakörök
+description: |-
+
+  A list végpont NEM igényel job_position.manage jogot — bejelentkezett user
+  cég-kontextusban bárhonnan olvashatja (a user-űrlap selectora is ezt hívja,
+  amit olyan usernek is működnie kell tudnia, akinek nincs munkakör-kezelési
+  joga). A job_position.manage kizárólag az írás-műveleteket kapuzza —
+  ugyanaz a minta, mint a /api/vat-rates és /api/payment-methods katalógus-
+  lekérdezéseknél (routes/api.php).
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/api-tester/openapi
+    uri: api/job-positions
     metadata:
       custom: []
-      groupName: 'API tesztelő'
-      groupDescription: ''
+      groupName: Munkakörök
+      groupDescription: |-
+
+        A list végpont NEM igényel job_position.manage jogot — bejelentkezett user
+        cég-kontextusban bárhonnan olvashatja (a user-űrlap selectora is ezt hívja,
+        amit olyan usernek is működnie kell tudnia, akinek nincs munkakör-kezelési
+        joga). A job_position.manage kizárólag az írás-műveleteket kapuzza —
+        ugyanaz a minta, mint a /api/vat-rates és /api/payment-methods katalógus-
+        lekérdezéseknél (routes/api.php).
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -35,9 +49,243 @@ endpoints:
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
-          access-control-allow-origin: 'http://localhost:5174'
-          access-control-allow-credentials: 'true'
+          vary: Origin
         description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/job-positions
+    metadata:
+      custom: []
+      groupName: Munkakörök
+      groupDescription: |-
+
+        A list végpont NEM igényel job_position.manage jogot — bejelentkezett user
+        cég-kontextusban bárhonnan olvashatja (a user-űrlap selectora is ezt hívja,
+        amit olyan usernek is működnie kell tudnia, akinek nincs munkakör-kezelési
+        joga). A job_position.manage kizárólag az írás-műveleteket kapuzza —
+        ugyanaz a minta, mint a /api/vat-rates és /api/payment-methods katalógus-
+        lekérdezéseknél (routes/api.php).
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      global:
+        custom: []
+        name: global
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      active:
+        custom: []
+        name: active
+        description: ''
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sort_order:
+        custom: []
+        name: sort_order
+        description: 'Must be at least 0.'
+        required: false
+        example: 27
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      global: true
+      active: false
+      sort_order: 27
+      name: 'n'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+      - PATCH
+    uri: 'api/job-positions/{id}'
+    metadata:
+      custom: []
+      groupName: Munkakörök
+      groupDescription: |-
+
+        A list végpont NEM igényel job_position.manage jogot — bejelentkezett user
+        cég-kontextusban bárhonnan olvashatja (a user-űrlap selectora is ezt hívja,
+        amit olyan usernek is működnie kell tudnia, akinek nincs munkakör-kezelési
+        joga). A job_position.manage kizárólag az írás-műveleteket kapuzza —
+        ugyanaz a minta, mint a /api/vat-rates és /api/payment-methods katalógus-
+        lekérdezéseknél (routes/api.php).
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the job position.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      active:
+        custom: []
+        name: active
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sort_order:
+        custom: []
+        name: sort_order
+        description: 'Must be at least 0.'
+        required: false
+        example: 27
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      active: true
+      sort_order: 27
+      name: 'n'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/job-positions/{id}'
+    metadata:
+      custom: []
+      groupName: Munkakörök
+      groupDescription: |-
+
+        A list végpont NEM igényel job_position.manage jogot — bejelentkezett user
+        cég-kontextusban bárhonnan olvashatja (a user-űrlap selectora is ezt hívja,
+        amit olyan usernek is működnie kell tudnia, akinek nincs munkakör-kezelési
+        joga). A job_position.manage kizárólag az írás-műveleteket kapuzza —
+        ugyanaz a minta, mint a /api/vat-rates és /api/payment-methods katalógus-
+        lekérdezéseknél (routes/api.php).
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the job position.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
     responseFields: []
     auth:
       - headers

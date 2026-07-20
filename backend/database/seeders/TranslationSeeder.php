@@ -560,6 +560,69 @@ class TranslationSeeder extends Seeder
             ['reports', 'col_net_base',             'Nettó alap',                           'Net base',                             'Nettobasis'],
             ['reports', 'row_total',                'Mindösszesen',                         'Grand total',                          'Gesamtsumme'],
             ['reports', 'chart_vat_distribution',   'ÁFA-kategóriánkénti megoszlás',        'Distribution by VAT category',        'Verteilung nach USt-Kategorie'],
+
+            // ── NAV beküldés-napló (3. fázis) ─────────────────────────
+            ['nav', 'nav_submissions', 'NAV napló', 'NAV log', 'NAV-Protokoll'],
+
+            ['navlog', 'status_not_applicable',        'Nem alkalmazandó',            'Not applicable',            'Nicht zutreffend'],
+            ['navlog', 'status_pending',                'Beküldésre vár',              'Pending',                   'Ausstehend'],
+            ['navlog', 'status_sent',                   'Beküldve',                    'Sent',                      'Gesendet'],
+            ['navlog', 'status_confirmed',              'Elfogadva',                   'Confirmed',                 'Bestätigt'],
+            ['navlog', 'status_confirmed_with_warnings', 'Elfogadva, figyelmeztetéssel', 'Confirmed, with warnings', 'Bestätigt, mit Warnungen'],
+            ['navlog', 'status_rejected',                'Elutasítva',                  'Rejected',                  'Abgelehnt'],
+            ['navlog', 'status_needs_attention',         'Beavatkozás szükséges',       'Needs attention',           'Handlungsbedarf'],
+            ['navlog', 'status_error',                   'Hiba',                        'Error',                     'Fehler'],
+
+            ['navlog', 'panel_title',        'NAV beküldési előzmények',                       'NAV submission history',                       'NAV-Übermittlungsverlauf'],
+            ['navlog', 'empty_invoice',      'Ehhez a számlához még nem történt NAV-beküldés.', 'No NAV submission has been made for this invoice yet.', 'Für diese Rechnung wurde noch keine NAV-Übermittlung durchgeführt.'],
+            ['navlog', 'load_error',         'Nem sikerült betölteni a NAV-előzményeket.',     'Failed to load the NAV submission history.',    'Der NAV-Übermittlungsverlauf konnte nicht geladen werden.'],
+            ['navlog', 'detail_load_error',  'Nem sikerült betölteni a bejegyzés részleteit.', 'Failed to load the entry details.',             'Die Details des Eintrags konnten nicht geladen werden.'],
+
+            ['navlog', 'op_manage_invoice',  'Beküldés',              'Submission',        'Übermittlung'],
+            ['navlog', 'op_query_status',    'Státusz-lekérdezés',    'Status check',      'Statusabfrage'],
+            ['navlog', 'outcome_success',    'Sikeres hívás',         'Call succeeded',    'Aufruf erfolgreich'],
+            ['navlog', 'outcome_error',      'Hívás sikertelen',      'Call failed',       'Aufruf fehlgeschlagen'],
+
+            ['navlog', 'processing_received',   'Befogadva',            'Received',    'Empfangen'],
+            ['navlog', 'processing_processing', 'Feldolgozás alatt',    'Processing',  'In Bearbeitung'],
+            ['navlog', 'processing_saved',       'Elmentve (köztes)',    'Saved (interim)', 'Gespeichert (Zwischenstand)'],
+            ['navlog', 'processing_done',        'Kész',                 'Done',        'Fertig'],
+            ['navlog', 'processing_aborted',     'Elutasítva',           'Aborted',     'Abgebrochen'],
+
+            ['navlog', 'transaction_id',     'Tranzakcióazonosító', 'Transaction ID', 'Transaktions-ID'],
+            ['navlog', 'environment',        'Környezet',           'Environment',    'Umgebung'],
+            ['navlog', 'error_message',      'Hibaüzenet',          'Error message',  'Fehlermeldung'],
+            ['navlog', 'severity_error',     'HIBA',                'ERROR',          'FEHLER'],
+            ['navlog', 'severity_warn',      'FIGYELMEZTETÉS',      'WARNING',        'WARNUNG'],
+            ['navlog', 'severity_info',      'INFO',                'INFO',           'INFO'],
+
+            ['navlog', 'show_details',       'Részletek',           'Details',        'Details'],
+            ['navlog', 'raw_xml_request',    'Kérés XML',           'Request XML',    'Anfrage-XML'],
+            ['navlog', 'raw_xml_response',   'Válasz XML',          'Response XML',   'Antwort-XML'],
+            ['navlog', 'no_raw_xml',         'Ehhez a kísérlethez nincs tárolt nyers XML.', 'No raw XML stored for this attempt.', 'Für diesen Versuch ist kein Roh-XML gespeichert.'],
+            ['navlog', 'copy',               'Másolás',             'Copy',           'Kopieren'],
+            ['navlog', 'copied',             'Másolva!',            'Copied!',        'Kopiert!'],
+
+            ['navlog', 'list_title',         'NAV napló',           'NAV log',        'NAV-Protokoll'],
+            ['navlog', 'filter_status_errors',  'Hibás',            'Errors',         'Fehlerhaft'],
+            ['navlog', 'filter_status_pending', 'Függő',            'Pending',        'Ausstehend'],
+            ['navlog', 'filter_status_all',     'Mind',             'All',            'Alle'],
+            ['navlog', 'search_ph',          'Számlaszám keresése…', 'Search invoice number…', 'Rechnungsnummer suchen…'],
+
+            ['navlog', 'col_invoice',   'Számla',              'Invoice',        'Rechnung'],
+            ['navlog', 'col_partner',   'Partner',             'Partner',        'Partner'],
+            ['navlog', 'col_status',    'Állapot',             'Status',         'Status'],
+            ['navlog', 'col_latest',    'Legutolsó kísérlet',  'Latest attempt', 'Letzter Versuch'],
+            ['navlog', 'col_attempts',  'Kísérletek',          'Attempts',       'Versuche'],
+            ['navlog', 'col_time',      'Időpont',             'Time',           'Zeitpunkt'],
+
+            ['navlog', 'attempt_count_label',          'kísérlet',                                     'attempt(s)',                                  'Versuch(e)'],
+            ['navlog', 'attempt_count_filtered_hint',  '(a szűrt időszakra)',                          '(within the filtered period)',                '(im gefilterten Zeitraum)'],
+            ['navlog', 'needs_attention_hint',         '24 órán belül sem érkezett végleges NAV-verdikt — emberi ellenőrzés szükséges.', 'No final NAV verdict arrived within 24 hours — needs human review.', 'Innerhalb von 24 Stunden ist kein endgültiges NAV-Ergebnis eingetroffen — manuelle Prüfung erforderlich.'],
+            ['navlog', 'empty_errors_title',           'Nincs hibás NAV-beküldés.',                    'No failed NAV submissions.',                  'Keine fehlgeschlagenen NAV-Übermittlungen.'],
+            ['navlog', 'empty_errors_hint',            'Minden beküldés rendben van — ez jó hír.',     'Every submission is fine — good news.',       'Alle Übermittlungen sind in Ordnung — gute Nachricht.'],
+            ['navlog', 'empty_generic',                'Nincs a szűrésnek megfelelő bejegyzés.',       'No entries match the filter.',                'Keine Einträge entsprechen dem Filter.'],
+            ['navlog', 'total_invoices',                '{count} érintett számla',                     '{count} affected invoice(s)',                 '{count} betroffene Rechnung(en)'],
         ];
 
         $now = now();

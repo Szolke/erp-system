@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Enums\DocumentType;
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\HasBlameable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
 #[Fillable(['company_id', 'document_type', 'prefix', 'reset_yearly', 'last_reset_year', 'next_number'])]
 class DocumentSeries extends Model
 {
-    use BelongsToCompany;
+    use BelongsToCompany, HasBlameable;
 
     protected function casts(): array
     {

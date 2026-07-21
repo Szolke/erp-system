@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\HasBlameable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable(['company_id', 'name', 'description', 'is_system'])]
 class Group extends Model
 {
-    use BelongsToCompany;
+    use BelongsToCompany, HasBlameable;
 
     protected function casts(): array
     {

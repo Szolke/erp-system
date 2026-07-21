@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasBlameable;
 use App\Support\CurrentCompany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,6 +29,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['company_id', 'code', 'name'])]
 class AssetType extends Model
 {
+    use HasBlameable;
+
     protected static function booted(): void
     {
         static::addGlobalScope('visibility', function (Builder $builder) {

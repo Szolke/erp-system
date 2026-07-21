@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasBlameable;
 use App\Support\CurrentCompany;
 use Database\Factories\JobPositionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -26,7 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class JobPosition extends Model
 {
     /** @use HasFactory<JobPositionFactory> */
-    use HasFactory;
+    use HasFactory, HasBlameable;
 
     protected static function booted(): void
     {

@@ -47,6 +47,7 @@ Státusz: tervezet (v1) — a Laravel migrations/modellek ez alapján készülne
 | is_active | boolean default true | |
 | nav_environment | enum(`test`,`production`) default `test` | melyik `company_nav_credentials.environment` sort használja a `SendInvoiceToNavJob` — utólag, 2026-06-30-án adva hozzá |
 | group_prefix | string(4) nullable, globally unique | értékesítő-csoport prefix (pl. `DEMO`); csak nagybetű, max 4 karakter; CHECK: IS NULL OR `^[A-Z]+$`; nem törölhető, ha a cégnek van `sales_groups` sora; utólag, 2026-07-15-én adva hozzá |
+| created_by, updated_by | FK nullable → users, self, `nullOnDelete` | HasBlameable trait tölti (auth user, ha van) — utólag, 2026-07-21-én adva hozzá |
 | timestamps | | |
 
 Index: unique(`tax_number`); unique(`group_prefix`).
@@ -59,6 +60,7 @@ Index: unique(`tax_number`); unique(`group_prefix`).
 | account_number | string (IBAN vagy magyar formátum) |
 | currency | char(3) |
 | is_default | boolean |
+| created_by, updated_by | FK nullable → users, `nullOnDelete` — HasBlameable, utólag 2026-07-21 |
 | timestamps | |
 
 Index: (`company_id`, `is_default`).
@@ -84,7 +86,8 @@ Index: unique(`company_id`, `environment`). Érzékeny mezők Laravel `encrypted
 
 ### `users` (Laravel default + bővítés)
 id, name, email (unique), password, default_company_id (FK nullable → companies, utoljára aktív cég),
-is_active, timestamps.
+is_active, created_by, updated_by (FK nullable → users, self-referencing, `nullOnDelete` —
+HasBlameable trait, utólag 2026-07-21-én adva hozzá), timestamps.
 
 ### `company_user` (pivot, M:N users↔companies)
 id, company_id (FK), user_id (FK), is_default (boolean), timestamps.
@@ -92,6 +95,7 @@ Index: unique(`company_id`, `user_id`).
 
 ### `groups` (szerepkörök, cégenként saját)
 id, company_id (FK), name, description nullable, is_system (boolean — pl. "Tulajdonos" törölhetetlen),
+created_by, updated_by (FK nullable → users, `nullOnDelete` — HasBlameable, utólag 2026-07-21),
 timestamps.
 Index: unique(`company_id`, `name`).
 
@@ -109,8 +113,18 @@ id, group_id (FK), permission_id (FK), timestamps.
 Index: unique(`group_id`, `permission_id`).
 
 ### `user_permission_overrides` (egyedi felülbírálás, cégenként)
-id, user_id (FK), company_id (FK), permission_id (FK), effect (enum: `allow`,`deny`), timestamps.
+id, user_id (FK), company_id (FK), permission_id (FK), effect (enum: `allow`,`deny`),
+created_by, updated_by (FK nullable → users, `nullOnDelete` — HasBlameable, utólag 2026-07-21),
+timestamps.
 Index: unique(`user_id`, `company_id`, `permission_id`).
+
+### `job_positions` (munkakör-katalógus — eddig nem volt dokumentálva ebben a fájlban, most pótolva)
+id, company_id (FK → companies, nullable, restrict — `NULL` = globális, mindenki látja; kitöltött = egy
+adott cég saját bővítése, ugyanaz a "globális VAGY saját" láthatósági minta, mint `asset_types`-nál,
+NEM a standard `BelongsToCompany` trait), name, active (boolean default true), sort_order (integer default 0),
+created_by, updated_by (FK nullable → users, `nullOnDelete` — HasBlameable, utólag 2026-07-21), timestamps.
+Index: (`company_id`, `active`, `sort_order`). `users.job_position_id` (FK nullable → job_positions,
+`nullOnDelete`) hivatkozik rá.
 
 ---
 
@@ -128,11 +142,13 @@ Online Számla `vatExemption` case-kódjaira, AAM/TAM/… való). L. 14. fejezet
 ### `products`
 id, company_id (FK), sku, name, description nullable, unit (string, pl. `db`, `óra`, `kg`),
 type (enum: `product`,`service`), vat_rate_id (FK), base_price (decimal 14,2), base_currency (char 3),
-is_active, timestamps.
+is_active, created_by, updated_by (FK nullable → users, `nullOnDelete` — HasBlameable, utólag 2026-07-21),
+timestamps.
 Index: unique(`company_id`, `sku`).
 
 ### `product_prices` (devizánkénti/idősoros ár)
 id, product_id (FK), currency (char 3), price (decimal 14,2), valid_from (date), valid_to (date nullable),
+created_by, updated_by (FK nullable → users, `nullOnDelete` — HasBlameable, utólag 2026-07-21),
 timestamps.
 Index: (`product_id`, `currency`, `valid_from`).
 
@@ -146,7 +162,9 @@ eu_tax_number nullable, registration_number nullable,
 billing_postal_code, billing_city, billing_address_line, billing_country_code (char 2, default `HU` — utólag, 2026-07-17-én adva hozzá, l. `countries` katalógus),
 shipping_postal_code nullable, shipping_city nullable, shipping_address_line nullable,
 default_payment_method_id (FK nullable → payment_methods), default_currency (char 3),
-email nullable, phone nullable, bank_account_number nullable, is_active, timestamps.
+email nullable, phone nullable, bank_account_number nullable, is_active,
+created_by, updated_by (FK nullable → users, `nullOnDelete` — HasBlameable, utólag 2026-07-21),
+timestamps.
 Index: (`company_id`, `tax_number`), unique(`company_id`, `name`) opcionális.
 
 `billing_country_code` validációja mindig a TELJES `config('countries')` listán fut
@@ -163,7 +181,9 @@ id, code (unique, pl. `cash`,`card`,`bank_transfer`,`simplepay`), name, is_activ
 
 ### `document_series` (cégenkénti/típusonkénti folytonos sorszámtartomány)
 id, company_id (FK), document_type (enum: `invoice`,`receipt`), prefix (string, pl. `SZ`,`NY`),
-reset_yearly (boolean), last_reset_year (smallint nullable), next_number (integer, számláló), timestamps.
+reset_yearly (boolean), last_reset_year (smallint nullable), next_number (integer, számláló),
+created_by, updated_by (FK nullable → users, `nullOnDelete` — HasBlameable, utólag 2026-07-21),
+timestamps.
 Index: unique(`company_id`, `document_type`, `prefix`).
 
 > A `next_number` növelése pesszimista zárolással (`lockForUpdate`) történik a service rétegben, hogy
@@ -314,6 +334,7 @@ CHECK `(IS NULL OR '^[A-Z]+$')`, csak nagybetűk.
 | id | bigIncrements | |
 | company_id | FK → companies, restrict | BelongsToCompany trait — globális Eloquent scope szűri |
 | name | string | tárolt „alapnév" (pl. `Észak`); megjelenítéskor: `prefix_name` |
+| created_by, updated_by | FK nullable → users, `nullOnDelete` | HasBlameable trait tölti — utólag, 2026-07-21-én adva hozzá |
 | timestamps | | |
 
 Index: `UNIQUE (company_id, LOWER(name))` — funkcionális PostgreSQL expression index, kis- és nagybetűtől független egyediség cégen belül. Sima `unique(company_id, name)` szándékosan NINCS.
@@ -339,6 +360,7 @@ Index: `UNIQUE (company_id, LOWER(name))` — funkcionális PostgreSQL expressio
 | company_id | FK → companies, nullable, restrict | `NULL` = globális alaptípus (mindenki látja); kitöltött = egy adott cég saját bővítése (csak az a cég látja) |
 | code | string | rövid kód (pl. `TEYA`, `MOBIL`) — bekerül a generált eszköznévbe |
 | name | string | ember-olvasható címke (pl. „Teya POS terminál”) |
+| created_by, updated_by | FK nullable → users, `nullOnDelete` | HasBlameable trait tölti — utólag, 2026-07-21-én adva hozzá |
 | timestamps | | |
 
 Index: composite `unique(company_id, code)` (céges bővítések cégen belüli egyedisége) **+**
@@ -357,6 +379,7 @@ egyenlőnek NULL-lal). Globális alaptípusok (`MOBIL`, `TEYA`, `PRINTER`) az
 | imei | string nullable | opcionális, felhasználói bevitel |
 | asset_type_id | FK → asset_types, restrict | a típus nem módosítható a létrehozás után (a name kódolja a típus kódját) |
 | status | enum(`active`,`issued`,`service`,`scrapped`) default `active` | |
+| created_by, updated_by | FK nullable → users, `nullOnDelete` | HasBlameable trait tölti — utólag, 2026-07-21-én adva hozzá |
 | timestamps | | |
 
 Index: composite `unique(company_id, name)`, `unique(company_id, serial_number)`,

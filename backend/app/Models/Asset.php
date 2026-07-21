@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AssetStatus;
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\HasBlameable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['company_id', 'name', 'serial_number', 'imei', 'asset_type_id', 'status'])]
 class Asset extends Model
 {
-    use BelongsToCompany;
+    use BelongsToCompany, HasBlameable;
 
     protected function casts(): array
     {

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PermissionEffect;
 use App\Models\Concerns\BelongsToCompany;
+use App\Models\Concerns\HasBlameable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['user_id', 'company_id', 'permission_id', 'effect'])]
 class UserPermissionOverride extends Model
 {
-    use BelongsToCompany;
+    use BelongsToCompany, HasBlameable;
 
     protected function casts(): array
     {

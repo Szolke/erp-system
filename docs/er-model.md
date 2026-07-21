@@ -218,8 +218,14 @@ Index: (`invoice_id`, `attempt_number`).
 id, company_id (FK), partner_id (FK nullable — nyugtánál nem kötelező), document_series_id (FK),
 receipt_number, issue_date, currency, exchange_rate, exchange_rate_date, payment_method_id (FK),
 status (enum: `issued`,`storno`), net_total, vat_total, gross_total, storno_of_receipt_id (FK nullable,
-self), pdf_path nullable, created_by (FK → users), timestamps.
-Index: unique(`company_id`, `receipt_number`); (`company_id`,`issue_date`).
+self), pdf_path nullable, created_by (FK → users),
+**reported_at (timestamp nullable), receipt_report_id (FK → receipt_reports, nullable, restrict — l. 15. fejezet, utólag, eNyugta 2. fázisban adva hozzá)**,
+timestamps.
+Index: unique(`company_id`, `receipt_number`); (`company_id`,`issue_date`); (`company_id`,`reported_at`); (`receipt_report_id`) — utóbbi explicit, mert PostgreSQL FK-oszlopra nem hoz létre automatikusan indexet.
+
+`reported_at` kitöltése ZÁROLJA a nyugtát (NAV eNyugta D2 — l. 15. fejezet): a `Receipt` modell
+`saving`/`deleting` guardja ilyenkor csak a `reported_at`/`receipt_report_id` mezők változását engedi,
+minden más módosítást és bármilyen törlést `ReceiptAlreadyReportedException`-nel elutasít.
 
 ### `receipt_items`
 id, receipt_id (FK), product_id (FK nullable), description, quantity, unit_price, vat_rate_id (FK),
@@ -452,11 +458,70 @@ NAV a jövőben bővíti a választ, külön migrációval vezetendő be.
 
 ---
 
+## 15. NAV eNyugta modul (2. fázis — napi összesítő, aggregáció, zárolás)
+
+> Napi nyugta-adatszolgáltatás összesítő (`docs/progress.md` NAV eNyugta 2. fázis, D1-D7 döntések).
+> NINCS ebben a fázisban: tényleges NAV HTTP-beküldés, XML-builder, frontend UI.
+
+### `receipt_reports`
+| mező | típus | megjegyzés |
+|---|---|---|
+| id, company_id (FK) | | |
+| report_date | date | a nap, amire a jelentés vonatkozik (D5: `receipts.issue_date`, Europe/Budapest) |
+| type | enum(`normal`,`correction`) default `normal` | D1 — a beküldött jelentés immutábilis, változás esetén korrekció, nem felülírás |
+| original_report_id | FK → receipt_reports, nullable, **restrict** | csak `type=correction` esetén kitöltött; mindig a nap NORMÁL jelentésére mutat, korrekciók nincsenek láncolva; **restrictOnDelete**, mert `nullOnDelete` ütközne a CHECK constrainttel |
+| status | enum(`draft`,`ready`,`sending`,`accepted`,`rejected`) default `draft` | a `sending`/`accepted`/`rejected` a 3. fázisban kap tényleges jelentést (előre felvéve, hogy ne kelljen enum-bővítő migráció) |
+| receipt_count | integer | a napon szereplő ÖSSZES nyugta száma (nem a soronkénti összeg — egy nyugta több kategóriában is szerepelhet) |
+| total_net, total_vat, total_gross | decimal(14,2) | D6: a nyugtatételeken már tárolt összegek összege, egész forintra kerekítve |
+| transaction_id | string nullable | 3. fázis (NAV tranzakcióazonosító) |
+| submitted_at | timestamp nullable | 3. fázis |
+| response_payload | jsonb nullable | 3. fázis (NAV válasz) |
+| error_message | text nullable | 3. fázis |
+| retry_count | integer default 0 | 3. fázis |
+| generated_at | timestamp | a `ReceiptReportBuilder` legutóbbi futásának időpontja |
+| timestamps | | |
+
+Index: (`company_id`, `report_date`). **Parciális unique index** `receipt_reports_one_normal_per_day`
+(`company_id`, `report_date`) `WHERE type = 'normal'` — cégenként/naponta pontosan egy normál jelentés,
+korrekcióból több is lehet. **CHECK constraint** `receipt_reports_correction_requires_original`:
+`type='normal' → original_report_id IS NULL`, `type='correction' → original_report_id IS NOT NULL`.
+
+### `receipt_report_lines`
+| mező | típus | megjegyzés |
+|---|---|---|
+| id, receipt_report_id (FK, cascade) | | |
+| nav_receipt_category | string | a NAV eNyugta kategória NEVE — az EGYETLEN csoportosítási kulcs (D4) |
+| net_amount, vat_amount, gross_amount | decimal(14,2) | |
+| receipt_count | integer | a kategóriát tartalmazó DISZTINKT nyugták száma |
+| timestamps | | |
+
+Index: (`receipt_report_id`). **NINCS `company_id`** (a szülőn, `receipt_reports`-on keresztül scope-olt) és
+**NINCS `vat_rate_id`** — utóbbi szándékos: egy `restrictOnDelete` FK örökre megkötné a `vat_rates`
+törzsadat-sort, amint egyszer belekerült egy immutábilis jelentésbe, és elméletileg több áfakulcs is
+ugyanarra a NAV-kategóriára képezhető (egy néha NULL, néha kitöltött FK félrevezető adat lenne).
+
+### Üzleti szabályok
+- **D2 (nyugta-zárolás):** a `Receipt` modell `saving`/`deleting` guardja — ha `reported_at` ki van
+  töltve, csak a `reported_at`/`receipt_report_id` mezők változása engedett, minden más
+  `ReceiptAlreadyReportedException`-t dob. A `ReceiptReportBuilder` pontosan ezt a két mezőt írja,
+  ezért a guard nem akasztja meg saját magát.
+- **D4 (áfa-megfeleltetés kötelező):** ha egy érintett `vat_rate.nav_receipt_category` `NULL`, az
+  aggregáció `ReceiptReportBuildException`-t dob — nem tippel, nem hagyja ki csendben a sort.
+- **Devizakérdés (dokumentált feltételezés, nem a spec/feladatleírás explicit döntése):** az
+  aggregáció NEM végez árfolyam-konverziót; nem-HUF nyugta esetén szintén
+  `ReceiptReportBuildException`-t dob.
+- **D7 (CSV export):** `GET /api/enyugta/reports/{report}/export` — vészkijárat a KOBAK-portálon
+  való kézi rögzítéshez, mivel a NAV gépi interfész bázis-URL-je nincs publikálva.
+
+---
+
 ## Kapcsolati összefoglaló (legfontosabbak)
 
 - `companies` 1—N `company_bank_accounts`, `company_nav_credentials`, `company_enyugta_credentials`,
   `products`, `partners`, `invoices`,
-  `receipts`, `groups`, `document_series`, `sales_groups`, `assets`, `asset_number_counters`
+  `receipts`, `groups`, `document_series`, `sales_groups`, `assets`, `asset_number_counters`, `receipt_reports`
+- `receipt_reports` 1—N `receipt_report_lines`, `receipts` (a jelentéshez tartozó nyugták);
+  `receipt_reports` önhivatkozó (`original_report_id`) — korrekció → normál jelentés
 - `asset_types` 1—N `assets`; `asset_types.company_id` nullable (globális VAGY céges sor)
 - `companies` M—N `users` (`company_user`)
 - `companies` M—N `modules` (`company_module`, csak opcionális modulok)

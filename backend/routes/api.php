@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\Api\DocumentSeriesController;
+use App\Http\Controllers\Api\EnyugtaReportController;
 use App\Http\Controllers\Api\EnyugtaSettingsController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\InvoiceController;
@@ -193,11 +194,16 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::get('settings/document-series', [DocumentSeriesController::class, 'index']);
     Route::put('settings/document-series/{documentSeries}', [DocumentSeriesController::class, 'update']);
 
-    // NAV eNyugta — 1. fázis: csak beállítások (hitelesítő adat + üzemmód), nincs beküldés.
+    // NAV eNyugta — 1. fázis: beállítások (hitelesítő adat + üzemmód); 2. fázis:
+    // napi jelentések olvasása + CSV export. Beküldés NINCS (3. fázis).
     Route::middleware('module:enyugta')->group(function () {
         Route::get('settings/enyugta', [EnyugtaSettingsController::class, 'show']);
         Route::put('settings/enyugta', [EnyugtaSettingsController::class, 'update']);
         Route::post('settings/enyugta/copy-from-nav', [EnyugtaSettingsController::class, 'copyFromNav']);
+
+        Route::get('enyugta/reports', [EnyugtaReportController::class, 'index']);
+        Route::get('enyugta/reports/{report}', [EnyugtaReportController::class, 'show']);
+        Route::get('enyugta/reports/{report}/export', [EnyugtaReportController::class, 'export']);
     });
 
     // API-tesztelő

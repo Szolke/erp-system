@@ -22,3 +22,13 @@ Schedule::command('exchange-rates:fetch-mnb')
 Schedule::command('nav:check-submission-status')
     ->everyFiveMinutes()
     ->withoutOverlapping();
+
+// NAV eNyugta napi nyugta-összesítő — a Budapest-nap zárása után fut, hogy az
+// előző (teljes) napra vonatkozó nyugták mind rendelkezésre álljanak (D5,
+// docs/nav-enyugta-spec-jegyzetek.md). Explicit ->timezone(): az APP_TIMEZONE
+// UTC (config/app.php), a "01:00" enélkül UTC szerint értendő, nem
+// Budapest szerint — a napi határ (D5) itt is Europe/Budapest kell legyen.
+Schedule::command('erp:build-receipt-reports')
+    ->dailyAt('01:00')
+    ->timezone('Europe/Budapest')
+    ->withoutOverlapping();

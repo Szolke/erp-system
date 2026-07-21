@@ -58,6 +58,29 @@ export function NavStatusBadge({ status }) {
   return <span className={`badge badge-nav-${status}`}>{label[status] ?? status}</span>
 }
 
+const ENYUGTA_REPORT_STATUS_LABELS = {
+  draft: 'Piszkozat',
+  ready: 'Kész',
+  sending: 'Beküldés alatt',
+  accepted: 'Elfogadva',
+  rejected: 'Elutasítva',
+}
+
+/** `receipt_reports.status` — 2. fázisban gyakorlatilag mindig 'draft' (a beküldés a 3. fázis). */
+export function EnyugtaReportStatusBadge({ status }) {
+  return <span className={`badge badge-enyugta-status-${status}`}>{ENYUGTA_REPORT_STATUS_LABELS[status] ?? status}</span>
+}
+
+const ENYUGTA_REPORT_TYPE_LABELS = {
+  normal: 'Normál',
+  correction: 'Korrekció',
+}
+
+/** `receipt_reports.type` — 'correction' esetén az eredetire mutat (original_report_id). */
+export function EnyugtaReportTypeBadge({ type }) {
+  return <span className={`badge badge-enyugta-type-${type}`}>{ENYUGTA_REPORT_TYPE_LABELS[type] ?? type}</span>
+}
+
 export function DocumentTypeBadge({ type }) {
   const { t } = useTranslation()
   const label = {

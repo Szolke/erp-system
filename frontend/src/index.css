@@ -457,6 +457,15 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .badge-nav-needs_attention { background: var(--color-warning); color: #fff; }
 .badge-nav-error { background: var(--color-danger-bg); color: var(--color-danger); }
 
+/* NAV eNyugta napi jelentés (4. fázis) — receipt_reports.status/type badge-ek. */
+.badge-enyugta-status-draft { background: var(--color-surface-alt); color: var(--color-muted); }
+.badge-enyugta-status-ready { background: var(--color-accent-bg); color: var(--color-accent-text); }
+.badge-enyugta-status-sending { background: var(--color-warning-bg); color: var(--color-warning); }
+.badge-enyugta-status-accepted { background: var(--color-success-bg); color: var(--color-success-text); }
+.badge-enyugta-status-rejected { background: var(--color-danger-bg); color: var(--color-danger); }
+.badge-enyugta-type-normal { background: var(--color-surface-alt); color: var(--color-text); border: 1px solid var(--color-border); }
+.badge-enyugta-type-correction { background: var(--color-warning-bg); color: var(--color-warning); }
+
 /* Validációs üzenetek súlyosság szerint — a WARN SOSE piros, elfogadott
    számlát jelöl (l. NavTransactionStatusChecker). */
 .navlog-messages { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 6px; }

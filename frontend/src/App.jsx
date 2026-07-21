@@ -35,6 +35,9 @@ import JobPositionPage from './pages/settings/JobPositionPage'
 import CountriesPage from './pages/settings/CountriesPage'
 import WikiPage from './pages/WikiPage'
 import ReportsPage from './pages/reports/ReportsPage'
+import EnyugtaSettingsPage from './pages/settings/EnyugtaSettingsPage'
+import EnyugtaReportsPage from './pages/EnyugtaReportsPage'
+import EnyugtaReportDetailPage from './pages/EnyugtaReportDetailPage'
 
 export default function App() {
   return (
@@ -84,6 +87,9 @@ export default function App() {
           <Route path="settings/api-tester" element={<ApiTesterPage />} />
           <Route path="wiki" element={<WikiPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="settings/enyugta" element={<EnyugtaSettingsPage />} />
+          <Route path="enyugta/reports" element={<EnyugtaReportsPage />} />
+          <Route path="enyugta/reports/:id" element={<EnyugtaReportDetailPage />} />
         </Route>
       </Routes>
   )

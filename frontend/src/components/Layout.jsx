@@ -10,7 +10,7 @@ import {
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers, Blocks,
   Settings2, ChevronLeft, ChevronRight,
   LogOut, Moon, Sun, Terminal, UsersRound, Boxes, Tags, Briefcase, Globe, BarChart3,
-  AlertTriangle,
+  AlertTriangle, Receipt, FileSpreadsheet,
 } from 'lucide-react'
 
 export default function Layout() {
@@ -65,6 +65,7 @@ export default function Layout() {
     { to: '/partners',  label: t('nav.partners'),  icon: Users2,    perm: 'partner.view' },
     { to: '/products',  label: t('nav.products'),  icon: Package,   perm: 'product.view' },
     { to: '/assets',    label: t('nav.assets'),    icon: Boxes,     perm: 'asset.view' },
+    { to: '/enyugta/reports', label: 'eNyugta jelentések', icon: Receipt, perm: 'enyugta.view' },
     { to: '/wiki',      label: t('nav.wiki'),       icon: BookOpen,  public: true },
   ]
 
@@ -75,6 +76,7 @@ export default function Layout() {
         { to: '/companies',                label: 'Cégek',              icon: Layers, superadminOnly: true },
         { to: '/company',                  label: t('nav.company'),     icon: Building2, perm: 'company.view' },
         { to: '/settings/document-series', label: t('nav.doc_series'),  icon: Hash,   perm: 'document_series.manage' },
+        { to: '/settings/enyugta',         label: 'NAV eNyugta',        icon: FileSpreadsheet, perm: 'enyugta.view' },
       ],
     },
     {

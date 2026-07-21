@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'rate_percent', 'nav_code', 'is_active'])]
+#[Fillable(['name', 'rate_percent', 'nav_code', 'nav_receipt_category', 'is_active'])]
 class VatRate extends Model
 {
     protected function casts(): array

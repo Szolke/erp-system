@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTranslation } from '../contexts/TranslationContext'
 import { company as companyApi } from '../api/company'
@@ -17,6 +17,7 @@ export default function Layout() {
   const { user, logout, can, activeCompanyId } = useAuth()
   const { locale, setLocale, t, SUPPORTED } = useTranslation()
   const navigate                            = useNavigate()
+  const { pathname }                        = useLocation()
 
   const [sidebarOpen, setSidebarOpen] = useState(
     () => localStorage.getItem('sidebarOpen') !== 'false'
@@ -28,6 +29,16 @@ export default function Layout() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
+
+  // A `.main-content`-en lévő `overflow-y: auto` a gyakorlatban SOHA nem lép
+  // életbe: a `.layout` `min-height: 100vh`-t használ (nem `height`-t), ezért
+  // hosszú tartalomnál a teljes `.layout` (és vele a `.main-content` is)
+  // magasabbra nő a viewportnál — a tényleges görgetés a böngészőablak
+  // (window) szintjén történik, ezért ott kell visszaállítani útvonalváltáskor
+  // (pl. sidebar-menüre kattintva).
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
 
   useEffect(() => {
     if (!activeCompanyId) return

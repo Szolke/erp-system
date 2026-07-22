@@ -58,7 +58,7 @@ export default function InvoiceDetailPage() {
   async function handleCancel() {
     if (!confirm(t('invoice.storno_confirm'))) return
     await invoiceApi.cancel(id)
-    navigate('/invoices')
+    navigate('/documents')
   }
 
   async function handleRefund() {

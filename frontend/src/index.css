@@ -121,6 +121,12 @@ tr:hover td { background: var(--color-hover); }
 .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--color-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
 input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--color-border); border-radius: 5px; font-size: 14px; color: var(--color-text); background: var(--color-input-bg); }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+/* checkbox/radio kizárva a fenti width:100%-ból — egy DEFINIT szélességű flex
+   sorban (pl. .column-picker-row) ez a checkbox-ot a teljes sorszélességre
+   nyújtaná, nullára szorítva a mellette lévő label helyét (más popovereknél,
+   ahol a konténer fit-content, ez a hiba lappangva sosem jelentkezett, mert a
+   100% egy indefinit méretű szülőn "auto"-ra oldódik fel). */
+input[type="checkbox"], input[type="radio"] { width: auto; }
 .form-error { color: var(--color-danger); font-size: 12px; margin-top: 3px; }
 
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: background .15s; }
@@ -190,6 +196,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .text-muted { color: var(--color-muted); font-size: 13px; }
 .text-danger { color: var(--color-danger); font-weight: 600; }
 .text-right { text-align: right; }
+.text-center { text-align: center; }
 .mb-4 { margin-bottom: 16px; }
 .mt-4 { margin-top: 16px; }
 .flex { display: flex; gap: 8px; align-items: center; }
@@ -373,6 +380,30 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 .fc-popover-field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: var(--color-muted); }
 .fc-popover-field select { padding: 5px 8px; border: 1px solid var(--color-border); border-radius: 5px; font-size: 13px; background: var(--color-surface); color: var(--color-text); }
 .fc-checkbox { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--color-text); cursor: pointer; white-space: nowrap; }
+.fc-clear-all:disabled { opacity: .5; cursor: not-allowed; text-decoration: none; }
+
+/* Oszlopválasztó popover (ColumnPicker) — a label balra, a checkbox jobbra
+   igazítva (space-between egy 2 elemű flex-soron), NEM az fc-checkbox
+   (label-elöl-checkbox) mintáját követve, mert itt a checkbox a sor VÉGÉN
+   van, nem az elején. */
+.column-picker-panel { width: min(290px, 90vw); display: flex; flex-direction: column; gap: 10px; }
+.column-picker-count { margin: 0; font-size: 12px; color: var(--color-muted); }
+/* Fix szélességű, saját scrollbar — a rendszer-scrollbar néhány böngészőben
+   hoverre vastagabbra nő, ami a jobbra igazított checkboxokba lógna bele akkor
+   is, ha a gutter alapból le van foglalva (scrollbar-gutter csak az ALAP,
+   nem a hover-állapot szélességét garantálja). */
+.column-picker-list {
+  display: flex; flex-direction: column; gap: 8px; max-height: 280px;
+  overflow-y: auto; padding-right: 12px;
+  scrollbar-width: thin; /* Firefox */
+}
+.column-picker-list::-webkit-scrollbar { width: 8px; }
+.column-picker-list::-webkit-scrollbar-track { background: transparent; }
+.column-picker-list::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+.column-picker-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--color-text); cursor: pointer; }
+.column-picker-row span { flex: 1 1 auto; min-width: 0; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.column-picker-row input { flex-shrink: 0; }
+.column-picker-row.is-locked { opacity: .6; cursor: not-allowed; }
 
 /* Egységes "címke fent, vezérlő lent" mező (pl. a kintlévőség as_of dátuma) */
 .fc-field { display: flex; flex-direction: column; gap: 6px; }

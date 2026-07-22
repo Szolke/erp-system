@@ -10,20 +10,23 @@ export function AuthProvider({ children }) {
   const [companies, setCompanies]           = useState([])
   const [activeCompanyId, setActiveCompanyId] = useState(null)
   const [permissions, setPermissions]       = useState([])
+  const [listPreferences, setListPreferences] = useState({})
   const [loading, setLoading]               = useState(true)
 
   async function fetchMe() {
     try {
       const res = await me()
-      const { user, companies, active_company_id, permissions } = res.data
+      const { user, companies, active_company_id, permissions, list_preferences } = res.data
       setUser(user)
       setCompanies(companies)
       setActiveCompanyId(active_company_id)
       setPermissions(permissions ?? [])
+      setListPreferences(list_preferences ?? {})
       // Fordítások betöltése a user locale-ja szerint (saveToServer=false, már mentve van)
       await setLocale(user.locale ?? 'hu', false)
     } catch {
       setUser(null)
+      setListPreferences({})
       // Bejelentkezés előtt is betöltjük a tárolt locale fordításait
       await loadLocale(localStorage.getItem('locale') ?? 'hu')
     } finally {
@@ -44,6 +47,7 @@ export function AuthProvider({ children }) {
     setCompanies([])
     setActiveCompanyId(null)
     setPermissions([])
+    setListPreferences({})
   }
 
   async function switchCompany(companyId) {
@@ -57,7 +61,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, companies, activeCompanyId, permissions, loading, login, logout, switchCompany, can, refreshAuth: fetchMe }}>
+    <AuthContext.Provider value={{ user, companies, activeCompanyId, permissions, listPreferences, loading, login, logout, switchCompany, can, refreshAuth: fetchMe }}>
       {children}
     </AuthContext.Provider>
   )

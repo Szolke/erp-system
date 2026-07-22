@@ -4,13 +4,16 @@ import { Search, AlertTriangle } from 'lucide-react'
 import { documents } from '../../api/documents'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
-import { DisplayStatusBadge } from '../../components/StatusBadge'
+import { DisplayStatusBadge, DocumentTypeBadge, PaymentStatusBadge } from '../../components/StatusBadge'
 import PerPageSelector from '../../components/PerPageSelector'
 import Pagination from '../../components/Pagination'
 import DateRangePicker from '../../components/reports/DateRangePicker'
 import DocumentFiltersPopover from '../../components/documents/DocumentFiltersPopover'
 import NewDocumentButton from '../../components/documents/NewDocumentButton'
 import ExportButton from '../../components/ExportButton'
+import ColumnPicker from '../../components/ColumnPicker'
+import { useListColumns } from '../../hooks/useListColumns'
+import { documentColumns } from '../../columns/documents'
 import { useUrlFilters } from '../../utils/useUrlFilters'
 import { formatCurrency } from '../../utils/format'
 import { statusLabel } from '../../utils/documentStatus'
@@ -44,6 +47,70 @@ function formatIssueDate(dateStr, locale, short) {
   return new Intl.DateTimeFormat(locale, opts).format(new Date(dateStr))
 }
 
+function docLink(doc) {
+  return doc.model_type === 'invoice' ? `/invoices/${doc.id}` : `/receipts/${doc.id}`
+}
+
+// Oszloponkénti <td> renderelés a documentColumns regisztry kulcsai szerint —
+// a látható oszlopok halmaza a useListColumns hooktól függ, ezért a fejléc
+// százalékos szélességei (a korábbi, fix 5-oszlopos verzióban) itt szükségképp
+// elesnek: változó oszlopszám mellett a böngésző automatikus oszlopszélessége
+// az egyetlen konzisztens megoldás (ugyanígy a számlalistán is).
+function renderDocumentCell(key, doc, { t, locale, shortDate }) {
+  switch (key) {
+    case 'number':
+      return (
+        <td key="number">
+          <Link to={docLink(doc)} className="table-link">{doc.document_number}</Link>
+          <div className="doc-subline">
+            {t(TYPE_LABEL_KEYS[doc.document_type] ?? doc.document_type)}
+            {doc.currency !== 'HUF' && <span className="doc-currency-marker"> · {doc.currency}</span>}
+          </div>
+        </td>
+      )
+    case 'type':
+      return <td key="type"><DocumentTypeBadge type={doc.document_type} /></td>
+    case 'partner':
+      return <td key="partner" className="doc-ellipsis" title={doc.partner_name ?? ''}>{doc.partner_name ?? '—'}</td>
+    case 'partner_tax_number':
+      return <td key="partner_tax_number">{doc.partner_tax_number ?? '—'}</td>
+    case 'issue_date':
+      return <td key="issue_date">{formatIssueDate(doc.issue_date, locale, shortDate)}</td>
+    // A nyugtának nincs teljesítés-dátuma külön mezőként tárolva minden esetben
+    // sem, ezért itt is (mint a due_date-nél) null-biztosan kezeljük.
+    case 'fulfillment_date':
+      return <td key="fulfillment_date">{doc.fulfillment_date ? formatIssueDate(doc.fulfillment_date, locale, shortDate) : '—'}</td>
+    // A nyugtának NINCS fizetési határideje (backend: NULL::date AS due_date) — szándékos üres cella.
+    case 'due_date':
+      return <td key="due_date">{doc.due_date ? formatIssueDate(doc.due_date, locale, shortDate) : '—'}</td>
+    case 'net_total':
+      return <td key="net_total" className="text-right">{formatCurrency(doc.net_total, null, locale)}</td>
+    case 'vat_total':
+      return <td key="vat_total" className="text-right">{formatCurrency(doc.vat_total, null, locale)}</td>
+    case 'gross': {
+      const isNegative = Number(doc.gross_total) < 0
+      return (
+        <td key="gross" className={'text-right doc-amount' + (isNegative ? ' text-danger' : '')}>
+          {formatCurrency(doc.gross_total, null, locale)}
+        </td>
+      )
+    }
+    // gross_total_huf a HufConversion "skip" ágon NULL lehet (érvénytelen/hiányzó
+    // árfolyam) — l. DocumentController::index() summary.skipped_count.
+    case 'gross_huf':
+      return <td key="gross_huf" className="text-right">{doc.gross_total_huf != null ? formatCurrency(doc.gross_total_huf, 'HUF', locale) : '—'}</td>
+    case 'currency':
+      return <td key="currency">{doc.currency}</td>
+    // A nyugtának NINCS fizetési státusza (backend: NULL AS payment_status) — szándékos üres cella.
+    case 'payment_status':
+      return <td key="payment_status">{doc.payment_status ? <PaymentStatusBadge status={doc.payment_status} /> : '—'}</td>
+    case 'status':
+      return <td key="status"><DisplayStatusBadge status={doc.display_status} /></td>
+    default:
+      return null
+  }
+}
+
 export default function DocumentListPage() {
   const { can } = useAuth()
   const { t, locale } = useTranslation()
@@ -54,6 +121,7 @@ export default function DocumentListPage() {
   const [openPopover, setOpenPopover] = useState(null)
   const [searchInput, setSearchInput] = useState(filters.search)
   const debounceRef = useRef(null)
+  const { allColumns, visibleColumns, isVisible, toggle, reset, isDirty } = useListColumns('documents.index', documentColumns)
 
   const page = Number(filters.page) || 1
   const perPage = Number(filters.per_page) || 20
@@ -116,10 +184,6 @@ export default function DocumentListPage() {
   }
   function clearChipFilters() {
     setFilters({ status: '', currency: '', page: '1' })
-  }
-
-  function docLink(doc) {
-    return doc.model_type === 'invoice' ? `/invoices/${doc.id}` : `/receipts/${doc.id}`
   }
 
   const visibleTabs = TABS.filter((tabDef) => !tabDef.needsPerm || can(tabDef.needsPerm))
@@ -214,6 +278,17 @@ export default function DocumentListPage() {
             onOpenChange={(o) => setOpenPopover(o ? 'filters' : null)}
             id="document-filters"
           />
+
+          <ColumnPicker
+            columns={allColumns}
+            isVisible={isVisible}
+            onToggle={toggle}
+            onReset={reset}
+            isDirty={isDirty}
+            open={openPopover === 'columns'}
+            onOpenChange={(o) => setOpenPopover(o ? 'columns' : null)}
+            id="document-columns"
+          />
         </div>
       </div>
 
@@ -257,35 +332,17 @@ export default function DocumentListPage() {
           <table className="doc-table">
             <thead>
               <tr>
-                <th scope="col" style={{ width: '34%' }}>{t('document.number')}</th>
-                <th scope="col" style={{ width: '24%' }}>{t('document.partner')}</th>
-                <th scope="col" style={{ width: '14%' }}>{t('document.issued_at')}</th>
-                <th scope="col" className="text-right" style={{ width: '15%' }}>{t('document.gross')}</th>
-                <th scope="col" style={{ width: '13%' }}>{t('document.status_col')}</th>
+                {visibleColumns.map((col) => (
+                  <th key={col.key} scope="col" className={col.align === 'right' ? 'text-right' : undefined}>{t(col.label)}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {data.data.map((doc) => {
-                const typeLabel = t(TYPE_LABEL_KEYS[doc.document_type] ?? doc.document_type)
-                const isNegative = Number(doc.gross_total) < 0
-                return (
-                  <tr key={`${doc.model_type}-${doc.id}`}>
-                    <td>
-                      <Link to={docLink(doc)} className="table-link">{doc.document_number}</Link>
-                      <div className="doc-subline">
-                        {typeLabel}
-                        {doc.currency !== 'HUF' && <span className="doc-currency-marker"> · {doc.currency}</span>}
-                      </div>
-                    </td>
-                    <td className="doc-ellipsis" title={doc.partner_name ?? ''}>{doc.partner_name ?? '—'}</td>
-                    <td>{formatIssueDate(doc.issue_date, locale, shortDate)}</td>
-                    <td className={'text-right doc-amount' + (isNegative ? ' text-danger' : '')}>
-                      {formatCurrency(doc.gross_total, null, locale)}
-                    </td>
-                    <td><DisplayStatusBadge status={doc.display_status} /></td>
-                  </tr>
-                )
-              })}
+              {data.data.map((doc) => (
+                <tr key={`${doc.model_type}-${doc.id}`}>
+                  {visibleColumns.map((col) => renderDocumentCell(col.key, doc, { t, locale, shortDate }))}
+                </tr>
+              ))}
             </tbody>
           </table>
         )}

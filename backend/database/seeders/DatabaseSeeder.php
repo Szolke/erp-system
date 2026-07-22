@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             PaymentMethodSeeder::class,
             TranslationSeeder::class,
             AssetTypeSeeder::class,
+            CountrySeeder::class,
         ]);
 
         // Demo user and data are only created in local/testing environments.

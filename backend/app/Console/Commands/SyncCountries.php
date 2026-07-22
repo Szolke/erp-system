@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Country;
+use Database\Seeders\CountrySeeder;
 use Illuminate\Console\Command;
 
 class SyncCountries extends Command
@@ -11,10 +12,13 @@ class SyncCountries extends Command
 
     /**
      * Beszúrja a config('countries')-ban szereplő, de a `countries` táblából még
-     * hiányzó kódokat (enabled=true default-tal). A már létező sorok `enabled`
-     * állapotát SOSEM írja felül — a superadmin által beállított be/kikapcsolt
-     * állapot deploy/újrafuttatás után is megmarad. A táblában lévő, de configból
-     * eltűnt kódokat nem törli, csak jelzi.
+     * hiányzó kódokat (enabled=true default-tal) — a tényleges beszúrás-logika a
+     * `CountrySeeder`-ben él (az mindig lefut a `DatabaseSeeder`-ből is), ez a
+     * parancs csak kézi újrafuttatáshoz ad részletes riportot ugyanarra a
+     * műveletre. A már létező sorok `enabled` állapotát SOSEM írja felül — a
+     * superadmin által beállított be/kikapcsolt állapot deploy/újrafuttatás után
+     * is megmarad. A táblában lévő, de configból eltűnt kódokat nem törli, csak
+     * jelzi.
      */
     protected $description = 'Insert missing country codes from config/countries.php into the countries table (never overwrites enabled state, never deletes).';
 
@@ -23,11 +27,9 @@ class SyncCountries extends Command
         $configCodes = config('countries');
         $existingCodes = Country::pluck('code')->all();
 
-        $missingCodes = array_diff($configCodes, $existingCodes);
-        foreach ($missingCodes as $code) {
-            Country::create(['code' => $code, 'enabled' => true]);
-        }
+        (new CountrySeeder())->run();
 
+        $missingCodes = array_diff($configCodes, $existingCodes);
         $staleCodes = array_diff($existingCodes, $configCodes);
 
         $this->printSection('Létrehozva', array_values($missingCodes), 'info');

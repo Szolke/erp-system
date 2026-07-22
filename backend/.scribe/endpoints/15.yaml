@@ -252,7 +252,7 @@ endpoints:
         name: status
         description: ''
         required: true
-        example: issued
+        example: service
         type: string
         enumValues:
           - active
@@ -265,7 +265,7 @@ endpoints:
     cleanBodyParameters:
       serial_number: b
       imei: 'n'
-      status: issued
+      status: service
     fileParameters: []
     responses: []
     responseFields: []

@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\EnyugtaSettingsController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\JobPositionController;
+use App\Http\Controllers\Api\ListPreferenceController;
 use App\Http\Controllers\Api\NavSubmissionLogController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\SalesGroupController;
@@ -205,6 +206,12 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
         Route::get('enyugta/reports/{report}', [EnyugtaReportController::class, 'show']);
         Route::get('enyugta/reports/{report}/export', [EnyugtaReportController::class, 'export']);
     });
+
+    // Lista-preferenciák (oszlopválasztó) — saját erőforrás, nincs külön jog
+    Route::put('list-preferences/{listKey}', [ListPreferenceController::class, 'update'])
+        ->where('listKey', '[a-z0-9_.]{1,64}');
+    Route::delete('list-preferences/{listKey}', [ListPreferenceController::class, 'destroy'])
+        ->where('listKey', '[a-z0-9_.]{1,64}');
 
     // API-tesztelő
     Route::get('api-tester/openapi', [ApiTesterController::class, 'openapi']);

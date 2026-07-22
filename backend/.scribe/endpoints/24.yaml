@@ -95,7 +95,7 @@ endpoints:
         name: global
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -106,7 +106,7 @@ endpoints:
         name: active
         description: ''
         required: false
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -135,8 +135,8 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      global: true
-      active: false
+      global: false
+      active: true
       sort_order: 27
       name: 'n'
     fileParameters: []

@@ -70,14 +70,14 @@ endpoints:
         name: documentSeries_id
         description: 'The ID of the documentSeries.'
         required: true
-        example: 1
+        example: 3
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      documentSeries_id: 1
+      documentSeries_id: 3
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -97,7 +97,7 @@ endpoints:
         name: reset_yearly
         description: ''
         required: true
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -105,7 +105,7 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       prefix: bngzmiyvdljnikhw
-      reset_yearly: false
+      reset_yearly: true
     fileParameters: []
     responses: []
     responseFields: []

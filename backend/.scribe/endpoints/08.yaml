@@ -78,7 +78,7 @@ endpoints:
         name: environment
         description: ''
         required: true
-        example: test
+        example: production
         type: string
         enumValues:
           - test
@@ -87,7 +87,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      environment: test
+      environment: production
     fileParameters: []
     responses: []
     responseFields: []

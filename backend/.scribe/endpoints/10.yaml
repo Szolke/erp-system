@@ -119,7 +119,7 @@ endpoints:
         name: is_active
         description: ''
         required: true
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -129,7 +129,7 @@ endpoints:
       merchant_id: b
       secret_key: 'n'
       sandbox: true
-      is_active: true
+      is_active: false
     fileParameters: []
     responses: []
     responseFields: []

@@ -25,15 +25,24 @@ endpoints:
       subgroup: ''
       subgroupDescription: ''
       title: |-
-        Cégszintű beküldés-lista — ALAPÉRTELMEZETTEN a hibás/elutasított/beavatkozást
-        igénylő számlák beküldéseire szűrve (?status=errors, az alapértelmezett) —
-        ez a napló egész célja: a hibás/függő halmaz mérete a monitorozható mutató.
+        Cégszintű beküldés-lista — EGY SOR = EGY ÉRINTETT SZÁMLA, nem naplósor. Ez a
+        képernyő arra válaszol, hogy "van-e bárhol baj?" — a válasz problémás SZÁMLÁK
+        halmaza, nem naplósoroké (három hibás kísérlet egy számláról EGY problémát
+        jelent, nem hármat). Soronként a számla adatai + a LEGUTOLSÓ naplóbejegyzés +
+        a hozzá tartozó kísérletek darabszáma (l. NavSubmissionLogGroupedResource).
       description: |-
-        ?status=pending a verdiktre váró beküldések, bármi más (pl. ?status=all) a
-        teljes napló. A szűrés a KAPCSOLÓDÓ SZÁMLA jelenlegi nav_status-án fut, nem
-        az egyes napló-sor saját (történeti) status/processing_result mezőjén — így
-        egy időközben sikerrel lezárt számla korábbi hibás kísérlete nem tartja
-        tévesen a "hibás" listán.
+        ALAPÉRTELMEZETTEN a hibás/elutasított/beavatkozást igénylő számlák beküldéseire
+        szűrve (?status=errors) — ez a napló egész célja: a hibás/függő halmaz mérete
+        a monitorozható mutató. ?status=pending a verdiktre váró, bármi más (pl.
+        ?status=all) a teljes napló. A szűrés a KAPCSOLÓDÓ SZÁMLA jelenlegi
+        nav_status-án fut, nem az egyes napló-sor saját (történeti) mezőjén — így egy
+        időközben sikerrel lezárt számla korábbi hibás kísérlete nem tartja tévesen a
+        "hibás" listán.
+
+        A lapozás SZÁMLÁKAT lapoz, nem sorokat: a "legutolsó napló-id számlánként"
+        alkérdés (MAX(id), ami az append-only táblán — UPDATED_AT nincs — biztonságos
+        proxy a created_at szerinti legutolsóra) pontosan egy sort ad számlánként, a
+        külső paginate() ezen fut, tehát a total/last_page már számla-számot tükröz.
       authenticated: true
       deprecated: false
     headers:
@@ -96,14 +105,14 @@ endpoints:
         name: nav_submission_log
         description: ''
         required: true
-        example: 16
+        example: 8
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      nav_submission_log: 16
+      nav_submission_log: 8
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -160,14 +169,14 @@ endpoints:
         name: invoice_id
         description: 'The ID of the invoice.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      invoice_id: 16
+      invoice_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

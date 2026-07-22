@@ -1,19 +1,22 @@
-name: 'API tesztelő'
+name: 'NAV eNyugta'
 description: ''
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/api-tester/openapi
+    uri: api/settings/enyugta
     metadata:
       custom: []
-      groupName: 'API tesztelő'
+      groupName: 'NAV eNyugta'
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'GET /api/settings/enyugta — a jelenlegi cég eNyugta beállításai.'
+      description: |-
+        A titkos mezők (login, password, signing_key, exchange_key) SOHA nem
+        kerülnek vissza — csak has_* boolean jelzi, hogy ki vannak-e töltve
+        (a CompanyNavCredentialController::toPublic() mintáját követi).
       authenticated: true
       deprecated: false
     headers:
@@ -37,6 +40,197 @@ endpoints:
           content-type: application/json
           vary: Origin
         description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: api/settings/enyugta
+    metadata:
+      custom: []
+      groupName: 'NAV eNyugta'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'PUT /api/settings/enyugta — mentés (create vagy update, cégenként egy sor).'
+      description: 'A jogosultság-ellenőrzés a FormRequest::authorize()-ban történik.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      login:
+        custom: []
+        name: login
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password:
+        custom: []
+        name: password
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: ']|{+-0pBNvYg'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      signing_key:
+        custom: []
+        name: signing_key
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: h
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      exchange_key:
+        custom: []
+        name: exchange_key
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      tax_number:
+        custom: []
+        name: tax_number
+        description: 'Must match the regex /^\d{8}$/.'
+        required: true
+        example: '56425593'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      mode:
+        custom: []
+        name: mode
+        description: ''
+        required: true
+        example: mock
+        type: string
+        enumValues:
+          - mock
+          - test
+          - live
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      base_url_override:
+        custom: []
+        name: base_url_override
+        description: 'Must be a valid URL. Must not be greater than 255 characters.'
+        required: false
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      send_empty_reports:
+        custom: []
+        name: send_empty_reports
+        description: ''
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      login: b
+      password: ']|{+-0pBNvYg'
+      signing_key: h
+      exchange_key: w
+      tax_number: '56425593'
+      mode: mock
+      base_url_override: 'n'
+      send_empty_reports: true
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/settings/enyugta/copy-from-nav
+    metadata:
+      custom: []
+      groupName: 'NAV eNyugta'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        POST /api/settings/enyugta/copy-from-nav — a company_nav_credentials
+        meglévő (test vagy production) sorából másolja át a login/password/
+        signing_key/exchange_key/tax_number mezőket.
+      description: |-
+        NEM tudjuk biztosan, hogy a technikai felhasználó ténylegesen
+        megosztható-e az Online Számla és az eNyugta interfész között (l.
+        docs/nav-enyugta-spec-jegyzetek.md 2. fejezet) — ez a végpont kényelmi
+        gyorsindítás, nem a helyesség garanciája; valós NAV-teszteléskor
+        derülhet ki, hogy külön technikai felhasználó szükséges.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      environment:
+        custom: []
+        name: environment
+        description: ''
+        required: false
+        example: production
+        type: string
+        enumValues:
+          - test
+          - production
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      environment: production
+    fileParameters: []
+    responses: []
     responseFields: []
     auth:
       - headers

@@ -391,6 +391,19 @@ Returns all definitions for the active company, optionally filtered by entity ty
                             </li>
                                                                         </ul>
                             </ul>
+                    <ul id="tocify-header-lista-preferenciak" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="lista-preferenciak">
+                    <a href="#lista-preferenciak">Lista-preferenciák</a>
+                </li>
+                                    <ul id="tocify-subheader-lista-preferenciak" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="lista-preferenciak-PUTapi-list-preferences--listKey-">
+                                <a href="#lista-preferenciak-PUTapi-list-preferences--listKey-">PUT /api/list-preferences/{listKey} — upsert a preferenciákat a bejelentkezett userhez</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="lista-preferenciak-DELETEapi-list-preferences--listKey-">
+                                <a href="#lista-preferenciak-DELETEapi-list-preferences--listKey-">DELETE /api/list-preferences/{listKey} — visszaáll a kód szerinti alapértelmezésre</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
                     <ul id="tocify-header-modulkezelo" class="tocify-header">
                 <li class="tocify-item level-1" data-unique="modulkezelo">
                     <a href="#modulkezelo">Modulkezelő</a>
@@ -442,15 +455,53 @@ Returns all definitions for the active company, optionally filtered by entity ty
                             </li>
                                                                         </ul>
                             </ul>
+                    <ul id="tocify-header-nav-enyugta" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="nav-enyugta">
+                    <a href="#nav-enyugta">NAV eNyugta</a>
+                </li>
+                                    <ul id="tocify-subheader-nav-enyugta" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="nav-enyugta-GETapi-settings-enyugta">
+                                <a href="#nav-enyugta-GETapi-settings-enyugta">GET /api/settings/enyugta — a jelenlegi cég eNyugta beállításai.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="nav-enyugta-PUTapi-settings-enyugta">
+                                <a href="#nav-enyugta-PUTapi-settings-enyugta">PUT /api/settings/enyugta — mentés (create vagy update, cégenként egy sor).</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="nav-enyugta-POSTapi-settings-enyugta-copy-from-nav">
+                                <a href="#nav-enyugta-POSTapi-settings-enyugta-copy-from-nav">POST /api/settings/enyugta/copy-from-nav — a company_nav_credentials
+meglévő (test vagy production) sorából másolja át a login/password/
+signing_key/exchange_key/tax_number mezőket.</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
+                    <ul id="tocify-header-nav-enyugta-jelentesek" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="nav-enyugta-jelentesek">
+                    <a href="#nav-enyugta-jelentesek">NAV eNyugta — jelentések</a>
+                </li>
+                                    <ul id="tocify-subheader-nav-enyugta-jelentesek" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="nav-enyugta-jelentesek-GETapi-enyugta-reports">
+                                <a href="#nav-enyugta-jelentesek-GETapi-enyugta-reports">GET /api/enyugta/reports — lista, szűrhető dátumtartományra és státuszra.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="nav-enyugta-jelentesek-GETapi-enyugta-reports--report_id-">
+                                <a href="#nav-enyugta-jelentesek-GETapi-enyugta-reports--report_id-">GET /api/enyugta/reports/{report} — részletek, kategóriánkénti sorokkal.</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="nav-enyugta-jelentesek-GETapi-enyugta-reports--report_id--export">
+                                <a href="#nav-enyugta-jelentesek-GETapi-enyugta-reports--report_id--export">GET /api/enyugta/reports/{report}/export — CSV (D7 vészkijárat-export a
+KOBAK-portálon való kézi rögzítéshez, mivel a gépi interfész bázis-URL-je
+nincs publikálva, l. docs/nav-enyugta-spec-jegyzetek.md).</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
                     <ul id="tocify-header-nav-naplo" class="tocify-header">
                 <li class="tocify-item level-1" data-unique="nav-naplo">
                     <a href="#nav-naplo">NAV napló</a>
                 </li>
                                     <ul id="tocify-subheader-nav-naplo" class="tocify-subheader">
                                                     <li class="tocify-item level-2" data-unique="nav-naplo-GETapi-nav-submissions">
-                                <a href="#nav-naplo-GETapi-nav-submissions">Cégszintű beküldés-lista — ALAPÉRTELMEZETTEN a hibás/elutasított/beavatkozást
-igénylő számlák beküldéseire szűrve (?status=errors, az alapértelmezett) —
-ez a napló egész célja: a hibás/függő halmaz mérete a monitorozható mutató.</a>
+                                <a href="#nav-naplo-GETapi-nav-submissions">Cégszintű beküldés-lista — EGY SOR = EGY ÉRINTETT SZÁMLA, nem naplósor. Ez a
+képernyő arra válaszol, hogy "van-e bárhol baj?" — a válasz problémás SZÁMLÁK
+halmaza, nem naplósoroké (három hibás kísérlet egy számláról EGY problémát
+jelent, nem hármat). Soronként a számla adatai + a LEGUTOLSÓ naplóbejegyzés +
+a hozzá tartozó kísérletek darabszáma (l. NavSubmissionLogGroupedResource).</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="nav-naplo-GETapi-nav-submissions--nav_submission_log-">
                                 <a href="#nav-naplo-GETapi-nav-submissions--nav_submission_log-">Egyetlen naplóbejegyzés részletei — EZ adja vissza a request_xml/response_xml-t.</a>
@@ -630,7 +681,7 @@ ez a napló egész célja: a hibás/függő halmaz mérete a monitorozható muta
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: July 20, 2026</li>
+        <li>Last updated: July 22, 2026</li>
     </ul>
 </div>
 
@@ -964,7 +1015,7 @@ by SimplePayIpnController instead.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/invoices/16/payments" \
+    --get "http://localhost/api/invoices/1/payments" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -972,7 +1023,7 @@ by SimplePayIpnController instead.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/16/payments"
+    "http://localhost/api/invoices/1/payments"
 );
 
 const headers = {
@@ -1098,10 +1149,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="GETapi-invoices--invoice_id--payments"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>16</code></p>
+<p>The ID of the invoice. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -1119,14 +1170,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/invoices/16/payments" \
+    "http://localhost/api/invoices/1/payments" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
     \"payment_method_id\": 16,
     \"amount\": 39,
-    \"paid_at\": \"2026-07-20T09:09:01\",
+    \"paid_at\": \"2026-07-22T05:18:37\",
     \"reference\": \"g\"
 }"
 </code></pre></div>
@@ -1134,7 +1185,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/16/payments"
+    "http://localhost/api/invoices/1/payments"
 );
 
 const headers = {
@@ -1146,7 +1197,7 @@ const headers = {
 let body = {
     "payment_method_id": 16,
     "amount": 39,
-    "paid_at": "2026-07-20T09:09:01",
+    "paid_at": "2026-07-22T05:18:37",
     "reference": "g"
 };
 
@@ -1251,10 +1302,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="POSTapi-invoices--invoice_id--payments"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>16</code></p>
+<p>The ID of the invoice. Example: <code>1</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -1288,10 +1339,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="paid_at"                data-endpoint="POSTapi-invoices--invoice_id--payments"
-               value="2026-07-20T09:09:01"
+               value="2026-07-22T05:18:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-20T09:09:01</code></p>
+<p>Must be a valid date. Example: <code>2026-07-22T05:18:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>reference</code></b>&nbsp;&nbsp;
@@ -1768,20 +1819,20 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/settings/document-series/1" \
+    "http://localhost/api/settings/document-series/3" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
     \"prefix\": \"bngzmiyvdljnikhw\",
-    \"reset_yearly\": false
+    \"reset_yearly\": true
 }"
 </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/settings/document-series/1"
+    "http://localhost/api/settings/document-series/3"
 );
 
 const headers = {
@@ -1792,7 +1843,7 @@ const headers = {
 
 let body = {
     "prefix": "bngzmiyvdljnikhw",
-    "reset_yearly": false
+    "reset_yearly": true
 };
 
 fetch(url, {
@@ -1896,10 +1947,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="documentSeries_id"                data-endpoint="PUTapi-settings-document-series--documentSeries_id-"
-               value="1"
+               value="3"
                data-component="url">
     <br>
-<p>The ID of the documentSeries. Example: <code>1</code></p>
+<p>The ID of the documentSeries. Example: <code>3</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -1934,7 +1985,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
         </form>
 
@@ -4128,7 +4179,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
-    --form "logo=@/tmp/phpohqlgvtnovjl3FUwUWr" </code></pre></div>
+    --form "logo=@/tmp/php4ej8i6rdp5662qpFiVS" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -4249,7 +4300,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpohqlgvtnovjl3FUwUWr</code></p>
+<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/php4ej8i6rdp5662qpFiVS</code></p>
         </div>
         </form>
 
@@ -5145,7 +5196,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"options\": [
         \"n\"
     ],
-    \"is_required\": false,
+    \"is_required\": true,
     \"sort_order\": 84,
     \"is_active\": true
 }"
@@ -5171,7 +5222,7 @@ let body = {
     "options": [
         "n"
     ],
-    "is_required": false,
+    "is_required": true,
     "sort_order": 84,
     "is_active": true
 };
@@ -5352,7 +5403,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>sort_order</code></b>&nbsp;&nbsp;
@@ -5416,7 +5467,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     ],
     \"is_required\": false,
     \"sort_order\": 84,
-    \"is_active\": false
+    \"is_active\": true
 }"
 </code></pre></div>
 
@@ -5440,7 +5491,7 @@ let body = {
     ],
     "is_required": false,
     "sort_order": 84,
-    "is_active": false
+    "is_active": true
 };
 
 fetch(url, {
@@ -5642,7 +5693,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
         </form>
 
@@ -7771,7 +7822,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"serial_number\": \"b\",
     \"imei\": \"n\",
-    \"status\": \"issued\"
+    \"status\": \"service\"
 }"
 </code></pre></div>
 
@@ -7790,7 +7841,7 @@ const headers = {
 let body = {
     "serial_number": "b",
     "imei": "n",
-    "status": "issued"
+    "status": "service"
 };
 
 fetch(url, {
@@ -7935,10 +7986,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="status"                data-endpoint="PUTapi-assets--id-"
-               value="issued"
+               value="service"
                data-component="body">
     <br>
-<p>Example: <code>issued</code></p>
+<p>Example: <code>service</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>active</code></li> <li><code>issued</code></li> <li><code>service</code></li> <li><code>scrapped</code></li></ul>
         </div>
@@ -10982,7 +11033,7 @@ hívás magától AuthorizationException-t (403) dob.</p>
     \"date_basis\": \"fulfillment\",
     \"granularity\": \"month\",
     \"partner_id\": 16,
-    \"status\": \"open\",
+    \"status\": \"partial\",
     \"include_receipts\": false
 }"
 </code></pre></div>
@@ -11005,7 +11056,7 @@ let body = {
     "date_basis": "fulfillment",
     "granularity": "month",
     "partner_id": 16,
-    "status": "open",
+    "status": "partial",
     "include_receipts": false
 };
 
@@ -11190,10 +11241,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="status"                data-endpoint="GETapi-reports-invoices"
-               value="open"
+               value="partial"
                data-component="body">
     <br>
-<p>Example: <code>open</code></p>
+<p>Example: <code>partial</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>open</code></li> <li><code>partial</code></li> <li><code>paid</code></li></ul>
         </div>
@@ -11242,10 +11293,10 @@ Must be one of:
     --data "{
     \"from\": \"4255-93\",
     \"to\": \"4255-93\",
-    \"date_basis\": \"issue\",
+    \"date_basis\": \"fulfillment\",
     \"limit\": 17,
     \"offset\": 8,
-    \"order_by\": \"revenue\"
+    \"order_by\": \"quantity\"
 }"
 </code></pre></div>
 
@@ -11264,10 +11315,10 @@ const headers = {
 let body = {
     "from": "4255-93",
     "to": "4255-93",
-    "date_basis": "issue",
+    "date_basis": "fulfillment",
     "limit": 17,
     "offset": 8,
-    "order_by": "revenue"
+    "order_by": "quantity"
 };
 
 fetch(url, {
@@ -11411,10 +11462,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_basis"                data-endpoint="GETapi-reports-products"
-               value="issue"
+               value="fulfillment"
                data-component="body">
     <br>
-<p>Example: <code>issue</code></p>
+<p>Example: <code>fulfillment</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>fulfillment</code></li> <li><code>issue</code></li></ul>
         </div>
@@ -11449,10 +11500,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="order_by"                data-endpoint="GETapi-reports-products"
-               value="revenue"
+               value="quantity"
                data-component="body">
     <br>
-<p>Example: <code>revenue</code></p>
+<p>Example: <code>quantity</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>revenue</code></li> <li><code>quantity</code></li></ul>
         </div>
@@ -11477,7 +11528,7 @@ Must be one of:
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"as_of\": \"2026-07-20\",
+    \"as_of\": \"2026-07-22\",
     \"partner_id\": 16
 }"
 </code></pre></div>
@@ -11495,7 +11546,7 @@ const headers = {
 };
 
 let body = {
-    "as_of": "2026-07-20",
+    "as_of": "2026-07-22",
     "partner_id": 16
 };
 
@@ -11616,10 +11667,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="as_of"                data-endpoint="GETapi-reports-receivables-aging"
-               value="2026-07-20"
+               value="2026-07-22"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-07-20</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-07-22</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>partner_id</code></b>&nbsp;&nbsp;
@@ -11983,6 +12034,415 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                     </form>
 
+                <h1 id="lista-preferenciak">Lista-preferenciák</h1>
+
+    <p>Saját-erőforrás kezelés: nincs külön jogosultsági kulcs, minden bejelentkezett
+felhasználó csak a SAJÁT (user_id, company_id, list_key) sorát írhatja/törölheti.
+A company_id-t a BelongsToCompany global scope / CurrentCompany adja; route model
+binding nincs (a {listKey} nem egy modell azonosítója), ezért a user-izolációt
+explicit where('user_id', ...) adja, nem az EnforcesCompanyScope minta.</p>
+
+                                <h2 id="lista-preferenciak-PUTapi-list-preferences--listKey-">PUT /api/list-preferences/{listKey} — upsert a preferenciákat a bejelentkezett userhez</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-PUTapi-list-preferences--listKey-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PUT \
+    "http://localhost/api/list-preferences/j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3" \
+    --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"columns\": {
+        \"visible\": [
+            \"b\"
+        ],
+        \"order\": [
+            \"n\"
+        ]
+    },
+    \"page_size\": 5,
+    \"sort\": {
+        \"by\": \"z\",
+        \"dir\": \"asc\"
+    }
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/list-preferences/j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3"
+);
+
+const headers = {
+    "Authorization": "Bearer 6g43cv8PD1aE5beadkZfhV6",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "columns": {
+        "visible": [
+            "b"
+        ],
+        "order": [
+            "n"
+        ]
+    },
+    "page_size": 5,
+    "sort": {
+        "by": "z",
+        "dir": "asc"
+    }
+};
+
+fetch(url, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-PUTapi-list-preferences--listKey-">
+</span>
+<span id="execution-results-PUTapi-list-preferences--listKey-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-PUTapi-list-preferences--listKey-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PUTapi-list-preferences--listKey-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PUTapi-list-preferences--listKey-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-PUTapi-list-preferences--listKey-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-PUTapi-list-preferences--listKey-" data-method="PUT"
+      data-path="api/list-preferences/{listKey}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PUTapi-list-preferences--listKey-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PUTapi-list-preferences--listKey-"
+                    onclick="tryItOut('PUTapi-list-preferences--listKey-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PUTapi-list-preferences--listKey-"
+                    onclick="cancelTryOut('PUTapi-list-preferences--listKey-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PUTapi-list-preferences--listKey-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-darkblue">PUT</small>
+            <b><code>api/list-preferences/{listKey}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="PUTapi-list-preferences--listKey-"
+               value="Bearer 6g43cv8PD1aE5beadkZfhV6"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer 6g43cv8PD1aE5beadkZfhV6</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PUTapi-list-preferences--listKey-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PUTapi-list-preferences--listKey-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>listKey</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="listKey"                data-endpoint="PUTapi-list-preferences--listKey-"
+               value="j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3"
+               data-component="url">
+    <br>
+<p>Example: <code>j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>columns</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+<br>
+
+            </summary>
+                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>visible</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="columns.visible[0]"                data-endpoint="PUTapi-list-preferences--listKey-"
+               data-component="body">
+        <input type="text" style="display: none"
+               name="columns.visible[1]"                data-endpoint="PUTapi-list-preferences--listKey-"
+               data-component="body">
+    <br>
+<p>Must match the regex /^[a-z0-9_.]+$/. Must not be greater than 64 characters.</p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>order</code></b>&nbsp;&nbsp;
+<small>string[]</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="columns.order[0]"                data-endpoint="PUTapi-list-preferences--listKey-"
+               data-component="body">
+        <input type="text" style="display: none"
+               name="columns.order[1]"                data-endpoint="PUTapi-list-preferences--listKey-"
+               data-component="body">
+    <br>
+<p>Must match the regex /^[a-z0-9_.]+$/. Must not be greater than 64 characters.</p>
+                    </div>
+                                    </details>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>page_size</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="page_size"                data-endpoint="PUTapi-list-preferences--listKey-"
+               value="5"
+               data-component="body">
+    <br>
+<p>Must be between 5 and 500. Example: <code>5</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>sort</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+<br>
+
+            </summary>
+                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>by</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="sort.by"                data-endpoint="PUTapi-list-preferences--listKey-"
+               value="z"
+               data-component="body">
+    <br>
+<p>Must match the regex /^[a-z0-9_.]+$/. Must not be greater than 64 characters. Example: <code>z</code></p>
+                    </div>
+                                                                <div style="margin-left: 14px; clear: unset;">
+                        <b style="line-height: 2;"><code>dir</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="sort.dir"                data-endpoint="PUTapi-list-preferences--listKey-"
+               value="asc"
+               data-component="body">
+    <br>
+<p>Example: <code>asc</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>asc</code></li> <li><code>desc</code></li></ul>
+                    </div>
+                                    </details>
+        </div>
+        </form>
+
+                    <h2 id="lista-preferenciak-DELETEapi-list-preferences--listKey-">DELETE /api/list-preferences/{listKey} — visszaáll a kód szerinti alapértelmezésre</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-DELETEapi-list-preferences--listKey-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request DELETE \
+    "http://localhost/api/list-preferences/j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3" \
+    --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/list-preferences/j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3"
+);
+
+const headers = {
+    "Authorization": "Bearer 6g43cv8PD1aE5beadkZfhV6",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "DELETE",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-DELETEapi-list-preferences--listKey-">
+</span>
+<span id="execution-results-DELETEapi-list-preferences--listKey-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-DELETEapi-list-preferences--listKey-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-DELETEapi-list-preferences--listKey-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-DELETEapi-list-preferences--listKey-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-DELETEapi-list-preferences--listKey-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-DELETEapi-list-preferences--listKey-" data-method="DELETE"
+      data-path="api/list-preferences/{listKey}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('DELETEapi-list-preferences--listKey-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-DELETEapi-list-preferences--listKey-"
+                    onclick="tryItOut('DELETEapi-list-preferences--listKey-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-DELETEapi-list-preferences--listKey-"
+                    onclick="cancelTryOut('DELETEapi-list-preferences--listKey-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-DELETEapi-list-preferences--listKey-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-red">DELETE</small>
+            <b><code>api/list-preferences/{listKey}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="DELETEapi-list-preferences--listKey-"
+               value="Bearer 6g43cv8PD1aE5beadkZfhV6"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer 6g43cv8PD1aE5beadkZfhV6</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="DELETEapi-list-preferences--listKey-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="DELETEapi-list-preferences--listKey-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>listKey</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="listKey"                data-endpoint="DELETEapi-list-preferences--listKey-"
+               value="j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3"
+               data-component="url">
+    <br>
+<p>Example: <code>j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3</code></p>
+            </div>
+                    </form>
+
                 <h1 id="modulkezelo">Modulkezelő</h1>
 
     
@@ -12180,7 +12640,7 @@ műveletek erre a companyId-re futnak.</p>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"enabled\": true
+    \"enabled\": false
 }"
 </code></pre></div>
 
@@ -12197,7 +12657,7 @@ const headers = {
 };
 
 let body = {
-    "enabled": true
+    "enabled": false
 };
 
 fetch(url, {
@@ -12327,7 +12787,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
         </form>
 
@@ -12501,8 +12961,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"global\": true,
-    \"active\": false,
+    \"global\": false,
+    \"active\": true,
     \"sort_order\": 27,
     \"name\": \"n\"
 }"
@@ -12521,8 +12981,8 @@ const headers = {
 };
 
 let body = {
-    "global": true,
-    "active": false,
+    "global": false,
+    "active": true,
     "sort_order": 27,
     "name": "n"
 };
@@ -12641,7 +13101,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>active</code></b>&nbsp;&nbsp;
@@ -12663,7 +13123,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>sort_order</code></b>&nbsp;&nbsp;
@@ -13199,7 +13659,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"environment\": \"test\"
+    \"environment\": \"production\"
 }"
 </code></pre></div>
 
@@ -13216,7 +13676,7 @@ const headers = {
 };
 
 let body = {
-    "environment": "test"
+    "environment": "production"
 };
 
 fetch(url, {
@@ -13320,10 +13780,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="environment"                data-endpoint="PATCHapi-company-nav-active-environment"
-               value="test"
+               value="production"
                data-component="body">
     <br>
-<p>Example: <code>test</code></p>
+<p>Example: <code>production</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>test</code></li> <li><code>production</code></li></ul>
         </div>
@@ -13703,6 +14163,1075 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                     </form>
 
+                <h1 id="nav-enyugta">NAV eNyugta</h1>
+
+    
+
+                                <h2 id="nav-enyugta-GETapi-settings-enyugta">GET /api/settings/enyugta — a jelenlegi cég eNyugta beállításai.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>A titkos mezők (login, password, signing_key, exchange<em>key) SOHA nem
+kerülnek vissza — csak has</em>* boolean jelzi, hogy ki vannak-e töltve
+(a CompanyNavCredentialController::toPublic() mintáját követi).</p>
+
+<span id="example-requests-GETapi-settings-enyugta">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/settings/enyugta" \
+    --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/settings/enyugta"
+);
+
+const headers = {
+    "Authorization": "Bearer 6g43cv8PD1aE5beadkZfhV6",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-settings-enyugta">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-settings-enyugta" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-settings-enyugta"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-settings-enyugta"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-settings-enyugta" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-settings-enyugta">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-settings-enyugta" data-method="GET"
+      data-path="api/settings/enyugta"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-settings-enyugta', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-settings-enyugta"
+                    onclick="tryItOut('GETapi-settings-enyugta');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-settings-enyugta"
+                    onclick="cancelTryOut('GETapi-settings-enyugta');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-settings-enyugta"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/settings/enyugta</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-settings-enyugta"
+               value="Bearer 6g43cv8PD1aE5beadkZfhV6"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer 6g43cv8PD1aE5beadkZfhV6</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-settings-enyugta"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-settings-enyugta"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="nav-enyugta-PUTapi-settings-enyugta">PUT /api/settings/enyugta — mentés (create vagy update, cégenként egy sor).</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>A jogosultság-ellenőrzés a FormRequest::authorize()-ban történik.</p>
+
+<span id="example-requests-PUTapi-settings-enyugta">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PUT \
+    "http://localhost/api/settings/enyugta" \
+    --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"login\": \"b\",
+    \"password\": \"]|{+-0pBNvYg\",
+    \"signing_key\": \"h\",
+    \"exchange_key\": \"w\",
+    \"tax_number\": \"56425593\",
+    \"mode\": \"mock\",
+    \"base_url_override\": \"n\",
+    \"send_empty_reports\": true
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/settings/enyugta"
+);
+
+const headers = {
+    "Authorization": "Bearer 6g43cv8PD1aE5beadkZfhV6",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "login": "b",
+    "password": "]|{+-0pBNvYg",
+    "signing_key": "h",
+    "exchange_key": "w",
+    "tax_number": "56425593",
+    "mode": "mock",
+    "base_url_override": "n",
+    "send_empty_reports": true
+};
+
+fetch(url, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-PUTapi-settings-enyugta">
+</span>
+<span id="execution-results-PUTapi-settings-enyugta" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-PUTapi-settings-enyugta"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PUTapi-settings-enyugta"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PUTapi-settings-enyugta" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-PUTapi-settings-enyugta">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-PUTapi-settings-enyugta" data-method="PUT"
+      data-path="api/settings/enyugta"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PUTapi-settings-enyugta', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PUTapi-settings-enyugta"
+                    onclick="tryItOut('PUTapi-settings-enyugta');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PUTapi-settings-enyugta"
+                    onclick="cancelTryOut('PUTapi-settings-enyugta');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PUTapi-settings-enyugta"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-darkblue">PUT</small>
+            <b><code>api/settings/enyugta</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="PUTapi-settings-enyugta"
+               value="Bearer 6g43cv8PD1aE5beadkZfhV6"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer 6g43cv8PD1aE5beadkZfhV6</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PUTapi-settings-enyugta"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PUTapi-settings-enyugta"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>login</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="login"                data-endpoint="PUTapi-settings-enyugta"
+               value="b"
+               data-component="body">
+    <br>
+<p>Must not be greater than 255 characters. Example: <code>b</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="password"                data-endpoint="PUTapi-settings-enyugta"
+               value="]|{+-0pBNvYg"
+               data-component="body">
+    <br>
+<p>Must not be greater than 255 characters. Example: <code>]|{+-0pBNvYg</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>signing_key</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="signing_key"                data-endpoint="PUTapi-settings-enyugta"
+               value="h"
+               data-component="body">
+    <br>
+<p>Must not be greater than 255 characters. Example: <code>h</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>exchange_key</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="exchange_key"                data-endpoint="PUTapi-settings-enyugta"
+               value="w"
+               data-component="body">
+    <br>
+<p>Must not be greater than 255 characters. Example: <code>w</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>tax_number</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="tax_number"                data-endpoint="PUTapi-settings-enyugta"
+               value="56425593"
+               data-component="body">
+    <br>
+<p>Must match the regex /^\d{8}$/. Example: <code>56425593</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>mode</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="mode"                data-endpoint="PUTapi-settings-enyugta"
+               value="mock"
+               data-component="body">
+    <br>
+<p>Example: <code>mock</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>mock</code></li> <li><code>test</code></li> <li><code>live</code></li></ul>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>base_url_override</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="base_url_override"                data-endpoint="PUTapi-settings-enyugta"
+               value="n"
+               data-component="body">
+    <br>
+<p>Must be a valid URL. Must not be greater than 255 characters. Example: <code>n</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>send_empty_reports</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <label data-endpoint="PUTapi-settings-enyugta" style="display: none">
+            <input type="radio" name="send_empty_reports"
+                   value="true"
+                   data-endpoint="PUTapi-settings-enyugta"
+                   data-component="body"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="PUTapi-settings-enyugta" style="display: none">
+            <input type="radio" name="send_empty_reports"
+                   value="false"
+                   data-endpoint="PUTapi-settings-enyugta"
+                   data-component="body"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>Example: <code>true</code></p>
+        </div>
+        </form>
+
+                    <h2 id="nav-enyugta-POSTapi-settings-enyugta-copy-from-nav">POST /api/settings/enyugta/copy-from-nav — a company_nav_credentials
+meglévő (test vagy production) sorából másolja át a login/password/
+signing_key/exchange_key/tax_number mezőket.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>NEM tudjuk biztosan, hogy a technikai felhasználó ténylegesen
+megosztható-e az Online Számla és az eNyugta interfész között (l.
+docs/nav-enyugta-spec-jegyzetek.md 2. fejezet) — ez a végpont kényelmi
+gyorsindítás, nem a helyesség garanciája; valós NAV-teszteléskor
+derülhet ki, hogy külön technikai felhasználó szükséges.</p>
+
+<span id="example-requests-POSTapi-settings-enyugta-copy-from-nav">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost/api/settings/enyugta/copy-from-nav" \
+    --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"environment\": \"production\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/settings/enyugta/copy-from-nav"
+);
+
+const headers = {
+    "Authorization": "Bearer 6g43cv8PD1aE5beadkZfhV6",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "environment": "production"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-settings-enyugta-copy-from-nav">
+</span>
+<span id="execution-results-POSTapi-settings-enyugta-copy-from-nav" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-settings-enyugta-copy-from-nav"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-settings-enyugta-copy-from-nav"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-settings-enyugta-copy-from-nav" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-settings-enyugta-copy-from-nav">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-settings-enyugta-copy-from-nav" data-method="POST"
+      data-path="api/settings/enyugta/copy-from-nav"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-settings-enyugta-copy-from-nav', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-settings-enyugta-copy-from-nav"
+                    onclick="tryItOut('POSTapi-settings-enyugta-copy-from-nav');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-settings-enyugta-copy-from-nav"
+                    onclick="cancelTryOut('POSTapi-settings-enyugta-copy-from-nav');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-settings-enyugta-copy-from-nav"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/settings/enyugta/copy-from-nav</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-settings-enyugta-copy-from-nav"
+               value="Bearer 6g43cv8PD1aE5beadkZfhV6"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer 6g43cv8PD1aE5beadkZfhV6</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-settings-enyugta-copy-from-nav"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-settings-enyugta-copy-from-nav"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>environment</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="environment"                data-endpoint="POSTapi-settings-enyugta-copy-from-nav"
+               value="production"
+               data-component="body">
+    <br>
+<p>Example: <code>production</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>test</code></li> <li><code>production</code></li></ul>
+        </div>
+        </form>
+
+                <h1 id="nav-enyugta-jelentesek">NAV eNyugta — jelentések</h1>
+
+    
+
+                                <h2 id="nav-enyugta-jelentesek-GETapi-enyugta-reports">GET /api/enyugta/reports — lista, szűrhető dátumtartományra és státuszra.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-enyugta-reports">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/enyugta/reports" \
+    --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"date_from\": \"2026-07-22T05:18:37\",
+    \"date_to\": \"2026-07-22T05:18:37\",
+    \"status\": \"rejected\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/enyugta/reports"
+);
+
+const headers = {
+    "Authorization": "Bearer 6g43cv8PD1aE5beadkZfhV6",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "date_from": "2026-07-22T05:18:37",
+    "date_to": "2026-07-22T05:18:37",
+    "status": "rejected"
+};
+
+fetch(url, {
+    method: "GET",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-enyugta-reports">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-enyugta-reports" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-enyugta-reports"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-enyugta-reports"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-enyugta-reports" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-enyugta-reports">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-enyugta-reports" data-method="GET"
+      data-path="api/enyugta/reports"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-enyugta-reports', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-enyugta-reports"
+                    onclick="tryItOut('GETapi-enyugta-reports');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-enyugta-reports"
+                    onclick="cancelTryOut('GETapi-enyugta-reports');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-enyugta-reports"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/enyugta/reports</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-enyugta-reports"
+               value="Bearer 6g43cv8PD1aE5beadkZfhV6"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer 6g43cv8PD1aE5beadkZfhV6</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-enyugta-reports"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-enyugta-reports"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>date_from</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="date_from"                data-endpoint="GETapi-enyugta-reports"
+               value="2026-07-22T05:18:37"
+               data-component="body">
+    <br>
+<p>Must be a valid date. Example: <code>2026-07-22T05:18:37</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>date_to</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="date_to"                data-endpoint="GETapi-enyugta-reports"
+               value="2026-07-22T05:18:37"
+               data-component="body">
+    <br>
+<p>Must be a valid date. Example: <code>2026-07-22T05:18:37</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="status"                data-endpoint="GETapi-enyugta-reports"
+               value="rejected"
+               data-component="body">
+    <br>
+<p>Example: <code>rejected</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>draft</code></li> <li><code>ready</code></li> <li><code>sending</code></li> <li><code>accepted</code></li> <li><code>rejected</code></li></ul>
+        </div>
+        </form>
+
+                    <h2 id="nav-enyugta-jelentesek-GETapi-enyugta-reports--report_id-">GET /api/enyugta/reports/{report} — részletek, kategóriánkénti sorokkal.</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-enyugta-reports--report_id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/enyugta/reports/1" \
+    --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/enyugta/reports/1"
+);
+
+const headers = {
+    "Authorization": "Bearer 6g43cv8PD1aE5beadkZfhV6",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-enyugta-reports--report_id-">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-enyugta-reports--report_id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-enyugta-reports--report_id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-enyugta-reports--report_id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-enyugta-reports--report_id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-enyugta-reports--report_id-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-enyugta-reports--report_id-" data-method="GET"
+      data-path="api/enyugta/reports/{report_id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-enyugta-reports--report_id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-enyugta-reports--report_id-"
+                    onclick="tryItOut('GETapi-enyugta-reports--report_id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-enyugta-reports--report_id-"
+                    onclick="cancelTryOut('GETapi-enyugta-reports--report_id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-enyugta-reports--report_id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/enyugta/reports/{report_id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-enyugta-reports--report_id-"
+               value="Bearer 6g43cv8PD1aE5beadkZfhV6"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer 6g43cv8PD1aE5beadkZfhV6</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-enyugta-reports--report_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-enyugta-reports--report_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>report_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="report_id"                data-endpoint="GETapi-enyugta-reports--report_id-"
+               value="1"
+               data-component="url">
+    <br>
+<p>The ID of the report. Example: <code>1</code></p>
+            </div>
+                    </form>
+
+                    <h2 id="nav-enyugta-jelentesek-GETapi-enyugta-reports--report_id--export">GET /api/enyugta/reports/{report}/export — CSV (D7 vészkijárat-export a
+KOBAK-portálon való kézi rögzítéshez, mivel a gépi interfész bázis-URL-je
+nincs publikálva, l. docs/nav-enyugta-spec-jegyzetek.md).</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-enyugta-reports--report_id--export">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost/api/enyugta/reports/1/export" \
+    --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost/api/enyugta/reports/1/export"
+);
+
+const headers = {
+    "Authorization": "Bearer 6g43cv8PD1aE5beadkZfhV6",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-enyugta-reports--report_id--export">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+vary: Origin
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;message&quot;: &quot;Unauthenticated.&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-enyugta-reports--report_id--export" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-enyugta-reports--report_id--export"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-enyugta-reports--report_id--export"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-enyugta-reports--report_id--export" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-enyugta-reports--report_id--export">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-enyugta-reports--report_id--export" data-method="GET"
+      data-path="api/enyugta/reports/{report_id}/export"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-enyugta-reports--report_id--export', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-enyugta-reports--report_id--export"
+                    onclick="tryItOut('GETapi-enyugta-reports--report_id--export');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-enyugta-reports--report_id--export"
+                    onclick="cancelTryOut('GETapi-enyugta-reports--report_id--export');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-enyugta-reports--report_id--export"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/enyugta/reports/{report_id}/export</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-enyugta-reports--report_id--export"
+               value="Bearer 6g43cv8PD1aE5beadkZfhV6"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer 6g43cv8PD1aE5beadkZfhV6</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-enyugta-reports--report_id--export"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-enyugta-reports--report_id--export"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>report_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="report_id"                data-endpoint="GETapi-enyugta-reports--report_id--export"
+               value="1"
+               data-component="url">
+    <br>
+<p>The ID of the report. Example: <code>1</code></p>
+            </div>
+                    </form>
+
                 <h1 id="nav-naplo">NAV napló</h1>
 
     <p>Read-only nézetek a nav_submission_logs táblára — l. docs/nav-logging-audit.md
@@ -13711,19 +15240,27 @@ A NavSubmissionLog modellen szándékosan NINCS BelongsToCompany trait (l. a
 modell kommentje) — minden lekérdezés a scopeForCompany()-n vagy explicit
 assertBelongsToCurrentCompany()-n át megy, sosem globális scope-ra hagyatkozva.</p>
 
-                                <h2 id="nav-naplo-GETapi-nav-submissions">Cégszintű beküldés-lista — ALAPÉRTELMEZETTEN a hibás/elutasított/beavatkozást
-igénylő számlák beküldéseire szűrve (?status=errors, az alapértelmezett) —
-ez a napló egész célja: a hibás/függő halmaz mérete a monitorozható mutató.</h2>
+                                <h2 id="nav-naplo-GETapi-nav-submissions">Cégszintű beküldés-lista — EGY SOR = EGY ÉRINTETT SZÁMLA, nem naplósor. Ez a
+képernyő arra válaszol, hogy &quot;van-e bárhol baj?&quot; — a válasz problémás SZÁMLÁK
+halmaza, nem naplósoroké (három hibás kísérlet egy számláról EGY problémát
+jelent, nem hármat). Soronként a számla adatai + a LEGUTOLSÓ naplóbejegyzés +
+a hozzá tartozó kísérletek darabszáma (l. NavSubmissionLogGroupedResource).</h2>
 
 <p>
 <small class="badge badge-darkred">requires authentication</small>
 </p>
 
-<p>?status=pending a verdiktre váró beküldések, bármi más (pl. ?status=all) a
-teljes napló. A szűrés a KAPCSOLÓDÓ SZÁMLA jelenlegi nav_status-án fut, nem
-az egyes napló-sor saját (történeti) status/processing_result mezőjén — így
-egy időközben sikerrel lezárt számla korábbi hibás kísérlete nem tartja
-tévesen a "hibás" listán.</p>
+<p>ALAPÉRTELMEZETTEN a hibás/elutasított/beavatkozást igénylő számlák beküldéseire
+szűrve (?status=errors) — ez a napló egész célja: a hibás/függő halmaz mérete
+a monitorozható mutató. ?status=pending a verdiktre váró, bármi más (pl.
+?status=all) a teljes napló. A szűrés a KAPCSOLÓDÓ SZÁMLA jelenlegi
+nav_status-án fut, nem az egyes napló-sor saját (történeti) mezőjén — így egy
+időközben sikerrel lezárt számla korábbi hibás kísérlete nem tartja tévesen a
+"hibás" listán.</p>
+<p>A lapozás SZÁMLÁKAT lapoz, nem sorokat: a "legutolsó napló-id számlánként"
+alkérdés (MAX(id), ami az append-only táblán — UPDATED_AT nincs — biztonságos
+proxy a created_at szerinti legutolsóra) pontosan egy sort ad számlánként, a
+külső paginate() ezen fut, tehát a total/last_page már számla-számot tükröz.</p>
 
 <span id="example-requests-GETapi-nav-submissions">
 <blockquote>Example request:</blockquote>
@@ -13873,7 +15410,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/nav-submissions/16" \
+    --get "http://localhost/api/nav-submissions/8" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -13881,7 +15418,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/nav-submissions/16"
+    "http://localhost/api/nav-submissions/8"
 );
 
 const headers = {
@@ -14007,10 +15544,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="nav_submission_log"                data-endpoint="GETapi-nav-submissions--nav_submission_log-"
-               value="16"
+               value="8"
                data-component="url">
     <br>
-<p>Example: <code>16</code></p>
+<p>Example: <code>8</code></p>
             </div>
                     </form>
 
@@ -14029,7 +15566,7 @@ kötelező az assertBelongsToCurrentCompany().</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/invoices/16/nav-submissions" \
+    --get "http://localhost/api/invoices/1/nav-submissions" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -14037,7 +15574,7 @@ kötelező az assertBelongsToCurrentCompany().</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/16/nav-submissions"
+    "http://localhost/api/invoices/1/nav-submissions"
 );
 
 const headers = {
@@ -14163,10 +15700,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="GETapi-invoices--invoice_id--nav-submissions"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>16</code></p>
+<p>The ID of the invoice. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -14337,8 +15874,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"partner_id\": 16,
     \"payment_method_id\": 16,
-    \"issue_date\": \"2026-07-20T09:09:01\",
-    \"fulfillment_date\": \"2026-07-20T09:09:01\",
+    \"issue_date\": \"2026-07-22T05:18:37\",
+    \"fulfillment_date\": \"2026-07-22T05:18:37\",
     \"currency\": \"ngz\",
     \"exchange_rate\": 77,
     \"items\": [
@@ -14368,8 +15905,8 @@ const headers = {
 let body = {
     "partner_id": 16,
     "payment_method_id": 16,
-    "issue_date": "2026-07-20T09:09:01",
-    "fulfillment_date": "2026-07-20T09:09:01",
+    "issue_date": "2026-07-22T05:18:37",
+    "fulfillment_date": "2026-07-22T05:18:37",
     "currency": "ngz",
     "exchange_rate": 77,
     "items": [
@@ -14508,10 +16045,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="issue_date"                data-endpoint="POSTapi-receipts"
-               value="2026-07-20T09:09:01"
+               value="2026-07-22T05:18:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-20T09:09:01</code></p>
+<p>Must be a valid date. Example: <code>2026-07-22T05:18:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>fulfillment_date</code></b>&nbsp;&nbsp;
@@ -14520,10 +16057,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="fulfillment_date"                data-endpoint="POSTapi-receipts"
-               value="2026-07-20T09:09:01"
+               value="2026-07-22T05:18:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-20T09:09:01</code></p>
+<p>Must be a valid date. Example: <code>2026-07-22T05:18:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>currency</code></b>&nbsp;&nbsp;
@@ -14637,7 +16174,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/receipts/16" \
+    --get "http://localhost/api/receipts/1" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -14645,7 +16182,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/receipts/16"
+    "http://localhost/api/receipts/1"
 );
 
 const headers = {
@@ -14771,10 +16308,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-receipts--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the receipt. Example: <code>16</code></p>
+<p>The ID of the receipt. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -14792,7 +16329,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/receipts/16/cancel" \
+    "http://localhost/api/receipts/1/cancel" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -14800,7 +16337,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/receipts/16/cancel"
+    "http://localhost/api/receipts/1/cancel"
 );
 
 const headers = {
@@ -14910,10 +16447,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="receipt_id"                data-endpoint="POSTapi-receipts--receipt_id--cancel"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the receipt. Example: <code>16</code></p>
+<p>The ID of the receipt. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -14931,7 +16468,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/receipts/16/pdf" \
+    --get "http://localhost/api/receipts/1/pdf" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -14939,7 +16476,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/receipts/16/pdf"
+    "http://localhost/api/receipts/1/pdf"
 );
 
 const headers = {
@@ -15065,10 +16602,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="receipt_id"                data-endpoint="GETapi-receipts--receipt_id--pdf"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the receipt. Example: <code>16</code></p>
+<p>The ID of the receipt. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -15086,7 +16623,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/receipts/16/regenerate-pdf" \
+    "http://localhost/api/receipts/1/regenerate-pdf" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -15094,7 +16631,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/receipts/16/regenerate-pdf"
+    "http://localhost/api/receipts/1/regenerate-pdf"
 );
 
 const headers = {
@@ -15204,10 +16741,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="receipt_id"                data-endpoint="POSTapi-receipts--receipt_id--regenerate-pdf"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the receipt. Example: <code>16</code></p>
+<p>The ID of the receipt. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -16404,7 +17941,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"email\": \"rempel.chadrick@example.org\",
     \"phone\": \"l\",
     \"bank_account_number\": \"j\",
-    \"is_active\": true
+    \"is_active\": false
 }"
 </code></pre></div>
 
@@ -16438,7 +17975,7 @@ let body = {
     "email": "rempel.chadrick@example.org",
     "phone": "l",
     "bank_account_number": "j",
-    "is_active": true
+    "is_active": false
 };
 
 fetch(url, {
@@ -16780,7 +18317,7 @@ Must be one of:
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>custom_fields</code></b>&nbsp;&nbsp;
@@ -17103,7 +18640,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"merchant_id\": \"b\",
     \"secret_key\": \"n\",
     \"sandbox\": true,
-    \"is_active\": true
+    \"is_active\": false
 }"
 </code></pre></div>
 
@@ -17123,7 +18660,7 @@ let body = {
     "merchant_id": "b",
     "secret_key": "n",
     "sandbox": true,
-    "is_active": true
+    "is_active": false
 };
 
 fetch(url, {
@@ -17299,7 +18836,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
         </form>
 
@@ -17460,7 +18997,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/invoices/16/simplepay" \
+    "http://localhost/api/invoices/1/simplepay" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -17468,7 +19005,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/16/simplepay"
+    "http://localhost/api/invoices/1/simplepay"
 );
 
 const headers = {
@@ -17578,10 +19115,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="POSTapi-invoices--invoice_id--simplepay"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>16</code></p>
+<p>The ID of the invoice. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -17601,7 +19138,7 @@ No IPN is expected for refunds (VERIFY against sandbox before production).</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/invoices/16/simplepay-refund" \
+    "http://localhost/api/invoices/1/simplepay-refund" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -17609,7 +19146,7 @@ No IPN is expected for refunds (VERIFY against sandbox before production).</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/16/simplepay-refund"
+    "http://localhost/api/invoices/1/simplepay-refund"
 );
 
 const headers = {
@@ -17719,10 +19256,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="POSTapi-invoices--invoice_id--simplepay-refund"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>16</code></p>
+<p>The ID of the invoice. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -17895,9 +19432,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"partner_id\": 16,
     \"payment_method_id\": 16,
-    \"issue_date\": \"2026-07-20T09:09:01\",
-    \"fulfillment_date\": \"2026-07-20T09:09:01\",
-    \"due_date\": \"2052-08-12\",
+    \"issue_date\": \"2026-07-22T05:18:37\",
+    \"fulfillment_date\": \"2026-07-22T05:18:37\",
+    \"due_date\": \"2052-08-14\",
     \"currency\": \"ngz\",
     \"exchange_rate\": 77,
     \"notes\": \"architecto\",
@@ -17930,9 +19467,9 @@ const headers = {
 let body = {
     "partner_id": 16,
     "payment_method_id": 16,
-    "issue_date": "2026-07-20T09:09:01",
-    "fulfillment_date": "2026-07-20T09:09:01",
-    "due_date": "2052-08-12",
+    "issue_date": "2026-07-22T05:18:37",
+    "fulfillment_date": "2026-07-22T05:18:37",
+    "due_date": "2052-08-14",
     "currency": "ngz",
     "exchange_rate": 77,
     "notes": "architecto",
@@ -18074,10 +19611,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="issue_date"                data-endpoint="POSTapi-invoices"
-               value="2026-07-20T09:09:01"
+               value="2026-07-22T05:18:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-20T09:09:01</code></p>
+<p>Must be a valid date. Example: <code>2026-07-22T05:18:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>fulfillment_date</code></b>&nbsp;&nbsp;
@@ -18086,10 +19623,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="fulfillment_date"                data-endpoint="POSTapi-invoices"
-               value="2026-07-20T09:09:01"
+               value="2026-07-22T05:18:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-20T09:09:01</code></p>
+<p>Must be a valid date. Example: <code>2026-07-22T05:18:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>due_date</code></b>&nbsp;&nbsp;
@@ -18098,10 +19635,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="due_date"                data-endpoint="POSTapi-invoices"
-               value="2052-08-12"
+               value="2052-08-14"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>issue_date</code>. Example: <code>2052-08-12</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>issue_date</code>. Example: <code>2052-08-14</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>currency</code></b>&nbsp;&nbsp;
@@ -18251,7 +19788,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/invoices/16" \
+    --get "http://localhost/api/invoices/1" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -18259,7 +19796,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/16"
+    "http://localhost/api/invoices/1"
 );
 
 const headers = {
@@ -18385,10 +19922,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-invoices--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>16</code></p>
+<p>The ID of the invoice. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -18406,7 +19943,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/invoices/16/cancel" \
+    "http://localhost/api/invoices/1/cancel" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -18414,7 +19951,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/16/cancel"
+    "http://localhost/api/invoices/1/cancel"
 );
 
 const headers = {
@@ -18524,10 +20061,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="POSTapi-invoices--invoice_id--cancel"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>16</code></p>
+<p>The ID of the invoice. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -18545,7 +20082,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/invoices/16/pdf" \
+    --get "http://localhost/api/invoices/1/pdf" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -18553,7 +20090,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/16/pdf"
+    "http://localhost/api/invoices/1/pdf"
 );
 
 const headers = {
@@ -18679,10 +20216,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="GETapi-invoices--invoice_id--pdf"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>16</code></p>
+<p>The ID of the invoice. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -18700,7 +20237,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/invoices/16/regenerate-pdf" \
+    "http://localhost/api/invoices/1/regenerate-pdf" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -18708,7 +20245,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/16/regenerate-pdf"
+    "http://localhost/api/invoices/1/regenerate-pdf"
 );
 
 const headers = {
@@ -18818,10 +20355,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="POSTapi-invoices--invoice_id--regenerate-pdf"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>16</code></p>
+<p>The ID of the invoice. Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -19432,11 +20969,11 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"name\": \"n\",
     \"description\": \"Eius et animi quos velit et.\",
     \"unit\": \"v\",
-    \"type\": \"product\",
+    \"type\": \"service\",
     \"vat_rate_id\": 16,
     \"base_price\": 39,
     \"base_currency\": \"gzm\",
-    \"is_active\": false
+    \"is_active\": true
 }"
 </code></pre></div>
 
@@ -19457,11 +20994,11 @@ let body = {
     "name": "n",
     "description": "Eius et animi quos velit et.",
     "unit": "v",
-    "type": "product",
+    "type": "service",
     "vat_rate_id": 16,
     "base_price": 39,
     "base_currency": "gzm",
-    "is_active": false
+    "is_active": true
 };
 
 fetch(url, {
@@ -19630,10 +21167,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="type"                data-endpoint="PUTapi-products--id-"
-               value="product"
+               value="service"
                data-component="body">
     <br>
-<p>Example: <code>product</code></p>
+<p>Example: <code>service</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>product</code></li> <li><code>service</code></li></ul>
         </div>
@@ -19693,7 +21230,7 @@ Must be one of:
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>custom_fields</code></b>&nbsp;&nbsp;

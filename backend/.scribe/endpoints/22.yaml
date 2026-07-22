@@ -96,7 +96,7 @@ endpoints:
         name: issue_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-07-20T09:09:01'
+        example: '2026-07-22T05:18:37'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -107,7 +107,7 @@ endpoints:
         name: fulfillment_date
         description: 'Must be a valid date.'
         required: false
-        example: '2026-07-20T09:09:01'
+        example: '2026-07-22T05:18:37'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -205,8 +205,8 @@ endpoints:
     cleanBodyParameters:
       partner_id: 16
       payment_method_id: 16
-      issue_date: '2026-07-20T09:09:01'
-      fulfillment_date: '2026-07-20T09:09:01'
+      issue_date: '2026-07-22T05:18:37'
+      fulfillment_date: '2026-07-22T05:18:37'
       currency: ngz
       exchange_rate: 77
       items:
@@ -251,14 +251,14 @@ endpoints:
         name: id
         description: 'The ID of the receipt.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 16
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -307,14 +307,14 @@ endpoints:
         name: receipt_id
         description: 'The ID of the receipt.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      receipt_id: 16
+      receipt_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -354,14 +354,14 @@ endpoints:
         name: receipt_id
         description: 'The ID of the receipt.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      receipt_id: 16
+      receipt_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -410,14 +410,14 @@ endpoints:
         name: receipt_id
         description: 'The ID of the receipt.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      receipt_id: 16
+      receipt_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

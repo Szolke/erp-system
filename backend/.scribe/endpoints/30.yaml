@@ -1,0 +1,205 @@
+name: Lista-preferenciák
+description: |-
+
+  Saját-erőforrás kezelés: nincs külön jogosultsági kulcs, minden bejelentkezett
+  felhasználó csak a SAJÁT (user_id, company_id, list_key) sorát írhatja/törölheti.
+  A company_id-t a BelongsToCompany global scope / CurrentCompany adja; route model
+  binding nincs (a {listKey} nem egy modell azonosítója), ezért a user-izolációt
+  explicit where('user_id', ...) adja, nem az EnforcesCompanyScope minta.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/list-preferences/{listKey}'
+    metadata:
+      custom: []
+      groupName: Lista-preferenciák
+      groupDescription: |-
+
+        Saját-erőforrás kezelés: nincs külön jogosultsági kulcs, minden bejelentkezett
+        felhasználó csak a SAJÁT (user_id, company_id, list_key) sorát írhatja/törölheti.
+        A company_id-t a BelongsToCompany global scope / CurrentCompany adja; route model
+        binding nincs (a {listKey} nem egy modell azonosítója), ezért a user-izolációt
+        explicit where('user_id', ...) adja, nem az EnforcesCompanyScope minta.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'PUT /api/list-preferences/{listKey} — upsert a preferenciákat a bejelentkezett userhez'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      listKey:
+        custom: []
+        name: listKey
+        description: ''
+        required: true
+        example: j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      listKey: j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      columns:
+        custom: []
+        name: columns
+        description: ''
+        required: false
+        example: null
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      columns.visible:
+        custom: []
+        name: columns.visible
+        description: 'Must match the regex /^[a-z0-9_.]+$/. Must not be greater than 64 characters.'
+        required: false
+        example:
+          - b
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      columns.order:
+        custom: []
+        name: columns.order
+        description: 'Must match the regex /^[a-z0-9_.]+$/. Must not be greater than 64 characters.'
+        required: false
+        example:
+          - 'n'
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      page_size:
+        custom: []
+        name: page_size
+        description: 'Must be between 5 and 500.'
+        required: false
+        example: 5
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sort:
+        custom: []
+        name: sort
+        description: ''
+        required: false
+        example: null
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sort.by:
+        custom: []
+        name: sort.by
+        description: 'Must match the regex /^[a-z0-9_.]+$/. Must not be greater than 64 characters.'
+        required: false
+        example: z
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sort.dir:
+        custom: []
+        name: sort.dir
+        description: ''
+        required: false
+        example: asc
+        type: string
+        enumValues:
+          - asc
+          - desc
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      columns:
+        visible:
+          - b
+        order:
+          - 'n'
+      page_size: 5
+      sort:
+        by: z
+        dir: asc
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/list-preferences/{listKey}'
+    metadata:
+      custom: []
+      groupName: Lista-preferenciák
+      groupDescription: |-
+
+        Saját-erőforrás kezelés: nincs külön jogosultsági kulcs, minden bejelentkezett
+        felhasználó csak a SAJÁT (user_id, company_id, list_key) sorát írhatja/törölheti.
+        A company_id-t a BelongsToCompany global scope / CurrentCompany adja; route model
+        binding nincs (a {listKey} nem egy modell azonosítója), ezért a user-izolációt
+        explicit where('user_id', ...) adja, nem az EnforcesCompanyScope minta.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'DELETE /api/list-preferences/{listKey} — visszaáll a kód szerinti alapértelmezésre'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      listKey:
+        custom: []
+        name: listKey
+        description: ''
+        required: true
+        example: j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      listKey: j2oo9p73x4iry2wmes4e0hkvfwc1e4dwpss47.3
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

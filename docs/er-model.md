@@ -538,11 +538,35 @@ ugyanarra a NAV-kategóriára képezhető (egy néha NULL, néha kitöltött FK 
 
 ---
 
+## 16. Lista-preferenciák (oszlopválasztó)
+
+> Felhasználónkénti/cégenkénti nézet-beállítás (látható oszlopok, sorrend, oldalméret, rendezés)
+> listanézetekhez. Az oszlop-DEFINÍCIÓ a frontend kódjában él (nem itt) — ez a tábla kizárólag a
+> felhasználó VÁLASZTÁSÁT tárolja, ezért a `preferences` jsonb-t a backend csak séma-szinten
+> (kulcs, típus, méret) validálja, oszlopkulcsonként nem.
+
+### `user_list_preferences`
+| mező | típus | megjegyzés |
+|---|---|---|
+| id, user_id (FK, cascade), company_id (FK, cascade) | | |
+| list_key | string(64) | pl. `invoices.index`; a route-on `[a-z0-9_.]{1,64}` regexszel kényszerítve |
+| preferences | jsonb, default `{}` | `columns.visible`/`columns.order` (max 100 elem, elemenként max 64 karakter, `^[a-z0-9_.]+$`), `page_size` (5-500), `sort.by`/`sort.dir` — ismeretlen kulcs a mentés előtt kiszűrve; teljes payload max 8192 bájt |
+| timestamps | | |
+
+Index: unique(`user_id`, `company_id`, `list_key`). GET külön végpont nincs — a preferenciák a
+`/api/me` válaszába ágyazva mennek (`list_preferences`, `list_key`-jel indexelt objektum, üres
+esetben `{}`). Nincs külön jogosultsági kulcs: minden bejelentkezett felhasználó csak a SAJÁT sorát
+írhatja/törölheti (route model binding nélkül, explicit `where('user_id', ...)` szűréssel).
+
+---
+
 ## Kapcsolati összefoglaló (legfontosabbak)
 
 - `companies` 1—N `company_bank_accounts`, `company_nav_credentials`, `company_enyugta_credentials`,
   `products`, `partners`, `invoices`,
-  `receipts`, `groups`, `document_series`, `sales_groups`, `assets`, `asset_number_counters`, `receipt_reports`
+  `receipts`, `groups`, `document_series`, `sales_groups`, `assets`, `asset_number_counters`, `receipt_reports`,
+  `user_list_preferences`
+- `users` 1—N `user_list_preferences`
 - `receipt_reports` 1—N `receipt_report_lines`, `receipts` (a jelentéshez tartozó nyugták);
   `receipt_reports` önhivatkozó (`original_report_id`) — korrekció → normál jelentés
 - `asset_types` 1—N `assets`; `asset_types.company_id` nullable (globális VAGY céges sor)

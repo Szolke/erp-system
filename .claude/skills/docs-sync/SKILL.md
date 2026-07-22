@@ -6,6 +6,8 @@ description: Frissíti a projekt dokumentációját egy befejezett lépés/commi
   docs/CHANGELOG.md a VALÓDI commit-hash-ekre szorul. Kiolvassa a hash-eket a git
   logból (SOHA nem találja ki), a meglévő formátumot követve frissíti a releváns
   .md fájlokat, majd MEGÁLL a doksi-commit előtt jóváhagyásért. Nem pushol.
+  A felhasználói wikit és a fejlesztői kézikönyveket (deploy/requirements/backup)
+  NEM ez a skill kezeli, hanem a kezikonyv-szinkron.
 ---
 
 Frissítsd a dokumentációt egy befejezett lépés után. Kövesd a lépéseket EBBEN A
@@ -46,9 +48,12 @@ formátumot NE vezess be.
 - `docs/CHANGELOG.md` — MINDIG. Rövid, tárgyilagos sor(ok) ugyanerről.
 - `docs/er-model.md` — CSAK ha a lépés a sémát érintette (új tábla / oszlop / FK
   / index). Frissítsd a tábla-/mezőszintű leírást.
-- Egyéb doksi (`docs/deploy.md`, `docs/requirements.md`, `docs/backup.md`, wiki):
-  CSAK ha a lépés közvetlenül érinti (pl. új deploy-lépés, új env-változó). Ha
-  bizonytalan, hogy egy fájlt érint-e a változás, KÉRDEZZ — ne írd át.
+- Felhasználói wiki (`docs/wiki/`) és a fejlesztői kézikönyvek (`docs/deploy.md`,
+  `docs/requirements.md`, `docs/backup.md`): ezeket a `docs-sync` NEM módosítja.
+  Ez a `kezikonyv-szinkron` skill hatóköre (kézikönyv-audit, HU–EN paritás, 3 fázisú
+  jóváhagyás-kapu). Ha a mostani lépés érinti a végfelhasználói kézikönyvet vagy egy
+  dev-manualt, azt itt CSAK JELEZD a záró összefoglalóban ("a kézikönyv frissítést
+  igényelhet — futtasd a kezikonyv-szinkron skillt"), de ne írd át ezeket a fájlokat.
 
 ## 4. A bejegyzések megírása
 

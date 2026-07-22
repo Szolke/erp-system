@@ -167,7 +167,7 @@ R=/home/szolke/projects/erp-system
 FOUND=0; CHECKED=0; MISSING=""
 while IFS='|' read -r H MSG; do
   case "$MSG" in
-    Document*|Record*|*changelog*|*progress\ log*) continue ;;
+    [Dd]ocument*|[Rr]ecord*|docs:*|*changelog*|*progress\ log*) continue ;;
   esac
   CHECKED=$((CHECKED+1))
   if grep -q "$H" "$R/docs/progress.md" "$R/docs/CHANGELOG.md" 2>/dev/null; then

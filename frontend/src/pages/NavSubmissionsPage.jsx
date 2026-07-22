@@ -100,7 +100,7 @@ export default function NavSubmissionsPage() {
   const [expandedId, setExpandedId] = useState(null)
   const [columnsOpen, setColumnsOpen] = useState(false)
   const debounceRef = useRef(null)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('nav_submissions.index', navSubmissionColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('nav_submissions.index', navSubmissionColumns)
 
   const page = Number(filters.page) || 1
   const perPage = Number(filters.per_page) || 20
@@ -197,7 +197,7 @@ export default function NavSubmissionsPage() {
 
           <DateRangePicker
             unit="day"
-            align="left"
+            align="right"
             from={filters.date_from}
             to={filters.date_to}
             onApply={handleDateRangeApply}
@@ -207,8 +207,9 @@ export default function NavSubmissionsPage() {
           />
 
           <ColumnPicker
-            columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+            columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReorder={reorder} onReset={resetColumns} isDirty={isDirty}
             open={columnsOpen} onOpenChange={setColumnsOpen} id="nav-submissions-columns"
+            align="right"
           />
         </div>
 

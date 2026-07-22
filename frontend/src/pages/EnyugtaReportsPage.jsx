@@ -71,7 +71,7 @@ export default function EnyugtaReportsPage() {
   const [error, setError] = useState(null) // null | 'forbidden' | 'generic'
   const [openPopover, setOpenPopover] = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('enyugta_reports.index', enyugtaReportColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('enyugta_reports.index', enyugtaReportColumns)
 
   // D4: diszkrét tájékoztató, ha az elmúlt 30 napban a cégnek egy nyugtája
   // sincs — a meglévő GET /api/documents (type=receipt) végpontból
@@ -158,7 +158,7 @@ export default function EnyugtaReportsPage() {
           />
 
           <ColumnPicker
-            columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+            columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReorder={reorder} onReset={resetColumns} isDirty={isDirty}
             open={columnsOpen} onOpenChange={setColumnsOpen} id="enyugta-reports-columns"
           />
         </div>

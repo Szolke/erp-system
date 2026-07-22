@@ -121,7 +121,7 @@ export default function DocumentListPage() {
   const [openPopover, setOpenPopover] = useState(null)
   const [searchInput, setSearchInput] = useState(filters.search)
   const debounceRef = useRef(null)
-  const { allColumns, visibleColumns, isVisible, toggle, reset, isDirty } = useListColumns('documents.index', documentColumns)
+  const { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty } = useListColumns('documents.index', documentColumns)
 
   const page = Number(filters.page) || 1
   const perPage = Number(filters.per_page) || 20
@@ -283,11 +283,13 @@ export default function DocumentListPage() {
             columns={allColumns}
             isVisible={isVisible}
             onToggle={toggle}
+            onReorder={reorder}
             onReset={reset}
             isDirty={isDirty}
             open={openPopover === 'columns'}
             onOpenChange={(o) => setOpenPopover(o ? 'columns' : null)}
             id="document-columns"
+            align="right"
           />
         </div>
       </div>

@@ -44,7 +44,7 @@ export default function PartnerListPage() {
   const [perPage, setPerPage] = useState(20)
   const [page, setPage]       = useState(1)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle, reset, isDirty } = useListColumns('partners.index', partnerColumns)
+  const { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty } = useListColumns('partners.index', partnerColumns)
 
   async function load(s, pp, pg) {
     setLoading(true)
@@ -85,8 +85,8 @@ export default function PartnerListPage() {
         <button className="btn btn-secondary" type="submit">{t('common.search')}</button>
         <PerPageSelector value={perPage} onChange={handlePerPage} />
         <ColumnPicker
-          columns={allColumns} isVisible={isVisible} onToggle={toggle} onReset={reset} isDirty={isDirty}
-          open={columnsOpen} onOpenChange={setColumnsOpen} id="partners-columns"
+          columns={allColumns} isVisible={isVisible} onToggle={toggle} onReorder={reorder} onReset={reset} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="partners-columns" align="right"
         />
       </form>
       {loading ? <p className="text-muted">{t('common.loading')}</p> : (

@@ -38,7 +38,7 @@ export default function AuditLogPage() {
   const [perPage, setPerPage] = useState(50)
   const [page, setPage]       = useState(1)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('audit_logs.index', auditLogColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('audit_logs.index', auditLogColumns)
 
   async function load(a, pp, pg) {
     setLoading(true)
@@ -65,8 +65,8 @@ export default function AuditLogPage() {
         <button className="btn btn-secondary" type="submit">{t('common.search')}</button>
         <PerPageSelector value={perPage} onChange={handlePerPage} />
         <ColumnPicker
-          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
-          open={columnsOpen} onOpenChange={setColumnsOpen} id="audit-logs-columns"
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReorder={reorder} onReset={resetColumns} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="audit-logs-columns" align="right"
         />
       </form>
       {loading ? <p className="text-muted">{t('common.loading')}</p> : (

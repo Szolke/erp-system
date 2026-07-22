@@ -77,7 +77,7 @@ export default function CompanyListPage() {
   const [saving, setSaving]     = useState(false)
   const [switching, setSwitching] = useState(null)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('companies.index', companyColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('companies.index', companyColumns)
 
   // Users modal state
   const [usersModal, setUsersModal]         = useState(null)   // aktuálisan nyitott company obj
@@ -247,7 +247,7 @@ export default function CompanyListPage() {
 
       <div className="search-row">
         <ColumnPicker
-          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReorder={reorder} onReset={resetColumns} isDirty={isDirty}
           open={columnsOpen} onOpenChange={setColumnsOpen} id="companies-columns"
         />
       </div>

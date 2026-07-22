@@ -121,7 +121,7 @@ export default function JobPositionPage() {
   const [editId, setEditId]         = useState(null)
   const [saving, setSaving]         = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('job_positions.index', jobPositionColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('job_positions.index', jobPositionColumns)
 
   async function load() {
     setLoading(true)
@@ -199,7 +199,7 @@ export default function JobPositionPage() {
 
       <div className="search-row">
         <ColumnPicker
-          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReorder={reorder} onReset={resetColumns} isDirty={isDirty}
           open={columnsOpen} onOpenChange={setColumnsOpen} id="job-positions-columns"
         />
       </div>

@@ -666,6 +666,7 @@ class TranslationSeeder extends Seeder
             ['columns', 'reset',            'Alapértelmezett visszaállítása',            'Reset to default',                          'Auf Standard zurücksetzen'],
             ['columns', 'locked_tooltip',   'Ez az oszlop nem rejthető el',              'This column cannot be hidden',              'Diese Spalte kann nicht ausgeblendet werden'],
             ['columns', 'save_error',       'Az oszlopbeállítás mentése nem sikerült, a módosítás egyelőre csak ideiglenes.', 'Saving the column preference failed — the change is temporary for now.', 'Speichern der Spalteneinstellung fehlgeschlagen — die Änderung ist vorerst nur vorübergehend.'],
+            ['columns', 'drag_handle',      'Oszlop áthelyezése: {name}',                'Move column: {name}',                       'Spalte verschieben: {name}'],
         ];
 
         $now = now();

@@ -45,7 +45,7 @@ export default function AssetListPage() {
   const [perPage, setPerPage] = useState(20)
   const [page, setPage]       = useState(1)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle, reset, isDirty } = useListColumns('assets.index', assetColumns)
+  const { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty } = useListColumns('assets.index', assetColumns)
 
   async function load(s, pp, pg) {
     setLoading(true)
@@ -86,8 +86,8 @@ export default function AssetListPage() {
         <button className="btn btn-secondary" type="submit">{t('common.search')}</button>
         <PerPageSelector value={perPage} onChange={handlePerPage} />
         <ColumnPicker
-          columns={allColumns} isVisible={isVisible} onToggle={toggle} onReset={reset} isDirty={isDirty}
-          open={columnsOpen} onOpenChange={setColumnsOpen} id="assets-columns"
+          columns={allColumns} isVisible={isVisible} onToggle={toggle} onReorder={reorder} onReset={reset} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="assets-columns" align="right"
         />
       </form>
       {loading ? <p className="text-muted">{t('common.loading')}</p> : (

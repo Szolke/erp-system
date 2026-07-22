@@ -71,7 +71,7 @@ export default function UserListPage() {
   const [form, setForm]         = useState({ name: '', email: '', password: '', job_position_id: null })
   const [formErr, setFormErr]   = useState('')
   const [saving, setSaving]     = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('users.index', userColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('users.index', userColumns)
 
   async function load(q = '', pp = 20, pg = 1) {
     setLoading(true)
@@ -180,8 +180,8 @@ export default function UserListPage() {
         <input placeholder="Keresés névben / e-mailben…" value={search} onChange={handleSearch} />
         <PerPageSelector value={perPage} onChange={handlePerPage} />
         <ColumnPicker
-          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
-          open={columnsOpen} onOpenChange={setColumnsOpen} id="users-columns"
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReorder={reorder} onReset={resetColumns} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="users-columns" align="right"
         />
       </div>
 

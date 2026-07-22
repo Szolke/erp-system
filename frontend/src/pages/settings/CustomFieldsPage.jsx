@@ -56,7 +56,7 @@ export default function CustomFieldsPage() {
   const [error, setError]       = useState('')
   const [activeTab, setActiveTab] = useState('partner')
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('custom_fields.index', customFieldColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('custom_fields.index', customFieldColumns)
 
   useEffect(() => { load() }, [])
 
@@ -147,8 +147,9 @@ export default function CustomFieldsPage() {
           <strong>{t(`customfield.entity_${activeTab}`)}</strong>
           <div style={{ display: 'flex', gap: 8 }}>
             <ColumnPicker
-              columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+              columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReorder={reorder} onReset={resetColumns} isDirty={isDirty}
               open={columnsOpen} onOpenChange={setColumnsOpen} id="custom-fields-columns"
+              align="right"
             />
             {!editing && (
               <button className="btn btn-secondary btn-sm" onClick={startAdd}>{t('customfield.new')}</button>

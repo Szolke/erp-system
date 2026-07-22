@@ -72,7 +72,7 @@ export default function AssetTypePage() {
   const [showCreate, setShowCreate] = useState(false)
   const [saving, setSaving]   = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('asset_types.index', assetTypeColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('asset_types.index', assetTypeColumns)
 
   async function load() {
     setLoading(true)
@@ -116,7 +116,7 @@ export default function AssetTypePage() {
 
       <div className="search-row">
         <ColumnPicker
-          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReorder={reorder} onReset={resetColumns} isDirty={isDirty}
           open={columnsOpen} onOpenChange={setColumnsOpen} id="asset-types-columns"
         />
       </div>

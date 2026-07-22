@@ -46,7 +46,7 @@ export default function ProductListPage() {
   const [perPage, setPerPage] = useState(20)
   const [page, setPage]       = useState(1)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle, reset, isDirty } = useListColumns('products.index', productColumns)
+  const { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty } = useListColumns('products.index', productColumns)
 
   async function load(s, pp, pg) {
     setLoading(true)
@@ -87,8 +87,8 @@ export default function ProductListPage() {
         <button className="btn btn-secondary" type="submit">{t('common.search')}</button>
         <PerPageSelector value={perPage} onChange={handlePerPage} />
         <ColumnPicker
-          columns={allColumns} isVisible={isVisible} onToggle={toggle} onReset={reset} isDirty={isDirty}
-          open={columnsOpen} onOpenChange={setColumnsOpen} id="products-columns"
+          columns={allColumns} isVisible={isVisible} onToggle={toggle} onReorder={reorder} onReset={reset} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="products-columns" align="right"
         />
       </form>
       {loading ? <p className="text-muted">{t('common.loading')}</p> : (

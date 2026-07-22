@@ -97,7 +97,7 @@ export default function GroupListPage() {
 
   const list = data?.data ?? []
   const canManage = can('group.manage')
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('groups.index', groupColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('groups.index', groupColumns)
 
   return (
     <div>
@@ -133,8 +133,8 @@ export default function GroupListPage() {
       <div className="search-row">
         <PerPageSelector value={perPage} onChange={handlePerPage} />
         <ColumnPicker
-          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
-          open={columnsOpen} onOpenChange={setColumnsOpen} id="groups-columns"
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReorder={reorder} onReset={resetColumns} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="groups-columns" align="right"
         />
       </div>
 

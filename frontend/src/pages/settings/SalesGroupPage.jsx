@@ -116,7 +116,7 @@ export default function SalesGroupPage() {
   const [editId, setEditId]         = useState(null)
   const [saving, setSaving]         = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('sales_groups.index', salesGroupColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('sales_groups.index', salesGroupColumns)
 
   async function load(pp = perPage, pg = page) {
     setLoading(true)
@@ -218,8 +218,8 @@ export default function SalesGroupPage() {
       <div className="search-row">
         <PerPageSelector value={perPage} onChange={handlePerPage} />
         <ColumnPicker
-          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
-          open={columnsOpen} onOpenChange={setColumnsOpen} id="sales-groups-columns"
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReorder={reorder} onReset={resetColumns} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="sales-groups-columns" align="right"
         />
       </div>
 

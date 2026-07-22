@@ -6,8 +6,46 @@ import { documents as documentsApi } from '../api/documents'
 import { useTranslation } from '../contexts/TranslationContext'
 import { EnyugtaReportStatusBadge, EnyugtaReportTypeBadge } from '../components/StatusBadge'
 import DateRangePicker from '../components/reports/DateRangePicker'
+import ColumnPicker from '../components/ColumnPicker'
+import { useListColumns } from '../hooks/useListColumns'
+import { enyugtaReportColumns } from '../columns/enyugtaReports'
 import { useUrlFilters } from '../utils/useUrlFilters'
 import { formatCurrency } from '../utils/format'
+
+function renderCell(key, report, { locale, original }) {
+  switch (key) {
+    case 'report_date':
+      return (
+        <td key="report_date">
+          <Link to={`/enyugta/reports/${report.id}`} className="table-link">
+            {report.report_date}
+          </Link>
+        </td>
+      )
+    case 'type':
+      return (
+        <td key="type">
+          <EnyugtaReportTypeBadge type={report.type} />
+          {report.type === 'correction' && (
+            <div className="text-muted" style={{ fontSize: 11, display: 'flex', alignItems: 'center', gap: 3, marginTop: 3 }}>
+              <CornerDownRight size={11} aria-hidden="true" />
+              {original
+                ? <Link to={`/enyugta/reports/${original.id}`} className="table-link">eredeti: #{original.id}</Link>
+                : <span>eredeti: #{report.original_report_id}</span>}
+            </div>
+          )}
+        </td>
+      )
+    case 'status':
+      return <td key="status"><EnyugtaReportStatusBadge status={report.status} /></td>
+    case 'receipt_count':
+      return <td key="receipt_count">{report.receipt_count}</td>
+    case 'gross_total':
+      return <td key="gross_total" className="text-right">{formatCurrency(report.total_gross, 'Ft', locale)}</td>
+    default:
+      return null
+  }
+}
 
 const STATUS_OPTIONS = [
   ['', 'Összes állapot'],
@@ -26,12 +64,14 @@ const DEFAULTS = { date_from: '', date_to: '', status: '' }
  * TELJES szűrt halmazt adja vissza egyszerre, nincs Pagination-komponens.
  */
 export default function EnyugtaReportsPage() {
-  const { locale } = useTranslation()
+  const { t, locale } = useTranslation()
   const [filters, setFilters] = useUrlFilters(DEFAULTS)
   const [reports, setReports] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null) // null | 'forbidden' | 'generic'
   const [openPopover, setOpenPopover] = useState(false)
+  const [columnsOpen, setColumnsOpen] = useState(false)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('enyugta_reports.index', enyugtaReportColumns)
 
   // D4: diszkrét tájékoztató, ha az elmúlt 30 napban a cégnek egy nyugtája
   // sincs — a meglévő GET /api/documents (type=receipt) végpontból
@@ -116,6 +156,11 @@ export default function EnyugtaReportsPage() {
             onOpenChange={setOpenPopover}
             id="enyugta-reports-daterange"
           />
+
+          <ColumnPicker
+            columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+            open={columnsOpen} onOpenChange={setColumnsOpen} id="enyugta-reports-columns"
+          />
         </div>
 
         <div className="doc-table-wrap mt-4">
@@ -138,11 +183,9 @@ export default function EnyugtaReportsPage() {
             <table className="doc-table">
               <thead>
                 <tr>
-                  <th scope="col">Nap</th>
-                  <th scope="col">Típus</th>
-                  <th scope="col">Állapot</th>
-                  <th scope="col">Nyugtaszám</th>
-                  <th scope="col">Bruttó összeg</th>
+                  {visibleColumns.map((col) => (
+                    <th key={col.key} scope="col" className={col.align === 'right' ? 'text-right' : undefined}>{t(col.label)}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -150,25 +193,7 @@ export default function EnyugtaReportsPage() {
                   const original = report.original_report_id ? reportsById[report.original_report_id] : null
                   return (
                     <tr key={report.id}>
-                      <td>
-                        <Link to={`/enyugta/reports/${report.id}`} className="table-link">
-                          {report.report_date}
-                        </Link>
-                      </td>
-                      <td>
-                        <EnyugtaReportTypeBadge type={report.type} />
-                        {report.type === 'correction' && (
-                          <div className="text-muted" style={{ fontSize: 11, display: 'flex', alignItems: 'center', gap: 3, marginTop: 3 }}>
-                            <CornerDownRight size={11} aria-hidden="true" />
-                            {original
-                              ? <Link to={`/enyugta/reports/${original.id}`} className="table-link">eredeti: #{original.id}</Link>
-                              : <span>eredeti: #{report.original_report_id}</span>}
-                          </div>
-                        )}
-                      </td>
-                      <td><EnyugtaReportStatusBadge status={report.status} /></td>
-                      <td>{report.receipt_count}</td>
-                      <td>{formatCurrency(report.total_gross, 'Ft', locale)}</td>
+                      {visibleColumns.map((col) => renderCell(col.key, report, { locale, original }))}
                     </tr>
                   )
                 })}

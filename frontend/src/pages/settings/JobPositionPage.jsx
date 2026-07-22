@@ -3,6 +3,49 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useToast } from '../../contexts/ToastContext'
 import { jobPositions as jpApi } from '../../api/jobPositions'
+import ColumnPicker from '../../components/ColumnPicker'
+import { useListColumns } from '../../hooks/useListColumns'
+import { jobPositionColumns } from '../../columns/jobPositions'
+
+function renderCell(key, jp, { t, editId, canEditRow, onEditStart, onDelete }) {
+  switch (key) {
+    case 'name':
+      return <td key="name">{jp.name}</td>
+    case 'scope':
+      return <td key="scope" className="text-muted" style={{ fontSize: 13 }}>{jp.is_global ? 'Globális' : 'Saját cég'}</td>
+    case 'status':
+      return (
+        <td key="status">
+          <span className={jp.active ? 'badge badge-pay-paid' : 'badge badge-inv-storno'}>
+            {jp.active ? t('common.active') : 'Inaktív'}
+          </span>
+        </td>
+      )
+    case 'sort_order':
+      return <td key="sort_order" className="text-muted">{jp.sort_order}</td>
+    case 'actions':
+      return (
+        <td key="actions" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+          {editId !== jp.id && canEditRow(jp) && (
+            <>
+              <button
+                className="btn btn-secondary btn-sm"
+                style={{ marginRight: 6 }}
+                onClick={() => onEditStart(jp)}
+              >
+                {t('common.edit')}
+              </button>
+              <button className="btn btn-danger btn-sm" onClick={() => onDelete(jp)}>
+                {t('common.delete')}
+              </button>
+            </>
+          )}
+        </td>
+      )
+    default:
+      return null
+  }
+}
 
 function JobPositionForm({ initial, allowGlobal, onSave, onCancel, saving }) {
   const [name, setName]         = useState(initial?.name ?? '')
@@ -77,6 +120,8 @@ export default function JobPositionPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [editId, setEditId]         = useState(null)
   const [saving, setSaving]         = useState(false)
+  const [columnsOpen, setColumnsOpen] = useState(false)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('job_positions.index', jobPositionColumns)
 
   async function load() {
     setLoading(true)
@@ -152,56 +197,40 @@ export default function JobPositionPage() {
         </div>
       )}
 
+      <div className="search-row">
+        <ColumnPicker
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="job-positions-columns"
+        />
+      </div>
+
       {loading ? (
         <p className="text-muted">{t('common.loading')}</p>
       ) : (
         <table>
           <thead>
             <tr>
-              <th>Név</th>
-              <th>Kör</th>
-              <th>Állapot</th>
-              <th>Sorrend</th>
-              <th></th>
+              {visibleColumns.map((col) => (
+                <th key={col.key}>{t(col.label)}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {list.length === 0 && (
-              <tr><td colSpan={5} className="text-muted">Még nincs munkakör.</td></tr>
+              <tr><td colSpan={visibleColumns.length} className="text-muted">Még nincs munkakör.</td></tr>
             )}
             {list.map((jp) => (
               <tr key={jp.id}>
-                <td>{jp.name}</td>
-                <td className="text-muted" style={{ fontSize: 13 }}>
-                  {jp.is_global ? 'Globális' : 'Saját cég'}
-                </td>
-                <td>
-                  <span className={jp.active ? 'badge badge-pay-paid' : 'badge badge-inv-storno'}>
-                    {jp.active ? t('common.active') : 'Inaktív'}
-                  </span>
-                </td>
-                <td className="text-muted">{jp.sort_order}</td>
-                <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                  {editId !== jp.id && canEditRow(jp) && (
-                    <>
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        style={{ marginRight: 6 }}
-                        onClick={() => { setEditId(jp.id); setShowCreate(false) }}
-                      >
-                        {t('common.edit')}
-                      </button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(jp)}>
-                        {t('common.delete')}
-                      </button>
-                    </>
-                  )}
-                </td>
+                {visibleColumns.map((col) => renderCell(col.key, jp, {
+                  t, editId, canEditRow,
+                  onEditStart: (position) => { setEditId(position.id); setShowCreate(false) },
+                  onDelete: handleDelete,
+                }))}
               </tr>
             ))}
             {editId !== null && (
               <tr>
-                <td colSpan={5}>
+                <td colSpan={visibleColumns.length}>
                   <div style={{ padding: '8px 0' }}>
                     <JobPositionForm
                       initial={list.find((jp) => jp.id === editId)}

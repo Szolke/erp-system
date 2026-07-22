@@ -6,6 +6,60 @@ import { useToast } from '../../contexts/ToastContext'
 import { companies as companiesApi } from '../../api/company'
 import { users as usersApi } from '../../api/users'
 import client from '../../api/client'
+import ColumnPicker from '../../components/ColumnPicker'
+import { useListColumns } from '../../hooks/useListColumns'
+import { companyColumns } from '../../columns/companies'
+
+function renderCell(key, c, { t, activeCompanyId, switching, onShowUsers, onSwitch }) {
+  switch (key) {
+    case 'name':
+      return (
+        <td key="name">
+          <strong>{c.name}</strong>
+          {c.id === activeCompanyId && (
+            <span className="badge badge-inv-issued" style={{ marginLeft: 8 }}>Aktív</span>
+          )}
+        </td>
+      )
+    case 'tax_number':
+      return <td key="tax_number" className="text-muted">{c.tax_number}</td>
+    case 'city':
+      return <td key="city" className="text-muted">{c.city || '—'}</td>
+    case 'users_count':
+      return <td key="users_count">{c.users_count ?? 0}</td>
+    case 'status':
+      return (
+        <td key="status">
+          <span className={c.is_active ? 'badge badge-pay-paid' : 'badge badge-inv-storno'}>
+            {c.is_active ? t('common.active') : 'Inaktív'}
+          </span>
+        </td>
+      )
+    case 'actions':
+      return (
+        <td key="actions" style={{ textAlign: 'right', whiteSpace: 'nowrap', display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => onShowUsers(c)}
+            style={{ fontSize: 11 }}
+          >
+            {t('company.show_users')} ({c.users_count ?? 0})
+          </button>
+          {c.id !== activeCompanyId && (
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => onSwitch(c)}
+              disabled={switching === c.id}
+            >
+              {switching === c.id ? '…' : 'Váltás'}
+            </button>
+          )}
+        </td>
+      )
+    default:
+      return null
+  }
+}
 
 const EMPTY_FORM = { name: '', tax_number: '', city: '', address_line: '', postal_code: '', registration_number: '', email: '' }
 
@@ -22,6 +76,8 @@ export default function CompanyListPage() {
   const [formErr, setFormErr]   = useState('')
   const [saving, setSaving]     = useState(false)
   const [switching, setSwitching] = useState(null)
+  const [columnsOpen, setColumnsOpen] = useState(false)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('companies.index', companyColumns)
 
   // Users modal state
   const [usersModal, setUsersModal]         = useState(null)   // aktuálisan nyitott company obj
@@ -189,58 +245,31 @@ export default function CompanyListPage() {
         </div>
       )}
 
+      <div className="search-row">
+        <ColumnPicker
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="companies-columns"
+        />
+      </div>
+
       {loading ? (
         <p className="text-muted">{t('common.loading')}</p>
       ) : (
         <table>
           <thead>
             <tr>
-              <th>Cégnév</th>
-              <th>Adószám</th>
-              <th>Város</th>
-              <th>Felhasználók</th>
-              <th>Státusz</th>
-              <th></th>
+              {visibleColumns.map((col) => (
+                <th key={col.key}>{t(col.label)}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {list.length === 0 && (
-              <tr><td colSpan={6} className="text-muted">{t('common.not_found')}</td></tr>
+              <tr><td colSpan={visibleColumns.length} className="text-muted">{t('common.not_found')}</td></tr>
             )}
             {list.map((c) => (
               <tr key={c.id} style={c.id === activeCompanyId ? { background: 'var(--color-primary-subtle)' } : {}}>
-                <td>
-                  <strong>{c.name}</strong>
-                  {c.id === activeCompanyId && (
-                    <span className="badge badge-inv-issued" style={{ marginLeft: 8 }}>Aktív</span>
-                  )}
-                </td>
-                <td className="text-muted">{c.tax_number}</td>
-                <td className="text-muted">{c.city || '—'}</td>
-                <td>{c.users_count ?? 0}</td>
-                <td>
-                  <span className={c.is_active ? 'badge badge-pay-paid' : 'badge badge-inv-storno'}>
-                    {c.is_active ? t('common.active') : 'Inaktív'}
-                  </span>
-                </td>
-                <td style={{ textAlign: 'right', whiteSpace: 'nowrap', display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => openUsersModal(c)}
-                    style={{ fontSize: 11 }}
-                  >
-                    {t('company.show_users')} ({c.users_count ?? 0})
-                  </button>
-                  {c.id !== activeCompanyId && (
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => handleSwitch(c)}
-                      disabled={switching === c.id}
-                    >
-                      {switching === c.id ? '…' : 'Váltás'}
-                    </button>
-                  )}
-                </td>
+                {visibleColumns.map((col) => renderCell(col.key, c, { t, activeCompanyId, switching, onShowUsers: openUsersModal, onSwitch: handleSwitch }))}
               </tr>
             ))}
           </tbody>

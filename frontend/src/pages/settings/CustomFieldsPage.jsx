@@ -1,9 +1,38 @@
 import { useEffect, useState } from 'react'
 import { customFields as api } from '../../api/customFields'
 import { useTranslation } from '../../contexts/TranslationContext'
+import ColumnPicker from '../../components/ColumnPicker'
+import { useListColumns } from '../../hooks/useListColumns'
+import { customFieldColumns } from '../../columns/customFields'
 
 const ENTITY_TYPES = ['partner', 'product']
 const FIELD_TYPES  = ['text', 'number', 'date', 'boolean', 'select']
+
+function renderCell(key, def, { t, onEdit, onDelete }) {
+  switch (key) {
+    case 'key':
+      return <td key="key" style={{ fontFamily: 'monospace' }}>{def.key}</td>
+    case 'label':
+      return <td key="label">{def.label}</td>
+    case 'type':
+      return <td key="type">{t(`customfield.type_${def.type}`)}</td>
+    case 'required':
+      return <td key="required">{def.is_required ? t('common.yes') : t('common.no')}</td>
+    case 'active':
+      return <td key="active">{def.is_active ? '✓' : '—'}</td>
+    case 'actions':
+      return (
+        <td key="actions">
+          <span style={{ display: 'flex', gap: 6 }}>
+            <button className="btn btn-secondary btn-sm" onClick={() => onEdit(def)}>{t('common.edit')}</button>
+            <button className="btn btn-danger btn-sm" onClick={() => onDelete(def)}>{t('common.delete')}</button>
+          </span>
+        </td>
+      )
+    default:
+      return null
+  }
+}
 
 function emptyForm(entityType = 'partner') {
   return {
@@ -26,6 +55,8 @@ export default function CustomFieldsPage() {
   const [saving, setSaving]     = useState(false)
   const [error, setError]       = useState('')
   const [activeTab, setActiveTab] = useState('partner')
+  const [columnsOpen, setColumnsOpen] = useState(false)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('custom_fields.index', customFieldColumns)
 
   useEffect(() => { load() }, [])
 
@@ -114,9 +145,15 @@ export default function CustomFieldsPage() {
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <strong>{t(`customfield.entity_${activeTab}`)}</strong>
-          {!editing && (
-            <button className="btn btn-secondary btn-sm" onClick={startAdd}>{t('customfield.new')}</button>
-          )}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <ColumnPicker
+              columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+              open={columnsOpen} onOpenChange={setColumnsOpen} id="custom-fields-columns"
+            />
+            {!editing && (
+              <button className="btn btn-secondary btn-sm" onClick={startAdd}>{t('customfield.new')}</button>
+            )}
+          </div>
         </div>
 
         {loading ? (
@@ -127,28 +164,15 @@ export default function CustomFieldsPage() {
               <table style={{ marginBottom: 16 }}>
                 <thead>
                   <tr>
-                    <th style={{ width: 140 }}>{t('customfield.key')}</th>
-                    <th>{t('customfield.label')}</th>
-                    <th style={{ width: 130 }}>{t('customfield.type')}</th>
-                    <th style={{ width: 80 }}>{t('customfield.required')}</th>
-                    <th style={{ width: 60 }}>{t('common.active')}</th>
-                    <th style={{ width: 130 }}></th>
+                    {visibleColumns.map((col) => (
+                      <th key={col.key}>{t(col.label)}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {tabDefs.map((def) => (
                     <tr key={def.id}>
-                      <td style={{ fontFamily: 'monospace' }}>{def.key}</td>
-                      <td>{def.label}</td>
-                      <td>{t(`customfield.type_${def.type}`)}</td>
-                      <td>{def.is_required ? t('common.yes') : t('common.no')}</td>
-                      <td>{def.is_active ? '✓' : '—'}</td>
-                      <td>
-                        <span style={{ display: 'flex', gap: 6 }}>
-                          <button className="btn btn-secondary btn-sm" onClick={() => startEdit(def)}>{t('common.edit')}</button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(def)}>{t('common.delete')}</button>
-                        </span>
-                      </td>
+                      {visibleColumns.map((col) => renderCell(col.key, def, { t, onEdit: startEdit, onDelete: handleDelete }))}
                     </tr>
                   ))}
                 </tbody>

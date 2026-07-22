@@ -7,6 +7,33 @@ import { useToast } from '../../contexts/ToastContext'
 import { AssetStatusBadge } from '../../components/StatusBadge'
 import PerPageSelector from '../../components/PerPageSelector'
 import Pagination from '../../components/Pagination'
+import ColumnPicker from '../../components/ColumnPicker'
+import { useListColumns } from '../../hooks/useListColumns'
+import { assetColumns } from '../../columns/assets'
+
+function renderCell(key, a, { t, can, onDelete }) {
+  switch (key) {
+    case 'name':
+      return <td key="name"><code style={{ fontSize: 13 }}>{a.name}</code></td>
+    case 'serial_number':
+      return <td key="serial_number">{a.serial_number}</td>
+    case 'imei':
+      return <td key="imei" className="text-muted">{a.imei ?? '—'}</td>
+    case 'asset_type':
+      return <td key="asset_type">{a.asset_type?.name}</td>
+    case 'status':
+      return <td key="status"><AssetStatusBadge status={a.status} /></td>
+    case 'actions':
+      return (
+        <td key="actions" className="flex">
+          {can('asset.edit') && <Link to={`/assets/${a.id}/edit`} className="btn btn-secondary btn-sm">{t('common.edit')}</Link>}
+          {can('asset.delete') && <button className="btn btn-danger btn-sm" onClick={() => onDelete(a)}>{t('common.delete')}</button>}
+        </td>
+      )
+    default:
+      return null
+  }
+}
 
 export default function AssetListPage() {
   const { can } = useAuth()
@@ -17,6 +44,8 @@ export default function AssetListPage() {
   const [loading, setLoading] = useState(true)
   const [perPage, setPerPage] = useState(20)
   const [page, setPage]       = useState(1)
+  const [columnsOpen, setColumnsOpen] = useState(false)
+  const { allColumns, visibleColumns, isVisible, toggle, reset, isDirty } = useListColumns('assets.index', assetColumns)
 
   async function load(s, pp, pg) {
     setLoading(true)
@@ -56,34 +85,27 @@ export default function AssetListPage() {
         <input placeholder={t('asset.search_placeholder')} value={search} onChange={(e) => setSearch(e.target.value)} />
         <button className="btn btn-secondary" type="submit">{t('common.search')}</button>
         <PerPageSelector value={perPage} onChange={handlePerPage} />
+        <ColumnPicker
+          columns={allColumns} isVisible={isVisible} onToggle={toggle} onReset={reset} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="assets-columns"
+        />
       </form>
       {loading ? <p className="text-muted">{t('common.loading')}</p> : (
         <table>
           <thead>
             <tr>
-              <th>{t('asset.name')}</th>
-              <th>{t('asset.serial_number')}</th>
-              <th>{t('asset.imei')}</th>
-              <th>{t('asset.asset_type')}</th>
-              <th>{t('asset.status')}</th>
-              <th></th>
+              {visibleColumns.map((col) => (
+                <th key={col.key}>{t(col.label)}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {data?.data.length === 0 && (
-              <tr><td colSpan={6} className="text-muted">{t('asset.no_assets')}</td></tr>
+              <tr><td colSpan={visibleColumns.length} className="text-muted">{t('asset.no_assets')}</td></tr>
             )}
             {data?.data.map((a) => (
               <tr key={a.id}>
-                <td><code style={{ fontSize: 13 }}>{a.name}</code></td>
-                <td>{a.serial_number}</td>
-                <td className="text-muted">{a.imei ?? '—'}</td>
-                <td>{a.asset_type?.name}</td>
-                <td><AssetStatusBadge status={a.status} /></td>
-                <td className="flex">
-                  {can('asset.edit') && <Link to={`/assets/${a.id}/edit`} className="btn btn-secondary btn-sm">{t('common.edit')}</Link>}
-                  {can('asset.delete') && <button className="btn btn-danger btn-sm" onClick={() => handleDelete(a)}>{t('common.delete')}</button>}
-                </td>
+                {visibleColumns.map((col) => renderCell(col.key, a, { t, can, onDelete: handleDelete }))}
               </tr>
             ))}
           </tbody>

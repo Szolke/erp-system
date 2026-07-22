@@ -3,6 +3,9 @@ import { assetTypes } from '../../api/assets'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useToast } from '../../contexts/ToastContext'
+import ColumnPicker from '../../components/ColumnPicker'
+import { useListColumns } from '../../hooks/useListColumns'
+import { assetTypeColumns } from '../../columns/assetTypes'
 
 function TypeForm({ onSave, onCancel, saving }) {
   const { t } = useTranslation()
@@ -42,6 +45,23 @@ function TypeForm({ onSave, onCancel, saving }) {
   )
 }
 
+function renderCell(key, tp, { t }) {
+  switch (key) {
+    case 'code':
+      return <td key="code"><code style={{ fontSize: 13 }}>{tp.code}</code></td>
+    case 'name':
+      return <td key="name">{tp.name}</td>
+    case 'scope':
+      return (
+        <td key="scope" className="text-muted" style={{ fontSize: 13 }}>
+          {tp.is_global ? t('asset_type.scope_global') : t('asset_type.scope_own')}
+        </td>
+      )
+    default:
+      return null
+  }
+}
+
 export default function AssetTypePage() {
   const { can } = useAuth()
   const { t } = useTranslation()
@@ -51,6 +71,8 @@ export default function AssetTypePage() {
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
   const [saving, setSaving]   = useState(false)
+  const [columnsOpen, setColumnsOpen] = useState(false)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('asset_types.index', assetTypeColumns)
 
   async function load() {
     setLoading(true)
@@ -92,28 +114,31 @@ export default function AssetTypePage() {
         </div>
       )}
 
+      <div className="search-row">
+        <ColumnPicker
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="asset-types-columns"
+        />
+      </div>
+
       {loading ? (
         <p className="text-muted">{t('common.loading')}</p>
       ) : (
         <table>
           <thead>
             <tr>
-              <th>{t('asset_type.code')}</th>
-              <th>{t('asset_type.name')}</th>
-              <th>{t('asset_type.scope')}</th>
+              {visibleColumns.map((col) => (
+                <th key={col.key}>{t(col.label)}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {list.length === 0 && (
-              <tr><td colSpan={3} className="text-muted">{t('asset_type.no_types')}</td></tr>
+              <tr><td colSpan={visibleColumns.length} className="text-muted">{t('asset_type.no_types')}</td></tr>
             )}
             {list.map((tp) => (
               <tr key={tp.id}>
-                <td><code style={{ fontSize: 13 }}>{tp.code}</code></td>
-                <td>{tp.name}</td>
-                <td className="text-muted" style={{ fontSize: 13 }}>
-                  {tp.is_global ? t('asset_type.scope_global') : t('asset_type.scope_own')}
-                </td>
+                {visibleColumns.map((col) => renderCell(col.key, tp, { t }))}
               </tr>
             ))}
           </tbody>

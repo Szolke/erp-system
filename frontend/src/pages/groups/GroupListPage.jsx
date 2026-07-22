@@ -5,7 +5,39 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { groups as groupsApi } from '../../api/groups'
 import PerPageSelector from '../../components/PerPageSelector'
 import Pagination from '../../components/Pagination'
+import ColumnPicker from '../../components/ColumnPicker'
+import { useListColumns } from '../../hooks/useListColumns'
+import { groupColumns } from '../../columns/groups'
 import { useToast } from '../../contexts/ToastContext'
+
+function renderCell(key, g, { t, canManage, onDelete }) {
+  switch (key) {
+    case 'name':
+      return (
+        <td key="name">
+          <Link to={`/groups/${g.id}`} className="table-link">{g.name}</Link>
+          {g.is_system && <span className="badge badge-inv-storno" style={{ marginLeft: 6 }}>rendszer</span>}
+        </td>
+      )
+    case 'description':
+      return <td key="description" className="text-muted">{g.description || '—'}</td>
+    case 'members':
+      return <td key="members">{g.users_count}</td>
+    case 'permissions':
+      return <td key="permissions">{g.permissions_count}</td>
+    case 'actions':
+      return (
+        <td key="actions" style={{ textAlign: 'right' }}>
+          <Link to={`/groups/${g.id}`} className="btn btn-secondary btn-sm" style={{ marginRight: 6 }}>{t('common.edit')}</Link>
+          {canManage && !g.is_system && (
+            <button className="btn btn-danger btn-sm" onClick={() => onDelete(g)}>{t('common.delete')}</button>
+          )}
+        </td>
+      )
+    default:
+      return null
+  }
+}
 
 export default function GroupListPage() {
   const { can } = useAuth()
@@ -16,6 +48,7 @@ export default function GroupListPage() {
   const [perPage, setPerPage]   = useState(20)
   const [page, setPage]         = useState(1)
   const [showForm, setShowForm] = useState(false)
+  const [columnsOpen, setColumnsOpen] = useState(false)
   const [form, setForm]         = useState({ name: '', description: '' })
   const [formErr, setFormErr]   = useState('')
   const [saving, setSaving]     = useState(false)
@@ -64,6 +97,7 @@ export default function GroupListPage() {
 
   const list = data?.data ?? []
   const canManage = can('group.manage')
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('groups.index', groupColumns)
 
   return (
     <div>
@@ -98,6 +132,10 @@ export default function GroupListPage() {
 
       <div className="search-row">
         <PerPageSelector value={perPage} onChange={handlePerPage} />
+        <ColumnPicker
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="groups-columns"
+        />
       </div>
 
       {loading ? (
@@ -106,32 +144,18 @@ export default function GroupListPage() {
         <table>
           <thead>
             <tr>
-              <th>{t('group.group_name')}</th>
-              <th>Leírás</th>
-              <th>{t('group.members')}</th>
-              <th>{t('group.permissions')}</th>
-              <th></th>
+              {visibleColumns.map((col) => (
+                <th key={col.key}>{t(col.label)}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {list.length === 0 && (
-              <tr><td colSpan={5} className="text-muted">{t('common.not_found')}</td></tr>
+              <tr><td colSpan={visibleColumns.length} className="text-muted">{t('common.not_found')}</td></tr>
             )}
             {list.map((g) => (
               <tr key={g.id}>
-                <td>
-                  <Link to={`/groups/${g.id}`} className="table-link">{g.name}</Link>
-                  {g.is_system && <span className="badge badge-inv-storno" style={{ marginLeft: 6 }}>rendszer</span>}
-                </td>
-                <td className="text-muted">{g.description || '—'}</td>
-                <td>{g.users_count}</td>
-                <td>{g.permissions_count}</td>
-                <td style={{ textAlign: 'right' }}>
-                  <Link to={`/groups/${g.id}`} className="btn btn-secondary btn-sm" style={{ marginRight: 6 }}>{t('common.edit')}</Link>
-                  {canManage && !g.is_system && (
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(g)}>{t('common.delete')}</button>
-                  )}
-                </td>
+                {visibleColumns.map((col) => renderCell(col.key, g, { t, canManage, onDelete: handleDelete }))}
               </tr>
             ))}
           </tbody>

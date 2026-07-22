@@ -7,6 +7,46 @@ import { salesGroups as sgApi } from '../../api/salesGroups'
 import { company as companyApi } from '../../api/company'
 import Pagination from '../../components/Pagination'
 import PerPageSelector from '../../components/PerPageSelector'
+import ColumnPicker from '../../components/ColumnPicker'
+import { useListColumns } from '../../hooks/useListColumns'
+import { salesGroupColumns } from '../../columns/salesGroups'
+
+function renderCell(key, g, { t, can, editId, onEditStart, onDelete }) {
+  switch (key) {
+    case 'display_name':
+      return <td key="display_name"><code style={{ fontSize: 13 }}>{g.display_name}</code></td>
+    case 'name':
+      return <td key="name" className="text-muted" style={{ fontSize: 13 }}>{g.name}</td>
+    case 'actions':
+      return (
+        <td key="actions" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+          {editId !== g.id ? (
+            <>
+              {can('sales_group.edit') && (
+                <button
+                  className="btn btn-secondary btn-sm"
+                  style={{ marginRight: 6 }}
+                  onClick={() => onEditStart(g)}
+                >
+                  {t('common.edit')}
+                </button>
+              )}
+              {can('sales_group.delete') && (
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => onDelete(g)}
+                >
+                  {t('common.delete')}
+                </button>
+              )}
+            </>
+          ) : null}
+        </td>
+      )
+    default:
+      return null
+  }
+}
 
 function displayName(prefix, name) {
   return prefix ? `${prefix}_${name}` : name
@@ -75,6 +115,8 @@ export default function SalesGroupPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [editId, setEditId]         = useState(null)
   const [saving, setSaving]         = useState(false)
+  const [columnsOpen, setColumnsOpen] = useState(false)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('sales_groups.index', salesGroupColumns)
 
   async function load(pp = perPage, pg = page) {
     setLoading(true)
@@ -175,6 +217,10 @@ export default function SalesGroupPage() {
 
       <div className="search-row">
         <PerPageSelector value={perPage} onChange={handlePerPage} />
+        <ColumnPicker
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="sales-groups-columns"
+        />
       </div>
 
       {loading ? (
@@ -183,56 +229,32 @@ export default function SalesGroupPage() {
         <table>
           <thead>
             <tr>
-              <th>Megjelenítőnév</th>
-              <th>Belső név</th>
-              <th></th>
+              {visibleColumns.map((col) => (
+                <th key={col.key}>{t(col.label)}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {list.length === 0 && (
               <tr>
-                <td colSpan={3} className="text-muted">
+                <td colSpan={visibleColumns.length} className="text-muted">
                   {prefix ? 'Még nincs értékesítő csoport.' : 'Prefix beállítása után hozható létre csoport.'}
                 </td>
               </tr>
             )}
             {list.map((g) => (
               <tr key={g.id}>
-                <td>
-                  <code style={{ fontSize: 13 }}>{g.display_name}</code>
-                </td>
-                <td className="text-muted" style={{ fontSize: 13 }}>
-                  {g.name}
-                </td>
-                <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                  {editId !== g.id ? (
-                    <>
-                      {can('sales_group.edit') && (
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          style={{ marginRight: 6 }}
-                          onClick={() => { setEditId(g.id); setShowCreate(false) }}
-                        >
-                          {t('common.edit')}
-                        </button>
-                      )}
-                      {can('sales_group.delete') && (
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDelete(g)}
-                        >
-                          {t('common.delete')}
-                        </button>
-                      )}
-                    </>
-                  ) : null}
-                </td>
+                {visibleColumns.map((col) => renderCell(col.key, g, {
+                  t, can, editId,
+                  onEditStart: (group) => { setEditId(group.id); setShowCreate(false) },
+                  onDelete: handleDelete,
+                }))}
               </tr>
             ))}
             {/* Szerkesztő sor — a szerkesztett elem alatt */}
             {editId !== null && (
               <tr>
-                <td colSpan={3}>
+                <td colSpan={visibleColumns.length}>
                   <div style={{ padding: '8px 0' }}>
                     <GroupForm
                       prefix={prefix}

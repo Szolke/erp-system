@@ -8,6 +8,9 @@ import PerPageSelector from '../components/PerPageSelector'
 import Pagination from '../components/Pagination'
 import DateRangePicker from '../components/reports/DateRangePicker'
 import NavSubmissionDetail from '../components/nav/NavSubmissionDetail'
+import ColumnPicker from '../components/ColumnPicker'
+import { useListColumns } from '../hooks/useListColumns'
+import { navSubmissionColumns } from '../columns/navSubmissions'
 import { useUrlFilters } from '../utils/useUrlFilters'
 import { formatDateTime } from '../utils/format'
 
@@ -26,6 +29,60 @@ function outcomeLabel(t, status) {
   return status === 'success' ? t('navlog.outcome_success') : t('navlog.outcome_error')
 }
 
+function renderCell(key, row, { t, locale, hasDateFilter, isOpen, onToggle }) {
+  switch (key) {
+    case 'invoice':
+      return (
+        <td key="invoice">
+          <Link to={`/invoices/${row.invoice.id}`} className="table-link">{row.invoice.invoice_number}</Link>
+        </td>
+      )
+    case 'partner':
+      return <td key="partner" className="doc-ellipsis" title={row.invoice.partner_name ?? ''}>{row.invoice.partner_name ?? '—'}</td>
+    case 'status': {
+      const needsAttention = row.invoice.nav_status === 'needs_attention'
+      return (
+        <td key="status">
+          <NavStatusBadge status={row.invoice.nav_status} />
+          {needsAttention && (
+            <span className="navlog-attention-hint" title={t('navlog.needs_attention_hint')}>
+              <AlertTriangle size={13} aria-hidden="true" />
+            </span>
+          )}
+        </td>
+      )
+    }
+    case 'latest':
+      return (
+        <td key="latest">
+          <div>{formatDateTime(row.latest.created_at, locale)}</div>
+          <div className="text-muted" style={{ fontSize: 12 }}>
+            {outcomeLabel(t, row.latest.status)}
+          </div>
+        </td>
+      )
+    case 'attempts':
+      return (
+        <td key="attempts">
+          {row.attempt_count} {t('navlog.attempt_count_label')}
+          {hasDateFilter && (
+            <div className="text-muted" style={{ fontSize: 11 }}>{t('navlog.attempt_count_filtered_hint')}</div>
+          )}
+        </td>
+      )
+    case 'actions':
+      return (
+        <td key="actions" className="text-right">
+          <button type="button" className="btn btn-secondary btn-sm" onClick={onToggle}>
+            {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />} {t('navlog.show_details')}
+          </button>
+        </td>
+      )
+    default:
+      return null
+  }
+}
+
 /**
  * "Van-e bárhol NAV-beküldési probléma?" — a NAV modul monitoring-listája.
  * Egy sor = egy érintett SZÁMLA (l. NavSubmissionLogGroupedResource), nem
@@ -41,7 +98,9 @@ export default function NavSubmissionsPage() {
   const [openPopover, setOpenPopover] = useState(false)
   const [searchInput, setSearchInput] = useState(filters.invoice_number)
   const [expandedId, setExpandedId] = useState(null)
+  const [columnsOpen, setColumnsOpen] = useState(false)
   const debounceRef = useRef(null)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('nav_submissions.index', navSubmissionColumns)
 
   const page = Number(filters.page) || 1
   const perPage = Number(filters.per_page) || 20
@@ -146,6 +205,11 @@ export default function NavSubmissionsPage() {
             onOpenChange={setOpenPopover}
             id="navlog-daterange"
           />
+
+          <ColumnPicker
+            columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+            open={columnsOpen} onOpenChange={setColumnsOpen} id="nav-submissions-columns"
+          />
         </div>
 
         <div className="doc-table-wrap mt-4">
@@ -171,12 +235,9 @@ export default function NavSubmissionsPage() {
             <table className="doc-table">
               <thead>
                 <tr>
-                  <th scope="col">{t('navlog.col_invoice')}</th>
-                  <th scope="col">{t('navlog.col_partner')}</th>
-                  <th scope="col">{t('navlog.col_status')}</th>
-                  <th scope="col">{t('navlog.col_latest')}</th>
-                  <th scope="col">{t('navlog.col_attempts')}</th>
-                  <th scope="col" />
+                  {visibleColumns.map((col) => (
+                    <th key={col.key} scope="col">{t(col.label)}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -186,39 +247,14 @@ export default function NavSubmissionsPage() {
                   return (
                     <Fragment key={row.invoice_id}>
                       <tr className={needsAttention ? 'navlog-row--needs-attention' : ''}>
-                        <td>
-                          <Link to={`/invoices/${row.invoice.id}`} className="table-link">{row.invoice.invoice_number}</Link>
-                        </td>
-                        <td className="doc-ellipsis" title={row.invoice.partner_name ?? ''}>{row.invoice.partner_name ?? '—'}</td>
-                        <td>
-                          <NavStatusBadge status={row.invoice.nav_status} />
-                          {needsAttention && (
-                            <span className="navlog-attention-hint" title={t('navlog.needs_attention_hint')}>
-                              <AlertTriangle size={13} aria-hidden="true" />
-                            </span>
-                          )}
-                        </td>
-                        <td>
-                          <div>{formatDateTime(row.latest.created_at, locale)}</div>
-                          <div className="text-muted" style={{ fontSize: 12 }}>
-                            {outcomeLabel(t, row.latest.status)}
-                          </div>
-                        </td>
-                        <td>
-                          {row.attempt_count} {t('navlog.attempt_count_label')}
-                          {hasDateFilter && (
-                            <div className="text-muted" style={{ fontSize: 11 }}>{t('navlog.attempt_count_filtered_hint')}</div>
-                          )}
-                        </td>
-                        <td className="text-right">
-                          <button type="button" className="btn btn-secondary btn-sm" onClick={() => toggleExpanded(row.latest.id)}>
-                            {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />} {t('navlog.show_details')}
-                          </button>
-                        </td>
+                        {visibleColumns.map((col) => renderCell(col.key, row, {
+                          t, locale, hasDateFilter, isOpen,
+                          onToggle: () => toggleExpanded(row.latest.id),
+                        }))}
                       </tr>
                       {isOpen && (
                         <tr>
-                          <td colSpan={6}>
+                          <td colSpan={visibleColumns.length}>
                             <NavSubmissionDetail logId={row.latest.id} />
                           </td>
                         </tr>

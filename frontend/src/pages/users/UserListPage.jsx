@@ -5,8 +5,57 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { users as usersApi } from '../../api/users'
 import PerPageSelector from '../../components/PerPageSelector'
 import Pagination from '../../components/Pagination'
+import ColumnPicker from '../../components/ColumnPicker'
+import { useListColumns } from '../../hooks/useListColumns'
+import { userColumns } from '../../columns/users'
 import JobPositionSelect from '../../components/JobPositionSelect'
 import { useToast } from '../../contexts/ToastContext'
+
+function renderCell(key, u, { t, canManage, onToggleActive, onRemove }) {
+  switch (key) {
+    case 'name':
+      return <td key="name"><Link to={`/users/${u.id}`} className="table-link">{u.name}</Link></td>
+    case 'email':
+      return <td key="email">{u.email}</td>
+    case 'groups':
+      return (
+        <td key="groups">
+          {u.groups?.length
+            ? u.groups.map((g) => (
+                <span key={g.id} className="badge badge-inv-issued" style={{ marginRight: 4 }}>{g.name}</span>
+              ))
+            : <span className="text-muted">—</span>}
+        </td>
+      )
+    case 'status':
+      return (
+        <td key="status">
+          {u.is_superadmin
+            ? <span className="badge badge-inv-issued">Szuperadmin</span>
+            : <span className={u.is_active ? 'badge badge-pay-paid' : 'badge badge-inv-storno'}>
+                {u.is_active ? t('common.active') : 'Inaktív'}
+              </span>
+          }
+        </td>
+      )
+    case 'actions':
+      return (
+        <td key="actions" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+          <Link to={`/users/${u.id}`} className="btn btn-secondary btn-sm" style={{ marginRight: 6 }}>{t('user.overrides')}</Link>
+          {canManage && !u.is_superadmin && (
+            <>
+              <button className="btn btn-secondary btn-sm" onClick={() => onToggleActive(u)} style={{ marginRight: 6 }}>
+                {u.is_active ? 'Letiltás' : 'Engedélyezés'}
+              </button>
+              <button className="btn btn-danger btn-sm" onClick={() => onRemove(u)}>{t('group.remove_member')}</button>
+            </>
+          )}
+        </td>
+      )
+    default:
+      return null
+  }
+}
 
 export default function UserListPage() {
   const { can } = useAuth()
@@ -18,9 +67,11 @@ export default function UserListPage() {
   const [perPage, setPerPage]   = useState(20)
   const [page, setPage]         = useState(1)
   const [showForm, setShowForm] = useState(false)
+  const [columnsOpen, setColumnsOpen] = useState(false)
   const [form, setForm]         = useState({ name: '', email: '', password: '', job_position_id: null })
   const [formErr, setFormErr]   = useState('')
   const [saving, setSaving]     = useState(false)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reset: resetColumns, isDirty } = useListColumns('users.index', userColumns)
 
   async function load(q = '', pp = 20, pg = 1) {
     setLoading(true)
@@ -128,6 +179,10 @@ export default function UserListPage() {
       <div className="search-row">
         <input placeholder="Keresés névben / e-mailben…" value={search} onChange={handleSearch} />
         <PerPageSelector value={perPage} onChange={handlePerPage} />
+        <ColumnPicker
+          columns={allColumns} isVisible={isVisible} onToggle={toggleColumn} onReset={resetColumns} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="users-columns"
+        />
       </div>
 
       {loading ? (
@@ -136,47 +191,18 @@ export default function UserListPage() {
         <table>
           <thead>
             <tr>
-              <th>{t('user.name')}</th>
-              <th>{t('user.email')}</th>
-              <th>Csoportok</th>
-              <th>Státusz</th>
-              <th></th>
+              {visibleColumns.map((col) => (
+                <th key={col.key}>{t(col.label)}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {list.length === 0 && (
-              <tr><td colSpan={5} className="text-muted">{t('common.not_found')}</td></tr>
+              <tr><td colSpan={visibleColumns.length} className="text-muted">{t('common.not_found')}</td></tr>
             )}
             {list.map((u) => (
               <tr key={u.id}>
-                <td><Link to={`/users/${u.id}`} className="table-link">{u.name}</Link></td>
-                <td>{u.email}</td>
-                <td>
-                  {u.groups?.length
-                    ? u.groups.map((g) => (
-                        <span key={g.id} className="badge badge-inv-issued" style={{ marginRight: 4 }}>{g.name}</span>
-                      ))
-                    : <span className="text-muted">—</span>}
-                </td>
-                <td>
-                  {u.is_superadmin
-                    ? <span className="badge badge-inv-issued">Szuperadmin</span>
-                    : <span className={u.is_active ? 'badge badge-pay-paid' : 'badge badge-inv-storno'}>
-                        {u.is_active ? t('common.active') : 'Inaktív'}
-                      </span>
-                  }
-                </td>
-                <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                  <Link to={`/users/${u.id}`} className="btn btn-secondary btn-sm" style={{ marginRight: 6 }}>{t('user.overrides')}</Link>
-                  {canManage && !u.is_superadmin && (
-                    <>
-                      <button className="btn btn-secondary btn-sm" onClick={() => handleToggleActive(u)} style={{ marginRight: 6 }}>
-                        {u.is_active ? 'Letiltás' : 'Engedélyezés'}
-                      </button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleRemove(u)}>{t('group.remove_member')}</button>
-                    </>
-                  )}
-                </td>
+                {visibleColumns.map((col) => renderCell(col.key, u, { t, canManage, onToggleActive: handleToggleActive, onRemove: handleRemove }))}
               </tr>
             ))}
           </tbody>

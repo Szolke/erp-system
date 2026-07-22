@@ -5,7 +5,34 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import PerPageSelector from '../../components/PerPageSelector'
 import Pagination from '../../components/Pagination'
+import ColumnPicker from '../../components/ColumnPicker'
+import { useListColumns } from '../../hooks/useListColumns'
+import { partnerColumns } from '../../columns/partners'
 import { useToast } from '../../contexts/ToastContext'
+
+function renderCell(key, p, { t, can, onDelete }) {
+  switch (key) {
+    case 'name':
+      return <td key="name">{p.name}</td>
+    case 'tax_number':
+      return <td key="tax_number">{p.tax_number ?? '—'}</td>
+    case 'type':
+      return <td key="type">{p.type}</td>
+    case 'city':
+      return <td key="city">{p.billing_city}</td>
+    case 'email':
+      return <td key="email">{p.email ?? '—'}</td>
+    case 'actions':
+      return (
+        <td key="actions" className="flex">
+          {can('partner.edit') && <Link to={`/partners/${p.id}/edit`} className="btn btn-secondary btn-sm">{t('common.edit')}</Link>}
+          {can('partner.delete') && <button className="btn btn-danger btn-sm" onClick={() => onDelete(p.id)}>{t('common.delete')}</button>}
+        </td>
+      )
+    default:
+      return null
+  }
+}
 
 export default function PartnerListPage() {
   const { can } = useAuth()
@@ -16,6 +43,8 @@ export default function PartnerListPage() {
   const [loading, setLoading] = useState(true)
   const [perPage, setPerPage] = useState(20)
   const [page, setPage]       = useState(1)
+  const [columnsOpen, setColumnsOpen] = useState(false)
+  const { allColumns, visibleColumns, isVisible, toggle, reset, isDirty } = useListColumns('partners.index', partnerColumns)
 
   async function load(s, pp, pg) {
     setLoading(true)
@@ -55,22 +84,24 @@ export default function PartnerListPage() {
         <input placeholder="Név vagy adószám…" value={search} onChange={(e) => setSearch(e.target.value)} />
         <button className="btn btn-secondary" type="submit">{t('common.search')}</button>
         <PerPageSelector value={perPage} onChange={handlePerPage} />
+        <ColumnPicker
+          columns={allColumns} isVisible={isVisible} onToggle={toggle} onReset={reset} isDirty={isDirty}
+          open={columnsOpen} onOpenChange={setColumnsOpen} id="partners-columns"
+        />
       </form>
       {loading ? <p className="text-muted">{t('common.loading')}</p> : (
         <table>
-          <thead><tr><th>{t('common.name')}</th><th>{t('partner.tax_number')}</th><th>Típus</th><th>{t('partner.city')}</th><th>{t('common.email')}</th><th></th></tr></thead>
+          <thead>
+            <tr>
+              {visibleColumns.map((col) => (
+                <th key={col.key}>{t(col.label)}</th>
+              ))}
+            </tr>
+          </thead>
           <tbody>
             {data?.data.map((p) => (
               <tr key={p.id}>
-                <td>{p.name}</td>
-                <td>{p.tax_number ?? '—'}</td>
-                <td>{p.type}</td>
-                <td>{p.billing_city}</td>
-                <td>{p.email ?? '—'}</td>
-                <td className="flex">
-                  {can('partner.edit') && <Link to={`/partners/${p.id}/edit`} className="btn btn-secondary btn-sm">{t('common.edit')}</Link>}
-                  {can('partner.delete') && <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id)}>{t('common.delete')}</button>}
-                </td>
+                {visibleColumns.map((col) => renderCell(col.key, p, { t, can, onDelete: handleDelete }))}
               </tr>
             ))}
           </tbody>

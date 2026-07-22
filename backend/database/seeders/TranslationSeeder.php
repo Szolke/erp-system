@@ -64,6 +64,9 @@ class TranslationSeeder extends Seeder
             ['common', 'inactive',    'Inaktív',              'Inactive',           'Inaktiv'],
             ['common', 'name',        'Név',                  'Name',               'Name'],
             ['common', 'email',       'E-mail',               'Email',              'E-Mail'],
+            ['common', 'city',        'Város',                'City',               'Stadt'],
+            ['common', 'description', 'Leírás',               'Description',        'Beschreibung'],
+            ['common', 'actions',     'Műveletek',            'Actions',            'Aktionen'],
             ['common', 'amount',      'Összeg',               'Amount',             'Betrag'],
             ['common', 'date',        'Dátum',                'Date',               'Datum'],
             ['common', 'currency',    'Deviza',               'Currency',           'Währung'],
@@ -86,8 +89,14 @@ class TranslationSeeder extends Seeder
             ['document', 'number',         'Bizonylat száma',                   'Document number',                   'Belegnummer'],
             ['document', 'type_col',       'Típus',                             'Type',                              'Typ'],
             ['document', 'partner',        'Partner',                           'Partner',                           'Partner'],
+            ['document', 'partner_tax_number', 'Adószám',                       'Tax number',                        'Steuernummer'],
             ['document', 'issued_at',      'Kelt',                              'Date',                              'Datum'],
+            ['document', 'fulfillment_date', 'Teljesítés',                      'Fulfillment date',                  'Erfüllungsdatum'],
+            ['document', 'due_date_col',   'Fizetési határidő',                 'Due date',                          'Fälligkeitsdatum'],
+            ['document', 'net',            'Nettó',                             'Net',                               'Netto'],
+            ['document', 'vat',            'ÁFA',                               'VAT',                               'MwSt.'],
             ['document', 'gross',          'Bruttó',                            'Gross',                             'Brutto'],
+            ['document', 'gross_huf',      'Bruttó (HUF)',                      'Gross (HUF)',                       'Brutto (HUF)'],
             ['document', 'status_col',     'Állapot',                           'Status',                            'Status'],
             ['document', 'payment_col',    'Fizetés',                           'Payment',                           'Zahlung'],
             ['document', 'date_from',      'Dátumtól',                          'Date from',                         'Von Datum'],
@@ -159,6 +168,8 @@ class TranslationSeeder extends Seeder
             ['invoice', 'number_col',      'Számlaszám',                        'Invoice number',                    'Rechnungsnummer'],
             ['invoice', 'partner_col',     'Partner',                           'Partner',                           'Partner'],
             ['invoice', 'gross_col',       'Bruttó',                            'Gross',                             'Brutto'],
+            ['invoice', 'status_col',      'Státusz',                           'Status',                            'Status'],
+            ['invoice', 'payment_status_col', 'Fizetés',                        'Payment',                           'Zahlung'],
             ['invoice', 'new_title',       'Új számla',                         'New invoice',                       'Neue Rechnung'],
             ['invoice', 'notes',           'Megjegyzés',                        'Notes',                             'Anmerkung'],
             ['invoice', 'items',           'Tételek',                           'Items',                             'Positionen'],
@@ -226,6 +237,8 @@ class TranslationSeeder extends Seeder
             ['product', 'vat_rate',        'ÁFA kulcs',                         'VAT rate',                          'MwSt.-Satz'],
             ['product', 'net_price',       'Nettó ár',                          'Net price',                         'Nettopreis'],
             ['product', 'unit',            'Egység',                            'Unit',                              'Einheit'],
+            ['product', 'base_price',      'Alapár',                            'Base price',                        'Grundpreis'],
+            ['product', 'type_col',        'Típus',                             'Type',                              'Typ'],
 
             // ── Eszközök ──────────────────────────────────────────────
             ['asset', 'title',              'Eszközök',                          'Assets',                            'Anlagen'],
@@ -267,6 +280,8 @@ class TranslationSeeder extends Seeder
             ['user', 'tab_profile',        'Adatlap',                           'Profile',                           'Profil'],
             ['user', 'tab_permissions',    'Jogosultságok',                     'Permissions',                       'Berechtigungen'],
             ['user', 'permission_search',  'Keresés a jogosultságok között…',   'Search permissions…',               'Berechtigungen durchsuchen…'],
+            ['user', 'groups_col',         'Csoportok',                         'Groups',                            'Gruppen'],
+            ['user', 'status_col',         'Státusz',                           'Status',                            'Status'],
 
             // ── Csoport ───────────────────────────────────────────────
             ['group', 'title',             'Csoportok',                         'Groups',                            'Gruppen'],
@@ -297,6 +312,8 @@ class TranslationSeeder extends Seeder
             ['company', 'no_logo',         'Nincs logó',                        'No logo',                           'Kein Logo'],
             ['company', 'inv_header',      'Bizonylatfejléc',                   'Invoice header',                    'Rechnungskopf'],
             ['company', 'inv_footer',      'Bizonylatláb',                      'Invoice footer',                    'Rechnungsfuß'],
+            ['company', 'users_count_col', 'Felhasználók',                      'Users',                             'Benutzer'],
+            ['company', 'status_col',      'Státusz',                           'Status',                            'Status'],
 
             // ── Audit napló ───────────────────────────────────────────
             ['audit', 'title',             'Audit napló',                       'Audit log',                         'Audit-Protokoll'],
@@ -623,6 +640,32 @@ class TranslationSeeder extends Seeder
             ['navlog', 'empty_errors_hint',            'Minden beküldés rendben van — ez jó hír.',     'Every submission is fine — good news.',       'Alle Übermittlungen sind in Ordnung — gute Nachricht.'],
             ['navlog', 'empty_generic',                'Nincs a szűrésnek megfelelő bejegyzés.',       'No entries match the filter.',                'Keine Einträge entsprechen dem Filter.'],
             ['navlog', 'total_invoices',                '{count} érintett számla',                     '{count} affected invoice(s)',                 '{count} betroffene Rechnung(en)'],
+
+            // ── Audit napló — oszlopválasztó bővítés ───────────────────
+            ['audit', 'timestamp_col',      'Időpont',                                   'Timestamp',                                  'Zeitpunkt'],
+
+            // ── Értékesítő csoportok — oszlopválasztó ──────────────────
+            ['sales_group', 'display_name_col',  'Megjelenítőnév',                       'Display name',                               'Anzeigename'],
+            ['sales_group', 'internal_name_col', 'Belső név',                            'Internal name',                              'Interner Name'],
+
+            // ── Munkakörök — oszlopválasztó ─────────────────────────────
+            ['job_position', 'scope_col',       'Kör',                                    'Scope',                                      'Bereich'],
+            ['job_position', 'status_col',      'Állapot',                                'Status',                                     'Status'],
+            ['job_position', 'sort_order_col',  'Sorrend',                                'Order',                                      'Reihenfolge'],
+
+            // ── NAV eNyugta jelentések lista — oszlopválasztó ───────────
+            ['enyugta', 'report_date_col',    'Nap',                                      'Day',                                        'Tag'],
+            ['enyugta', 'type_col',           'Típus',                                    'Type',                                       'Typ'],
+            ['enyugta', 'status_col',         'Állapot',                                  'Status',                                     'Status'],
+            ['enyugta', 'receipt_count_col',  'Nyugtaszám',                               'Receipt count',                              'Belegzahl'],
+            ['enyugta', 'gross_total_col',    'Bruttó összeg',                            'Gross total',                                'Bruttosumme'],
+
+            // ── Oszlopválasztó (ColumnPicker, listafüggetlen) ──────────
+            ['columns', 'picker_button',    'Oszlopok',                                  'Columns',                                    'Spalten'],
+            ['columns', 'visible_count',    '{visible} / {total} oszlop látszik',        '{visible} / {total} columns visible',       '{visible} / {total} Spalten sichtbar'],
+            ['columns', 'reset',            'Alapértelmezett visszaállítása',            'Reset to default',                          'Auf Standard zurücksetzen'],
+            ['columns', 'locked_tooltip',   'Ez az oszlop nem rejthető el',              'This column cannot be hidden',              'Diese Spalte kann nicht ausgeblendet werden'],
+            ['columns', 'save_error',       'Az oszlopbeállítás mentése nem sikerült, a módosítás egyelőre csak ideiglenes.', 'Saving the column preference failed — the change is temporary for now.', 'Speichern der Spalteneinstellung fehlgeschlagen — die Änderung ist vorerst nur vorübergehend.'],
         ];
 
         $now = now();

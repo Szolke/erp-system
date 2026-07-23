@@ -1,17 +1,23 @@
 # 6. Settings
 
-The Settings submenu contains several pages accessible from the Settings section in the
-sidebar. Each page is gated by a permission such as `company.manage` — if a page is not
-visible in the sidebar, you do not have access to it.
+The Settings submenu contains several pages organised into categories: **Company data**,
+**General**, **Users**, **Dictionaries**. Pages are gated by permissions — some are
+restricted to superadmins only; if a page is not visible in the sidebar, you do not have
+access to it.
 Back: [README.md](../README.md)
 
 ---
 
-## Company Settings (Settings → Company Settings)
+## Company data
 
-This page has four main sections.
+> The **Companies** menu item (creating a new company, superadmins only) is covered in
+> [Chapter 1](01-overview-login.md), in the Company Switcher section.
 
-### Company Data
+### Company Settings (Settings → Company Settings)
+
+The page is organised into several sections.
+
+#### Company Data
 
 Basic company information: name, tax number, EU tax number, registration number, postal
 code, city, address, email, phone, base currency, NAV Online Invoice environment
@@ -27,7 +33,7 @@ system normalises it to uppercase automatically. It forms the first part of ever
 group's display name: `PREFIX_GroupName`. The prefix cannot be cleared while the company
 still has sales groups; those must be removed first.
 
-### Company Logo Upload
+#### Company Logo Upload
 
 The company logo appears on issued PDFs. Requirements: JPEG, PNG, GIF, or WebP format,
 maximum 2 MB. After upload, the logo is immediately shown in the preview area. The
@@ -35,7 +41,7 @@ maximum 2 MB. After upload, the logo is immediately shown in the preview area. T
 
 This section is only visible to users with the `company.manage` permission.
 
-### General Settings
+#### General Settings
 
 - **Default currency** — the currency configured for the company (HUF / EUR / USD).
   Invoices support HUF and EUR at issuance; receipts support all three (HUF, EUR, USD).
@@ -46,7 +52,7 @@ This section is only visible to users with the `company.manage` permission.
 
 This section is only visible to users with the `company.manage` permission.
 
-### Sidebar Accent Colour
+#### Sidebar Accent Colour
 
 Choose from 18 predefined colours for the sidebar background. The selected colour takes
 effect immediately and is stored per company — different companies can have different
@@ -54,7 +60,7 @@ colours.
 
 This section is only visible to users with the `company.manage` permission.
 
-### SimplePay Credentials
+#### SimplePay Credentials
 
 Online payment integration configured per currency (HUF / EUR / USD). Each currency has
 its own merchant ID and secret key. The secret key is stored encrypted and is never
@@ -64,7 +70,7 @@ payment flow in test mode.
 This section is only visible to users with the `simplepay.manage` permission and only when
 the SimplePay module is enabled.
 
-### NAV Online Invoice Credentials
+#### NAV Online Invoice Credentials
 
 Configure the technical user credentials required for the NAV Online Invoice 3.0 API. Two
 environments (test / production) are managed independently with separate credential sets.
@@ -92,26 +98,7 @@ environment.
 This section is only visible to users with the `invoice.send_nav` permission and only when
 the NAV Online Invoice module is enabled.
 
-### NAV Log (Settings → General → NAV Log)
-
-Every NAV submission attempt is logged — both the initial invoice send and any later
-verdict check. This list shows whether anything is wrong: by default it's filtered to
-invoices that are failed, rejected, or stuck without a verdict after 24 hours (needs
-attention). One row represents one affected invoice, together with its attempt count —
-not one row per individual attempt.
-
-Each row can be expanded to show the latest attempt's details, including the raw data
-sent to and received from NAV (loaded only on demand, not as part of the list). The
-invoice's own detail page also shows a "NAV submission history" panel with that invoice's
-full chronological history.
-
-This list/panel is only visible to users with the `nav.log.view` permission — a SEPARATE
-permission from `invoice.send_nav` (used for managing NAV credentials), because the log
-contains raw NAV communication and is more sensitive than viewing the invoice itself.
-
----
-
-## Document Series (Settings → Document Series)
+### Document Series (Settings → Document Series)
 
 Configure the prefix and format for document serial numbers here. The default series
 (`SZ`, `NY`, `SZSZT`, `NYSZT`) are created automatically when a new company is set up.
@@ -123,29 +110,9 @@ Requires the `document_series.manage` permission.
 
 ---
 
-## Custom Fields (Settings → Custom Fields)
+## General
 
-Add custom data fields to partners and products. Available types: text, number, date,
-yes/no (boolean), pick list (select). For the select type, enter each possible value on
-a separate line.
-
-Custom fields require the `company.manage` permission. Defined fields appear on the
-partner and product forms, and the data entered there is stored with the respective
-partner or product record.
-
----
-
-## Translations (Settings → Translations)
-
-Interface texts (buttons, labels, error messages, etc.) can be edited in this editor
-across three languages (HU / EN / DE). Changes take effect immediately on the user
-interface.
-
-Requires the `company.manage` permission.
-
----
-
-## Module Manager (Settings → Modules)
+### Module Manager (Settings → Modules)
 
 This page is only accessible to **superadmins**.
 
@@ -165,30 +132,96 @@ For enabled modules that have a settings page (e.g. NAV Online Invoice, SimplePa
 Sales Groups), a "Configure →" link appears at the bottom of the card. It navigates to
 the module's own settings page or to the relevant section of the Company Settings page.
 
+### NAV Log (Settings → General → NAV Log)
+
+Every NAV submission attempt is logged — both the initial invoice send and any later
+verdict check. This list shows whether anything is wrong: by default it's filtered to
+invoices that are failed, rejected, or stuck without a verdict after 24 hours (needs
+attention). One row represents one affected invoice, together with its attempt count —
+not one row per individual attempt.
+
+Each row can be expanded to show the latest attempt's details, including the raw data
+sent to and received from NAV (loaded only on demand, not as part of the list). The
+invoice's own detail page also shows a "NAV submission history" panel with that invoice's
+full chronological history.
+
+This list/panel is only visible to users with the `nav.log.view` permission — a SEPARATE
+permission from `invoice.send_nav` (used for managing NAV credentials), because the log
+contains raw NAV communication and is more sensitive than viewing the invoice itself.
+
+### Custom Fields (Settings → Custom Fields)
+
+Add custom data fields to partners and products. Available types: text, number, date,
+yes/no (boolean), pick list (select). For the select type, enter each possible value on
+a separate line.
+
+Custom fields require the `company.manage` permission. Defined fields appear on the
+partner and product forms, and the data entered there is stored with the respective
+partner or product record.
+
+### API Tester (Settings → API Tester)
+
+An interactive interface for browsing and testing the ERP's own REST API. The left panel
+shows all available endpoints in collapsible groups (method badge + path); the right panel
+displays the endpoint details: parameter table, request body schema, and the "Send request"
+card.
+
+**Sending a request:**
+- Path parameters such as `{invoice}` or `{partner}` are filled in dedicated input fields.
+- Query parameters (e.g. `page`, `per_page`) can also be provided.
+- POST/PUT/PATCH methods show a JSON body textarea, pre-filled from the schema.
+- After clicking **Send**, the response (HTTP status, duration, JSON body) appears at the
+  bottom of the right panel.
+
+**Protection for irreversible operations:**  
+For cancel (`/cancel`), SimplePay refund (`/refund`), PDF regeneration (`/regenerate-pdf`),
+and delete (DELETE) endpoints, a red-bordered warning modal appears instead of the standard
+confirmation. It displays the active company name and requires ticking an "I understand —
+this operation is irreversible" checkbox before the Send button becomes active.
+
+Requires the `api_tester.use` permission.
+
 ---
 
-## Sales Groups (Settings → Sales Groups)
+## Users
 
-This page is only available when the **Sales Groups** module is enabled and requires the
-`sales_group.view` permission.
-
-Sales groups are scoped to the current company — groups belonging to other companies are
-not visible. Each group's display name is composed of the company prefix and the group
-name: `PREFIX_GroupName` (e.g. `BUD_North`).
-
-**Adding a group** (`sales_group.create`):
-The name must be unique within the company (case-insensitive). If no prefix has been
-configured for the company, the system returns a 422 error prompting you to set a prefix
-in Company Settings first.
-
-**Editing** (`sales_group.edit`): only the group name can be changed; the display name
-updates automatically.
-
-**Deleting** (`sales_group.delete`): the group is permanently removed.
+The **Users** and **Groups** pages are available here; for the full description of the
+permission system (RBAC) — roles, group membership, per-user overrides — see
+[Chapter 7](07-users-permissions.md).
 
 ---
 
-## Assets and Asset Types (Assets / Settings → Asset Types)
+## Dictionaries
+
+### Countries (Settings → Countries)
+
+This page is only available to **superadmins**. It controls which countries appear as
+selectable options system-wide — the list is controlled with checkboxes, can be filtered
+by search, and is saved with a single **Save** button.
+
+> Countries disabled here are also unavailable in the partner form's "Country" field —
+> the two lists are linked. If a partner's already-saved country is later disabled, it
+> does not disappear from that partner's record; it just can't be selected again as a
+> new value.
+
+### Munkakörök (Job Positions) (Settings → Munkakörök)
+
+> **This entire screen is only available in Hungarian**, regardless of your interface
+> language setting — not just the menu label (as with the *eNyugta jelentések* item in
+> [Chapter 1](01-overview-login.md)), but the page title, buttons, and every field label
+> too. The description below explains what the screen does; the on-screen text itself
+> will still read in Hungarian.
+
+Freely named job positions (e.g. "Recepciós" – receptionist, "Könyvelő" – bookkeeper) can
+be created and assigned to users — the field is purely informational and is not tied to
+any permission. A job position can be marked inactive: existing assignments are unaffected,
+it just becomes unavailable for new selections. Superadmins can also create a "global" job
+position, which applies to every company, not just their own.
+
+The "Munkakör" field on the user form (when creating a user, and on the user's detail page)
+is where a job position is selected from the list.
+
+### Assets and Asset Types (Assets / Settings → Asset Types)
 
 This feature is only available when the **Assets** module is enabled. The **Assets**
 menu item (top of the sidebar) tracks the company's physical assets (e.g. POS
@@ -211,26 +244,29 @@ terminal, Printer) and the types your own company has created. **Adding a new
 type** (`asset.create`) always creates it under your own company — other companies
 cannot see it.
 
----
+### Sales Groups (Settings → Sales Groups)
 
-## API Tester (Settings → API Tester)
+This page is only available when the **Sales Groups** module is enabled and requires the
+`sales_group.view` permission.
 
-An interactive interface for browsing and testing the ERP's own REST API. The left panel
-shows all available endpoints in collapsible groups (method badge + path); the right panel
-displays the endpoint details: parameter table, request body schema, and the "Send request"
-card.
+Sales groups are scoped to the current company — groups belonging to other companies are
+not visible. Each group's display name is composed of the company prefix and the group
+name: `PREFIX_GroupName` (e.g. `BUD_North`).
 
-**Sending a request:**
-- Path parameters such as `{invoice}` or `{partner}` are filled in dedicated input fields.
-- Query parameters (e.g. `page`, `per_page`) can also be provided.
-- POST/PUT/PATCH methods show a JSON body textarea, pre-filled from the schema.
-- After clicking **Send**, the response (HTTP status, duration, JSON body) appears at the
-  bottom of the right panel.
+**Adding a group** (`sales_group.create`):
+The name must be unique within the company (case-insensitive). If no prefix has been
+configured for the company, the system returns a 422 error prompting you to set a prefix
+in Company Settings first.
 
-**Protection for irreversible operations:**  
-For cancel (`/cancel`), SimplePay refund (`/refund`), PDF regeneration (`/regenerate-pdf`),
-and delete (DELETE) endpoints, a red-bordered warning modal appears instead of the standard
-confirmation. It displays the active company name and requires ticking an "I understand —
-this operation is irreversible" checkbox before the Send button becomes active.
+**Editing** (`sales_group.edit`): only the group name can be changed; the display name
+updates automatically.
 
-Requires the `api_tester.use` permission.
+**Deleting** (`sales_group.delete`): the group is permanently removed.
+
+### Translations (Settings → Translations)
+
+Interface texts (buttons, labels, error messages, etc.) can be edited in this editor
+across three languages (HU / EN / DE). Changes take effect immediately on the user
+interface.
+
+Requires the `company.manage` permission.

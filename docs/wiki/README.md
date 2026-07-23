@@ -23,6 +23,7 @@ partnereket kezelni, fizetéseket rögzíteni, és mire jók az egyes beállít�
 | 7 | [Felhasználók és jogosultságok](hu/07-felhasznalok-jogosultsagok.md) |
 | 8 | [Egyéb: nyelvváltás, sötét mód, audit napló](hu/08-egyeb.md) |
 | 9 | [Kimutatások](hu/09-kimutatasok.md) |
+| 10 | [NAV eNyugta](hu/10-enyugta.md) |
 
 ### English
 
@@ -37,3 +38,4 @@ partnereket kezelni, fizetéseket rögzíteni, és mire jók az egyes beállít�
 | 7 | [Users and permissions](en/07-users-permissions.md) |
 | 8 | [Other: language, dark mode, audit log](en/08-other.md) |
 | 9 | [Reports](en/09-reports.md) |
+| 10 | [NAV eNyugta (Receipt Data Reporting)](en/10-nav-enyugta.md) |

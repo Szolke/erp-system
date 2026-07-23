@@ -40,14 +40,44 @@ After a successful login, the system opens the last active company context.
 After logging in, you will see two main areas:
 
 - **Sidebar** — on the left; the primary navigation tool. The company switcher is shown in
-  the header (details below), followed by the menu items (Documents, Partners, Products, and
-  the Settings submenu). At the bottom of the sidebar you will find the language switcher,
-  the dark/light mode toggle, the username, and the **Log out** button.
+  the header (details below), followed by the menu items. The main items are: **Dashboard**,
+  Documents, Reports, Partners, Products, Assets, *eNyugta jelentések* (the NAV eNyugta
+  reports screen — shown under this Hungarian name regardless of interface language) and
+  **User guide** (this document — available from within the app, no need to leave it).
+  Below these, in a separate block, the **Settings** submenu, organised into categories
+  (details: [Chapter 6](06-settings.md)). At the bottom of the sidebar you will find the
+  language switcher, the dark/light mode toggle, the username, and the **Log out** button.
 - **Main content** — the larger area on the right; this is where the current page is
   displayed (lists, details, forms).
 
+> Which menu items you see depends on your permissions and on which modules are enabled —
+> not every user sees the full list above.
+
 The sidebar is collapsible: clicking the arrow button in the header shrinks it to icon-only
-mode (54 px wide), giving more room to the content area. The state persists across sessions.
+mode, giving more room to the content area. The state persists across sessions.
+
+---
+
+## Dashboard
+
+After a successful login, the first screen is the Dashboard (the page heading reads
+"Overview"), giving a quick snapshot of the company's current status:
+
+- **Unpaid** — the total amount of all invoices not yet paid, in the primary currency,
+  together with the item count; if the company invoices in more than one currency, the
+  other currencies' totals are shown on a separate line.
+- **Overdue** — the total for invoices past their due date, highlighting how many days ago
+  the oldest one became overdue.
+- **This month's invoicing** — the gross total of invoices issued in the current month.
+- **NAV status** — the error count from NAV Online Invoice submissions and the timestamp of
+  the last sync; only shown if NAV integration is enabled for the company.
+- **Oldest unpaid invoices** table — the longest-open items with invoice number (a
+  clickable link to the invoice), partner name, and days overdue/remaining.
+
+> Which cards and the table appear also depends on permissions and on the NAV module's
+> status — not every user sees all of them.
+
+---
 
 ---
 

@@ -40,14 +40,42 @@ Sikeres bejelentkezés után a rendszer az utoljára aktív cégkontextusba visz
 Bejelentkezés után két fő terület látható:
 
 - **Oldalsáv (sidebar)** — a bal oldalon, ez a navigáció fő eszköze. A fejlécben a cégváltó
-  látható (részletek lent), alatta a menüpontok (Bizonylatok, Partnerek, Termékek és a
-  Beállítások almenü). Az oldalsáv alján a nyelvváltó, a sötét/világos mód kapcsolója, a
-  felhasználónév és a **Kijelentkezés** gomb található.
+  látható (részletek lent), alatta a menüpontok. A fő menüpontok: **Nyitólap**, Bizonylatok,
+  Kimutatások, Partnerek, Termékek, Eszközök, eNyugta jelentések és **Kézikönyv** (ez a
+  jelen dokumentum — a felületről is elérhető, nem kell elhagyni hozzá az alkalmazást).
+  Ezek alatt, külön blokkban, a **Beállítások** almenü, kategóriákba rendezve (bővebben:
+  [6. fejezet](06-beallitasok.md)). Az oldalsáv alján a nyelvváltó, a sötét/világos mód
+  kapcsolója, a felhasználónév és a **Kijelentkezés** gomb található.
 - **Fő tartalom** — a jobb oldali, nagyobb terület; itt jelenik meg az adott oldal (lista,
   részletek, űrlap).
 
+> A látható menüpontok köre jogosultságtól és az aktivált moduloktól függ — nem minden
+> felhasználó látja a fenti listát teljes egészében.
+
 Az oldalsáv összecsukható: a fejlécben lévő nyíl gombbal ikonméretre szűkíthető, így több hely
 marad a tartalomnak. Az állapot munkamenetről munkamenetre megmarad.
+
+---
+
+## Nyitólap (Dashboard)
+
+Sikeres bejelentkezés után az első képernyő a Nyitólap (a képernyő fejléce: „Áttekintés"),
+amely gyors áttekintést ad a cég aktuális állapotáról:
+
+- **Kifizetetlen** — az összes még ki nem fizetett számla összege a fő devizában, a
+  darabszámmal együtt; ha a cég több devizában is számláz, a többi deviza összege külön
+  sorban jelenik meg.
+- **Lejárt** — a fizetési határidőn túli számlák összege, kiemelve, hány napja esedékes a
+  legrégebbi elmaradás.
+- **E havi számlázás** — a folyó hónapban kiállított számlák bruttó összege.
+- **NAV állapot** — a NAV Online Számla beküldések hibaszáma és az utolsó szinkronizálás
+  időpontja; csak akkor jelenik meg, ha a NAV-integráció be van kapcsolva a cégnél.
+- **Legrégebbi kifizetetlen számlák** táblázata — a legrégebb óta nyitott tételek
+  számlaszámmal (kattintható link az adott számlára), partnerrel és a hátralévő/lejárt
+  napok számával.
+
+> A kártyák és a táblázat megjelenése is jogosultságtól és a NAV-modul állapotától függ —
+> nem minden felhasználó látja mindegyiket.
 
 ---
 

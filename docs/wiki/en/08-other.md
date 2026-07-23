@@ -43,6 +43,9 @@ Each row shows:
 - **Record** — which database object was affected (e.g. `Invoice#42`)
 - **Before / After values** — what changed (only present when data was modified)
 
+These columns can be customised too: the **Columns** button above the list — the same
+way as on the Documents page — lets you show/hide and reorder the individual columns.
+
 ### Filtering
 
 Type an event name into the search box above the log (e.g. entering `invoice` shows only

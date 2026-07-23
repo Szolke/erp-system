@@ -40,6 +40,9 @@ Minden sor a következőket mutatja:
 - **Rekord** — melyik adatbázis-objektumot érintette (pl. `Invoice#42`)
 - **Előző / Új értékek** — mi változott (csak ha az eseményhez van adatváltozás)
 
+Az oszlopok itt is testre szabhatók: a lista feletti **Oszlopok** gombbal — a
+Bizonylatoknál megismert módon — az egyes oszlopok ki-/bekapcsolhatók és átrendezhetők.
+
 ### Szűrés
 
 A napló feletti keresőmezőbe beírhatod a keresett eseménynevet (pl. `invoice` beírásával csak

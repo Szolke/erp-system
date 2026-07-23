@@ -8,8 +8,12 @@ Back: [README.md](../README.md)
 
 ## List Layout
 
-Table columns: document number · type · partner · issue date · gross total · currency ·
-status · payment status.
+By default the table shows the most commonly used columns, but more columns are
+available. Click the **Columns** button above the list to open the column picker:
+individual columns can be shown or hidden with a checkbox, and non-locked columns can be
+reordered by dragging the handle at the start of their row. Certain identifier columns
+(e.g. the document number) always remain visible. The setting is saved separately per
+user and per company — switching companies shows that company's own column preference.
 
 Click a document number to open its detail page.
 

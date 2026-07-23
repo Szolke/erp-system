@@ -8,8 +8,13 @@ Vissza: [README.md](../README.md)
 
 ## A lista elrendezése
 
-A táblázat oszlopai: bizonylat száma · típus · partner · kiállítás dátuma · bruttó összeg ·
-deviza · státusz · fizetési állapot.
+A táblázat alapból a leggyakrabban használt oszlopokat mutatja, de az elérhető oszlopok
+köre ennél bővebb. A lista feletti **Oszlopok** gombra kattintva megnyílik az
+oszlopválasztó: itt az egyes oszlopok jelölőnégyzettel ki- és bekapcsolhatók, a nem
+rögzített oszlopok pedig a soruk elején lévő fogantyúval húzva átrendezhetők. Egyes
+azonosító oszlopok (pl. a bizonylatszám) mindig láthatók maradnak. A beállítás
+felhasználónként és cégenként külön megőrződik — másik cégre váltva a lista a saját
+oszlop-preferenciáját mutatja.
 
 A bizonylat sorszámára kattintva megnyílik a részletes oldal.
 

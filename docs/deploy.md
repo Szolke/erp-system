@@ -42,12 +42,13 @@ php artisan db:seed --force
 ```
 
 **Mit csinál:** betölti a `PermissionSeeder`, `VatRateSeeder`,
-`PaymentMethodSeeder` és `TranslationSeeder` katalógusait. Ezek **kötelező
-rendszer-adatok** — nélkülük az RBAC, az ÁFA-számítás és a fizetési módok
-nem működnek.
+`PaymentMethodSeeder`, `TranslationSeeder`, `AssetTypeSeeder` és
+`CountrySeeder` katalógusait. Ezek **kötelező rendszer-adatok** — nélkülük
+az RBAC, az ÁFA-számítás és a fizetési módok nem működnek, az eszköztípus-
+és országtörzs pedig üresen marad.
 
-**Idempotens:** minden seeder `updateOrCreate`/`firstOrCreate` logikával ír —
-többszöri futtatás biztonságos, nem hoz létre duplikált sorokat.
+**Idempotens:** minden seeder úgy ír, hogy a meglévő sorokat nem
+duplikálja — a többszöri futtatás biztonságos.
 
 **Miért `--force`?** Ugyanaz az ok, mint a migrate esetén: `production`
 környezetben a Laravel interaktív megerősítést kér, a `--force` ezt

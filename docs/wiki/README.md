@@ -22,6 +22,7 @@ partnereket kezelni, fizetéseket rögzíteni, és mire jók az egyes beállít�
 | 6 | [Beállítások](hu/06-beallitasok.md) |
 | 7 | [Felhasználók és jogosultságok](hu/07-felhasznalok-jogosultsagok.md) |
 | 8 | [Egyéb: nyelvváltás, sötét mód, audit napló](hu/08-egyeb.md) |
+| 9 | [Kimutatások](hu/09-kimutatasok.md) |
 
 ### English
 
@@ -35,3 +36,4 @@ partnereket kezelni, fizetéseket rögzíteni, és mire jók az egyes beállít�
 | 6 | [Settings](en/06-settings.md) |
 | 7 | [Users and permissions](en/07-users-permissions.md) |
 | 8 | [Other: language, dark mode, audit log](en/08-other.md) |
+| 9 | [Reports](en/09-reports.md) |

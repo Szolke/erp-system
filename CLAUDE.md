@@ -23,11 +23,13 @@
 ## Környezet
 - A projekt WSL2 Ubuntu alatt fut, natív Linux fájlrendszeren: `/home/szolke/projects/erp-system`.
 - SOHA ne dolgozz vagy hozz létre fájlokat a `/mnt/c/` vagy Windows-os elérési úton.
+- A host `npm` a Windows-oldali Node telepítésre mutat (`/mnt/c/...` alatt) — natív Linux útvonalon EISDIR/EPERM hibával elszáll. Ezért MINDEN frontend npm-műveletet (telepítés, csomag hozzáadása, build) a `frontend` konténerben futtass: `docker compose exec frontend npm install <csomag>`. Ez nem preferencia, hanem környezeti kényszer.
 - Docker Compose alapú (`compose.yaml` a gyökérben): `laravel.test`, `pgsql` (PostgreSQL 18), `redis`, frontend szolgáltatások.
 - A compose-projekt a repó GYÖKERÉBŐL fut. A `./vendor/bin/sail` a `backend/` alkönyvtárból nem indul ("Sail is not running") — a gyökérből futtasd, vagy használd a `docker compose exec laravel.test php artisan ...` formát.
 - Backend: http://localhost
 - Frontend: http://localhost:5174
 - git checkout / bisect után mindig `docker compose restart frontend` build vagy teszt előtt (stale bind-mount, l. docs/requirements.md).
+- A `.scribe/endpoints/*.yaml` és a `resources/views/scribe/index.blade.php` generált API-doksi (`php artisan scribe:generate` állítja elő) VERZIÓBAN MARAD — nem kézzel szerkesztendő, és szándékosan nincs `.gitignore`-olva, hogy a doksi elavulása látható legyen a diffben. Ha egy lépés új API-végpontot ad vagy meglévőt módosít, a commit ELŐTT futtasd a `scribe:generate`-et, és a generált fájlok legyenek a kód-commit részei. A generálás időnként zajos diffet ad (időbélyeg, sorrend) — ez elfogadott, nem hiba.
 
 ## Adatbázis
 - Minden DB-módosítást migráción keresztül végezz, SOHA kézi SQL-lel a konténerben.

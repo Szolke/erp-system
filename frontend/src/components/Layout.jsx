@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { NavLink, Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTranslation } from '../contexts/TranslationContext'
 import { company as companyApi } from '../api/company'
 import CompanySwitcher from './CompanySwitcher'
+import RouteErrorBoundary from './RouteErrorBoundary'
 import { applySidebarTheme } from '../utils/sidebarTheme'
 import {
   LayoutDashboard, FileText, Users2, Package, BookOpen,
@@ -222,7 +223,13 @@ export default function Layout() {
 
       </aside>
       <main className="main-content">
-        <Outlet key={activeCompanyId} />
+        {/* `key={pathname}` az ErrorBoundary-n: navigációkor új példány jön létre,
+            különben egy render-hiba után a felhasználó a hibaképernyőn ragadna. */}
+        <RouteErrorBoundary key={pathname}>
+          <Suspense fallback={<p className="text-muted">{t('common.loading')}</p>}>
+            <Outlet key={activeCompanyId} />
+          </Suspense>
+        </RouteErrorBoundary>
       </main>
     </div>
   )

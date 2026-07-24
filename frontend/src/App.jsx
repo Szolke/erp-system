@@ -1,43 +1,49 @@
+import { lazy } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
-import InvoiceListPage from './pages/invoices/InvoiceListPage'
-import InvoiceDetailPage from './pages/invoices/InvoiceDetailPage'
-import InvoiceCreatePage from './pages/invoices/InvoiceCreatePage'
-import ReceiptListPage from './pages/receipts/ReceiptListPage'
-import ReceiptDetailPage from './pages/receipts/ReceiptDetailPage'
-import ReceiptCreatePage from './pages/receipts/ReceiptCreatePage'
-import PartnerListPage from './pages/partners/PartnerListPage'
-import PartnerFormPage from './pages/partners/PartnerFormPage'
-import ProductListPage from './pages/products/ProductListPage'
-import ProductFormPage from './pages/products/ProductFormPage'
-import CompanyPage from './pages/CompanyPage'
-import AuditLogPage from './pages/AuditLogPage'
-import NavSubmissionsPage from './pages/NavSubmissionsPage'
-import UserListPage from './pages/users/UserListPage'
-import UserDetailPage from './pages/users/UserDetailPage'
-import GroupListPage from './pages/groups/GroupListPage'
-import GroupDetailPage from './pages/groups/GroupDetailPage'
-import DocumentSeriesSettingsPage from './pages/settings/DocumentSeriesSettingsPage'
-import DocumentListPage from './pages/documents/DocumentListPage'
-import TranslationPage from './pages/settings/TranslationPage'
-import CustomFieldsPage from './pages/settings/CustomFieldsPage'
-import CompanyListPage from './pages/companies/CompanyListPage'
-import ApiTesterPage from './pages/settings/ApiTesterPage'
-import ModulesPage from './pages/settings/ModulesPage'
-import SalesGroupPage from './pages/settings/SalesGroupPage'
-import AssetListPage from './pages/assets/AssetListPage'
-import AssetFormPage from './pages/assets/AssetFormPage'
-import AssetTypePage from './pages/settings/AssetTypePage'
-import JobPositionPage from './pages/settings/JobPositionPage'
-import CountriesPage from './pages/settings/CountriesPage'
-import WikiPage from './pages/WikiPage'
-import ReportsPage from './pages/reports/ReportsPage'
-import EnyugtaSettingsPage from './pages/settings/EnyugtaSettingsPage'
-import EnyugtaReportsPage from './pages/EnyugtaReportsPage'
-import EnyugtaReportDetailPage from './pages/EnyugtaReportDetailPage'
+
+// A Login (mindig kell, nem-authentikált látogatóknál az első képernyő) és a Dashboard
+// (index route, a legtöbb session első képernyője bejelentkezés után; kicsi, nincs nehéz
+// függősége) szándékosan EAGER marad — a szétbontásuk csak egy plusz hálózati kört adna
+// haszon nélkül. A többi route lazy: route-alapú code splitting, l. docs/progress.md.
+const DocumentListPage = lazy(() => import('./pages/documents/DocumentListPage'))
+const InvoiceListPage = lazy(() => import('./pages/invoices/InvoiceListPage'))
+const InvoiceDetailPage = lazy(() => import('./pages/invoices/InvoiceDetailPage'))
+const InvoiceCreatePage = lazy(() => import('./pages/invoices/InvoiceCreatePage'))
+const ReceiptListPage = lazy(() => import('./pages/receipts/ReceiptListPage'))
+const ReceiptDetailPage = lazy(() => import('./pages/receipts/ReceiptDetailPage'))
+const ReceiptCreatePage = lazy(() => import('./pages/receipts/ReceiptCreatePage'))
+const PartnerListPage = lazy(() => import('./pages/partners/PartnerListPage'))
+const PartnerFormPage = lazy(() => import('./pages/partners/PartnerFormPage'))
+const ProductListPage = lazy(() => import('./pages/products/ProductListPage'))
+const ProductFormPage = lazy(() => import('./pages/products/ProductFormPage'))
+const CompanyPage = lazy(() => import('./pages/CompanyPage'))
+const AuditLogPage = lazy(() => import('./pages/AuditLogPage'))
+const NavSubmissionsPage = lazy(() => import('./pages/NavSubmissionsPage'))
+const UserListPage = lazy(() => import('./pages/users/UserListPage'))
+const UserDetailPage = lazy(() => import('./pages/users/UserDetailPage'))
+const GroupListPage = lazy(() => import('./pages/groups/GroupListPage'))
+const GroupDetailPage = lazy(() => import('./pages/groups/GroupDetailPage'))
+const DocumentSeriesSettingsPage = lazy(() => import('./pages/settings/DocumentSeriesSettingsPage'))
+const TranslationPage = lazy(() => import('./pages/settings/TranslationPage'))
+const CustomFieldsPage = lazy(() => import('./pages/settings/CustomFieldsPage'))
+const CompanyListPage = lazy(() => import('./pages/companies/CompanyListPage'))
+const ApiTesterPage = lazy(() => import('./pages/settings/ApiTesterPage'))
+const ModulesPage = lazy(() => import('./pages/settings/ModulesPage'))
+const SalesGroupPage = lazy(() => import('./pages/settings/SalesGroupPage'))
+const AssetListPage = lazy(() => import('./pages/assets/AssetListPage'))
+const AssetFormPage = lazy(() => import('./pages/assets/AssetFormPage'))
+const AssetTypePage = lazy(() => import('./pages/settings/AssetTypePage'))
+const JobPositionPage = lazy(() => import('./pages/settings/JobPositionPage'))
+const CountriesPage = lazy(() => import('./pages/settings/CountriesPage'))
+const WikiPage = lazy(() => import('./pages/WikiPage'))
+const ReportsPage = lazy(() => import('./pages/reports/ReportsPage'))
+const EnyugtaSettingsPage = lazy(() => import('./pages/settings/EnyugtaSettingsPage'))
+const EnyugtaReportsPage = lazy(() => import('./pages/EnyugtaReportsPage'))
+const EnyugtaReportDetailPage = lazy(() => import('./pages/EnyugtaReportDetailPage'))
 
 export default function App() {
   return (

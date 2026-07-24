@@ -58,6 +58,8 @@ class TranslationSeeder extends Seeder
             ['common', 'rows',        'Sorok',                'Rows',               'Zeilen'],
             ['common', 'error',       'Hiba',                 'Error',              'Fehler'],
             ['common', 'retry',       'Újrapróbálom',         'Retry',              'Erneut versuchen'],
+            ['common', 'chunk_load_error', 'Nem sikerült betölteni az oldal egy részét. Ellenőrizd az internetkapcsolatot, és próbáld újra.', 'Failed to load part of the page. Check your internet connection and try again.', 'Ein Teil der Seite konnte nicht geladen werden. Überprüfe deine Internetverbindung und versuche es erneut.'],
+            ['common', 'page_error',  'Váratlan hiba történt az oldal megjelenítése közben.', 'An unexpected error occurred while displaying the page.', 'Beim Anzeigen der Seite ist ein unerwarteter Fehler aufgetreten.'],
             ['common', 'saved',       'Mentve.',              'Saved.',             'Gespeichert.'],
             ['common', 'not_found',   'Nem található.',       'Not found.',         'Nicht gefunden.'],
             ['common', 'active',      'Aktív',                'Active',             'Aktiv'],

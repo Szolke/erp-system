@@ -457,6 +457,7 @@ class TranslationSeeder extends Seeder
             ['company', 'no_users',        'Nincs felhasználó ebben a cégben.',               'No users in this company.',                    'Keine Benutzer in dieser Firma.'],
 
             ['common', 'no_permission',    'Nincs jogosultságod ehhez a művelethez.',         'You do not have permission for this.',         'Keine Berechtigung für diese Aktion.'],
+            ['common', 'no_page_permission', 'Nincs jogosultságod ehhez az oldalhoz.',        'You do not have permission to access this page.', 'Du hast keine Berechtigung für diese Seite.'],
 
             // ── Országok (superadmin admin-UI) ────────────────────────
             ['country', 'title',              'Országok',                                       'Countries',                                    'Länder'],

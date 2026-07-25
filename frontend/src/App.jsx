@@ -2,6 +2,8 @@ import { lazy } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import RequirePermission from './components/RequirePermission'
+import { ROUTE_ACCESS } from './routePermissions'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 
@@ -57,45 +59,111 @@ export default function App() {
             </ProtectedRoute>
           }
         >
+          {/* Nyitólap, Wiki: public route (l. ROUTE_ACCESS) — nincs RequirePermission.
+              invoices/*, receipts/*: a sidebar sem köt hozzájuk jogot (árva route-ok,
+              l. docs/progress.md) — szándékosan szintén védelem nélkül maradnak. */}
           <Route index element={<DashboardPage />} />
-          <Route path="documents" element={<DocumentListPage />} />
+          <Route path="wiki" element={<WikiPage />} />
           <Route path="invoices" element={<InvoiceListPage />} />
           <Route path="invoices/new" element={<InvoiceCreatePage />} />
           <Route path="invoices/:id" element={<InvoiceDetailPage />} />
           <Route path="receipts" element={<ReceiptListPage />} />
           <Route path="receipts/new" element={<ReceiptCreatePage />} />
           <Route path="receipts/:id" element={<ReceiptDetailPage />} />
-          <Route path="partners" element={<PartnerListPage />} />
-          <Route path="partners/new" element={<PartnerFormPage />} />
-          <Route path="partners/:id/edit" element={<PartnerFormPage />} />
-          <Route path="products" element={<ProductListPage />} />
-          <Route path="products/new" element={<ProductFormPage />} />
-          <Route path="products/:id/edit" element={<ProductFormPage />} />
-          <Route path="company" element={<CompanyPage />} />
-          <Route path="audit-logs" element={<AuditLogPage />} />
-          <Route path="nav-submissions" element={<NavSubmissionsPage />} />
-          <Route path="users" element={<UserListPage />} />
-          <Route path="users/:id" element={<UserDetailPage />} />
-          <Route path="groups" element={<GroupListPage />} />
-          <Route path="groups/:id" element={<GroupDetailPage />} />
-          <Route path="settings/document-series" element={<DocumentSeriesSettingsPage />} />
-          <Route path="settings/translations" element={<TranslationPage />} />
-          <Route path="settings/custom-fields" element={<CustomFieldsPage />} />
-          <Route path="companies" element={<CompanyListPage />} />
-          <Route path="settings/modules" element={<ModulesPage />} />
-          <Route path="settings/sales-groups" element={<SalesGroupPage />} />
-          <Route path="assets" element={<AssetListPage />} />
-          <Route path="assets/new" element={<AssetFormPage />} />
-          <Route path="assets/:id/edit" element={<AssetFormPage />} />
-          <Route path="settings/asset-types" element={<AssetTypePage />} />
-          <Route path="settings/job-positions" element={<JobPositionPage />} />
-          <Route path="settings/countries" element={<CountriesPage />} />
-          <Route path="settings/api-tester" element={<ApiTesterPage />} />
-          <Route path="wiki" element={<WikiPage />} />
-          <Route path="reports" element={<ReportsPage />} />
-          <Route path="settings/enyugta" element={<EnyugtaSettingsPage />} />
-          <Route path="enyugta/reports" element={<EnyugtaReportsPage />} />
-          <Route path="enyugta/reports/:id" element={<EnyugtaReportDetailPage />} />
+
+          <Route path="documents" element={
+            <RequirePermission access={ROUTE_ACCESS['/documents']}><DocumentListPage /></RequirePermission>
+          } />
+          <Route path="reports" element={
+            <RequirePermission access={ROUTE_ACCESS['/reports']}><ReportsPage /></RequirePermission>
+          } />
+          <Route path="partners" element={
+            <RequirePermission access={ROUTE_ACCESS['/partners']}><PartnerListPage /></RequirePermission>
+          } />
+          <Route path="partners/new" element={
+            <RequirePermission access={ROUTE_ACCESS['/partners/new']}><PartnerFormPage /></RequirePermission>
+          } />
+          <Route path="partners/:id/edit" element={
+            <RequirePermission access={ROUTE_ACCESS['/partners/:id/edit']}><PartnerFormPage /></RequirePermission>
+          } />
+          <Route path="products" element={
+            <RequirePermission access={ROUTE_ACCESS['/products']}><ProductListPage /></RequirePermission>
+          } />
+          <Route path="products/new" element={
+            <RequirePermission access={ROUTE_ACCESS['/products/new']}><ProductFormPage /></RequirePermission>
+          } />
+          <Route path="products/:id/edit" element={
+            <RequirePermission access={ROUTE_ACCESS['/products/:id/edit']}><ProductFormPage /></RequirePermission>
+          } />
+          <Route path="company" element={
+            <RequirePermission access={ROUTE_ACCESS['/company']}><CompanyPage /></RequirePermission>
+          } />
+          <Route path="audit-logs" element={
+            <RequirePermission access={ROUTE_ACCESS['/audit-logs']}><AuditLogPage /></RequirePermission>
+          } />
+          <Route path="nav-submissions" element={
+            <RequirePermission access={ROUTE_ACCESS['/nav-submissions']}><NavSubmissionsPage /></RequirePermission>
+          } />
+          <Route path="users" element={
+            <RequirePermission access={ROUTE_ACCESS['/users']}><UserListPage /></RequirePermission>
+          } />
+          <Route path="users/:id" element={
+            <RequirePermission access={ROUTE_ACCESS['/users/:id']}><UserDetailPage /></RequirePermission>
+          } />
+          <Route path="groups" element={
+            <RequirePermission access={ROUTE_ACCESS['/groups']}><GroupListPage /></RequirePermission>
+          } />
+          <Route path="groups/:id" element={
+            <RequirePermission access={ROUTE_ACCESS['/groups/:id']}><GroupDetailPage /></RequirePermission>
+          } />
+          <Route path="settings/document-series" element={
+            <RequirePermission access={ROUTE_ACCESS['/settings/document-series']}><DocumentSeriesSettingsPage /></RequirePermission>
+          } />
+          <Route path="settings/translations" element={
+            <RequirePermission access={ROUTE_ACCESS['/settings/translations']}><TranslationPage /></RequirePermission>
+          } />
+          <Route path="settings/custom-fields" element={
+            <RequirePermission access={ROUTE_ACCESS['/settings/custom-fields']}><CustomFieldsPage /></RequirePermission>
+          } />
+          <Route path="companies" element={
+            <RequirePermission access={ROUTE_ACCESS['/companies']}><CompanyListPage /></RequirePermission>
+          } />
+          <Route path="settings/modules" element={
+            <RequirePermission access={ROUTE_ACCESS['/settings/modules']}><ModulesPage /></RequirePermission>
+          } />
+          <Route path="settings/sales-groups" element={
+            <RequirePermission access={ROUTE_ACCESS['/settings/sales-groups']}><SalesGroupPage /></RequirePermission>
+          } />
+          <Route path="assets" element={
+            <RequirePermission access={ROUTE_ACCESS['/assets']}><AssetListPage /></RequirePermission>
+          } />
+          <Route path="assets/new" element={
+            <RequirePermission access={ROUTE_ACCESS['/assets/new']}><AssetFormPage /></RequirePermission>
+          } />
+          <Route path="assets/:id/edit" element={
+            <RequirePermission access={ROUTE_ACCESS['/assets/:id/edit']}><AssetFormPage /></RequirePermission>
+          } />
+          <Route path="settings/asset-types" element={
+            <RequirePermission access={ROUTE_ACCESS['/settings/asset-types']}><AssetTypePage /></RequirePermission>
+          } />
+          <Route path="settings/job-positions" element={
+            <RequirePermission access={ROUTE_ACCESS['/settings/job-positions']}><JobPositionPage /></RequirePermission>
+          } />
+          <Route path="settings/countries" element={
+            <RequirePermission access={ROUTE_ACCESS['/settings/countries']}><CountriesPage /></RequirePermission>
+          } />
+          <Route path="settings/api-tester" element={
+            <RequirePermission access={ROUTE_ACCESS['/settings/api-tester']}><ApiTesterPage /></RequirePermission>
+          } />
+          <Route path="settings/enyugta" element={
+            <RequirePermission access={ROUTE_ACCESS['/settings/enyugta']}><EnyugtaSettingsPage /></RequirePermission>
+          } />
+          <Route path="enyugta/reports" element={
+            <RequirePermission access={ROUTE_ACCESS['/enyugta/reports']}><EnyugtaReportsPage /></RequirePermission>
+          } />
+          <Route path="enyugta/reports/:id" element={
+            <RequirePermission access={ROUTE_ACCESS['/enyugta/reports/:id']}><EnyugtaReportDetailPage /></RequirePermission>
+          } />
         </Route>
       </Routes>
   )

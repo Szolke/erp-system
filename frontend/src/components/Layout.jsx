@@ -6,6 +6,7 @@ import { company as companyApi } from '../api/company'
 import CompanySwitcher from './CompanySwitcher'
 import RouteErrorBoundary from './RouteErrorBoundary'
 import { applySidebarTheme } from '../utils/sidebarTheme'
+import { ROUTE_ACCESS, hasRouteAccess } from '../routePermissions'
 import {
   LayoutDashboard, FileText, Users2, Package, BookOpen,
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers, Blocks,
@@ -71,58 +72,58 @@ export default function Layout() {
   async function handleLocale(loc) { await setLocale(loc, true) }
 
   const topNavItems = [
-    { to: '/',          label: t('nav.dashboard'), icon: LayoutDashboard, public: true },
-    { to: '/documents', label: t('nav.documents'), icon: FileText,  anyPerm: ['invoice.view', 'receipt.view'] },
-    { to: '/reports',   label: t('nav.reports'),   icon: BarChart3, perm: 'report.view' },
-    { to: '/partners',  label: t('nav.partners'),  icon: Users2,    perm: 'partner.view' },
-    { to: '/products',  label: t('nav.products'),  icon: Package,   perm: 'product.view' },
-    { to: '/assets',    label: t('nav.assets'),    icon: Boxes,     perm: 'asset.view' },
-    { to: '/enyugta/reports', label: 'eNyugta jelentések', icon: Receipt, perm: 'enyugta.view' },
-    { to: '/wiki',      label: t('nav.wiki'),       icon: BookOpen,  public: true },
+    { to: '/',          label: t('nav.dashboard'), icon: LayoutDashboard, ...ROUTE_ACCESS['/'] },
+    { to: '/documents', label: t('nav.documents'), icon: FileText,  ...ROUTE_ACCESS['/documents'] },
+    { to: '/reports',   label: t('nav.reports'),   icon: BarChart3, ...ROUTE_ACCESS['/reports'] },
+    { to: '/partners',  label: t('nav.partners'),  icon: Users2,    ...ROUTE_ACCESS['/partners'] },
+    { to: '/products',  label: t('nav.products'),  icon: Package,   ...ROUTE_ACCESS['/products'] },
+    { to: '/assets',    label: t('nav.assets'),    icon: Boxes,     ...ROUTE_ACCESS['/assets'] },
+    { to: '/enyugta/reports', label: 'eNyugta jelentések', icon: Receipt, ...ROUTE_ACCESS['/enyugta/reports'] },
+    { to: '/wiki',      label: t('nav.wiki'),       icon: BookOpen,  ...ROUTE_ACCESS['/wiki'] },
   ]
 
   const settingsGroups = [
     {
       label: t('nav.settings_company_data'),
       items: [
-        { to: '/companies',                label: 'Cégek',              icon: Layers, superadminOnly: true },
-        { to: '/company',                  label: t('nav.company'),     icon: Building2, perm: 'company.view' },
-        { to: '/settings/document-series', label: t('nav.doc_series'),  icon: Hash,   perm: 'document_series.manage' },
-        { to: '/settings/enyugta',         label: 'NAV eNyugta',        icon: FileSpreadsheet, perm: 'enyugta.view' },
+        { to: '/companies',                label: 'Cégek',              icon: Layers, ...ROUTE_ACCESS['/companies'] },
+        { to: '/company',                  label: t('nav.company'),     icon: Building2, ...ROUTE_ACCESS['/company'] },
+        { to: '/settings/document-series', label: t('nav.doc_series'),  icon: Hash,   ...ROUTE_ACCESS['/settings/document-series'] },
+        { to: '/settings/enyugta',         label: 'NAV eNyugta',        icon: FileSpreadsheet, ...ROUTE_ACCESS['/settings/enyugta'] },
       ],
     },
     {
       label: t('nav.settings_general'),
       items: [
-        { to: '/settings/modules',         label: 'Modulok',              icon: Blocks,     superadminOnly: true },
-        { to: '/audit-logs',               label: t('nav.audit_log'),     icon: ScrollText, perm: 'audit.view' },
-        { to: '/nav-submissions',          label: t('nav.nav_submissions'), icon: AlertTriangle, perm: 'nav.log.view' },
-        { to: '/settings/custom-fields',   label: t('nav.custom_fields'), icon: Sliders,    perm: 'company.manage' },
-        { to: '/settings/api-tester',      label: t('nav.api_tester'),    icon: Terminal,   perm: 'api_tester.use' },
+        { to: '/settings/modules',         label: 'Modulok',              icon: Blocks,     ...ROUTE_ACCESS['/settings/modules'] },
+        { to: '/audit-logs',               label: t('nav.audit_log'),     icon: ScrollText, ...ROUTE_ACCESS['/audit-logs'] },
+        { to: '/nav-submissions',          label: t('nav.nav_submissions'), icon: AlertTriangle, ...ROUTE_ACCESS['/nav-submissions'] },
+        { to: '/settings/custom-fields',   label: t('nav.custom_fields'), icon: Sliders,    ...ROUTE_ACCESS['/settings/custom-fields'] },
+        { to: '/settings/api-tester',      label: t('nav.api_tester'),    icon: Terminal,   ...ROUTE_ACCESS['/settings/api-tester'] },
       ],
     },
     {
       label: t('nav.settings_users'),
       items: [
-        { to: '/users',  label: t('nav.users'),  icon: UserRound, perm: 'user.view' },
-        { to: '/groups', label: t('nav.groups'), icon: Users,     perm: 'group.view' },
+        { to: '/users',  label: t('nav.users'),  icon: UserRound, ...ROUTE_ACCESS['/users'] },
+        { to: '/groups', label: t('nav.groups'), icon: Users,     ...ROUTE_ACCESS['/groups'] },
       ],
     },
     {
       label: t('nav.settings_dictionaries'),
       items: [
-        { to: '/settings/countries',     label: t('nav.countries'),     icon: Globe,      superadminOnly: true },
-        { to: '/settings/job-positions', label: 'Munkakörök',           icon: Briefcase,  perm: 'job_position.manage' },
-        { to: '/settings/asset-types',   label: t('nav.asset_types'),   icon: Tags,       perm: 'asset.view' },
-        { to: '/settings/sales-groups',  label: 'Értékesítő csoportok', icon: UsersRound, perm: 'sales_group.view' },
-        { to: '/settings/translations',  label: t('nav.translations'),  icon: Languages,  perm: 'company.manage' },
+        { to: '/settings/countries',     label: t('nav.countries'),     icon: Globe,      ...ROUTE_ACCESS['/settings/countries'] },
+        { to: '/settings/job-positions', label: 'Munkakörök',           icon: Briefcase,  ...ROUTE_ACCESS['/settings/job-positions'] },
+        { to: '/settings/asset-types',   label: t('nav.asset_types'),   icon: Tags,       ...ROUTE_ACCESS['/settings/asset-types'] },
+        { to: '/settings/sales-groups',  label: 'Értékesítő csoportok', icon: UsersRound, ...ROUTE_ACCESS['/settings/sales-groups'] },
+        { to: '/settings/translations',  label: t('nav.translations'),  icon: Languages,  ...ROUTE_ACCESS['/settings/translations'] },
       ],
     },
   ]
 
-  const visibleTop = topNavItems.filter((i) => i.public || (i.anyPerm ? i.anyPerm.some((p) => can(p)) : can(i.perm)))
+  const visibleTop = topNavItems.filter((i) => hasRouteAccess(i, { user, can }))
   const visibleSettingsGroups = settingsGroups
-    .map((g) => ({ ...g, items: g.items.filter((i) => (i.superadminOnly ? user?.is_superadmin : can(i.perm))) }))
+    .map((g) => ({ ...g, items: g.items.filter((i) => hasRouteAccess(i, { user, can })) }))
     .filter((g) => g.items.length > 0)
   const hasVisibleSettings = visibleSettingsGroups.some((g) => g.items.length > 0)
   const collapsed = !sidebarOpen

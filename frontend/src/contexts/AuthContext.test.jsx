@@ -137,7 +137,7 @@ describe('cégváltás — a permissions frissül-e', () => {
     expect(result.current.can('invoice.view')).toBe(false)
   })
 
-  it('MEGFIGYELÉS (nem hiba, dokumentálva): switchCompany() az activeCompanyId-t a fetchMe() ELŐTT állítja át — az API-hívás és a permissions-frissülés között az UI rövid ideig az ÚJ cég azonosítóját mutatja a RÉGI cég jogaival párosítva', async () => {
+  it('JAVÍTVA (korábban MEGFIGYELÉS volt, szándékos viselkedésváltozás): a switchCompany() már NEM állítja át az activeCompanyId-t a fetchMe() előtt — az activeCompanyId és a permissions a `me()` válaszával EGYÜTT, egyetlen frissítésben vált, ezért nincs olyan köztes állapot, ahol az ÚJ cég azonosítója a RÉGI cég jogaival párosul', async () => {
     me.mockResolvedValueOnce(meResponse({ permissions: ['invoice.view'], companyId: 1 }))
     const { result } = setup()
     await waitFor(() => expect(result.current.loading).toBe(false))
@@ -151,26 +151,54 @@ describe('cégváltás — a permissions frissül-e', () => {
       result.current.switchCompany(2) // szándékosan nem awaitolva — a köztes állapotot vizsgáljuk
     })
 
-    // az apiSwitch(2) hívás még függőben van -> activeCompanyId még a RÉGI (1)
+    // az apiSwitch(2) hívás még függőben van -> activeCompanyId még a RÉGI (1), a RÉGI jogokkal
     expect(result.current.activeCompanyId).toBe(1)
+    expect(result.current.can('invoice.view')).toBe(true)
 
     await act(async () => {
       resolveSwitch({})
-      await Promise.resolve() // engedjük lefutni a setActiveCompanyId-t + a fetchMe() indítását
+      await Promise.resolve() // engedjük lefutni az apiSwitch()-et követő fetchMe()-indítást
     })
 
-    // apiSwitch lezárult -> activeCompanyId már 2, DE a permissions még a RÉGI (1-es) cégé,
-    // mert a fetchMe()-n belüli `await me()` még nem oldódott fel.
-    expect(result.current.activeCompanyId).toBe(2)
-    expect(result.current.can('invoice.view')).toBe(true) // a RÉGI cég joga még "aktív"
-    expect(result.current.can('partner.edit')).toBe(false) // az ÚJ cég joga még nem érkezett meg
+    // apiSwitch lezárult, DE a fetchMe()-n belüli `await me()` még nem oldódott fel — mivel az
+    // AuthContext.jsx MÁR NEM állítja át korán az activeCompanyId-t, itt MÉG MINDIG a RÉGI (1)
+    // az aktív cég, a RÉGI jogokkal konzisztensen párosítva. Ez a lényegi különbség a korábbi
+    // (hibás) viselkedéshez képest: akkor itt már 2 lett volna activeCompanyId, RÉGI jogokkal.
+    expect(result.current.activeCompanyId).toBe(1)
+    expect(result.current.can('invoice.view')).toBe(true)
+    expect(result.current.can('partner.edit')).toBe(false)
 
     await act(async () => {
       resolveMe(meResponse({ permissions: ['partner.edit'], companyId: 2 }))
     })
 
-    // a válasz megérkezett -> a permissions immár az ÚJ cégé
-    expect(result.current.can('invoice.view')).toBe(false)
+    // a /api/me válasza megérkezett -> activeCompanyId ÉS permissions EGYSZERRE, egyetlen
+    // React-frissítésben vált az ÚJ cégére (React 19 automatikus batching a setState-sorozatra)
+    expect(result.current.activeCompanyId).toBe(2)
     expect(result.current.can('partner.edit')).toBe(true)
+    expect(result.current.can('invoice.view')).toBe(false)
+  })
+
+  it('a köztes ablakban a can() NEM ad true-t egy olyan kulcsra, ami csak a RÉGI cégnél volt meg, az ÚJ cég azonosítója alá párosítva — mert az activeCompanyId is a RÉGI marad, amíg a permissions is az', async () => {
+    me.mockResolvedValueOnce(meResponse({ permissions: ['invoice.view'], companyId: 1 }))
+    const { result } = setup()
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let resolveSwitch
+    switchCompany.mockReturnValue(new Promise((resolve) => { resolveSwitch = resolve }))
+    me.mockReturnValueOnce(new Promise(() => {})) // ebben a tesztben sosem oldódik fel
+
+    act(() => { result.current.switchCompany(2) })
+    await act(async () => {
+      resolveSwitch({})
+      await Promise.resolve()
+    })
+
+    // a köztes ablakban SOSEM áll elő "ÚJ cég azonosítója + RÉGI cég joga" kombináció
+    const showingNewCompanyId = result.current.activeCompanyId === 2
+    const hasOldCompanyOnlyPermission = result.current.can('invoice.view')
+    expect(showingNewCompanyId && hasOldCompanyOnlyPermission).toBe(false)
+    // konkrétan: a RÉGI cég marad érvényben, konzisztensen, amíg az új válasz meg nem érkezik
+    expect(result.current.activeCompanyId).toBe(1)
   })
 })

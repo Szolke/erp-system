@@ -52,7 +52,9 @@ export function AuthProvider({ children }) {
 
   async function switchCompany(companyId) {
     await apiSwitch(companyId)
-    setActiveCompanyId(companyId)
+    // NEM állítjuk itt az activeCompanyId-t — a fetchMe() a `me()` válaszából (ami már
+    // az apiSwitch() után lekérdezett, tehát friss) egyszerre írja az activeCompanyId-t
+    // ÉS a permissions-t, ezért a kettő sosem csúszhat szét egy köztes renderben.
     await fetchMe()
   }
 

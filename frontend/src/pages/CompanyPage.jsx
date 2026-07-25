@@ -351,7 +351,6 @@ function SalesGroupPrefixSection({ can }) {
   const { t } = useTranslation()
   const [prefix, setPrefix]         = useState('')
   const [original, setOriginal]     = useState('')
-  const [company, setCompany]       = useState(null)
   const [groupsExist, setGroupsExist] = useState(false)
   const [loading, setLoading]       = useState(true)
   const [saving, setSaving]         = useState(false)
@@ -368,7 +367,6 @@ function SalesGroupPrefixSection({ can }) {
         companyApi.get(),
         sgApi.list({ per_page: 1 }),
       ])
-      setCompany(compRes.data.data)
       const p = compRes.data.data?.group_prefix ?? ''
       setPrefix(p)
       setOriginal(p)
@@ -385,7 +383,11 @@ function SalesGroupPrefixSection({ can }) {
     setError('')
     setSuccess(false)
     try {
-      await companyApi.update({ ...company, group_prefix: prefix || null })
+      // Csak a prefix mezőt küldjük — NEM a teljes cégobjektumot —, hogy a mountoláskor
+      // vett pillanatkép ne írhassa felül a fő cégform időközbeni, más mezőket érintő
+      // mentését (versenyhelyzet). A backend (UpdateCompanyRequest) 'sometimes' szabállyal
+      // valódi részleges mentést enged.
+      await companyApi.update({ group_prefix: prefix || null })
       setOriginal(prefix)
       setSuccess(true)
       // Ha prefixet töröltünk/módosítottunk, frissítjük a csoportlista-állapotot
@@ -853,12 +855,23 @@ export default function CompanyPage() {
     } finally { setLogoUploading(false) }
   }
 
+  // Csak a fő cégformon ténylegesen szerkeszthető mezőket küldjük — NEM a teljes
+  // `form` snapshotot —, hogy ez a mentés se tudja felülírni más, saját mentési úttal
+  // rendelkező szekciók (pl. SalesGroupPrefixSection) időközbeni változását.
+  const MAIN_FORM_FIELDS = [
+    'name', 'tax_number', 'eu_tax_number', 'registration_number', 'email', 'phone',
+    'postal_code', 'city', 'address_line',
+    'base_currency', 'invoice_header_text', 'invoice_footer_text',
+  ]
+
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
     setSaving(true)
     try {
-      await companyApi.update(form)
+      const payload = {}
+      MAIN_FORM_FIELDS.forEach((k) => { payload[k] = form[k] })
+      await companyApi.update(payload)
       setSuccess(true)
     } catch (err) {
       const errs = err.response?.data?.errors

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Eye, EyeOff, ChevronDown, ChevronRight } from 'lucide-react'
+import { Eye, EyeOff, ChevronDown, ChevronRight, Check, Ban } from 'lucide-react'
 import client from '../../api/client'
 import { users as usersApi } from '../../api/users'
 import { groups as groupsApi } from '../../api/groups'
@@ -163,6 +163,15 @@ export default function UserDetailPage() {
 
   function setOverride(permId, effect) {
     setOverrides((prev) => ({ ...prev, [permId]: effect }))
+    setSaved(false)
+  }
+
+  function setOverridesFor(perms, effect) {
+    setOverrides((prev) => {
+      const next = { ...prev }
+      perms.forEach((p) => { next[p.id] = effect })
+      return next
+    })
     setSaved(false)
   }
 
@@ -580,34 +589,74 @@ export default function UserDetailPage() {
             </p>
           </div>
 
-          <input
-            type="text"
-            value={permSearch}
-            onChange={(e) => setPermSearch(e.target.value)}
-            placeholder={t('user.permission_search')}
-            style={{ marginBottom: 16, maxWidth: 320 }}
-          />
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              value={permSearch}
+              onChange={(e) => setPermSearch(e.target.value)}
+              placeholder={t('user.permission_search')}
+              style={{ maxWidth: 320 }}
+            />
+            {canOverride && (
+              <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setOverridesFor(allPerms, 'allow')}>
+                  {t('user.overrides_allow_all')}
+                </button>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setOverridesFor(allPerms, 'deny')}>
+                  {t('user.overrides_deny_all')}
+                </button>
+              </div>
+            )}
+          </div>
 
           {Object.entries(filteredByModule).map(([module, perms]) => {
             const isOpen = !!permSearchLower || openModules.has(module)
             return (
               <div key={module} style={{ borderTop: '1px solid var(--color-border)' }}>
-                <button
-                  type="button"
-                  onClick={() => toggleModule(module)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-                    padding: '10px 4px', background: 'none', border: 'none', cursor: 'pointer',
-                    textAlign: 'left', fontWeight: 700, fontSize: 11, textTransform: 'uppercase',
-                    color: 'var(--color-muted)', letterSpacing: '.05em',
-                  }}
-                >
-                  {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                  {module}
-                  <span style={{ marginLeft: 'auto', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 4px' }}>
+                  <button
+                    type="button"
+                    onClick={() => toggleModule(module)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0,
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      textAlign: 'left', fontWeight: 700, fontSize: 11, textTransform: 'uppercase',
+                      color: 'var(--color-muted)', letterSpacing: '.05em',
+                    }}
+                  >
+                    {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                    {module}
+                  </button>
+                  {canOverride && (
+                    <div style={{ display: 'flex', gap: 2 }}>
+                      <button
+                        type="button"
+                        onClick={() => setOverridesFor(byModule[module] ?? [], 'allow')}
+                        title={t('user.overrides_module_allow')}
+                        style={{
+                          background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+                          display: 'flex', color: 'var(--color-success-text)',
+                        }}
+                      >
+                        <Check size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setOverridesFor(byModule[module] ?? [], 'deny')}
+                        title={t('user.overrides_module_deny')}
+                        style={{
+                          background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+                          display: 'flex', color: 'var(--color-danger)',
+                        }}
+                      >
+                        <Ban size={14} />
+                      </button>
+                    </div>
+                  )}
+                  <span style={{ fontWeight: 400, fontSize: 11, color: 'var(--color-muted)' }}>
                     {perms.length}
                   </span>
-                </button>
+                </div>
                 {isOpen && (
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, marginBottom: 8 }}>
                     <tbody>

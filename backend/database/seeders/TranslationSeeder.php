@@ -282,6 +282,10 @@ class TranslationSeeder extends Seeder
             ['user', 'tab_profile',        'Adatlap',                           'Profile',                           'Profil'],
             ['user', 'tab_permissions',    'Jogosultságok',                     'Permissions',                       'Berechtigungen'],
             ['user', 'permission_search',  'Keresés a jogosultságok között…',   'Search permissions…',               'Berechtigungen durchsuchen…'],
+            ['user', 'overrides_allow_all', 'Összes engedélyezése',             'Allow all',                         'Alle erlauben'],
+            ['user', 'overrides_deny_all',  'Összes tiltása',                   'Deny all',                          'Alle verweigern'],
+            ['user', 'overrides_module_allow', 'A modul minden jogának engedélyezése', 'Allow all permissions in this module', 'Alle Berechtigungen dieses Moduls erlauben'],
+            ['user', 'overrides_module_deny',  'A modul minden jogának tiltása',       'Deny all permissions in this module',  'Alle Berechtigungen dieses Moduls verweigern'],
             ['user', 'groups_col',         'Csoportok',                         'Groups',                            'Gruppen'],
             ['user', 'status_col',         'Státusz',                           'Status',                            'Status'],
 

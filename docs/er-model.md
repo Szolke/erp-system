@@ -37,8 +37,8 @@ Státusz: tervezet (v1) — a Laravel migrations/modellek ez alapján készülne
 | name | string | cégnév |
 | tax_number | string(11) | adószám, pl. `12345678-1-42` formátum |
 | eu_tax_number | string nullable | közösségi adószám |
-| registration_number | string | cégjegyzékszám |
-| postal_code, city, address_line | string | székhely |
+| registration_number | string nullable | cégjegyzékszám — 2026-07-25-én nullable-re váltva (a `StoreCompanyRequest`-tel korábban is összhangban volt, csak a DB-séma nem, ez nyers NOT NULL SQL-hibát adott üresen hagyva) |
+| postal_code, city, address_line | string nullable | székhely — 2026-07-25-én nullable-re váltva, ugyanazon okból mint a `registration_number` |
 | country_code | char(2) default `HU` | |
 | email, phone | string nullable | |
 | logo_path | string nullable | |

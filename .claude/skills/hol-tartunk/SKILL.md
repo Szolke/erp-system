@@ -1,5 +1,7 @@
 ---
 name: hol-tartunk
+model: sonnet
+effort: low
 description: Felveszi a fonalat egy új sessionben — elolvassa a CLAUDE.md-t és a
   progress.md-t célzott szakasz-kivágással (nem teljes beolvasással), lekéri a git
   állapotot (branch, remote-eltérés, stash, uncommitted munka, nem pusholt commitok),

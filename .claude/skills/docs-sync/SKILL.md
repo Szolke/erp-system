@@ -1,5 +1,7 @@
 ---
 name: docs-sync
+model: sonnet
+effort: low
 description: Frissíti a projekt dokumentációját egy befejezett lépés/commit-csoport
   után. Használd, amikor "frissítsd a doksit", "dokumentáld a lépést" vagy "update
   docs" hangzik el, illetve amikor egy commit-csoport után a docs/progress.md és

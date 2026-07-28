@@ -11,6 +11,7 @@ use App\Models\Asset;
 use App\Models\AssetType;
 use App\Models\Company;
 use App\Services\AssetService;
+use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 
@@ -39,12 +40,21 @@ class AssetController extends Controller
         return AssetResource::collection($assets);
     }
 
-    public function store(StoreAssetRequest $request, CurrentCompany $currentCompany)
+    public function store(StoreAssetRequest $request, CurrentCompany $currentCompany, AuditLogger $auditLogger)
     {
         $company   = Company::findOrFail($currentCompany->id());
         $assetType = AssetType::findOrFail($request->validated('asset_type_id'));
 
         $asset = $this->assetService->create($company, $assetType, $request->validated());
+
+        $auditLogger->logChange(
+            'asset.create',
+            $asset->company_id,
+            $request->user()->id,
+            $asset,
+            [],
+            $asset->only($asset->getFillable()),
+        );
 
         return AssetResource::make($asset->load('assetType'))
             ->response()
@@ -59,16 +69,20 @@ class AssetController extends Controller
         return AssetResource::make($asset->load('assetType'));
     }
 
-    public function update(UpdateAssetRequest $request, Asset $asset)
+    public function update(UpdateAssetRequest $request, Asset $asset, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompany($asset);
 
+        $oldValues = $asset->only($asset->getFillable());
         $asset->update($request->validated());
+        $newValues = $asset->fresh()->only($asset->getFillable());
+
+        $auditLogger->logChange('asset.update', $asset->company_id, $request->user()->id, $asset, $oldValues, $newValues);
 
         return AssetResource::make($asset->load('assetType'));
     }
 
-    public function destroy(Asset $asset)
+    public function destroy(Asset $asset, Request $request, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompany($asset);
         $this->authorize('asset.delete');
@@ -77,7 +91,11 @@ class AssetController extends Controller
             abort(409, 'Az eszköz nem törölhető.');
         }
 
+        $oldValues = $asset->only($asset->getFillable());
+        $companyId = $asset->company_id;
         $asset->delete();
+
+        $auditLogger->logChange('asset.delete', $companyId, $request->user()->id, $asset, $oldValues, []);
 
         return response()->noContent();
     }

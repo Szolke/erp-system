@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAssetTypeRequest;
 use App\Http\Resources\AssetTypeResource;
 use App\Models\AssetType;
+use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,7 @@ class AssetTypeController extends Controller
         return AssetTypeResource::collection($types);
     }
 
-    public function store(StoreAssetTypeRequest $request, CurrentCompany $currentCompany)
+    public function store(StoreAssetTypeRequest $request, CurrentCompany $currentCompany, AuditLogger $auditLogger)
     {
         // company_id is set explicitly here from CurrentCompany — never from
         // client input — otherwise an omitted company_id would silently create
@@ -38,6 +39,15 @@ class AssetTypeController extends Controller
             'code' => $request->validated('code'),
             'name' => $request->validated('name'),
         ]);
+
+        $auditLogger->logChange(
+            'asset_type.create',
+            $type->company_id,
+            $request->user()->id,
+            $type,
+            [],
+            $type->only($type->getFillable()),
+        );
 
         return AssetTypeResource::make($type)->response()->setStatusCode(201);
     }

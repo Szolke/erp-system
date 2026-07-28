@@ -10,6 +10,7 @@ use App\Models\Group;
 use App\Models\Module;
 use App\Models\Permission;
 use App\Models\User;
+use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -265,7 +266,7 @@ class AssetControllerTest extends TestCase
         $mocked->shouldReceive('canBeDeleted')->once()->andReturn(false);
 
         try {
-            app(AssetController::class)->destroy($mocked);
+            app(AssetController::class)->destroy($mocked, request(), app(AuditLogger::class));
             $this->fail('Expected a 409 HttpException, none was thrown.');
         } catch (HttpException $e) {
             $this->assertSame(409, $e->getStatusCode());

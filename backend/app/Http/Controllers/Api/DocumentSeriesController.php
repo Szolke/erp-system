@@ -6,6 +6,7 @@ use App\Enums\DocumentType;
 use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Models\DocumentSeries;
+use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 
@@ -44,7 +45,7 @@ class DocumentSeriesController extends Controller
         return response()->json(['data' => $result]);
     }
 
-    public function update(Request $request, DocumentSeries $documentSeries)
+    public function update(Request $request, DocumentSeries $documentSeries, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompany($documentSeries);
         $this->authorize('document_series.manage');
@@ -54,7 +55,11 @@ class DocumentSeriesController extends Controller
             'reset_yearly' => ['required', 'boolean'],
         ]);
 
+        $oldValues = $documentSeries->only(array_keys($data));
         $documentSeries->update($data);
+        $newValues = $documentSeries->fresh()->only(array_keys($data));
+
+        $auditLogger->logChange('document_series.update', $documentSeries->company_id, $request->user()->id, $documentSeries, $oldValues, $newValues);
 
         $type = $documentSeries->document_type;
 

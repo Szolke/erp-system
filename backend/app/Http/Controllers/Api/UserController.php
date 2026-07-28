@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use App\Models\User;
 use App\Models\UserPermissionOverride;
+use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -34,7 +35,7 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, AuditLogger $auditLogger)
     {
         $this->authorize('user.manage');
 
@@ -73,6 +74,17 @@ class UserController extends Controller
                 'default_company_id' => $companyId,
                 'job_position_id'    => $data['job_position_id'] ?? null,
             ]);
+
+            // getHidden() (password, remember_token) takes care of the secret —
+            // logChange() masks it into changed_secret_fields, never the hash.
+            $auditLogger->logChange(
+                'user.create',
+                $companyId,
+                $request->user()->id,
+                $user,
+                [],
+                $user->only(['name', 'email', 'password', 'default_company_id', 'job_position_id']),
+            );
         }
 
         $user->companies()->attach($companyId);
@@ -83,7 +95,7 @@ class UserController extends Controller
         );
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $user, AuditLogger $auditLogger)
     {
         $this->authorize('user.manage');
 
@@ -123,12 +135,18 @@ class UserController extends Controller
             unset($data['password']);
         }
 
+        $auditFields = ['name', 'is_active', 'job_position_id', 'password'];
+        $oldValues = $user->only($auditFields);
         $user->update($data);
+        $newValues = $user->fresh()->only($auditFields);
+
+        // getHidden() (password) masks the hash into changed_secret_fields — see logChange().
+        $auditLogger->logChange('user.update', $this->currentCompany->id(), $request->user()->id, $user, $oldValues, $newValues);
 
         return response()->json($user->load('jobPosition'));
     }
 
-    public function destroy(User $user, Request $request)
+    public function destroy(User $user, Request $request, AuditLogger $auditLogger)
     {
         $this->authorize('user.manage');
 
@@ -145,6 +163,17 @@ class UserController extends Controller
         $companyId = $this->currentCompany->id();
         $user->companies()->detach($companyId);
         $user->groups()->whereHas('company', fn ($q) => $q->where('companies.id', $companyId))->detach();
+
+        // Ez nem a User sor törlése (a felhasználó más cégben megmarad) — a
+        // ténylegesen történt változás a cég-tagság megszűnése, ezt auditáljuk.
+        $auditLogger->logChange(
+            'user.company_removed',
+            $companyId,
+            $request->user()->id,
+            $user,
+            ['company_id' => $companyId],
+            [],
+        );
 
         return response()->noContent();
     }
@@ -183,7 +212,7 @@ class UserController extends Controller
 
     // PUT /api/users/{user}/overrides
     // Body: { "overrides": { "<permission_id>": "allow"|"deny"|null } }
-    public function syncOverrides(Request $request, User $user)
+    public function syncOverrides(Request $request, User $user, AuditLogger $auditLogger)
     {
         $this->authorize('permission.override');
         $this->ensureSameCompany($user);
@@ -195,19 +224,45 @@ class UserController extends Controller
 
         $companyId = $this->currentCompany->id();
         $permissionIds = Permission::pluck('id')->all();
+        $actorId = $request->user()->id;
 
         foreach ($data['overrides'] as $permId => $effect) {
             if (!in_array((int) $permId, $permissionIds)) continue;
 
+            $existing = UserPermissionOverride::where('user_id', $user->id)
+                ->where('company_id', $companyId)
+                ->where('permission_id', $permId)
+                ->first();
+
+            $oldEffect = $existing?->effect?->value;
+
+            if ($oldEffect === $effect) {
+                continue; // nincs tényleges változás
+            }
+
             if ($effect === null) {
-                UserPermissionOverride::where('user_id', $user->id)
-                    ->where('company_id', $companyId)
-                    ->where('permission_id', $permId)
-                    ->delete();
+                $oldValues = $existing->only($existing->getFillable());
+                $existing->delete();
+
+                $auditLogger->logChange('permission_override.delete', $companyId, $actorId, $existing, $oldValues, []);
             } else {
-                UserPermissionOverride::updateOrCreate(
+                $isNew = $existing === null;
+                $oldValues = $existing?->only($existing->getFillable()) ?? [];
+
+                $override = UserPermissionOverride::updateOrCreate(
                     ['user_id' => $user->id, 'company_id' => $companyId, 'permission_id' => $permId],
                     ['effect' => PermissionEffect::from($effect)]
+                );
+
+                $newValues = $override->fresh()->only($override->getFillable());
+
+                $auditLogger->logChange(
+                    $isNew ? 'permission_override.create' : 'permission_override.update',
+                    $companyId,
+                    $actorId,
+                    $override,
+                    $oldValues,
+                    $newValues,
                 );
             }
         }

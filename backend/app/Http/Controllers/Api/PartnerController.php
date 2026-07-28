@@ -8,6 +8,7 @@ use App\Http\Requests\StorePartnerRequest;
 use App\Http\Requests\UpdatePartnerRequest;
 use App\Http\Resources\PartnerResource;
 use App\Models\Partner;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 
 /** @group Partnerek */
@@ -31,9 +32,18 @@ class PartnerController extends Controller
         return PartnerResource::collection($partners);
     }
 
-    public function store(StorePartnerRequest $request)
+    public function store(StorePartnerRequest $request, AuditLogger $auditLogger)
     {
         $partner = Partner::create($request->validated())->refresh();
+
+        $auditLogger->logChange(
+            'partner.create',
+            $partner->company_id,
+            $request->user()->id,
+            $partner,
+            [],
+            $partner->only($partner->getFillable()),
+        );
 
         return PartnerResource::make($partner)
             ->response()
@@ -48,16 +58,20 @@ class PartnerController extends Controller
         return PartnerResource::make($partner);
     }
 
-    public function update(UpdatePartnerRequest $request, Partner $partner)
+    public function update(UpdatePartnerRequest $request, Partner $partner, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompany($partner);
 
+        $oldValues = $partner->only($partner->getFillable());
         $partner->update($request->validated());
+        $newValues = $partner->fresh()->only($partner->getFillable());
+
+        $auditLogger->logChange('partner.update', $partner->company_id, $request->user()->id, $partner, $oldValues, $newValues);
 
         return PartnerResource::make($partner);
     }
 
-    public function destroy(Partner $partner)
+    public function destroy(Partner $partner, Request $request, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompany($partner);
         $this->authorize('partner.delete');
@@ -66,7 +80,11 @@ class PartnerController extends Controller
             abort(409, 'A partner nem törölhető, mert tartoznak hozzá bizonylatok.');
         }
 
+        $oldValues = $partner->only($partner->getFillable());
+        $companyId = $partner->company_id;
         $partner->delete();
+
+        $auditLogger->logChange('partner.delete', $companyId, $request->user()->id, $partner, $oldValues, []);
 
         return response()->noContent();
     }

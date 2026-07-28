@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\Permission;
 use App\Models\User;
+use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 
@@ -28,7 +29,7 @@ class GroupController extends Controller
         return response()->json($groups);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, AuditLogger $auditLogger)
     {
         $this->authorize('group.manage');
 
@@ -38,6 +39,15 @@ class GroupController extends Controller
         ]);
 
         $group = Group::create($data);
+
+        $auditLogger->logChange(
+            'group.create',
+            $group->company_id,
+            $request->user()->id,
+            $group,
+            [],
+            $group->only($group->getFillable()),
+        );
 
         return response()->json($group, 201);
     }
@@ -52,7 +62,7 @@ class GroupController extends Controller
         );
     }
 
-    public function update(Request $request, Group $group)
+    public function update(Request $request, Group $group, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompany($group);
         $this->authorize('group.manage');
@@ -66,12 +76,16 @@ class GroupController extends Controller
             'description' => ['nullable', 'string', 'max:500'],
         ]);
 
+        $oldValues = $group->only(array_keys($data));
         $group->update($data);
+        $newValues = $group->fresh()->only(array_keys($data));
+
+        $auditLogger->logChange('group.update', $group->company_id, $request->user()->id, $group, $oldValues, $newValues);
 
         return response()->json($group);
     }
 
-    public function destroy(Group $group)
+    public function destroy(Group $group, Request $request, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompany($group);
         $this->authorize('group.manage');
@@ -80,7 +94,11 @@ class GroupController extends Controller
             return response()->json(['message' => 'Rendszer-csoport nem törölhető.'], 422);
         }
 
+        $oldValues = $group->only($group->getFillable());
+        $companyId = $group->company_id;
         $group->delete();
+
+        $auditLogger->logChange('group.delete', $companyId, $request->user()->id, $group, $oldValues, []);
 
         return response()->noContent();
     }

@@ -8,6 +8,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 
 /** @group Termékek */
@@ -32,9 +33,18 @@ class ProductController extends Controller
         return ProductResource::collection($products);
     }
 
-    public function store(StoreProductRequest $request)
+    public function store(StoreProductRequest $request, AuditLogger $auditLogger)
     {
         $product = Product::create($request->validated())->refresh();
+
+        $auditLogger->logChange(
+            'product.create',
+            $product->company_id,
+            $request->user()->id,
+            $product,
+            [],
+            $product->only($product->getFillable()),
+        );
 
         return ProductResource::make($product->load('vatRate'))
             ->response()
@@ -49,21 +59,29 @@ class ProductController extends Controller
         return ProductResource::make($product->load('vatRate'));
     }
 
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompany($product);
 
+        $oldValues = $product->only($product->getFillable());
         $product->update($request->validated());
+        $newValues = $product->fresh()->only($product->getFillable());
+
+        $auditLogger->logChange('product.update', $product->company_id, $request->user()->id, $product, $oldValues, $newValues);
 
         return ProductResource::make($product->load('vatRate'));
     }
 
-    public function destroy(Product $product)
+    public function destroy(Product $product, Request $request, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompany($product);
         $this->authorize('product.delete');
 
+        $oldValues = $product->only($product->getFillable());
+        $companyId = $product->company_id;
         $product->delete();
+
+        $auditLogger->logChange('product.delete', $companyId, $request->user()->id, $product, $oldValues, []);
 
         return response()->noContent();
     }

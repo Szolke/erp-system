@@ -8,6 +8,7 @@ use App\Http\Requests\StoreJobPositionRequest;
 use App\Http\Requests\UpdateJobPositionRequest;
 use App\Http\Resources\JobPositionResource;
 use App\Models\JobPosition;
+use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 
@@ -43,7 +44,7 @@ class JobPositionController extends Controller
         return JobPositionResource::collection($jobPositions);
     }
 
-    public function store(StoreJobPositionRequest $request, CurrentCompany $currentCompany)
+    public function store(StoreJobPositionRequest $request, CurrentCompany $currentCompany, AuditLogger $auditLogger)
     {
         $isGlobal = $request->boolean('global');
 
@@ -61,23 +62,36 @@ class JobPositionController extends Controller
             'sort_order' => $request->validated('sort_order', 0),
         ]);
 
+        $auditLogger->logChange(
+            'job_position.create',
+            $jobPosition->company_id,
+            $request->user()->id,
+            $jobPosition,
+            [],
+            $jobPosition->only($jobPosition->getFillable()),
+        );
+
         return JobPositionResource::make($jobPosition)
             ->response()
             ->setStatusCode(201);
     }
 
-    public function update(UpdateJobPositionRequest $request, JobPosition $jobPosition)
+    public function update(UpdateJobPositionRequest $request, JobPosition $jobPosition, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompanyOrGlobal($jobPosition);
         $this->authorize('job_position.manage');
         $this->assertWritableBySuperadminIfGlobal($jobPosition, $request);
 
+        $oldValues = $jobPosition->only($jobPosition->getFillable());
         $jobPosition->update($request->validated());
+        $newValues = $jobPosition->fresh()->only($jobPosition->getFillable());
+
+        $auditLogger->logChange('job_position.update', $jobPosition->company_id, $request->user()->id, $jobPosition, $oldValues, $newValues);
 
         return JobPositionResource::make($jobPosition);
     }
 
-    public function destroy(Request $request, JobPosition $jobPosition)
+    public function destroy(Request $request, JobPosition $jobPosition, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompanyOrGlobal($jobPosition);
         $this->authorize('job_position.manage');
@@ -87,7 +101,11 @@ class JobPositionController extends Controller
             abort(409, 'A munkakör nem törölhető, mert felhasználók vannak hozzárendelve hozzá.');
         }
 
+        $oldValues = $jobPosition->only($jobPosition->getFillable());
+        $companyId = $jobPosition->company_id;
         $jobPosition->delete();
+
+        $auditLogger->logChange('job_position.delete', $companyId, $request->user()->id, $jobPosition, $oldValues, []);
 
         return response()->noContent();
     }

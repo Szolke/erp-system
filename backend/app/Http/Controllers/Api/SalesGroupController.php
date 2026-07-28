@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateSalesGroupRequest;
 use App\Http\Resources\SalesGroupResource;
 use App\Models\Company;
 use App\Models\SalesGroup;
+use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 
@@ -28,7 +29,7 @@ class SalesGroupController extends Controller
         return SalesGroupResource::collection($groups);
     }
 
-    public function store(StoreSalesGroupRequest $request)
+    public function store(StoreSalesGroupRequest $request, AuditLogger $auditLogger)
     {
         $company = Company::findOrFail(app(CurrentCompany::class)->id());
 
@@ -40,6 +41,16 @@ class SalesGroupController extends Controller
         }
 
         $salesGroup = SalesGroup::create($request->validated());
+
+        $auditLogger->logChange(
+            'sales_group.create',
+            $salesGroup->company_id,
+            $request->user()->id,
+            $salesGroup,
+            [],
+            $salesGroup->only($salesGroup->getFillable()),
+        );
+
         $salesGroup->load('company');
 
         return SalesGroupResource::make($salesGroup)
@@ -57,22 +68,31 @@ class SalesGroupController extends Controller
         return SalesGroupResource::make($salesGroup);
     }
 
-    public function update(UpdateSalesGroupRequest $request, SalesGroup $salesGroup)
+    public function update(UpdateSalesGroupRequest $request, SalesGroup $salesGroup, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompany($salesGroup);
 
+        $oldValues = $salesGroup->only($salesGroup->getFillable());
         $salesGroup->update($request->validated());
+        $newValues = $salesGroup->fresh()->only($salesGroup->getFillable());
+
+        $auditLogger->logChange('sales_group.update', $salesGroup->company_id, $request->user()->id, $salesGroup, $oldValues, $newValues);
+
         $salesGroup->load('company');
 
         return SalesGroupResource::make($salesGroup);
     }
 
-    public function destroy(SalesGroup $salesGroup)
+    public function destroy(SalesGroup $salesGroup, Request $request, AuditLogger $auditLogger)
     {
         $this->assertBelongsToCurrentCompany($salesGroup);
         $this->authorize('sales_group.delete');
 
+        $oldValues = $salesGroup->only($salesGroup->getFillable());
+        $companyId = $salesGroup->company_id;
         $salesGroup->delete();
+
+        $auditLogger->logChange('sales_group.delete', $companyId, $request->user()->id, $salesGroup, $oldValues, []);
 
         return response()->noContent();
     }

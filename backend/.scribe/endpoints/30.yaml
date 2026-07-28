@@ -122,7 +122,7 @@ endpoints:
         name: sort.dir
         description: ''
         required: false
-        example: asc
+        example: desc
         type: string
         enumValues:
           - asc
@@ -139,7 +139,7 @@ endpoints:
       page_size: 5
       sort:
         by: z
-        dir: asc
+        dir: desc
     fileParameters: []
     responses: []
     responseFields: []

@@ -198,7 +198,7 @@ endpoints:
         name: active
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -227,7 +227,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      active: true
+      active: false
       sort_order: 27
       name: 'n'
     fileParameters: []

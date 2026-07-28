@@ -97,7 +97,7 @@ endpoints:
         name: reset_yearly
         description: ''
         required: true
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -105,7 +105,7 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       prefix: bngzmiyvdljnikhw
-      reset_yearly: true
+      reset_yearly: false
     fileParameters: []
     responses: []
     responseFields: []

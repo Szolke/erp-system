@@ -292,7 +292,7 @@ endpoints:
         custom: []
         name: name
         description: 'Must not be greater than 255 characters.'
-        required: true
+        required: false
         example: b
         type: string
         enumValues: []
@@ -303,7 +303,7 @@ endpoints:
         custom: []
         name: tax_number
         description: 'Must match the regex /^\d{8}-\d-\d{2}$/.'
-        required: true
+        required: false
         example: 64255931-4-23
         type: string
         enumValues: []
@@ -325,7 +325,7 @@ endpoints:
         custom: []
         name: registration_number
         description: 'Must not be greater than 255 characters.'
-        required: true
+        required: false
         example: a
         type: string
         enumValues: []
@@ -336,7 +336,7 @@ endpoints:
         custom: []
         name: postal_code
         description: 'Must not be greater than 10 characters.'
-        required: true
+        required: false
         example: ykcmyu
         type: string
         enumValues: []
@@ -347,7 +347,7 @@ endpoints:
         custom: []
         name: city
         description: 'Must not be greater than 255 characters.'
-        required: true
+        required: false
         example: w
         type: string
         enumValues: []
@@ -358,7 +358,7 @@ endpoints:
         custom: []
         name: address_line
         description: 'Must not be greater than 255 characters.'
-        required: true
+        required: false
         example: p
         type: string
         enumValues: []
@@ -369,7 +369,7 @@ endpoints:
         custom: []
         name: country_code
         description: 'Must be 2 characters.'
-        required: true
+        required: false
         example: wl
         type: string
         enumValues: []
@@ -424,7 +424,7 @@ endpoints:
         custom: []
         name: base_currency
         description: 'Must be 3 characters.'
-        required: true
+        required: false
         example: ngz
         type: string
         enumValues: []

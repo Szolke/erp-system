@@ -240,7 +240,7 @@ endpoints:
         name: is_active
         description: ''
         required: false
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -275,7 +275,7 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       name: b
-      is_active: false
+      is_active: true
       job_position_id: 16
     fileParameters: []
     responses: []
@@ -376,7 +376,7 @@ endpoints:
         description: ''
         required: false
         example:
-          - deny
+          - allow
         type: 'string[]'
         enumValues:
           - allow
@@ -386,7 +386,7 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       overrides:
-        - deny
+        - allow
     fileParameters: []
     responses: []
     responseFields: []

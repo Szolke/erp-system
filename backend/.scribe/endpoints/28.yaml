@@ -132,7 +132,7 @@ endpoints:
         name: mode
         description: ''
         required: true
-        example: mock
+        example: live
         type: string
         enumValues:
           - mock
@@ -169,7 +169,7 @@ endpoints:
       signing_key: h
       exchange_key: w
       tax_number: '56425593'
-      mode: mock
+      mode: live
       base_url_override: 'n'
       send_empty_reports: true
     fileParameters: []

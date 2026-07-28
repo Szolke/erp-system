@@ -30,7 +30,7 @@ endpoints:
         name: date_from
         description: 'Must be a valid date.'
         required: false
-        example: '2026-07-22T05:18:37'
+        example: '2026-07-28T19:42:21'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -41,7 +41,7 @@ endpoints:
         name: date_to
         description: 'Must be a valid date.'
         required: false
-        example: '2026-07-22T05:18:37'
+        example: '2026-07-28T19:42:21'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -52,7 +52,7 @@ endpoints:
         name: status
         description: ''
         required: false
-        example: rejected
+        example: sending
         type: string
         enumValues:
           - draft
@@ -64,9 +64,9 @@ endpoints:
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      date_from: '2026-07-22T05:18:37'
-      date_to: '2026-07-22T05:18:37'
-      status: rejected
+      date_from: '2026-07-28T19:42:21'
+      date_to: '2026-07-28T19:42:21'
+      status: sending
     fileParameters: []
     responses:
       -

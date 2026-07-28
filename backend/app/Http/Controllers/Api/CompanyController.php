@@ -68,14 +68,24 @@ class CompanyController extends Controller
 
         $auditLogger->log('company.manage', $company->id, $request->user()->id, $company, [], $company->toArray());
 
-        return CompanyResource::make($company)->response()->setStatusCode(201);
+        return CompanyResource::make(
+            $company->loadMissing(['creator:id,name', 'updater:id,name'])
+        )->response()->setStatusCode(201);
     }
 
     public function show(CurrentCompany $currentCompany)
     {
         $this->authorize('company.view');
 
-        return CompanyResource::make(Company::findOrFail($currentCompany->id()));
+        // Blame-adat (created_by/updated_by) csak az egy-rekordos válaszokban
+        // jelenik meg — a cég-listát ugyanez a Resource szolgálja ki, de ott a
+        // reláció nincs betöltve, így a WithBlameable trait whenLoaded() kapuja
+        // kihagyja a mezőket (nincs N+1). Az oszlop-korlátozás (:id,name)
+        // megakadályozza, hogy felesleges/érzékeny user-mező töltődjön be.
+        return CompanyResource::make(
+            Company::findOrFail($currentCompany->id())
+                ->loadMissing(['creator:id,name', 'updater:id,name'])
+        );
     }
 
     public function update(UpdateCompanyRequest $request, CurrentCompany $currentCompany, AuditLogger $auditLogger)
@@ -115,7 +125,9 @@ class CompanyController extends Controller
             $auditLogger->log('company.manage', $company->id, $request->user()->id, $company, $oldValues, $newValues);
         }
 
-        return CompanyResource::make($company);
+        return CompanyResource::make(
+            $company->loadMissing(['creator:id,name', 'updater:id,name'])
+        );
     }
 
     /** POST /api/company/logo — feltölt egy logót (max 2 MB, jpeg/png/gif/webp) */

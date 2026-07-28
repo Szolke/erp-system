@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 /** @group Csoportok */
 class GroupController extends Controller
@@ -57,9 +58,22 @@ class GroupController extends Controller
         $this->assertBelongsToCurrentCompany($group);
         $this->authorize('group.view');
 
-        return response()->json(
-            $group->load(['permissions', 'users'])
-        );
+        // Ez a végpont nyers modell-JSON-t ad (nincs GroupResource), ezért a
+        // blame-adatot kézzel fésüljük bele; a HasBlameable::blameData()
+        // ugyanazt az alakot adja, mint a Resource-alapú detail-végpontokon.
+        // Két igazítás kell hozzá:
+        //  - a betöltött creator/updater relációt kihagyjuk, hogy ne
+        //    duplikálódjon a válaszban;
+        //  - a created_by/updated_by FK-t (nyers JSON-ben egész szám) a
+        //    blame-objektum írja felül, hogy a detail-szerződés minden
+        //    végponton azonos legyen. A lista (index) érintetlen marad.
+        $group->load(['permissions', 'users'])
+            ->loadMissing(['creator:id,name', 'updater:id,name']);
+
+        return response()->json([
+            ...Arr::except($group->toArray(), ['creator', 'updater']),
+            ...$group->blameData(),
+        ]);
     }
 
     public function update(Request $request, Group $group, AuditLogger $auditLogger)

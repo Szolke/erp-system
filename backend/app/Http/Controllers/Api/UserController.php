@@ -10,6 +10,7 @@ use App\Models\UserPermissionOverride;
 use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -189,10 +190,14 @@ class UserController extends Controller
 
         $companyId = $this->currentCompany->id();
 
+        // A creator/updater oszlop-korlátozott eager-loadja a blame-adathoz kell
+        // (l. lent) — a beágyazott groups/jobPosition kollekciók SAJÁT blame-je
+        // szándékosan nem töltődik: az a detail-nézetnek nem adata, és listányi
+        // N+1-et hozna.
         $user->load([
             'groups' => fn ($q) => $q->where('company_id', $companyId)->with('permissions'),
             'jobPosition',
-        ]);
+        ])->loadMissing(['creator:id,name', 'updater:id,name']);
 
         $overrides = UserPermissionOverride::where('user_id', $user->id)
             ->where('company_id', $companyId)
@@ -204,7 +209,15 @@ class UserController extends Controller
         $fromGroups = $user->groups->flatMap(fn ($g) => $g->permissions->pluck('id'))->unique()->values();
 
         return response()->json([
-            'user'       => $user,
+            // Nyers modell-JSON (nincs UserResource), ezért a blame-adatot
+            // kézzel fésüljük bele — ugyanaz az alak, mint a Resource-alapú
+            // detail-végpontokon. A betöltött creator/updater relációt
+            // kihagyjuk (ne duplikálódjon), a created_by/updated_by FK-t pedig
+            // a blame-objektum írja felül. A lista (index) érintetlen marad.
+            'user'       => [
+                ...Arr::except($user->toArray(), ['creator', 'updater']),
+                ...$user->blameData(),
+            ],
             'overrides'  => $overrides->map(fn ($o) => $o->effect->value)->toArray(),
             'from_groups' => $fromGroups,
         ]);

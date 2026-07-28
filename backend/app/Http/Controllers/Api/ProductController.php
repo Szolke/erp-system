@@ -46,7 +46,9 @@ class ProductController extends Controller
             $product->only($product->getFillable()),
         );
 
-        return ProductResource::make($product->load('vatRate'))
+        return ProductResource::make(
+            $product->load('vatRate')->loadMissing(['creator:id,name', 'updater:id,name'])
+        )
             ->response()
             ->setStatusCode(201);
     }
@@ -56,7 +58,14 @@ class ProductController extends Controller
         $this->assertBelongsToCurrentCompany($product);
         $this->authorize('product.view');
 
-        return ProductResource::make($product->load('vatRate'));
+        // Blame-adat (created_by/updated_by) csak az egy-rekordos válaszokban
+        // jelenik meg — a listát ugyanez a Resource szolgálja ki, de ott a
+        // reláció nincs betöltve, így a WithBlameable trait whenLoaded() kapuja
+        // kihagyja a mezőket (nincs N+1). Az oszlop-korlátozás (:id,name)
+        // megakadályozza, hogy felesleges/érzékeny user-mező töltődjön be.
+        return ProductResource::make(
+            $product->load('vatRate')->loadMissing(['creator:id,name', 'updater:id,name'])
+        );
     }
 
     public function update(UpdateProductRequest $request, Product $product, AuditLogger $auditLogger)
@@ -69,7 +78,9 @@ class ProductController extends Controller
 
         $auditLogger->logChange('product.update', $product->company_id, $request->user()->id, $product, $oldValues, $newValues);
 
-        return ProductResource::make($product->load('vatRate'));
+        return ProductResource::make(
+            $product->load('vatRate')->loadMissing(['creator:id,name', 'updater:id,name'])
+        );
     }
 
     public function destroy(Product $product, Request $request, AuditLogger $auditLogger)

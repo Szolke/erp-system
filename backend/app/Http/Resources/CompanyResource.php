@@ -2,12 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Concerns\WithBlameable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /** @mixin \App\Models\Company */
 class CompanyResource extends JsonResource
 {
+    use WithBlameable;
+
     public function toArray(Request $request): array
     {
         return [
@@ -34,6 +37,7 @@ class CompanyResource extends JsonResource
             'users_count' => $this->whenCounted('users'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            ...$this->blame(),
         ];
     }
 }

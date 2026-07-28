@@ -2,12 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Concerns\WithBlameable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /** @mixin \App\Models\Product */
 class ProductResource extends JsonResource
 {
+    use WithBlameable;
+
     public function toArray(Request $request): array
     {
         return [
@@ -29,6 +32,7 @@ class ProductResource extends JsonResource
             'custom_fields' => $this->custom_fields ?? [],
             'created_at'    => $this->created_at,
             'updated_at'    => $this->updated_at,
+            ...$this->blame(),
         ];
     }
 }

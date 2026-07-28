@@ -45,7 +45,9 @@ class PartnerController extends Controller
             $partner->only($partner->getFillable()),
         );
 
-        return PartnerResource::make($partner)
+        return PartnerResource::make(
+            $partner->loadMissing(['creator:id,name', 'updater:id,name'])
+        )
             ->response()
             ->setStatusCode(201);
     }
@@ -55,7 +57,14 @@ class PartnerController extends Controller
         $this->assertBelongsToCurrentCompany($partner);
         $this->authorize('partner.view');
 
-        return PartnerResource::make($partner);
+        // Blame-adat (created_by/updated_by) csak az egy-rekordos válaszokban
+        // jelenik meg — a listát ugyanez a Resource szolgálja ki, de ott a
+        // reláció nincs betöltve, így a WithBlameable trait whenLoaded() kapuja
+        // kihagyja a mezőket (nincs N+1). Az oszlop-korlátozás (:id,name)
+        // megakadályozza, hogy felesleges/érzékeny user-mező töltődjön be.
+        return PartnerResource::make(
+            $partner->loadMissing(['creator:id,name', 'updater:id,name'])
+        );
     }
 
     public function update(UpdatePartnerRequest $request, Partner $partner, AuditLogger $auditLogger)
@@ -68,7 +77,9 @@ class PartnerController extends Controller
 
         $auditLogger->logChange('partner.update', $partner->company_id, $request->user()->id, $partner, $oldValues, $newValues);
 
-        return PartnerResource::make($partner);
+        return PartnerResource::make(
+            $partner->loadMissing(['creator:id,name', 'updater:id,name'])
+        );
     }
 
     public function destroy(Partner $partner, Request $request, AuditLogger $auditLogger)

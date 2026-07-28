@@ -51,7 +51,7 @@ class SalesGroupController extends Controller
             $salesGroup->only($salesGroup->getFillable()),
         );
 
-        $salesGroup->load('company');
+        $salesGroup->load('company')->loadMissing(['creator:id,name', 'updater:id,name']);
 
         return SalesGroupResource::make($salesGroup)
             ->response()
@@ -63,7 +63,12 @@ class SalesGroupController extends Controller
         $this->assertBelongsToCurrentCompany($salesGroup);
         $this->authorize('sales_group.view');
 
-        $salesGroup->load('company');
+        // Blame-adat (created_by/updated_by) csak az egy-rekordos válaszokban
+        // jelenik meg — a listát ugyanez a Resource szolgálja ki, de ott a
+        // reláció nincs betöltve, így a WithBlameable trait whenLoaded() kapuja
+        // kihagyja a mezőket (nincs N+1). Az oszlop-korlátozás (:id,name)
+        // megakadályozza, hogy felesleges/érzékeny user-mező töltődjön be.
+        $salesGroup->load('company')->loadMissing(['creator:id,name', 'updater:id,name']);
 
         return SalesGroupResource::make($salesGroup);
     }
@@ -78,7 +83,7 @@ class SalesGroupController extends Controller
 
         $auditLogger->logChange('sales_group.update', $salesGroup->company_id, $request->user()->id, $salesGroup, $oldValues, $newValues);
 
-        $salesGroup->load('company');
+        $salesGroup->load('company')->loadMissing(['creator:id,name', 'updater:id,name']);
 
         return SalesGroupResource::make($salesGroup);
     }

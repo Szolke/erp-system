@@ -4,18 +4,24 @@ namespace Tests\Feature;
 
 use App\Models\Company;
 use App\Models\Concerns\HasBlameable;
+use App\Models\Group;
 use App\Models\Invoice;
 use App\Models\Partner;
 use App\Models\User;
 use App\Support\CurrentCompany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
  * HasBlameable trait (app/Models/Concerns/HasBlameable.php) — created_by/
  * updated_by kitöltés a törzsadat-táblákon (partners itt reprezentatívan,
  * a trait modellfüggetlen). l. docs/progress.md, docs/er-model.md.
+ *
+ * A 9. szakasz a mezők API-serializációját fedi: a blame-adat a DETAIL
+ * válaszban jelenik meg felhasználónévvel és időponttal, a LISTÁBAN nem
+ * (WithBlameable trait, app/Http/Resources/Concerns/WithBlameable.php).
  */
 class BlameableTest extends TestCase
 {
@@ -198,6 +204,189 @@ class BlameableTest extends TestCase
         // InvoiceService tölti explicit módon (l. docs/progress.md), egy
         // auth-kontextusban lévő közvetlen model-létrehozás nem tölti ki.
         $this->assertNull($invoice->created_by);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 9: API-serializáció — a blame-adat a DETAIL válaszban, névvel és
+    //    időponttal. Partner a reprezentatív modell; a minta (WithBlameable
+    //    trait + HasBlameable::blameEntry) modellfüggetlen.
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function test_detail_endpoint_returns_creator_and_updater_name_with_timestamp(): void
+    {
+        $user = $this->makeUser();
+        $this->attach($user);
+
+        $created = $this->asUser($user)->postJson('/api/partners', $this->partnerPayload());
+        $created->assertCreated();
+        $partnerId = $created->json('data.id');
+
+        $response = $this->asUser($user)->getJson("/api/partners/{$partnerId}");
+        $response->assertOk();
+
+        $this->assertSame($user->name, $response->json('data.created_by.name'));
+        $this->assertSame($user->name, $response->json('data.updated_by.name'));
+
+        // Az „at" a rekord created_at/updated_at értéke, ISO8601-ben — a
+        // frontend ezt formázza majd, a backend nyers időbélyeget ad.
+        $this->assertNotNull($response->json('data.created_by.at'));
+        $this->assertSame(
+            $response->json('data.created_at'),
+            $response->json('data.created_by.at')
+        );
+        $this->assertSame(
+            $response->json('data.updated_at'),
+            $response->json('data.updated_by.at')
+        );
+    }
+
+    public function test_detail_endpoint_returns_null_blame_for_row_written_without_actor(): void
+    {
+        // Auth-kontextus NÉLKÜL létrehozott sor (seeder / konzol / queue job
+        // helyzet): a HasBlameable hookjai nem töltenek, a FK null marad.
+        $partner = Partner::create($this->partnerPayload(['company_id' => $this->company->id]));
+        $this->assertNull($partner->created_by);
+
+        $viewer = $this->makeUser();
+        $this->attach($viewer);
+
+        $response = $this->asUser($viewer)->getJson("/api/partners/{$partner->id}");
+        $response->assertOk();
+
+        // Nem hiányzó kulcs és nem üres objektum: explicit null — ebből tudja a
+        // frontend, hogy „Rendszer" fallbackot kell mutatnia.
+        $this->assertArrayHasKey('created_by', $response->json('data'));
+        $this->assertNull($response->json('data.created_by'));
+        $this->assertNull($response->json('data.updated_by'));
+    }
+
+    public function test_blame_entry_returns_null_name_when_the_user_row_is_gone(): void
+    {
+        // Védekező ág: FK megvan, de a user sora már nincs. HTTP-n át ez a
+        // jelenlegi sémával nem érhető el (a 2026_07_21_000001 migráció
+        // nullOnDelete()-tel köti a FK-t, tehát user törlésekor a mező null
+        // lesz), ezért közvetlenül a blameEntry()-t gyakoroljuk: betöltött, de
+        // null reláció + kitöltött FK.
+        $partner = new Partner;
+        $partner->created_by = 999999;
+        $partner->created_at = now();
+        $partner->setRelation('creator', null);
+
+        $entry = $partner->blameEntry('created_by', 'creator', 'created_at');
+
+        $this->assertIsArray($entry);
+        $this->assertNull($entry['name']);
+        $this->assertNotNull($entry['at']);
+    }
+
+    public function test_list_endpoint_does_not_expose_blame_fields(): void
+    {
+        $user = $this->makeUser();
+        $this->attach($user);
+
+        $this->asUser($user)->postJson('/api/partners', $this->partnerPayload())->assertCreated();
+
+        $response = $this->asUser($user)->getJson('/api/partners');
+        $response->assertOk();
+
+        // A listát ugyanaz a PartnerResource szolgálja ki, de a creator/updater
+        // reláció nincs betöltve — a WithBlameable whenLoaded() kapuja miatt a
+        // két kulcs teljesen kimarad. Ez a lista-oldali N+1 elleni védelem.
+        $row = $response->json('data.0');
+        $this->assertIsArray($row);
+        $this->assertArrayNotHasKey('created_by', $row);
+        $this->assertArrayNotHasKey('updated_by', $row);
+    }
+
+    public function test_detail_endpoint_eager_loads_blame_relations_without_n_plus_one(): void
+    {
+        $user = $this->makeUser();
+        $this->attach($user);
+
+        $created = $this->asUser($user)->postJson('/api/partners', $this->partnerPayload());
+        $created->assertCreated();
+        $partnerId = $created->json('data.id');
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $this->asUser($user)->getJson("/api/partners/{$partnerId}")->assertOk();
+        $queries = DB::getQueryLog();
+        DB::disableQueryLog();
+
+        // Az oszlop-korlátozott eager-load pontosan 2 lekérdezést ad (creator +
+        // updater), és a SELECT csak az id/name mezőt kéri. Lusta betöltésnél
+        // ez a minta egyáltalán nem jelenne meg (az `select * from "users"`
+        // alakot adná) — a pontos 2-es darabszám tehát egyszerre bizonyítja az
+        // eager-loadot és az oszlop-korlátozást.
+        $eagerLoads = collect($queries)
+            ->filter(fn ($q) => str_contains($q['query'], 'select "id", "name" from "users"'))
+            ->count();
+
+        $this->assertSame(2, $eagerLoads);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 10: nyers modell-JSON-t adó detail-végpontok (nincs JsonResource) —
+    //     GroupController::show és UserController::show. Itt a blame-adatot
+    //     kézzel fésüljük a payloadba, ezért külön fedezet kell rá.
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function test_group_detail_endpoint_merges_blame_into_raw_model_json(): void
+    {
+        $actor = $this->makeUser();
+        $this->attach($actor);
+        $this->actingAs($actor);
+
+        $group = Group::create(['company_id' => $this->company->id, 'name' => 'Teszt csoport']);
+        $this->assertSame($actor->id, $group->created_by);
+
+        $response = $this->asUser($actor)->getJson("/api/groups/{$group->id}");
+        $response->assertOk();
+
+        // A nyers JSON-ben a created_by/updated_by korábban egész FK volt — a
+        // detail-válaszban a blame-objektum írja felül, hogy a szerződés
+        // azonos legyen a Resource-alapú végpontokéval.
+        $this->assertSame($actor->name, $response->json('created_by.name'));
+        $this->assertSame($actor->name, $response->json('updated_by.name'));
+        $this->assertNotNull($response->json('created_by.at'));
+
+        // A betöltött relációk nem szivárognak be duplikátumként.
+        $body = $response->json();
+        $this->assertArrayNotHasKey('creator', $body);
+        $this->assertArrayNotHasKey('updater', $body);
+
+        // A payload többi része változatlan.
+        $this->assertSame('Teszt csoport', $response->json('name'));
+        $this->assertIsArray($response->json('permissions'));
+        $this->assertIsArray($response->json('users'));
+    }
+
+    public function test_user_detail_endpoint_merges_blame_into_raw_model_json(): void
+    {
+        $actor = $this->makeUser();
+        $this->attach($actor);
+        $this->actingAs($actor);
+
+        // Auth-kontextusban létrehozott user → a blame-mezők kitöltődnek.
+        $target = $this->makeUser();
+        $this->attach($target);
+        $this->assertSame($actor->id, $target->created_by);
+
+        $response = $this->asUser($actor)->getJson("/api/users/{$target->id}");
+        $response->assertOk();
+
+        $this->assertSame($actor->name, $response->json('user.created_by.name'));
+        $this->assertSame($actor->name, $response->json('user.updated_by.name'));
+        $this->assertNotNull($response->json('user.created_by.at'));
+
+        $user = $response->json('user');
+        $this->assertArrayNotHasKey('creator', $user);
+        $this->assertArrayNotHasKey('updater', $user);
+
+        // A show() többi ága érintetlen.
+        $this->assertSame($target->name, $response->json('user.name'));
+        $this->assertArrayHasKey('overrides', $response->json());
+        $this->assertArrayHasKey('from_groups', $response->json());
     }
 
     // ══════════════════════════════════════════════════════════════════════════

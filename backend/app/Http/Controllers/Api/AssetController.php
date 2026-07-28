@@ -56,7 +56,9 @@ class AssetController extends Controller
             $asset->only($asset->getFillable()),
         );
 
-        return AssetResource::make($asset->load('assetType'))
+        return AssetResource::make(
+            $asset->load('assetType')->loadMissing(['creator:id,name', 'updater:id,name'])
+        )
             ->response()
             ->setStatusCode(201);
     }
@@ -66,7 +68,14 @@ class AssetController extends Controller
         $this->assertBelongsToCurrentCompany($asset);
         $this->authorize('asset.view');
 
-        return AssetResource::make($asset->load('assetType'));
+        // Blame-adat (created_by/updated_by) csak az egy-rekordos válaszokban
+        // jelenik meg — a listát ugyanez a Resource szolgálja ki, de ott a
+        // reláció nincs betöltve, így a WithBlameable trait whenLoaded() kapuja
+        // kihagyja a mezőket (nincs N+1). Az oszlop-korlátozás (:id,name)
+        // megakadályozza, hogy felesleges/érzékeny user-mező töltődjön be.
+        return AssetResource::make(
+            $asset->load('assetType')->loadMissing(['creator:id,name', 'updater:id,name'])
+        );
     }
 
     public function update(UpdateAssetRequest $request, Asset $asset, AuditLogger $auditLogger)
@@ -79,7 +88,9 @@ class AssetController extends Controller
 
         $auditLogger->logChange('asset.update', $asset->company_id, $request->user()->id, $asset, $oldValues, $newValues);
 
-        return AssetResource::make($asset->load('assetType'));
+        return AssetResource::make(
+            $asset->load('assetType')->loadMissing(['creator:id,name', 'updater:id,name'])
+        );
     }
 
     public function destroy(Asset $asset, Request $request, AuditLogger $auditLogger)

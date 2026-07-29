@@ -302,14 +302,14 @@ endpoints:
         name: user_id
         description: 'The ID of the user.'
         required: true
-        example: 1
+        example: 2
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      user_id: 1
+      user_id: 2
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:

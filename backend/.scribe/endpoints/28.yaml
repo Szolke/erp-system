@@ -157,7 +157,7 @@ endpoints:
         name: send_empty_reports
         description: ''
         required: true
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -171,7 +171,7 @@ endpoints:
       tax_number: '56425593'
       mode: live
       base_url_override: 'n'
-      send_empty_reports: true
+      send_empty_reports: false
     fileParameters: []
     responses: []
     responseFields: []
@@ -219,7 +219,7 @@ endpoints:
         name: environment
         description: ''
         required: false
-        example: production
+        example: test
         type: string
         enumValues:
           - test
@@ -228,7 +228,7 @@ endpoints:
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      environment: production
+      environment: test
     fileParameters: []
     responses: []
     responseFields: []

@@ -107,7 +107,7 @@ endpoints:
         name: status
         description: ''
         required: false
-        example: scrapped
+        example: issued
         type: string
         enumValues:
           - active
@@ -121,7 +121,7 @@ endpoints:
       serial_number: b
       imei: 'n'
       asset_type_id: 16
-      status: scrapped
+      status: issued
     fileParameters: []
     responses: []
     responseFields: []
@@ -252,7 +252,7 @@ endpoints:
         name: status
         description: ''
         required: true
-        example: active
+        example: issued
         type: string
         enumValues:
           - active
@@ -265,7 +265,7 @@ endpoints:
     cleanBodyParameters:
       serial_number: b
       imei: 'n'
-      status: active
+      status: issued
     fileParameters: []
     responses: []
     responseFields: []

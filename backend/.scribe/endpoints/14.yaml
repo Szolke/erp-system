@@ -117,14 +117,14 @@ endpoints:
         name: id
         description: 'The ID of the sales group.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 16
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -174,14 +174,14 @@ endpoints:
         name: id
         description: 'The ID of the sales group.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 16
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -233,20 +233,192 @@ endpoints:
         name: id
         description: 'The ID of the sales group.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 16
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
     responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/sales-groups/{salesGroup_id}/users'
+    metadata:
+      custom: []
+      groupName: 'Értékesítő csoportok'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/sales-groups/{salesGroup}/users — a csoport tagjai.'
+      description: |-
+        Az oszlop-korlátozás (:id,name,email) szándékos: a tagválasztóhoz ennyi
+        kell, és így nem szivárog ki felesleges user-mező.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      salesGroup_id:
+        custom: []
+        name: salesGroup_id
+        description: 'The ID of the salesGroup.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      salesGroup_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/sales-groups/{salesGroup_id}/users'
+    metadata:
+      custom: []
+      groupName: 'Értékesítő csoportok'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'PUT /api/sales-groups/{salesGroup}/users — tagság-szinkron.'
+      description: |-
+        A same-company garanciát a SyncSalesGroupUsersRequest adja (minden
+        user_id igazoltan az aktuális cég felhasználója), ezért itt már nyugodtan
+        sync()-elhetünk. A pivotnak nincs blame-oszlopa (l. a migráció
+        kommentjét), a "ki mikor mit kapcsolt" az audit-naplóból derül ki.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      salesGroup_id:
+        custom: []
+        name: salesGroup_id
+        description: 'The ID of the salesGroup.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      salesGroup_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      user_ids:
+        custom: []
+        name: user_ids
+        description: 'Must match an existing stored value.'
+        required: false
+        example:
+          - 16
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      user_ids:
+        - 16
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin/sales-groups
+    metadata:
+      custom: []
+      groupName: 'Értékesítő csoportok'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/admin/sales-groups'
+      description: |-
+        A jogosultság-kapu a sales_group.view_cross_company kulcs: superadminnál a
+        Gate::before enged át (AppServiceProvider), normál felhasználónál a
+        PermissionChecker sosem adja meg (SUPERADMIN_ONLY_KEYS) → 403. A modul-kapu
+        mindkét úton érvényes: kikapcsolt sales_group modulnál a Gate::before is
+        false-t ad, a route-on ülő module:sales_group middleware pedig 404-et.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
     responseFields: []
     auth:
       - headers

@@ -4,6 +4,7 @@ import { salesGroups as sgApi } from '../api/salesGroups'
 import { useAuth } from '../contexts/AuthContext'
 import { useTranslation } from '../contexts/TranslationContext'
 import { applySidebarTheme } from '../utils/sidebarTheme'
+import BlameFooter from '../components/BlameFooter'
 
 const ACCENT_PALETTE = [
   { hex: '#0f172a', label: 'Slate 950'    },
@@ -962,6 +963,11 @@ export default function CompanyPage() {
           <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? t('common.saving') : t('common.save')}</button>
         )}
       </form>
+
+      {/* A blame a CÉG rekordjára vonatkozik, ezért közvetlenül a cégadat-form
+          alá kerül — nem az oldal legaljára, ahol már más rekordok (SimplePay,
+          NAV, prefix) szekciói állnak, és rájuk vonatkozónak látszana. */}
+      <BlameFooter createdBy={form.created_by} updatedBy={form.updated_by} style={{ marginBottom: 24 }} />
 
       {can('company.manage') && <GeneralSettingsSection can={can} />}
       {can('company.manage') && <AccentColorSection can={can} />}

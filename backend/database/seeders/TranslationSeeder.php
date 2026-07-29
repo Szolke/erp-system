@@ -674,6 +674,15 @@ class TranslationSeeder extends Seeder
             ['columns', 'locked_tooltip',   'Ez az oszlop nem rejthető el',              'This column cannot be hidden',              'Diese Spalte kann nicht ausgeblendet werden'],
             ['columns', 'save_error',       'Az oszlopbeállítás mentése nem sikerült, a módosítás egyelőre csak ideiglenes.', 'Saving the column preference failed — the change is temporary for now.', 'Speichern der Spalteneinstellung fehlgeschlagen — die Änderung ist vorerst nur vorübergehend.'],
             ['columns', 'drag_handle',      'Oszlop áthelyezése: {name}',                'Move column: {name}',                       'Spalte verschieben: {name}'],
+
+            // ── Blame-lábléc (törzsadat detail/edit oldalak alján) ─────
+            // A 'system' akkor jelenik meg, ha a rekordot seeder/konzol/queue
+            // írta, tehát nincs mögötte felhasználó; az 'unknown_user' pedig
+            // akkor, ha a felhasználó sora már nem létezik, de az időpont igen.
+            ['blame', 'created_by',   'Létrehozta',   'Created by',   'Erstellt von'],
+            ['blame', 'updated_by',   'Módosította',  'Updated by',   'Geändert von'],
+            ['blame', 'system',       'Rendszer',     'System',       'System'],
+            ['blame', 'unknown_user', '—',            '—',            '—'],
         ];
 
         $now = now();

@@ -4,6 +4,7 @@ import client from '../../api/client'
 import { groups as groupsApi } from '../../api/groups'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
+import BlameFooter from '../../components/BlameFooter'
 
 export default function GroupDetailPage() {
   const { id } = useParams()
@@ -173,6 +174,9 @@ export default function GroupDetailPage() {
           </table>
         )}
       </div>
+
+      {/* Ez a végpont nyers modell-JSON-t ad, a blame-kulcsok a gyökérben ülnek. */}
+      <BlameFooter createdBy={group.created_by} updatedBy={group.updated_by} />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
@@ -8,6 +8,7 @@ import { company as companyApi } from '../../api/company'
 import Pagination from '../../components/Pagination'
 import PerPageSelector from '../../components/PerPageSelector'
 import ColumnPicker from '../../components/ColumnPicker'
+import BlameFooter from '../../components/BlameFooter'
 import { useListColumns } from '../../hooks/useListColumns'
 import { salesGroupColumns } from '../../columns/salesGroups'
 
@@ -114,6 +115,12 @@ export default function SalesGroupPage() {
 
   const [showCreate, setShowCreate] = useState(false)
   const [editId, setEditId]         = useState(null)
+  // Az értékesítő csoportnak nincs önálló detail-oldala, a szerkesztés a listán
+  // belül történik. A lista (index) válasza viszont szándékosan NEM hozza a
+  // blame-adatot (a Resource whenLoaded() kapuja kihagyja), ezért szerkesztés
+  // megnyitásakor egyszer lekérjük a detail-végpontot — ott már benne van.
+  const [editBlame, setEditBlame]   = useState({})
+  const editIdRef                   = useRef(null)
   const [saving, setSaving]         = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
   const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('sales_groups.index', salesGroupColumns)
@@ -133,6 +140,29 @@ export default function SalesGroupPage() {
   }
 
   useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Szerkesztés megnyitása: a blame-adatot a detail-végpontról kérjük.
+  // A válasz beírása előtt ellenőrizzük, hogy még mindig ugyanaz a sor van-e
+  // nyitva — gyors sorváltásnál különben egy elkésett válasz felülírná az újat.
+  function startEdit(group) {
+    setEditId(group.id)
+    editIdRef.current = group.id
+    setShowCreate(false)
+    setEditBlame({})
+    sgApi.get(group.id)
+      .then((res) => {
+        if (editIdRef.current !== group.id) return
+        const g = res.data.data
+        setEditBlame({ created_by: g.created_by, updated_by: g.updated_by })
+      })
+      .catch(() => { /* a lábléc ilyenkor egyszerűen nem jelenik meg */ })
+  }
+
+  function cancelEdit() {
+    setEditId(null)
+    editIdRef.current = null
+    setEditBlame({})
+  }
 
   function handlePerPage(value) {
     setPerPage(value)
@@ -156,7 +186,7 @@ export default function SalesGroupPage() {
     setSaving(true)
     try {
       await sgApi.update(id, { name })
-      setEditId(null)
+      cancelEdit()
       toast('Csoport módosítva.', 'success')
       load()
     } finally {
@@ -182,7 +212,7 @@ export default function SalesGroupPage() {
       <div className="page-header">
         <h1 className="page-title">Értékesítő csoportok</h1>
         {can('sales_group.create') && !showCreate && (
-          <button className="btn btn-primary" onClick={() => { setShowCreate(true); setEditId(null) }}>
+          <button className="btn btn-primary" onClick={() => { setShowCreate(true); cancelEdit() }}>
             + Új csoport
           </button>
         )}
@@ -246,7 +276,7 @@ export default function SalesGroupPage() {
               <tr key={g.id}>
                 {visibleColumns.map((col) => renderCell(col.key, g, {
                   t, can, editId,
-                  onEditStart: (group) => { setEditId(group.id); setShowCreate(false) },
+                  onEditStart: startEdit,
                   onDelete: handleDelete,
                 }))}
               </tr>
@@ -260,9 +290,10 @@ export default function SalesGroupPage() {
                       prefix={prefix}
                       initial={list.find((g) => g.id === editId)}
                       onSave={(name) => handleUpdate(editId, name)}
-                      onCancel={() => setEditId(null)}
+                      onCancel={cancelEdit}
                       saving={saving}
                     />
+                    <BlameFooter createdBy={editBlame.created_by} updatedBy={editBlame.updated_by} />
                   </div>
                 </td>
               </tr>

@@ -5,6 +5,7 @@ import { customFields as cfApi } from '../../api/customFields'
 import client from '../../api/client'
 import { useTranslation } from '../../contexts/TranslationContext'
 import CustomFieldsForm from '../../components/CustomFieldsForm'
+import BlameFooter from '../../components/BlameFooter'
 
 const empty = { sku: '', name: '', description: '', unit: 'db', type: 'product', vat_rate_id: '', base_price: '', base_currency: 'HUF', is_active: true, custom_fields: {} }
 
@@ -108,6 +109,9 @@ export default function ProductFormPage() {
           <Link to="/products" className="btn btn-secondary">{t('common.cancel')}</Link>
         </div>
       </form>
+      {/* A detail-válasz teljes egészében a `form`-ba kerül, így a blame-kulcsok
+          is onnan jönnek; új terméknél nincsenek benne, ezért nem is renderel. */}
+      <BlameFooter createdBy={form.created_by} updatedBy={form.updated_by} />
     </div>
   )
 }

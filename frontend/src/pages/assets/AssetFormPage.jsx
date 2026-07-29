@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { assets, assetTypes } from '../../api/assets'
 import { useTranslation } from '../../contexts/TranslationContext'
+import BlameFooter from '../../components/BlameFooter'
 
 const empty = { serial_number: '', imei: '', asset_type_id: '', status: 'active' }
 
@@ -14,6 +15,9 @@ export default function AssetFormPage() {
   const isEdit = !!id
   const [form, setForm]   = useState(empty)
   const [name, setName]   = useState(null) // szerver-generált — csak megjelenítéshez
+  // A `form` csak a szerkeszthető mezőket tartja; a blame-adat külön él, hogy
+  // a mentés payloadjába se keveredjen bele.
+  const [blame, setBlame] = useState({})
   const [types, setTypes] = useState([])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -29,6 +33,7 @@ export default function AssetFormPage() {
         const a = res.data.data
         setForm({ serial_number: a.serial_number, imei: a.imei ?? '', asset_type_id: a.asset_type_id, status: a.status })
         setName(a.name)
+        setBlame({ created_by: a.created_by, updated_by: a.updated_by })
       })
     }
   }, [id])
@@ -110,6 +115,7 @@ export default function AssetFormPage() {
           <Link to="/assets" className="btn btn-secondary">{t('common.cancel')}</Link>
         </div>
       </form>
+      <BlameFooter createdBy={blame.created_by} updatedBy={blame.updated_by} />
     </div>
   )
 }

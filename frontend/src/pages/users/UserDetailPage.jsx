@@ -9,6 +9,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useToast } from '../../contexts/ToastContext'
 import JobPositionSelect from '../../components/JobPositionSelect'
+import BlameFooter from '../../components/BlameFooter'
 
 const EFFECT_LABELS = {
   allow: { label: 'Engedélyezve', bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
@@ -698,6 +699,10 @@ export default function UserDetailPage() {
           })}
         </div>
       )}
+
+      {/* Fülfüggetlen: a blame magára a felhasználó-rekordra vonatkozik, nem az
+          épp aktív fül tartalmára. A `data.user` nyers modell-JSON. */}
+      <BlameFooter createdBy={user.created_by} updatedBy={user.updated_by} />
     </div>
   )
 }

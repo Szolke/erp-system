@@ -19,3 +19,20 @@ export function formatDateTime(isoString, locale = 'hu') {
   if (Number.isNaN(date.getTime())) return isoString
   return date.toLocaleString(locale)
 }
+
+// Locale-független "YYYY-MM-DD HH:mm" időbélyeg, a felhasználó HELYI idejében.
+// Szándékosan nem a fenti formatDateTime: az toLocaleString-et hív, ami `hu`
+// alatt "2026. 07. 28. 19:34" alakot ad, és locale-onként változik — a blame-
+// lábléc viszont minden nyelven ugyanazt a kompakt, rendezhető alakot kéri.
+//
+// A backend UTC ISO8601-et küld; a Date konstruktor ezt már helyi időre
+// értelmezi, ezért a lokális gettereket (getFullYear/getMonth/…) olvassuk, NEM
+// a toISOString()-et, ami visszatérne UTC-re.
+export function formatTimestamp(isoString) {
+  if (!isoString) return ''
+  const date = new Date(isoString)
+  if (Number.isNaN(date.getTime())) return isoString
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+    + ` ${pad(date.getHours())}:${pad(date.getMinutes())}`
+}

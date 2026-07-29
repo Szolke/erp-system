@@ -5,6 +5,7 @@ import { customFields as cfApi } from '../../api/customFields'
 import { useTranslation } from '../../contexts/TranslationContext'
 import CustomFieldsForm from '../../components/CustomFieldsForm'
 import CountrySelect from '../../components/CountrySelect'
+import BlameFooter from '../../components/BlameFooter'
 
 const empty = { type: 'customer', name: '', tax_number: '', billing_postal_code: '', billing_city: '', billing_address_line: '', billing_country_code: 'HU', default_currency: 'HUF', email: '', phone: '', custom_fields: {} }
 
@@ -120,6 +121,9 @@ export default function PartnerFormPage() {
           <Link to="/partners" className="btn btn-secondary">{t('common.cancel')}</Link>
         </div>
       </form>
+      {/* A detail-válasz teljes egészében a `form`-ba kerül, így a blame-kulcsok
+          is onnan jönnek; új partnernél nincsenek benne, ezért nem is renderel. */}
+      <BlameFooter createdBy={form.created_by} updatedBy={form.updated_by} />
     </div>
   )
 }

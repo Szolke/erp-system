@@ -232,7 +232,12 @@ export default function JobPositionPage() {
               <tr>
                 <td colSpan={visibleColumns.length}>
                   <div style={{ padding: '8px 0' }}>
+                    {/* `key`: a JobPositionForm a mezőit mountoláskor veszi át az
+                        `initial`-ből (nem kontrollált mezők). `key` nélkül sorváltáskor a
+                        komponens újrafelhasználódna, és az ELŐZŐ munkakör név/aktív/sorrend
+                        értéke maradna a mezőkben — mentéskor átvihetően a másik rekordra. */}
                     <JobPositionForm
+                      key={editId}
                       initial={list.find((jp) => jp.id === editId)}
                       allowGlobal={isSuperadmin}
                       onSave={(payload) => handleUpdate(editId, payload)}

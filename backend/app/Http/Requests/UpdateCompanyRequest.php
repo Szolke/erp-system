@@ -52,4 +52,17 @@ class UpdateCompanyRequest extends FormRequest
                 Rule::unique('companies', 'group_prefix')->ignore($companyId)],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            // A prefix cégek KÖZÖTT egyedi (l. docs/er-model.md — companies.group_prefix
+            // globally unique). A Laravel alapértelmezett angol "has already been taken"
+            // üzenete ezt nem árulja el, ezért írjuk felül — a foglaló cég nevét
+            // szándékosan NEM nevezzük meg, az másik cég adata lenne.
+            'group_prefix.unique' => 'Ezt a prefixet már használja egy másik cég — a prefix cégek között egyedi.',
+            'group_prefix.alpha'  => 'A prefix csak betűkből állhat (ékezet nélkül).',
+            'group_prefix.max'    => 'A prefix legfeljebb 4 karakter lehet.',
+        ];
+    }
 }

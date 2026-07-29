@@ -14,7 +14,16 @@ class SalesGroupModule extends ModuleDescriptor
 
     public function permissions(): array
     {
-        return ['sales_group.view', 'sales_group.create', 'sales_group.edit', 'sales_group.delete'];
+        return [
+            'sales_group.view',
+            'sales_group.create',
+            'sales_group.edit',
+            'sales_group.delete',
+            // Superadmin-only (l. PermissionChecker::SUPERADMIN_ONLY_KEYS). Itt
+            // azért szerepel, hogy a modul-kapu rá is vonatkozzon: kikapcsolt
+            // sales_group modulnál a superadmin se lásson fantom-menüpontot.
+            'sales_group.view_cross_company',
+        ];
     }
 
     public function settingsRoute(): ?string { return '/settings/sales-groups'; }

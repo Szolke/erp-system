@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ActiveCompanyController;
+use App\Http\Controllers\Api\AdminSalesGroupController;
 use App\Http\Controllers\Api\AssetController;
 use App\Http\Controllers\Api\AssetTypeController;
 use App\Http\Controllers\Api\ModuleController;
@@ -40,6 +41,7 @@ use App\Http\Controllers\Api\UserTokenController;
 use App\Models\PaymentMethod;
 use App\Models\Permission;
 use App\Models\VatRate;
+use App\Services\PermissionChecker;
 use Illuminate\Support\Facades\Route;
 
 // Fordítások betöltése — publikus, nincs auth (a login oldal is használja)
@@ -124,6 +126,13 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
     Route::middleware('module:sales_group')->group(function () {
         Route::apiResource('sales-groups', SalesGroupController::class);
+
+        // Tagság (sales_group_user pivot) — cégre scope-olva, sales_group.edit joggal.
+        Route::get('sales-groups/{salesGroup}/users', [SalesGroupController::class, 'users']);
+        Route::put('sales-groups/{salesGroup}/users', [SalesGroupController::class, 'syncUsers']);
+
+        // Cégek közötti nézet (superadmin, csak olvasás) — nincs route model binding.
+        Route::get('admin/sales-groups', [AdminSalesGroupController::class, 'index']);
     });
 
     Route::middleware('module:assets')->group(function () {
@@ -188,8 +197,15 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
     Route::post('groups/{group}/members', [GroupController::class, 'addMember']);
     Route::delete('groups/{group}/members/{user}', [GroupController::class, 'removeMember']);
 
-    // Jogosultságok katalógusa
-    Route::get('/permissions', fn () => response()->json(['data' => Permission::orderBy('module')->orderBy('key')->get()]));
+    // Jogosultságok katalógusa (a csoport-szerkesztő ebből építi a checkbox-listát).
+    // A superadmin-only kulcsok kimaradnak: azokat a PermissionChecker normál
+    // felhasználónál úgyis kivágja, így csoporthoz rendelve néma no-op lenne.
+    Route::get('/permissions', fn () => response()->json([
+        'data' => Permission::whereNotIn('key', PermissionChecker::SUPERADMIN_ONLY_KEYS)
+            ->orderBy('module')
+            ->orderBy('key')
+            ->get(),
+    ]));
 
     // Beállítások — bizonylat-sorszámtartományok
     Route::get('settings/document-series', [DocumentSeriesController::class, 'index']);

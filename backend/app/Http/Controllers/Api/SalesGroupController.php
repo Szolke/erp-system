@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSalesGroupRequest;
+use App\Http\Requests\SyncSalesGroupUsersRequest;
 use App\Http\Requests\UpdateSalesGroupRequest;
 use App\Http\Resources\SalesGroupResource;
 use App\Models\Company;
@@ -100,5 +101,59 @@ class SalesGroupController extends Controller
         $auditLogger->logChange('sales_group.delete', $companyId, $request->user()->id, $salesGroup, $oldValues, []);
 
         return response()->noContent();
+    }
+
+    /**
+     * GET /api/sales-groups/{salesGroup}/users — a csoport tagjai.
+     *
+     * Az oszlop-korlátozás (:id,name,email) szándékos: a tagválasztóhoz ennyi
+     * kell, és így nem szivárog ki felesleges user-mező.
+     */
+    public function users(SalesGroup $salesGroup)
+    {
+        $this->assertBelongsToCurrentCompany($salesGroup);
+        $this->authorize('sales_group.view');
+
+        return response()->json([
+            'data' => $salesGroup->users()
+                ->orderBy('name')
+                ->get(['users.id', 'users.name', 'users.email']),
+        ]);
+    }
+
+    /**
+     * PUT /api/sales-groups/{salesGroup}/users — tagság-szinkron.
+     *
+     * A same-company garanciát a SyncSalesGroupUsersRequest adja (minden
+     * user_id igazoltan az aktuális cég felhasználója), ezért itt már nyugodtan
+     * sync()-elhetünk. A pivotnak nincs blame-oszlopa (l. a migráció
+     * kommentjét), a "ki mikor mit kapcsolt" az audit-naplóból derül ki.
+     */
+    public function syncUsers(SyncSalesGroupUsersRequest $request, SalesGroup $salesGroup, AuditLogger $auditLogger)
+    {
+        $this->assertBelongsToCurrentCompany($salesGroup);
+
+        $oldIds = $salesGroup->users()->pluck('users.id')->sort()->values()->all();
+
+        $salesGroup->users()->sync($request->validated()['user_ids']);
+
+        $newIds = $salesGroup->users()->pluck('users.id')->sort()->values()->all();
+
+        // logChange() diffel: ha a tagság ténylegesen nem változott (pl. ugyanaz
+        // a lista jött be újra), nem keletkezik audit-sor.
+        $auditLogger->logChange(
+            'sales_group.members_sync',
+            $salesGroup->company_id,
+            $request->user()->id,
+            $salesGroup,
+            ['user_ids' => $oldIds],
+            ['user_ids' => $newIds],
+        );
+
+        return response()->json([
+            'data' => $salesGroup->users()
+                ->orderBy('name')
+                ->get(['users.id', 'users.name', 'users.email']),
+        ]);
     }
 }

@@ -20,6 +20,24 @@ use App\Modules\ModuleResolver;
  */
 class PermissionChecker
 {
+    /**
+     * Kulcsok, amelyeket KIZÁRÓLAG superadmin kaphat meg — csoport-tagsággal
+     * vagy user-override-dal sem szerezhetők meg.
+     *
+     * Miért itt, egy helyen? A jogosultság két úton oldódik fel (CLAUDE.md):
+     * a Gate::before és a /api/me → frontend can(). A Gate::before normál
+     * felhasználónál ennek az osztálynak a check()-jét hívja, ami ugyanezt az
+     * effectivePermissionKeys()-t nézi — így ez az egyetlen lista MINDKÉT utat
+     * lefedi, superadmin-logika duplikálása nélkül. A superadmin ág változatlan:
+     * a Gate::before true-t ad, a checker pedig a teljes katalógust adja vissza,
+     * amelyben ezek a kulcsok benne vannak.
+     *
+     * @var array<string>
+     */
+    public const SUPERADMIN_ONLY_KEYS = [
+        'sales_group.view_cross_company',
+    ];
+
     /** @var array<string, array<string>> */
     private array $cache = [];
 
@@ -81,8 +99,13 @@ class PermissionChecker
                 }
             });
 
+        // A superadmin-only kulcsokat a normál úton mindig kivágjuk, akkor is,
+        // ha valaki (UI-t megkerülve) csoporthoz vagy override-hoz rendelte
+        // volna őket — így nem szivároghatnak be sem a can()-be, sem a
+        // Gate::before-ba.
         $keys = Permission::query()
             ->whereIn('id', array_keys($granted))
+            ->whereNotIn('key', self::SUPERADMIN_ONLY_KEYS)
             ->pluck('key')
             ->all();
 

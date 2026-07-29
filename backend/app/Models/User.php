@@ -59,6 +59,17 @@ class User extends Authenticatable
         return $this->belongsToMany(Group::class, 'user_group')->withTimestamps();
     }
 
+    /**
+     * Értékesítő csoport tagságok. NINCS cégre szűrve: a SalesGroup-on ülő
+     * BelongsToCompany globális scope intézi el, hogy normál (nem
+     * withoutGlobalScope) lekérdezésnél csak az aktuális cég csoportjai
+     * jöjjenek vissza.
+     */
+    public function salesGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(SalesGroup::class, 'sales_group_user')->withTimestamps();
+    }
+
     public function permissionOverrides(): HasMany
     {
         return $this->hasMany(UserPermissionOverride::class);

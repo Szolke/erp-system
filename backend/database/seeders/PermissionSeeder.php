@@ -77,6 +77,11 @@ class PermissionSeeder extends Seeder
             ['key' => 'sales_group.create', 'module' => 'sales_group', 'description' => 'Értékesítő csoport létrehozása', 'is_sensitive' => false],
             ['key' => 'sales_group.edit', 'module' => 'sales_group', 'description' => 'Értékesítő csoport szerkesztése', 'is_sensitive' => false],
             ['key' => 'sales_group.delete', 'module' => 'sales_group', 'description' => 'Értékesítő csoport törlése', 'is_sensitive' => false],
+            // Superadmin-only: a PermissionChecker sosem adja normál felhasználónak,
+            // és a /api/permissions katalógus sem kínálja csoporthoz rendelhetőként
+            // (l. PermissionChecker::SUPERADMIN_ONLY_KEYS). A sorra azért van szükség,
+            // mert a superadmin úton a checker a Permission tábla kulcsaiból dolgozik.
+            ['key' => 'sales_group.view_cross_company', 'module' => 'sales_group', 'description' => 'Értékesítő csoportok cégek közötti megtekintése (superadmin)', 'is_sensitive' => true],
 
             // Assets module permissions (assets module must be enabled).
             ['key' => 'asset.view', 'module' => 'asset', 'description' => 'Eszközök megtekintése', 'is_sensitive' => false],

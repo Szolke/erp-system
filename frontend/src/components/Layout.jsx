@@ -11,7 +11,7 @@ import {
   LayoutDashboard, FileText, Users2, Package, BookOpen,
   UserRound, Users, Building2, ScrollText, Hash, Languages, Sliders, Layers, Blocks,
   Settings2, ChevronLeft, ChevronRight,
-  LogOut, Moon, Sun, Terminal, UsersRound, Boxes, Tags, Briefcase, Globe, BarChart3,
+  LogOut, Moon, Sun, Terminal, UsersRound, Network, Boxes, Tags, Briefcase, Globe, BarChart3,
   AlertTriangle, Receipt, FileSpreadsheet,
 } from 'lucide-react'
 
@@ -116,6 +116,7 @@ export default function Layout() {
         { to: '/settings/job-positions', label: 'Munkakörök',           icon: Briefcase,  ...ROUTE_ACCESS['/settings/job-positions'] },
         { to: '/settings/asset-types',   label: t('nav.asset_types'),   icon: Tags,       ...ROUTE_ACCESS['/settings/asset-types'] },
         { to: '/settings/sales-groups',  label: 'Értékesítő csoportok', icon: UsersRound, ...ROUTE_ACCESS['/settings/sales-groups'] },
+        { to: '/settings/sales-groups/all', label: 'Csoportok — összes cég', icon: Network, ...ROUTE_ACCESS['/settings/sales-groups/all'] },
         { to: '/settings/translations',  label: t('nav.translations'),  icon: Languages,  ...ROUTE_ACCESS['/settings/translations'] },
       ],
     },

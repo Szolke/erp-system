@@ -67,6 +67,11 @@ export const ROUTE_ACCESS = {
   '/settings/job-positions': { perm: 'job_position.manage' },
   '/settings/asset-types': { perm: 'asset.view' },
   '/settings/sales-groups': { perm: 'sales_group.view' },
+  // Cégek közötti (superadmin) olvasó nézet. Szándékosan `perm` és NEM
+  // `superadminOnly`: a kulcsot a PermissionChecker csak superadminnak adja meg
+  // (SUPERADMIN_ONLY_KEYS), ÉS a modul-kapun is átmegy — kikapcsolt
+  // `sales_group` modulnál a kulcs eltűnik, a menüpont/route vele együtt.
+  '/settings/sales-groups/all': { perm: 'sales_group.view_cross_company' },
   '/settings/translations': { perm: 'company.manage' },
 }
 

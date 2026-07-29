@@ -36,6 +36,7 @@ const CompanyListPage = lazy(() => import('./pages/companies/CompanyListPage'))
 const ApiTesterPage = lazy(() => import('./pages/settings/ApiTesterPage'))
 const ModulesPage = lazy(() => import('./pages/settings/ModulesPage'))
 const SalesGroupPage = lazy(() => import('./pages/settings/SalesGroupPage'))
+const AdminSalesGroupPage = lazy(() => import('./pages/settings/AdminSalesGroupPage'))
 const AssetListPage = lazy(() => import('./pages/assets/AssetListPage'))
 const AssetFormPage = lazy(() => import('./pages/assets/AssetFormPage'))
 const AssetTypePage = lazy(() => import('./pages/settings/AssetTypePage'))
@@ -133,6 +134,9 @@ export default function App() {
           } />
           <Route path="settings/sales-groups" element={
             <RequirePermission access={ROUTE_ACCESS['/settings/sales-groups']}><SalesGroupPage /></RequirePermission>
+          } />
+          <Route path="settings/sales-groups/all" element={
+            <RequirePermission access={ROUTE_ACCESS['/settings/sales-groups/all']}><AdminSalesGroupPage /></RequirePermission>
           } />
           <Route path="assets" element={
             <RequirePermission access={ROUTE_ACCESS['/assets']}><AssetListPage /></RequirePermission>

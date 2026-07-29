@@ -163,7 +163,16 @@ class UserController extends Controller
 
         $companyId = $this->currentCompany->id();
         $user->companies()->detach($companyId);
-        $user->groups()->whereHas('company', fn ($q) => $q->where('companies.id', $companyId))->detach();
+
+        // FONTOS: a BelongsToMany::detach() a PIVOT táblán (user_group) operál egy
+        // friss lekérdezéssel, ami CSAK a wherePivot*() feltételeket és a szülő
+        // kulcsát veszi figyelembe — a relációra rakott where/whereHas és a Group
+        // globális cég-scope-ja némán elvész. Argumentum nélkül hívva ezért MINDEN
+        // cégben törölte volna a tagságokat (cross-company adatromlás). A helyes
+        // minta: az id-ket a reláció-query-vel gyűjtjük ki (ez tiszteletben tartja
+        // a szűrést), és explicit listaként adjuk át a detach()-nek.
+        $groupIds = $user->groups()->where('groups.company_id', $companyId)->pluck('groups.id')->all();
+        $user->groups()->detach($groupIds);
 
         // Ez nem a User sor törlése (a felhasználó más cégben megmarad) — a
         // ténylegesen történt változás a cég-tagság megszűnése, ezt auditáljuk.
@@ -175,6 +184,20 @@ class UserController extends Controller
             ['company_id' => $companyId],
             [],
         );
+
+        // Az elvesztett RBAC-csoport-tagságokat külön naplózzuk: a pivot sorok
+        // nyom nélkül tűnnek el, így ez az EGYETLEN forrás, amiből egy téves
+        // kivétel után visszaállítható, mely csoportokban volt a felhasználó.
+        if ($groupIds !== []) {
+            $auditLogger->logChange(
+                'user.groups_detached',
+                $companyId,
+                $request->user()->id,
+                $user,
+                ['company_id' => $companyId, 'group_ids' => $groupIds],
+                [],
+            );
+        }
 
         return response()->noContent();
     }

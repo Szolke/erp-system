@@ -10,6 +10,7 @@ import Pagination from '../../components/Pagination'
 import PerPageSelector from '../../components/PerPageSelector'
 import ColumnPicker from '../../components/ColumnPicker'
 import BlameFooter from '../../components/BlameFooter'
+import SalesGroupForm from '../../components/SalesGroupForm'
 import { useListColumns } from '../../hooks/useListColumns'
 import { salesGroupColumns } from '../../columns/salesGroups'
 
@@ -48,59 +49,6 @@ function renderCell(key, g, { t, can, editId, onEditStart, onDelete }) {
     default:
       return null
   }
-}
-
-function displayName(prefix, name) {
-  return prefix ? `${prefix}_${name}` : name
-}
-
-function GroupForm({ prefix, initial, onSave, onCancel, saving }) {
-  const [name, setName] = useState(initial?.name ?? '')
-  const [err, setErr]   = useState('')
-
-  async function handleSubmit(e) {
-    e.preventDefault()
-    setErr('')
-    try {
-      await onSave(name)
-    } catch (error) {
-      const errs = error.response?.data?.errors
-      setErr(errs ? Object.values(errs).flat().join(' | ') : error.response?.data?.message ?? 'Hiba')
-    }
-  }
-
-  const preview = name.trim() ? displayName(prefix, name.trim()) : ''
-
-  return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {err && <div className="alert-error">{err}</div>}
-      <div className="form-group" style={{ margin: 0 }}>
-        <label>Csoport neve</label>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          maxLength={100}
-          placeholder="pl. Észak"
-          autoFocus
-        />
-      </div>
-      {preview && (
-        <div style={{ fontSize: 12, color: 'var(--color-muted)' }}>
-          Megjelenítőnév:{' '}
-          <code style={{ fontSize: 12, color: 'var(--color-text)' }}>{preview}</code>
-        </div>
-      )}
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button className="btn btn-primary btn-sm" type="submit" disabled={saving || !name.trim()}>
-          {saving ? 'Mentés...' : initial ? 'Mentés' : 'Létrehozás'}
-        </button>
-        <button className="btn btn-secondary btn-sm" type="button" onClick={onCancel}>
-          Mégsem
-        </button>
-      </div>
-    </form>
-  )
 }
 
 /**
@@ -472,7 +420,7 @@ export default function SalesGroupPage() {
       {showCreate && can('sales_group.create') && (
         <div className="card" style={{ marginBottom: 16 }}>
           <strong style={{ display: 'block', marginBottom: 12 }}>Új csoport</strong>
-          <GroupForm
+          <SalesGroupForm
             prefix={prefix}
             onSave={handleCreate}
             onCancel={() => setShowCreate(false)}
@@ -522,13 +470,14 @@ export default function SalesGroupPage() {
               <tr>
                 <td colSpan={visibleColumns.length}>
                   <div style={{ padding: '8px 0' }}>
-                    {/* `key`: a GroupForm a nevet mountoláskor veszi át az `initial`-ből
-                        (nem kontrollált mező). `key` nélkül sorváltáskor a komponens
-                        újrafelhasználódna, és az ELŐZŐ csoport neve maradna a mezőben.
-                        A prefix azért kell a kulcsba, mert testvér elemek kulcsának
-                        EGYEDINEK kell lennie — két testvér azonos kulccsal a régi
-                        példány törlését akadályozza meg (duplán jelenne meg az űrlap). */}
-                    <GroupForm
+                    {/* `key`: a SalesGroupForm a nevet mountoláskor veszi át az
+                        `initial`-ből (nem kontrollált mező). `key` nélkül sorváltáskor a
+                        komponens újrafelhasználódna, és az ELŐZŐ csoport neve maradna a
+                        mezőben. A prefix azért kell a kulcsba, mert testvér elemek
+                        kulcsának EGYEDINEK kell lennie — két testvér azonos kulccsal a
+                        régi példány törlését akadályozza meg (duplán jelenne meg az
+                        űrlap). */}
+                    <SalesGroupForm
                       key={`form-${editId}`}
                       prefix={prefix}
                       initial={list.find((g) => g.id === editId)}

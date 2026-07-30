@@ -3,21 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Concerns\EnforcesCompanyScope;
+use App\Http\Controllers\Concerns\ManagesSalesGroups;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSalesGroupRequest;
 use App\Http\Requests\SyncSalesGroupUsersRequest;
 use App\Http\Requests\UpdateSalesGroupRequest;
 use App\Http\Resources\SalesGroupResource;
-use App\Models\Company;
 use App\Models\SalesGroup;
 use App\Services\AuditLogger;
-use App\Support\CurrentCompany;
 use Illuminate\Http\Request;
 
 /** @group Értékesítő csoportok */
 class SalesGroupController extends Controller
 {
-    use EnforcesCompanyScope;
+    use EnforcesCompanyScope, ManagesSalesGroups;
 
     public function index(Request $request)
     {
@@ -32,31 +31,10 @@ class SalesGroupController extends Controller
 
     public function store(StoreSalesGroupRequest $request, AuditLogger $auditLogger)
     {
-        $company = Company::findOrFail(app(CurrentCompany::class)->id());
-
-        if (! $company->group_prefix) {
-            return response()->json(
-                ['message' => 'Előbb állíts be prefixet a cégbeállításoknál.'],
-                422
-            );
-        }
-
-        $salesGroup = SalesGroup::create($request->validated());
-
-        $auditLogger->logChange(
-            'sales_group.create',
-            $salesGroup->company_id,
-            $request->user()->id,
-            $salesGroup,
-            [],
-            $salesGroup->only($salesGroup->getFillable()),
-        );
-
-        $salesGroup->load('company')->loadMissing(['creator:id,name', 'updater:id,name']);
-
-        return SalesGroupResource::make($salesGroup)
-            ->response()
-            ->setStatusCode(201);
+        // A jog-ellenőrzést a StoreSalesGroupRequest::authorize() végzi
+        // (sales_group.create); a művelet törzse a ManagesSalesGroups concernben
+        // közös a cross-company úttal.
+        return $this->createSalesGroup($request->validated(), $request->user()->id, $auditLogger);
     }
 
     public function show(SalesGroup $salesGroup)
@@ -78,15 +56,7 @@ class SalesGroupController extends Controller
     {
         $this->assertBelongsToCurrentCompany($salesGroup);
 
-        $oldValues = $salesGroup->only($salesGroup->getFillable());
-        $salesGroup->update($request->validated());
-        $newValues = $salesGroup->fresh()->only($salesGroup->getFillable());
-
-        $auditLogger->logChange('sales_group.update', $salesGroup->company_id, $request->user()->id, $salesGroup, $oldValues, $newValues);
-
-        $salesGroup->load('company')->loadMissing(['creator:id,name', 'updater:id,name']);
-
-        return SalesGroupResource::make($salesGroup);
+        return $this->updateSalesGroup($salesGroup, $request->validated(), $request->user()->id, $auditLogger);
     }
 
     public function destroy(SalesGroup $salesGroup, Request $request, AuditLogger $auditLogger)
@@ -94,13 +64,7 @@ class SalesGroupController extends Controller
         $this->assertBelongsToCurrentCompany($salesGroup);
         $this->authorize('sales_group.delete');
 
-        $oldValues = $salesGroup->only($salesGroup->getFillable());
-        $companyId = $salesGroup->company_id;
-        $salesGroup->delete();
-
-        $auditLogger->logChange('sales_group.delete', $companyId, $request->user()->id, $salesGroup, $oldValues, []);
-
-        return response()->noContent();
+        return $this->deleteSalesGroup($salesGroup, $request->user()->id, $auditLogger);
     }
 
     /**

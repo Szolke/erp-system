@@ -132,7 +132,7 @@ endpoints:
         name: mode
         description: ''
         required: true
-        example: live
+        example: test
         type: string
         enumValues:
           - mock
@@ -157,7 +157,7 @@ endpoints:
         name: send_empty_reports
         description: ''
         required: true
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -169,9 +169,9 @@ endpoints:
       signing_key: h
       exchange_key: w
       tax_number: '56425593'
-      mode: live
+      mode: test
       base_url_override: 'n'
-      send_empty_reports: false
+      send_empty_reports: true
     fileParameters: []
     responses: []
     responseFields: []
@@ -219,7 +219,7 @@ endpoints:
         name: environment
         description: ''
         required: false
-        example: test
+        example: production
         type: string
         enumValues:
           - test
@@ -228,7 +228,7 @@ endpoints:
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      environment: test
+      environment: production
     fileParameters: []
     responses: []
     responseFields: []

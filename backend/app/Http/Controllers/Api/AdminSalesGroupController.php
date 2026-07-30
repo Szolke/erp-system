@@ -2,24 +2,49 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\ManagesSalesGroups;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSalesGroupRequest;
+use App\Http\Requests\UpdateSalesGroupRequest;
 use App\Models\SalesGroup;
+use App\Services\AuditLogger;
+use App\Support\CurrentCompany;
+use Illuminate\Http\Request;
 
 /**
- * Cégek közötti (superadmin) értékesítő csoport nézet — CSAK OLVASÁS.
+ * Cégek közötti (superadmin) értékesítő csoport kezelés — olvasás + CRUD.
  *
  * Miért külön kontroller és külön útvonal? A SalesGroupController minden
  * végpontja a BelongsToCompany globális scope-ra és az
  * assertBelongsToCurrentCompany() őrre épül; egy "néha átlép a cégen"
- * kapcsolóval a scope-garancia elveszne. A cross-company olvasás ezért saját,
- * route-model-binding NÉLKÜLI útvonalon él (a binding úgyis az
- * EnsureCompanyContext előtt futna), és kizárólag listát ad — szerkesztés
- * továbbra is cégre scope-olva, a SalesGroupControlleren keresztül történik.
+ * kapcsolóval a scope-garancia elveszne — ugyanabban az osztályban egyes
+ * metódusokon valódi őr lenne, másokon tautológia. A cross-company út ezért
+ * saját útvonalakon él.
+ *
+ * ═══ HOGYAN MŰKÖDIK AZ ÍRÁS ═══
+ * Az index() route-model-binding nélkül, withoutGlobalScope-pal olvas. Az írási
+ * végpontok viszont NEM építenek párhuzamos, scope-mentes CRUD-ot: rajtuk a
+ * `company.cross` middleware (ResolveCrossCompanyContext) a kérés idejére a CÉL
+ * cégre állítja a CurrentCompany-t, MÉG a FormRequest feloldása előtt — onnantól
+ * a megszokott gépezet fut változatlanul (validáció, globális scope, auto-stamp,
+ * audit). A közös művelet-törzs a ManagesSalesGroups concernben van, tehát a
+ * cégen belüli és a cross-company út bitre ugyanazt a logikát futtatja.
+ *
+ * ═══ JOGOSULTSÁG ═══
+ * Nincs új permission-kulcs: hard superadmin-kapu. Az elsődleges őr a
+ * middleware (a kontextus felülírása ELŐTT fut); az itteni abort_unless() a
+ * második, független réteg arra az esetre, ha valaki a middleware nélkül kötné
+ * be az útvonalat. A FormRequestek can('sales_group.create'/'edit') hívása a
+ * MÁR átállított kontextuson fut, tehát a modul-kaput a CÉL cégre is érvényesíti
+ * (kikapcsolt sales_group modulú cégbe superadmin sem ír) — a route-on ülő
+ * module:sales_group middleware ezzel szemben a HÍVÓ cégére vonatkozik.
  *
  * @group Értékesítő csoportok
  */
 class AdminSalesGroupController extends Controller
 {
+    use ManagesSalesGroups;
+
     /**
      * GET /api/admin/sales-groups
      *
@@ -66,5 +91,86 @@ class AdminSalesGroupController extends Controller
                 ])->values(),
             ])->values(),
         ]);
+    }
+
+    /**
+     * POST /api/admin/sales-groups — csoport létrehozása TETSZŐLEGES cégben.
+     *
+     * A cél céget a kérés `company_id` mezője adja; azt a company.cross
+     * middleware validálja (létező cég) és állítja be kontextusként — ezért a
+     * StoreSalesGroupRequest név-egyediség szabálya már a cél cégre fut, és a
+     * `company_id` a BelongsToCompany auto-stampjéből kerül a rekordra (a
+     * validated() csak a nevet tartalmazza, tehát a kérés törzse nem tud más
+     * céget becsempészni).
+     */
+    public function store(StoreSalesGroupRequest $request, AuditLogger $auditLogger)
+    {
+        abort_unless($request->user()->is_superadmin, 403);
+
+        return $this->createSalesGroup(
+            $request->validated(),
+            $request->user()->id,
+            $auditLogger,
+            $this->crossCompanyAuditContext(),
+        );
+    }
+
+    /**
+     * PUT /api/admin/sales-groups/{sales_group} — átnevezés bármelyik cégben.
+     *
+     * Az útvonal-paraméter neve szándékosan `sales_group`: az
+     * UpdateSalesGroupRequest ezen a néven olvassa ki a route-modellt a
+     * név-egyediség self-exclude-jához. Más néven a szabály önmagával ütköztetné
+     * a csoportot (a saját nevére mentés hamis 422-t adna).
+     */
+    public function update(UpdateSalesGroupRequest $request, SalesGroup $salesGroup, AuditLogger $auditLogger)
+    {
+        abort_unless($request->user()->is_superadmin, 403);
+
+        return $this->updateSalesGroup(
+            $salesGroup,
+            $request->validated(),
+            $request->user()->id,
+            $auditLogger,
+            $this->crossCompanyAuditContext(),
+        );
+    }
+
+    /**
+     * DELETE /api/admin/sales-groups/{sales_group} — törlés bármelyik cégben.
+     *
+     * A törlés szemantikája megegyezik a cégen belülivel (nincs tagság-alapú
+     * tiltás, a pivot-takarítást a DB cascade végzi) — l. ManagesSalesGroups.
+     * Az authorize() a már átállított kontextuson fut, tehát a cél cég
+     * modul-kapuját is érvényesíti.
+     */
+    public function destroy(SalesGroup $salesGroup, Request $request, AuditLogger $auditLogger)
+    {
+        abort_unless($request->user()->is_superadmin, 403);
+        $this->authorize('sales_group.delete');
+
+        return $this->deleteSalesGroup(
+            $salesGroup,
+            $request->user()->id,
+            $auditLogger,
+            $this->crossCompanyAuditContext(),
+        );
+    }
+
+    /**
+     * Cross-company jelölők az audit-payloadba, migráció nélkül (JSON).
+     *
+     * A `target_company_id` külön kulcs, nem a fillable `company_id`: az utóbbi
+     * a törlés new_values-ából hiányozna, és így a riportok egyetlen, mindig
+     * jelenlévő mezőből tudják kiolvasni, MELYIK cégben történt a művelet.
+     *
+     * @return array<string, mixed>
+     */
+    private function crossCompanyAuditContext(): array
+    {
+        return [
+            'cross_company'     => true,
+            'target_company_id' => app(CurrentCompany::class)->id(),
+        ];
     }
 }

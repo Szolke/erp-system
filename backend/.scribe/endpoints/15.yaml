@@ -107,7 +107,7 @@ endpoints:
         name: status
         description: ''
         required: false
-        example: issued
+        example: service
         type: string
         enumValues:
           - active
@@ -121,7 +121,7 @@ endpoints:
       serial_number: b
       imei: 'n'
       asset_type_id: 16
-      status: issued
+      status: service
     fileParameters: []
     responses: []
     responseFields: []

@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'company.context' => \App\Http\Middleware\EnsureCompanyContext::class,
+            'company.cross'   => \App\Http\Middleware\ResolveCrossCompanyContext::class,
             'module'          => \App\Http\Middleware\EnsureModuleEnabled::class,
         ]);
     })

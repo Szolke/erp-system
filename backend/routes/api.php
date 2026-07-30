@@ -133,6 +133,19 @@ Route::middleware(['auth:sanctum', 'company.context'])->group(function () {
 
         // Cégek közötti nézet (superadmin, csak olvasás) — nincs route model binding.
         Route::get('admin/sales-groups', [AdminSalesGroupController::class, 'index']);
+
+        // Cégek közötti ÍRÁS (superadmin). A company.cross middleware a kérés
+        // idejére a CÉL cégre állítja a CurrentCompany-t — create-nél a törzs
+        // company_id mezőjéből, update/delete-nél a bound modellből —, így
+        // innentől a megszokott, cégre scope-olt CRUD-gépezet fut. Az
+        // útvonal-paraméter neve kötelezően `sales_group`: az
+        // UpdateSalesGroupRequest ezen a néven olvassa ki a route-modellt.
+        Route::post('admin/sales-groups', [AdminSalesGroupController::class, 'store'])
+            ->middleware('company.cross');
+        Route::put('admin/sales-groups/{sales_group}', [AdminSalesGroupController::class, 'update'])
+            ->middleware('company.cross:sales_group');
+        Route::delete('admin/sales-groups/{sales_group}', [AdminSalesGroupController::class, 'destroy'])
+            ->middleware('company.cross:sales_group');
     });
 
     Route::middleware('module:assets')->group(function () {

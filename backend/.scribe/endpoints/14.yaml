@@ -427,3 +427,170 @@ endpoints:
     controller: null
     method: null
     route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/admin/sales-groups
+    metadata:
+      custom: []
+      groupName: 'Értékesítő csoportok'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/admin/sales-groups — csoport létrehozása TETSZŐLEGES cégben.'
+      description: |-
+        A cél céget a kérés `company_id` mezője adja; azt a company.cross
+        middleware validálja (létező cég) és állítja be kontextusként — ezért a
+        StoreSalesGroupRequest név-egyediség szabálya már a cél cégre fut, és a
+        `company_id` a BelongsToCompany auto-stampjéből kerül a rekordra (a
+        validated() csak a nevet tartalmazza, tehát a kérés törzse nem tud más
+        céget becsempészni).
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/admin/sales-groups/{sales_group_id}'
+    metadata:
+      custom: []
+      groupName: 'Értékesítő csoportok'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'PUT /api/admin/sales-groups/{sales_group} — átnevezés bármelyik cégben.'
+      description: |-
+        Az útvonal-paraméter neve szándékosan `sales_group`: az
+        UpdateSalesGroupRequest ezen a néven olvassa ki a route-modellt a
+        név-egyediség self-exclude-jához. Más néven a szabály önmagával ütköztetné
+        a csoportot (a saját nevére mentés hamis 422-t adna).
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      sales_group_id:
+        custom: []
+        name: sales_group_id
+        description: 'The ID of the sales group.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      sales_group_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/admin/sales-groups/{sales_group_id}'
+    metadata:
+      custom: []
+      groupName: 'Értékesítő csoportok'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'DELETE /api/admin/sales-groups/{sales_group} — törlés bármelyik cégben.'
+      description: |-
+        A törlés szemantikája megegyezik a cégen belülivel (nincs tagság-alapú
+        tiltás, a pivot-takarítást a DB cascade végzi) — l. ManagesSalesGroups.
+        Az authorize() a már átállított kontextuson fut, tehát a cél cég
+        modul-kapuját is érvényesíti.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      sales_group_id:
+        custom: []
+        name: sales_group_id
+        description: 'The ID of the sales group.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      sales_group_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

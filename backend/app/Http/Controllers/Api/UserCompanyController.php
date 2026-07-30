@@ -93,6 +93,24 @@ class UserCompanyController extends Controller
         // végpont a fix előtt keletkezett árva sorokat is felszámolja, ha újra hívják.
         $user->groups()->detach($groupIds);
 
+        // Ugyanez az ÉRTÉKESÍTŐ csoport tagságokra (sales_group_user). A pivot
+        // cascadeOnDelete-je csak a `users` sor TÖRLÉSÉRE fut, a tipikus művelet
+        // viszont ez a cég-leválasztás — takarítás nélkül a felhasználó bennragad a
+        // leválasztott cég értékesítő csoportjaiban (árva sales_group_user sorok).
+        // Mindkét fenti csapda ugyanúgy él: a SalesGroup is BelongsToCompany-t
+        // használ, tehát a globális scope itt is az AKTUÁLIS (nem a leválasztott)
+        // cégre szűrne, és a detach() is a pivoton dolgozik. Ezért withoutGlobalScope
+        // ('company') + explicit company_id szűrés + explicit id-lista.
+        $salesGroupIds = $user->salesGroups()
+            ->withoutGlobalScope('company')
+            ->where('sales_groups.company_id', $company->id)
+            ->pluck('sales_groups.id')
+            ->all();
+
+        // A groups()-szal azonos okból a $wasMember guardon KÍVÜL: a fix előtt
+        // keletkezett árva sorokat egy ismételt hívás így fel tudja számolni.
+        $user->salesGroups()->detach($salesGroupIds);
+
         if ($wasMember) {
             // If the detached company was the user's default, it would otherwise be
             // left pointing at a company the user no longer belongs to — EnsureCompanyContext
@@ -126,6 +144,21 @@ class UserCompanyController extends Controller
                 $request->user()->id,
                 $user,
                 ['company_id' => $company->id, 'group_ids' => $groupIds],
+                null,
+            );
+        }
+
+        // Az értékesítő csoport tagságok KÜLÖN akció-néven naplózódnak (l. a
+        // UserController::destroy() azonos indoklását): az RBAC-csoport jogot hordoz,
+        // az értékesítő csoport üzleti besorolás, a kettő összemosása egy
+        // jog-vesztés riportot hamis találattal terhelne.
+        if ($salesGroupIds !== []) {
+            $this->auditLogger->log(
+                'user.sales_groups_detached',
+                $company->id,
+                $request->user()->id,
+                $user,
+                ['company_id' => $company->id, 'sales_group_ids' => $salesGroupIds],
                 null,
             );
         }

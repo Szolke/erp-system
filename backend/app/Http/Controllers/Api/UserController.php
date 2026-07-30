@@ -174,6 +174,19 @@ class UserController extends Controller
         $groupIds = $user->groups()->where('groups.company_id', $companyId)->pluck('groups.id')->all();
         $user->groups()->detach($groupIds);
 
+        // Ugyanez a takarítás az ÉRTÉKESÍTŐ csoport tagságokra (sales_group_user).
+        // A pivot cascadeOnDelete-je csak a `users` sor TÖRLÉSÉRE fut, itt viszont a
+        // felhasználó megmarad (más cégben továbbra is aktív), csak a cég-tagsága
+        // szűnik meg — takarítás nélkül bennragadna az elhagyott cég értékesítő
+        // csoportjaiban (árva sales_group_user sorok). A detach() ugyanúgy a pivoton
+        // operál és a relációra rakott where-t eldobja, ezért itt is a reláció-query
+        // gyűjti ki az id-ket, és explicit listaként adjuk át (l. a fenti magyarázatot).
+        $salesGroupIds = $user->salesGroups()
+            ->where('sales_groups.company_id', $companyId)
+            ->pluck('sales_groups.id')
+            ->all();
+        $user->salesGroups()->detach($salesGroupIds);
+
         // Ez nem a User sor törlése (a felhasználó más cégben megmarad) — a
         // ténylegesen történt változás a cég-tagság megszűnése, ezt auditáljuk.
         $auditLogger->logChange(
@@ -195,6 +208,22 @@ class UserController extends Controller
                 $request->user()->id,
                 $user,
                 ['company_id' => $companyId, 'group_ids' => $groupIds],
+                [],
+            );
+        }
+
+        // Az értékesítő csoport tagságok KÜLÖN akció-néven naplózódnak, nem a
+        // user.groups_detached alatt: az RBAC-csoport jogot hordoz, az értékesítő
+        // csoport üzleti besorolás — egy naplóolvasónak (pl. „milyen jogokat vesztett
+        // a felhasználó" riport) a kettő összemosása félrevezető lenne. A payload
+        // alakja viszont szándékosan párhuzamos (company_id + *_ids).
+        if ($salesGroupIds !== []) {
+            $auditLogger->logChange(
+                'user.sales_groups_detached',
+                $companyId,
+                $request->user()->id,
+                $user,
+                ['company_id' => $companyId, 'sales_group_ids' => $salesGroupIds],
                 [],
             );
         }

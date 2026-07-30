@@ -291,19 +291,24 @@ a `kezikonyv-szinkron` skill hatásköre, egyeztetés után indítható.
 - **SimplePay sandbox-tesztelés** — start URL struktúra (1 vs. több callback URL), refund API pontos request/response formátum, IPN visszajelzés refundra. Valódi merchant-adatokkal kell ellenőrizni élesítés előtt.
 - **NAV sandbox-tesztelés** — `vatExemption` kódok (AAM/TAM stb.) XSD-konformitása `NavXmlBuilder`-ben.
 
-### Frontend automatizált tesztelés — infrastruktúra + 3 kör lefedve, innen csökkenő hozamú
+### Frontend automatizált tesztelés — infrastruktúra + 6 kör lefedve, innen csökkenő hozamú
 
 A projektben eddig NEM volt frontend automatizált teszt (a CLAUDE.md Tesztelés szakasza
 szerint a böngészős végigjátszás mindig a felhasználó feladata marad — ez a hook-/
 komponens-szintű LOGIKA automatizálását célozza, nem a böngészős E2E-t). Az infrastruktúra
-(Vitest 4 + Testing Library, jsdom, `test`/`test:watch` npm scriptek) és három tesztkör
-elkészült, összesen **46 teszt** — l. a fenti „Utolsó frissítés" a teljes részletért:
-- `useListColumns` hook (21 teszt, `edb510b`/`2152764`) — a 14 listanézet közös merge-/sorrend-logikája.
+(Vitest 4 + Testing Library, jsdom, `test`/`test:watch` npm scriptek) és hat tesztkör
+elkészült, **9 fájlban összesen 83 teszt** (a `npm test` tényleges összegzése a
+`frontend` konténerben, 2026-07-30) — az egyes körök részleteiért l. a CHANGELOG-ot:
+- `useListColumns` hook (21 teszt, `edb510b`/`2152764`) — a 14 listanézet közös merge-/sorrend-logikája; ugyanitt a `smoke.test.jsx` (2 teszt) az infrastruktúra életjele.
 - `ColumnPicker` komponens (15 teszt, `a76fdad`) — trigger, popover-tartalom, checkbox-toggle, drag-fogantyú jelenléte/hiánya, reset, popover-dismiss bekötés.
-- `AuthContext`/`can()` jogosultság-helper (8 teszt, `f92dd02`) — meglévő/hiányzó kulcs, superadmin (nincs külön ág), **fail-closed betöltetlen állapot**, cégváltás utáni frissülés + a tranziens ablak.
+- `AuthContext`/`can()` jogosultság-helper (9 teszt, `f92dd02`) — meglévő/hiányzó kulcs, superadmin (nincs külön ág), **fail-closed betöltetlen állapot**, cégváltás utáni frissülés + a tranziens ablak.
+- Route-szintű jogosultság-védelem (`b1635b4`): `RequirePermission` komponens (12 teszt) + a közös `routePermissions` / `ROUTE_ACCESS` térkép (9 teszt) — köztük a saját-profil kivétel és a fail-closed viselkedés betöltetlen jogosultságoknál.
+- `BlameFooter` komponens (5 teszt, `051bc5d`) — a `created_by`/`updated_by` audit-mezők megjelenítése, hiányzó adat esetén is.
+- `SalesGroupForm` komponens (5 teszt) + `utils/salesGroups` hiba-helperek (5 teszt) — `8269639`: a szerver mezőnkénti 422-hibája a saját mezője alatt, `errors.company_id` az injektált slotban, cross-company 403 → magyarázó magyar szöveg (az angol Laravel-default nem szivárog ki), submit-kapu, prefix-előnézet.
 
-NYITOTT, jövőbeli kör(ök)ben bővíthető, de a hármas kör után **csökkenő hozamú** (a
-legkritikusabb megosztott logika — oszlopválasztó, jogosultság-kiértékelés — már fedett):
+NYITOTT, jövőbeli kör(ök)ben bővíthető, de a fenti körök után **csökkenő hozamú** (a
+legkritikusabb megosztott logika — oszlopválasztó, jogosultság-kiértékelés, route-kapuzás
+— már fedett):
 - egyéb megosztott komponensek (`Pagination`, `PerPageSelector`, `SearchableSelect`, `DateRangePicker`)
 - form-komponensek, listaoldalak (jellemzően vékony, API-hívást+renderelést összekötő kód, alacsonyabb önálló logikai sűrűséggel)
 

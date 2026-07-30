@@ -65,6 +65,34 @@ class UserCompanyController extends Controller
 
         $user->companies()->detach($company->id);
 
+        // A cég-tagsággal együtt a leválasztott cég RBAC-csoport-tagságai is
+        // megszűnnek. Nélküle a user bennragad a cég csoportjaiban: a jogfeloldás
+        // az aktuális cég kontextusán megy, tehát ez nem azonnali jog-szivárgás,
+        // viszont egy későbbi visszarendeléskor a régi csoport-tagságok (és velük a
+        // jogok) váratlanul „visszaélednek", és addig is elavult tagsági adat marad.
+        //
+        // Két csapda egyszerre:
+        // 1) A BelongsToMany::detach() a PIVOT táblán (user_group) operál egy friss
+        //    lekérdezéssel, ami a relációra rakott where-t némán eldobja — argumentum
+        //    nélkül hívva MINDEN cégben törölné a tagságokat. Ezért az id-ket a
+        //    reláció-query gyűjti ki, és explicit listaként kapja meg a detach()
+        //    (ugyanaz a minta, mint a UserController::destroy()-ban, `8e7ac1a`).
+        // 2) Ez a végpont superadmin-only és CÉGEK KÖZÖTT dolgozik: a leválasztott cég
+        //    nem feltétlenül az aktuális. A Group globális cég-scope-ja viszont az
+        //    AKTUÁLIS cégre szűr, ezért withoutGlobalScope('company') nélkül a
+        //    lekérdezés a leválasztott cég csoportjait egyáltalán nem látná, és
+        //    csendben nem törölnénk semmit (a `8e7ac1a` hiba inverze: alul-detach).
+        $groupIds = $user->groups()
+            ->withoutGlobalScope('company')
+            ->where('groups.company_id', $company->id)
+            ->pluck('groups.id')
+            ->all();
+
+        // Szándékosan a $wasMember guardon KÍVÜL: az invariáns, amit tartunk, az hogy
+        // egy céghez nem tartozó user ne legyen benne a cég csoportjaiban. Így a
+        // végpont a fix előtt keletkezett árva sorokat is felszámolja, ha újra hívják.
+        $user->groups()->detach($groupIds);
+
         if ($wasMember) {
             // If the detached company was the user's default, it would otherwise be
             // left pointing at a company the user no longer belongs to — EnsureCompanyContext
@@ -82,6 +110,22 @@ class UserCompanyController extends Controller
                 $request->user()->id,
                 $user,
                 ['company_id' => $company->id, 'company_name' => $company->name],
+                null,
+            );
+        }
+
+        // Az elvesztett RBAC-csoport-tagságokat külön naplózzuk: a pivot sorok nyom
+        // nélkül tűnnek el, így ez az EGYETLEN forrás, amiből egy téves leválasztás
+        // után visszaállítható, mely csoportokban volt a felhasználó. A payload
+        // szándékosan azonos alakú a UserController::destroy() naplósorával
+        // (company_id + group_ids), hogy egy naplóolvasó mindkét útvonalat kezelje.
+        if ($groupIds !== []) {
+            $this->auditLogger->log(
+                'user.groups_detached',
+                $company->id,
+                $request->user()->id,
+                $user,
+                ['company_id' => $company->id, 'group_ids' => $groupIds],
                 null,
             );
         }

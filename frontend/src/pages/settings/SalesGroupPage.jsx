@@ -4,13 +4,13 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useTranslation } from '../../contexts/TranslationContext'
 import { useToast } from '../../contexts/ToastContext'
 import { salesGroups as sgApi } from '../../api/salesGroups'
-import { users as usersApi } from '../../api/users'
 import { company as companyApi } from '../../api/company'
 import Pagination from '../../components/Pagination'
 import PerPageSelector from '../../components/PerPageSelector'
 import ColumnPicker from '../../components/ColumnPicker'
 import BlameFooter from '../../components/BlameFooter'
 import SalesGroupForm from '../../components/SalesGroupForm'
+import SalesGroupMembersSection from '../../components/SalesGroupMembersSection'
 import { useListColumns } from '../../hooks/useListColumns'
 import { salesGroupColumns } from '../../columns/salesGroups'
 
@@ -49,231 +49,6 @@ function renderCell(key, g, { t, can, editId, onEditStart, onDelete }) {
     default:
       return null
   }
-}
-
-/**
- * Tagság-szekció a csoport szerkesztő sorában.
- *
- * Külön mentési út: a tagság SAJÁT PUT-tal (`/sales-groups/{id}/users`) megy,
- * és CSAK a `user_ids` mezőt küldi, mindig az ÉLŐ `selected` state-ből — nem egy
- * mountoláskor vett pillanatképből. Ezzel elkerüljük ugyanazt a versenyhelyzetet,
- * amit a CompanyPage `SalesGroupPrefixSection`-je is kivéd: két, egymástól
- * független mentési út nem írhatja felül a másik időközbeni változását, mert
- * mindegyik csak a saját mezőit küldi.
- *
- * A tagságot mindig frissen töltjük (GET a szekció megnyitásakor), nem a
- * lista-válaszból származtatjuk.
- */
-function MembersSection({ groupId, canEdit, canViewUsers, onDirtyChange }) {
-  const { t }  = useTranslation()
-  const toast  = useToast()
-
-  const [companyUsers, setCompanyUsers] = useState([])
-  const [members, setMembers]   = useState([])   // szerver szerinti aktuális tagság
-  const [selected, setSelected] = useState(new Set())
-  const [original, setOriginal] = useState(new Set())
-  const [truncated, setTruncated] = useState(false)
-  const [loading, setLoading]   = useState(true)
-  const [saving, setSaving]     = useState(false)
-  const [error, setError]       = useState('')
-  const [filter, setFilter]     = useState('')
-
-  // Betöltés a szekció megnyitásakor (a komponens a szerkesztett csoportra van
-  // kulcsolva, így csoportváltásnál újramountol). A `cancelled` őr megakadályozza,
-  // hogy egy elkésett válasz egy már lecsukott/másik sor állapotát írja felül.
-  useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-    setError('')
-
-    const requests = [sgApi.listUsers(groupId)]
-    // A cégre szűkített user-listázó `user.view` jogot kér. Jog nélkül nem
-    // küldünk felesleges, 403-ra futó kérést — a szekció ilyenkor csak-olvasás.
-    requests.push(canViewUsers ? usersApi.list({ per_page: 200 }) : Promise.resolve(null))
-
-    Promise.all(requests)
-      .then(([memberRes, userRes]) => {
-        if (cancelled) return
-        const memberList = memberRes.data.data ?? []
-        const ids = new Set(memberList.map((u) => u.id))
-        setMembers(memberList)
-        setSelected(ids)
-        setOriginal(ids)
-        if (userRes) {
-          const list = userRes.data.data ?? []
-          setCompanyUsers(list)
-          setTruncated((userRes.data.meta?.total ?? list.length) > list.length)
-        }
-      })
-      .catch((err) => {
-        if (cancelled) return
-        setError(err.response?.data?.message ?? t('common.error'))
-      })
-      .finally(() => { if (!cancelled) setLoading(false) })
-
-    return () => { cancelled = true }
-  }, [groupId, canViewUsers]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  function toggle(userId) {
-    setSelected((prev) => {
-      const next = new Set(prev)
-      if (next.has(userId)) next.delete(userId)
-      else next.add(userId)
-      return next
-    })
-  }
-
-  async function handleSave() {
-    setSaving(true)
-    setError('')
-    try {
-      // Az élő `selected` state-ből — nem mount-kori snapshotból.
-      const res = await sgApi.syncUsers(groupId, [...selected])
-      const saved = res.data.data ?? []
-      const ids   = new Set(saved.map((u) => u.id))
-      // A szerver válaszából állítjuk vissza az állapotot: az marad a mérvadó,
-      // ami ténylegesen mentődött.
-      setMembers(saved)
-      setSelected(ids)
-      setOriginal(ids)
-      toast('Tagság mentve.', 'success')
-    } catch (err) {
-      // A backend scope-leak-őre (SyncSalesGroupUsersRequest) idegen cég
-      // user_id-jára 422-t ad, mezőnkénti üzenettel — ezt mutatjuk meg.
-      const errs = err.response?.data?.errors
-      const msg  = errs
-        ? Object.values(errs).flat().join(' | ')
-        : err.response?.data?.message ?? t('common.error')
-      setError(msg)
-      toast(msg, 'error')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const dirty = selected.size !== original.size || [...selected].some((id) => !original.has(id))
-
-  // A tagság-mentés független a csoport-űrlapétól, de a fő űrlap mentése bezárja
-  // a szerkesztő sort — a szülő ebből tudja, hogy van-e elveszíthető módosítás.
-  useEffect(() => {
-    onDirtyChange(dirty)
-    return () => onDirtyChange(false)
-  }, [dirty, onDirtyChange])
-
-  if (loading) {
-    return (
-      <div style={{ marginTop: 16 }}>
-        <p className="text-muted" style={{ fontSize: 13 }}>{t('common.loading')}</p>
-      </div>
-    )
-  }
-
-  // A választható sorok: a cég userei + a jelenlegi tagok. Az unió azért kell,
-  // hogy egy olyan tag se essen ki csendben a mentésnél, aki (lapozási korlát
-  // vagy időközbeni cég-leválasztás miatt) nincs benne a lekért user-listában.
-  const optionList = canViewUsers
-    ? [...companyUsers, ...members.filter((m) => !companyUsers.some((u) => u.id === m.id))]
-        .sort((a, b) => a.name.localeCompare(b.name, 'hu'))
-    : members
-
-  const needle   = filter.trim().toLowerCase()
-  const visible  = needle
-    ? optionList.filter((u) => `${u.name} ${u.email}`.toLowerCase().includes(needle))
-    : optionList
-
-  const editable = canEdit && canViewUsers
-
-  return (
-    <div style={{ marginTop: 16, borderTop: '1px solid var(--color-border)', paddingTop: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
-        <strong style={{ fontSize: 14 }}>
-          Tagok{' '}
-          <span className="text-muted" style={{ fontWeight: 400, fontSize: 12 }}>
-            ({selected.size} kiválasztva)
-          </span>
-        </strong>
-        {editable && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {dirty && (
-              <span className="text-muted" style={{ fontSize: 12 }}>Nem mentett módosítás</span>
-            )}
-            <button
-              className="btn btn-primary btn-sm"
-              type="button"
-              onClick={handleSave}
-              disabled={saving || !dirty}
-            >
-              {saving ? t('common.saving') : 'Tagság mentése'}
-            </button>
-          </div>
-        )}
-      </div>
-
-      <p className="text-muted" style={{ fontSize: 12, marginBottom: 10 }}>
-        A tagság mentése <strong>külön</strong> történik, a csoport nevének mentésétől függetlenül.
-      </p>
-
-      {error && <div className="alert-error mb-4">{error}</div>}
-
-      {!canViewUsers && (
-        <div className="text-muted" style={{ fontSize: 12, marginBottom: 10 }}>
-          A tagok szerkesztéséhez a céges felhasználók listázási joga (<code>user.view</code>) is
-          szükséges — jelenleg csak a meglévő tagság látszik.
-        </div>
-      )}
-      {!canEdit && canViewUsers && (
-        <div className="text-muted" style={{ fontSize: 12, marginBottom: 10 }}>
-          Csak megtekintés — a tagság módosításához <code>sales_group.edit</code> jog szükséges.
-        </div>
-      )}
-      {truncated && (
-        <div className="text-muted" style={{ fontSize: 12, marginBottom: 10 }}>
-          A cégnek 200-nál több felhasználója van, a lista csak az első 200-at mutatja.
-        </div>
-      )}
-
-      {optionList.length > 8 && (
-        <input
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          placeholder="Szűrés névre / e-mailre"
-          style={{ maxWidth: 280, marginBottom: 10 }}
-        />
-      )}
-
-      {optionList.length === 0 ? (
-        <p className="text-muted" style={{ fontSize: 13 }}>
-          {canViewUsers ? 'Nincs felhasználó ebben a cégben.' : 'Ennek a csoportnak nincs tagja.'}
-        </p>
-      ) : (
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-          gap: '4px 20px', maxHeight: 260, overflowY: 'auto',
-        }}>
-          {visible.map((u) => (
-            <label
-              key={u.id}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: editable ? 'pointer' : 'default' }}
-            >
-              <input
-                type="checkbox"
-                checked={selected.has(u.id)}
-                onChange={() => toggle(u.id)}
-                disabled={!editable || saving}
-                style={{ width: 'auto' }}
-              />
-              <span style={{ fontSize: 13 }}>
-                {u.name} <span className="text-muted" style={{ fontSize: 12 }}>({u.email})</span>
-              </span>
-            </label>
-          ))}
-          {visible.length === 0 && (
-            <p className="text-muted" style={{ fontSize: 13 }}>Nincs találat.</p>
-          )}
-        </div>
-      )}
-    </div>
-  )
 }
 
 export default function SalesGroupPage() {
@@ -488,7 +263,7 @@ export default function SalesGroupPage() {
                     {/* A tagság saját mentési úttal rendelkezik — a `key` miatt
                         csoportváltásnál újramountol, így mindig friss adatot tölt.
                         A `members-` előtag a testvér GroupForm kulcsától különbözteti meg. */}
-                    <MembersSection
+                    <SalesGroupMembersSection
                       key={`members-${editId}`}
                       groupId={editId}
                       canEdit={can('sales_group.edit')}

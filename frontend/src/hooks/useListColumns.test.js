@@ -51,14 +51,18 @@ const REG_WITH_PERMISSION = [
 
 // `strict: true` esetén a hook a valós alkalmazással azonos módon, StrictMode
 // alatt fut (l. main.jsx) — a kettős render-futás így tesztelhető.
+// A visszaadott `toast` a hook által ténylegesen hívott addToast — a mentési
+// hibaút ezen keresztül ellenőrizhető anélkül, hogy a modul-mockhoz kellene nyúlni.
 function setup(registry, { saved, can, options, companyId = 1, strict = false } = {}) {
   mockAuth({ saved, can, companyId })
-  useToast.mockReturnValue(vi.fn())
+  const toast = vi.fn()
+  useToast.mockReturnValue(toast)
   useTranslation.mockReturnValue({ t: (key) => key })
-  return renderHook(
+  const utils = renderHook(
     () => useListColumns(LIST_KEY, registry, options),
     strict ? { wrapper: StrictMode } : undefined,
   )
+  return { ...utils, toast }
 }
 
 // Cégváltás szimulálásához külön is hívható: a rerender() ezt az új /api/me
@@ -251,6 +255,142 @@ describe('reset', () => {
     expect(result.current.allColumns.map((c) => c.key)).toEqual(['name', 'email', 'groups', 'status', 'actions'])
     expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['name', 'email', 'groups', 'actions'])
     expect(listPreferencesApi.remove).toHaveBeenCalledWith(LIST_KEY)
+  })
+})
+
+describe('isDirty (a ColumnPicker "Alapértelmezett visszaállítása" gombját vezérli)', () => {
+  it('érintetlen listán false — a reset gomb inaktív marad', () => {
+    const { result } = setup(REG_STANDARD)
+    expect(result.current.isDirty).toBe(false)
+  })
+
+  it('láthatóság-váltás után true, ugyanannak a visszakapcsolása után újra false', () => {
+    const { result } = setup(REG_STANDARD)
+    act(() => result.current.toggle('status'))
+    expect(result.current.isDirty).toBe(true)
+
+    act(() => result.current.toggle('status'))
+    expect(result.current.isDirty).toBe(false)
+  })
+
+  it('sorrend-változás után true, akkor is, ha a láthatóság érintetlen', () => {
+    // A két ág (visibilityDirty / orderDirty) külön is meg tudja billenteni az
+    // isDirty-t — itt csak a sorrend változik, a látható halmaz nem.
+    const { result } = setup(REG_STANDARD)
+    act(() => result.current.reorder('email', 'groups'))
+
+    expect(result.current.allColumns.map((c) => c.key)).toEqual(['name', 'groups', 'email', 'status', 'actions'])
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['name', 'groups', 'email', 'actions'])
+    expect(result.current.isDirty).toBe(true)
+  })
+
+  it('a defaulttól eltérő MENTETT sorrenddel már mountkor true (nem kell hozzá helyi művelet)', () => {
+    const saved = {
+      columns: {
+        order: ['name', 'groups', 'email', 'status', 'actions'],
+        visible: ['name', 'email', 'groups', 'actions'], // = a registry defaultja
+      },
+    }
+    const { result } = setup(REG_STANDARD, { saved })
+    expect(result.current.isDirty).toBe(true)
+  })
+
+  it('reset után false', async () => {
+    const saved = {
+      columns: { order: ['name', 'groups', 'email', 'status', 'actions'], visible: ['name', 'email'] },
+    }
+    const { result } = setup(REG_STANDARD, { saved })
+    expect(result.current.isDirty).toBe(true)
+
+    await act(async () => { await result.current.reset() })
+    expect(result.current.isDirty).toBe(false)
+  })
+
+  it('a lapméret-váltás NEM teszi dirty-vé — az isDirty csak a láthatóságot és a sorrendet nézi', () => {
+    // Szándékos: a "Alapértelmezett visszaállítása" gomb az oszlopválasztó
+    // panelen ül és az oszlopokra vonatkozik, ezért egy tisztán lapméret-
+    // váltás után inaktív marad — noha a mentett sorban ilyenkor már van
+    // eltérés a lista defaultjától.
+    const { result } = setup(REG_STANDARD, { options: { defaultPageSize: 20 } })
+    act(() => result.current.setPageSize(100))
+
+    expect(result.current.pageSize).toBe(100)
+    expect(result.current.isDirty).toBe(false)
+  })
+})
+
+describe('mentési hibaút', () => {
+  it('a PUT elutasításakor hibát jelez, de a helyi állapotot NEM görgeti vissza', async () => {
+    listPreferencesApi.update.mockRejectedValue(new Error('network'))
+    const { result, toast } = setup(REG_STANDARD)
+
+    act(() => result.current.toggle('status'))
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+    expect(toast).toHaveBeenCalledWith('columns.save_error', 'error')
+    // A választás a képernyőn érvényben marad — csak a háttérmentés esett ki.
+    expect(result.current.isVisible('status')).toBe(true)
+  })
+
+  it('sikeres mentéskor nincs hibajelzés', async () => {
+    const { result, toast } = setup(REG_STANDARD)
+
+    act(() => result.current.toggle('status'))
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+    expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+    expect(toast).not.toHaveBeenCalled()
+  })
+
+  it('a reset DELETE-jének elutasításakor is jelez, a helyi visszaállítás viszont megmarad', async () => {
+    listPreferencesApi.remove.mockRejectedValue(new Error('network'))
+    const saved = {
+      columns: { order: ['actions', 'status', 'groups', 'email', 'name'], visible: ['email'] },
+    }
+    const { result, toast } = setup(REG_STANDARD, { saved })
+
+    await act(async () => { await result.current.reset() })
+
+    expect(toast).toHaveBeenCalledWith('columns.save_error', 'error')
+    expect(result.current.allColumns.map((c) => c.key)).toEqual(['name', 'email', 'groups', 'status', 'actions'])
+    expect(result.current.isDirty).toBe(false)
+  })
+})
+
+describe('cégváltás — oszlop-izoláció', () => {
+  it('a másik cég mentett oszlop-preferenciája lép életbe (azonos listakulcs, cégenként külön sor)', () => {
+    const companyA = {
+      columns: { order: ['name', 'groups', 'email', 'status', 'actions'], visible: ['name', 'groups', 'actions'] },
+    }
+    const companyB = {
+      columns: { order: ['name', 'email', 'groups', 'status', 'actions'], visible: ['name', 'email', 'status', 'actions'] },
+    }
+
+    const { result, rerender } = setup(REG_STANDARD, { saved: companyA, companyId: 1 })
+    expect(result.current.allColumns.map((c) => c.key)).toEqual(['name', 'groups', 'email', 'status', 'actions'])
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['name', 'groups', 'actions'])
+
+    mockAuth({ saved: companyB, companyId: 2 })
+    rerender()
+
+    expect(result.current.allColumns.map((c) => c.key)).toEqual(['name', 'email', 'groups', 'status', 'actions'])
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['name', 'email', 'status', 'actions'])
+  })
+
+  it('cégváltáskor megvont jogosultság esetén az oszlop kiesik, akkor is, ha a mentett sor láthatóra állította', () => {
+    // A jogosultsághoz kötött oszlop nem szivároghat át a másik cégbe a mentett
+    // preferencián keresztül: a szűrés a `can()`-en dől el, nem a mentett soron.
+    const saved = {
+      columns: { order: ['name', 'email', 'secret', 'actions'], visible: ['name', 'email', 'secret', 'actions'] },
+    }
+    const { result, rerender } = setup(REG_WITH_PERMISSION, { saved, can: () => true, companyId: 1 })
+    expect(result.current.visibleColumns.map((c) => c.key)).toContain('secret')
+
+    mockAuth({ saved, can: (key) => key !== 'secret.view', companyId: 2 })
+    rerender()
+
+    expect(result.current.allColumns.map((c) => c.key)).toEqual(['name', 'email', 'actions'])
+    expect(result.current.visibleColumns.map((c) => c.key)).not.toContain('secret')
   })
 })
 

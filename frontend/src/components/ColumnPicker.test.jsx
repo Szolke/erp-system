@@ -8,6 +8,28 @@ import { usePopoverDismiss } from '../utils/usePopoverDismiss'
 vi.mock('../contexts/TranslationContext', () => ({ useTranslation: vi.fn() }))
 vi.mock('../utils/usePopoverDismiss', () => ({ usePopoverDismiss: vi.fn() }))
 
+// A drag&drop GESZTUS jsdom alatt nem szimulálható hűen: a dnd-kit ütközés-
+// detektálása (closestCenter) a getBoundingClientRect-re épül, ami jsdom-ban
+// minden elemre 0×0-t ad, így az `over` célpont nem determinisztikus. Ezért a
+// VALÓDI DndContext renderelődik tovább (a useSortable így működőképes marad) —
+// csak az `onDragEnd` propot csípjük le, hogy a komponens SAJÁT
+// handleDragEnd-jét futtathassuk valósághű esemény-objektumokkal. Ugyanaz az
+// elv, mint a usePopoverDismiss-nél lentebb: a külső könyvtár belső működését
+// nem teszteljük, a bekötést igen.
+const dnd = vi.hoisted(() => ({ props: null }))
+
+vi.mock('@dnd-kit/core', async (importOriginal) => {
+  const actual = await importOriginal()
+  const Actual = actual.DndContext
+  return {
+    ...actual,
+    DndContext: (props) => {
+      dnd.props = props
+      return <Actual {...props} />
+    },
+  }
+})
+
 // Egyszerű, determinisztikus t(): kulcs önmagában, paraméterezve pedig
 // "kulcs érték1/érték2/..." alakban — így a teszt a tényleges számokat/neveket
 // tudja a szövegben ellenőrizni anélkül, hogy a valódi fordítási kulcsokat kellene ismernie.
@@ -18,6 +40,7 @@ function t(key, params) {
 beforeEach(() => {
   useTranslation.mockReturnValue({ t })
   usePopoverDismiss.mockReset()
+  dnd.props = null
 })
 
 // 4 oszlop: elöl+hátul locked ('name'/'actions'), két nem-locked ('email'/'status'),
@@ -82,6 +105,67 @@ describe('popover tartalom (nyitott állapotban)', () => {
     for (const col of COLUMNS) {
       expect(screen.getByText(col.label)).toBeInTheDocument()
     }
+  })
+
+  it('a számláló a locked oszlopokat is beleszámolja, ha minden kapcsolható oszlop rejtett', () => {
+    // A két locked oszlop elrejthetetlen, ezért a számláló soha nem eshet 0-ra.
+    setup({ isVisible: (key) => key === 'name' || key === 'actions' })
+    expect(screen.getByText('columns.visible_count 2/4')).toBeInTheDocument()
+  })
+
+  it('minden oszlop láthatóságakor a két szám megegyezik', () => {
+    setup({ isVisible: () => true })
+    expect(screen.getByText('columns.visible_count 4/4')).toBeInTheDocument()
+  })
+
+  it('a panel dialog szerepet és nevet kap, a trigger pedig a kapott id-t', () => {
+    setup()
+    expect(screen.getByRole('dialog', { name: 'columns.picker_button' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'columns.picker_button' })).toHaveAttribute('id', 'test-columns')
+  })
+})
+
+describe('panel-horgonyzás (align)', () => {
+  it('alapból BALRA horgonyzott — nem kapja meg a jobbra-módosítót', () => {
+    // Az alapértelmezés szándékosan a bal horgonyzás: a trigger jellemzően egy
+    // bal oldali eszköztár-sáv eleje, ahol a jobbra-horgonyzás a sidebar alá
+    // lógatná a panelt (l. a komponens doc-kommentjét).
+    setup()
+    expect(screen.getByRole('dialog')).not.toHaveClass('fc-popover-panel--right')
+  })
+
+  it('align="right" esetén megkapja a jobbra-horgonyzó módosítót', () => {
+    setup({ align: 'right' })
+    expect(screen.getByRole('dialog')).toHaveClass('fc-popover-panel--right')
+  })
+})
+
+describe('sorrendezés — a drag-vég bekötése (handleDragEnd)', () => {
+  it('érvényes ejtésnél a két oszlopkulccsal hívja az onReorder-t', () => {
+    const { props } = setup()
+    dnd.props.onDragEnd({ active: { id: 'email' }, over: { id: 'status' } })
+    expect(props.onReorder).toHaveBeenCalledWith('email', 'status')
+  })
+
+  it('a panelen kívülre ejtve (over = null) nem hív reorder-t', () => {
+    const { props } = setup()
+    dnd.props.onDragEnd({ active: { id: 'email' }, over: null })
+    expect(props.onReorder).not.toHaveBeenCalled()
+  })
+
+  it('helyben ejtve (active = over) nem hív reorder-t', () => {
+    // Egy megfogott, de el nem mozdított sor nem indíthat mentést a hookban.
+    const { props } = setup()
+    dnd.props.onDragEnd({ active: { id: 'email' }, over: { id: 'email' } })
+    expect(props.onReorder).not.toHaveBeenCalled()
+  })
+
+  it('a sortable halmaz CSAK a nem-locked oszlopokat tartalmazza', () => {
+    // A locked pozíciókat a hook úgyis fail-safe visszakényszeríti, de a
+    // komponens már eleve ki sem ajánlja őket ejtési célpontnak.
+    setup()
+    const sortableIds = dnd.props.children.props.items
+    expect(sortableIds).toEqual(['email', 'status'])
   })
 })
 

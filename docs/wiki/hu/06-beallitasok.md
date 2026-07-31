@@ -215,27 +215,23 @@ minden céget érint, nem csak a sajátjukat.
 A felhasználó-űrlapon (felhasználó létrehozásakor és a felhasználó adatlapján) jelenik meg a
 „Munkakör" mező, ahonnan a listából választható.
 
-### Eszközök és eszköztípusok (Eszközök / Beállítások → Eszköztípusok)
+### Eszköztípusok (Beállítások → Eszköztípusok)
 
-Ez a funkció csak akkor érhető el, ha az **Eszközök** modul engedélyezve van. Az
-**Eszközök** menüpont (oldalsáv, felül) a cég fizikai eszközeit (pl. POS terminálok,
-telefonok) tartja nyilván — a megtekintéshez az eszközök megtekintésének joga szükséges.
+Ez az oldal csak akkor érhető el, ha az **Eszközök** modul engedélyezve van, és a
+megtekintéshez az eszközök megtekintésének joga szükséges.
 
-**Eszköz felvétele** (az eszközök létrehozásának jogával): meg kell adni a gyári számot és a
-eszköztípust; az IMEI opcionális. **A nevet a rendszer generálja** a típus kódja és
-egy sorszám alapján (pl. `DEMO_TEYA_00001`) — ez a mező a felvételkor nem
-szerkeszthető, csak mentés után jelenik meg.
+Az oldal a globális (minden cég számára elérhető, pl. Mobiltelefon, Teya POS terminál,
+Nyomtató) és a saját cég által létrehozott típusokat mutatja; a **Hatókör** oszlop jelzi,
+melyik melyik. **Új típus hozzáadása** (az eszközök létrehozásának jogával): egy kódot
+(pl. `LAPTOP` — a rendszer automatikusan nagybetűsíti) és egy megnevezést (pl. `Laptop`)
+kell megadni. A kódnak a cégen belül egyedinek kell lennie. Az így felvett típus mindig a
+saját céghez kerül — más cégek nem látják.
 
-**Szerkesztés** (az eszközök szerkesztésének jogával): csak az állapot (aktív / kiadva / szervizben /
-selejtezve), a gyári szám és az IMEI módosítható. A név és az eszköztípus a
-létrehozás után véglegesen rögzített.
+A típusok utólag nem szerkeszthetők és nem törölhetők: a típus kódja beépül a rá felvett
+eszközök nevébe is.
 
-**Törlés** (az eszközök törlésének jogával): az eszköz véglegesen törlődik.
-
-Az **Eszköztípusok** oldal (Beállítások → Eszköztípusok, az eszközök megtekintésének
-jogával) mutatja a globális (minden cég számára elérhető, pl. Mobiltelefon, Teya POS
-terminál, Nyomtató) és a saját cég által létrehozott típusokat. **Új típus hozzáadása**
-(az eszközök létrehozásának jogával) mindig a saját céghez kerül — más cégek nem látják.
+Maguknak az eszközöknek a nyilvántartását — lista, felvétel, szerkesztés, állapotok,
+törlés — a felső szintű **Eszközök** menüpont adja, l. a [11. fejezet](11-eszkozok.md).
 
 ### Értékesítő csoportok (Beállítások → Értékesítő csoportok)
 

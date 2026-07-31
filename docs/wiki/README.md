@@ -24,6 +24,7 @@ partnereket kezelni, fizetéseket rögzíteni, és mire jók az egyes beállít�
 | 8 | [Egyéb: nyelvváltás, sötét mód, audit napló](hu/08-egyeb.md) |
 | 9 | [Kimutatások](hu/09-kimutatasok.md) |
 | 10 | [NAV eNyugta](hu/10-enyugta.md) |
+| 11 | [Eszközök](hu/11-eszkozok.md) |
 
 ### English
 
@@ -39,3 +40,4 @@ partnereket kezelni, fizetéseket rögzíteni, és mire jók az egyes beállít�
 | 8 | [Other: language, dark mode, audit log](en/08-other.md) |
 | 9 | [Reports](en/09-reports.md) |
 | 10 | [NAV eNyugta (Receipt Data Reporting)](en/10-nav-enyugta.md) |
+| 11 | [Assets](en/11-assets.md) |

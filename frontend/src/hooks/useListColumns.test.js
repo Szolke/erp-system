@@ -1,3 +1,4 @@
+import { StrictMode } from 'react'
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useListColumns, resetListColumnsCompanyMemory } from './useListColumns'
@@ -48,11 +49,16 @@ const REG_WITH_PERMISSION = [
   { key: 'actions', default: true, locked: true },
 ]
 
-function setup(registry, { saved, can, options, companyId = 1 } = {}) {
+// `strict: true` esetén a hook a valós alkalmazással azonos módon, StrictMode
+// alatt fut (l. main.jsx) — a kettős render-futás így tesztelhető.
+function setup(registry, { saved, can, options, companyId = 1, strict = false } = {}) {
   mockAuth({ saved, can, companyId })
   useToast.mockReturnValue(vi.fn())
   useTranslation.mockReturnValue({ t: (key) => key })
-  return renderHook(() => useListColumns(LIST_KEY, registry, options))
+  return renderHook(
+    () => useListColumns(LIST_KEY, registry, options),
+    strict ? { wrapper: StrictMode } : undefined,
+  )
 }
 
 // Cégváltás szimulálásához külön is hívható: a rerender() ezt az új /api/me
@@ -317,6 +323,22 @@ describe('lapméret (page_size)', () => {
       expect(result.current.pageSize).toBe(100)
     })
 
+    it('csak oszlopokat tartalmazó mentés (page_size nélkül) esetén a lista defaultja érvényes', () => {
+      // A `saved` sor LÉTEZIK, csak a `page_size` mezője hiányzik belőle — az
+      // oszlopválasztó előtti mentések pont ilyenek. A feloldásnak ilyenkor
+      // tovább kell esnie a lista defaultjára, nem `undefined`-ot adni.
+      const { result } = setup(REG_STANDARD, {
+        saved: { columns: { visible: ['name', 'email', 'actions'], order: ['name', 'email', 'groups', 'status', 'actions'] } },
+        options: PAGED,
+      })
+      expect(result.current.pageSize).toBe(20)
+    })
+
+    it('a URL-beli lapméret mentett sor nélkül is erősebb a lista defaultjánál', () => {
+      const { result } = setup(REG_STANDARD, { options: { defaultPageSize: 20, urlPageSize: 200 } })
+      expect(result.current.pageSize).toBe(200)
+    })
+
     it('az EXPLICIT URL-beli lapméret erősebb a mentettnél (megosztott link)', () => {
       const { result } = setup(REG_STANDARD, {
         saved: { page_size: 100 },
@@ -532,6 +554,112 @@ describe('lapméret (page_size)', () => {
 
       const [, payload] = listPreferencesApi.update.mock.calls[0]
       expect(payload).not.toHaveProperty('page_size')
+    })
+  })
+
+  describe('elévülés — első mount és StrictMode', () => {
+    it('a legelső listamounton (üres cég-memória) a URL-érték érvényesül', () => {
+      // A modul-szintű `lastMountedCompanyId` őre: `null` esetén nincs "előző
+      // cég", tehát a címsorban álló érték csak megosztott linkből származhat —
+      // ilyenkor nem szabad elévültnek tekinteni.
+      const { result } = setup(REG_STANDARD, {
+        saved: { page_size: 50 },
+        options: { defaultPageSize: 20, urlPageSize: 500 },
+      })
+      expect(result.current.pageSize).toBe(500)
+    })
+
+    it('StrictMode alatt is a URL-érték érvényesül a saját cégen', () => {
+      // A valós alkalmazás StrictMode-ban fut (main.jsx), tehát a render-test
+      // kétszer hívódik meg — ez az eset azt rögzíti, hogy a kettős render nem
+      // változtat a feloldás eredményén.
+      //
+      // FIGYELEM, amit ez NEM őriz: a hook kommentje szerint a cég-memóriát
+      // azért csak effektben írjuk, mert render-fázisú írásnál a második
+      // render-futás a saját írását olvasná vissza. Mutációs próbával
+      // ellenőrizve: az írás render-fázisba mozgatásától egyik eset sem bukik
+      // el, mert a StrictMode az ELSŐ render-futás useState-eredményét tartja
+      // meg, tehát a második futás olvasása nem jut érvényre. A hook kommentje
+      // így is helyes elővigyázatosság, de nincs mögötte fogó teszt.
+      const { result } = setup(REG_STANDARD, {
+        saved: { page_size: 50 },
+        options: { defaultPageSize: 20, urlPageSize: 500 },
+        strict: true,
+      })
+      expect(result.current.pageSize).toBe(500)
+    })
+
+    it('StrictMode alatt is elévül a cégváltás miatti újracsatoláskor a címsorban maradt érték', () => {
+      const first = setup(REG_STANDARD, {
+        saved: { page_size: 100 },
+        options: { defaultPageSize: 20, urlPageSize: 100 },
+        strict: true,
+      })
+      expect(first.result.current.pageSize).toBe(100)
+      first.unmount()
+
+      const second = setup(REG_STANDARD, {
+        saved: { page_size: 50 },
+        companyId: 2,
+        options: { defaultPageSize: 20, urlPageSize: 100 },
+        strict: true,
+      })
+
+      expect(second.result.current.pageSize).toBe(50)
+    })
+  })
+
+  describe('debounce-ablak (600 ms)', () => {
+    it('a 600 ms letelte ELŐTT nem megy ki PUT, utána pontosan egy', async () => {
+      const { result } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.setPageSize(100))
+
+      await act(async () => { await vi.advanceTimersByTimeAsync(599) })
+      expect(listPreferencesApi.update).not.toHaveBeenCalled()
+
+      await act(async () => { await vi.advanceTimersByTimeAsync(1) })
+      expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+      expect(listPreferencesApi.update.mock.calls[0][1].page_size).toBe(100)
+    })
+
+    it('a gyors egymás utáni lapméret-váltások EGYETLEN PUT-ba olvadnak, az utolsó értékkel', async () => {
+      // A legördülőben kapkodó felhasználó nem küldhet három kérést a szerverre.
+      const { result } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.setPageSize(50))
+      await act(async () => { await vi.advanceTimersByTimeAsync(300) })
+      act(() => result.current.setPageSize(100))
+      await act(async () => { await vi.advanceTimersByTimeAsync(300) })
+      act(() => result.current.setPageSize(200))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+      expect(listPreferencesApi.update.mock.calls[0][1].page_size).toBe(200)
+    })
+
+    it('a lapméret-váltást követő oszlop-kapcsolás újraindítja az ablakot (összesen egy PUT)', async () => {
+      // A két művelet ugyanabba a debounce-ablakba esik, és ugyanabba a
+      // preferencia-sorba ment — nem szabad két külön PUT-ot indítaniuk.
+      const { result } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.setPageSize(200))
+      await act(async () => { await vi.advanceTimersByTimeAsync(300) })
+      act(() => result.current.toggle('status'))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+      const [, payload] = listPreferencesApi.update.mock.calls[0]
+      expect(payload.page_size).toBe(200)
+      expect(payload.columns.visible).toContain('status')
+    })
+
+    it('az ablakon belüli lecsatolás eldobja a még ki nem ment lapméret-mentést', async () => {
+      // A lista elhagyása a debounce-ablakon belül: a hook takarító-effektje
+      // törli az időzítőt, különben egy már lecsatolt komponens írna a szerverre.
+      const { result, unmount } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.setPageSize(100))
+      unmount()
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      expect(listPreferencesApi.update).not.toHaveBeenCalled()
     })
   })
 })

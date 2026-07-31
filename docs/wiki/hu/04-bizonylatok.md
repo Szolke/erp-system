@@ -44,7 +44,11 @@ A keresőmező jobb szélén lévő ✕ gomb törli a szöveget és visszaállí
 **Dátumszűrő:** „Dátumtól" és „Dátumig" mezők a kiállítás dátuma szerint szűkítik a listát.
 A szűrők jobb szélén megjelenő ✕ törli a dátumtartomány-feltételt.
 
-**Oldalanként megjelenítendő elemek száma** (per-page választó): 10, 20, 50 vagy 100.
+**Oldalanként megjelenítendő elemek száma** (per-page választó): 20, 50, 100, 200 vagy 500.
+A kiválasztott lapméretet a rendszer felhasználónként és cégenként megjegyzi, így a lista
+legközelebbi megnyitásakor is ez lesz érvényben. Ha a listát megosztott linkből nyitod meg,
+és a link tartalmaz lapméretet, az arra a megnyitásra érvényesül, de a saját mentett
+beállításodat nem írja felül.
 
 ---
 
@@ -87,8 +91,9 @@ azt adja vissza; ha valami okból nem volt elmentve, a rendszer helyszínen gene
 
 ## PDF újragenerálása
 
-A **PDF újragenerálása** gomb jogosultsághoz kötött (külön `invoice.regenerate_pdf` /
-`receipt.regenerate_pdf` jog szükséges). Megerősítő kérdés után:
+A **PDF újragenerálása** gomb külön jogosultsághoz kötött: a kiállított számla, illetve
+nyugta PDF-jének újragenerálására vonatkozó jog szükséges hozzá — a kettő egymástól
+független jogosultság. Megerősítő kérdés után:
 
 - A korábbi PDF-fájl archivált másolatként megmarad (időbélyeggel ellátva), nem törlődik.
 - Új PDF generálódik a jelenlegi sablonnal és adatokkal.

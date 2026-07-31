@@ -40,7 +40,8 @@ A felhasználók listáján látható minden aktív felhasználó, csoporttagsá
 
 A felhasználó részletes oldalán a **Csoportok** szekció mutatja, melyik csoportokba tartozik.
 Egy legördülőből új csoport adható hozzá; a **Eltávolítás** gombbal a tagság megszüntethető.
-Ez `group.manage` jogosultságot igényel.
+Ehhez a csoportok kezelésének — létrehozásuknak és jogosultság-listáik szerkesztésének —
+a jogosultsága szükséges.
 
 ### Egyedi jog-felülírások
 
@@ -56,7 +57,21 @@ A csoporttól örökölt jogok kék háttérrel jelöltek, hogy egyértelmű leg
 
 Az „Érzékeny" feliratú jogok (pl. PDF újragenerálása, sztornózás) külön megjelenítve láthatók.
 
-A változtatásokat a **Felülírások mentése** gomb rögzíti. Ez `permission.override` jogosultságot igényel.
+**Tömeges beállítás:** a lista fölött, a keresőmező mellett két gomb áll — **Összes
+engedélyezése** és **Összes tiltása** —, amelyek egy lépésben minden jogra beállítják a
+választott felülírást. Modulonként is van rá mód: a modul fejlécében lévő pipa, illetve ×
+ikon az adott modul összes jogát engedélyezi vagy tiltja.
+
+> **Figyelem:** az **Összes engedélyezése / Összes tiltása** gomb akkor is a teljes
+> joglistára hat, ha a keresőmezővel éppen leszűkítetted a megjelenített sorokat — nem
+> csak a látható találatokra. A modul-szintű ikonok ezzel szemben pontosan az adott modul
+> jogaira vonatkoznak.
+
+A tömeges kapcsolók az egyes sorokhoz hasonlóan egyelőre csak a képernyőn állítják át az
+értékeket.
+
+A változtatásokat a **Felülírások mentése** gomb rögzíti. Ez a gomb és a tömeges kapcsolók
+is csak a jog-felülírásra jogosult felhasználóknak jelennek meg.
 
 ---
 

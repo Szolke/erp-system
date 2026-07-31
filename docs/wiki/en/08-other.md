@@ -29,8 +29,8 @@ themes.
 
 ## Audit Log (Settings → Audit Log)
 
-The audit log records the history of significant actions performed in the system.
-Viewing the log requires the `audit.view` permission.
+The audit log records the history of significant actions performed in the system. The log
+is only available to users who may view the audit log.
 
 ### What Does an Entry Contain?
 
@@ -39,7 +39,7 @@ Each row shows:
 - **Timestamp** — when the event occurred
 - **User** — who performed the action
 - **Event** — the name of the action (e.g. `invoice.cancel`, `auth.login`,
-  `company.update`)
+  `company.manage`)
 - **Record** — which database object was affected (e.g. `Invoice#42`)
 - **Before / After values** — what changed (only present when data was modified)
 
@@ -62,3 +62,28 @@ The audit log helps track:
 
 Entries cannot be deleted; the system records them automatically at the end of the
 relevant operation.
+
+### "Created by / Updated by" Footer on Master Data Pages
+
+Alongside the full audit log, master data pages show a discreet footer with the same
+information at record level: **Created by** and **Updated by** — who the record is
+attributable to, and when. This answers the most common question ("who touched this
+last?") without opening the audit log.
+
+The footer appears on these pages:
+
+- Company Settings (below the company data form — it refers to the company record, which
+  is why it is not at the very bottom of the page, where other sections follow)
+- Partner, Product and Asset detail pages
+- Sales group detail page
+- User and Group detail pages
+
+What it can show:
+
+- **Name · timestamp** — this user created or last updated the record.
+- **System** — the row was not written by a user but by the system (e.g. initial data
+  seeding or a background process); no timestamp is shown in this case.
+- **—** — the user behind the operation no longer exists in the system; the timestamp is
+  still shown.
+
+For a new, unsaved record the footer is not displayed at all.

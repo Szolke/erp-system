@@ -40,7 +40,7 @@ The user list shows all active users with their group memberships.
 
 The **Groups** section on a user's detail page shows which groups they belong to. A new
 group can be added via a drop-down; the **Remove** button removes the membership.
-Requires the `group.manage` permission.
+Requires permission to manage groups — creating them and editing their permission lists.
 
 ### Per-User Permission Overrides
 
@@ -57,8 +57,20 @@ clear which rows the overrides affect.
 Permissions marked as **Sensitive** (e.g. PDF regeneration, cancellation) are displayed
 separately.
 
-Changes are saved with the **Save overrides** button. Requires the
-`permission.override` permission.
+**Bulk setting:** above the list, next to the search box, two buttons are available —
+**Allow all** and **Deny all** — which apply the chosen override to every permission in
+one step. The same is possible per module: the tick and × icons in a module's header
+allow or deny all permissions in that module.
+
+> **Note:** the **Allow all / Deny all** buttons act on the entire permission list even
+> when you have narrowed the displayed rows with the search box — not just on the visible
+> results. The module-level icons, by contrast, apply exactly to that module's
+> permissions.
+
+Like the individual rows, the bulk toggles only change the values on screen for now.
+
+Changes are saved with the **Save overrides** button. Both this button and the bulk
+toggles are only shown to users who may override permissions.
 
 ---
 

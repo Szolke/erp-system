@@ -25,13 +25,7 @@ code, city, address, email, phone, base currency, NAV Online Invoice environment
 all fields at once.
 
 The NAV environment (test / production) field is only visible to users with the
-`company.manage` permission.
-
-**Sales group prefix:** when the Sales Groups module is enabled, a **Sales Group Prefix**
-field also appears here. The prefix is up to 4 uppercase letters (e.g. `BUD`) — the
-system normalises it to uppercase automatically. It forms the first part of every sales
-group's display name: `PREFIX_GroupName`. The prefix cannot be cleared while the company
-still has sales groups; those must be removed first.
+permission to manage company data.
 
 #### Company Logo Upload
 
@@ -39,7 +33,7 @@ The company logo appears on issued PDFs. Requirements: JPEG, PNG, GIF, or WebP f
 maximum 2 MB. After upload, the logo is immediately shown in the preview area. The
 **Delete** button removes the logo (previously archived PDFs are not affected).
 
-This section is only visible to users with the `company.manage` permission.
+This section is only visible to users who may manage company data.
 
 #### General Settings
 
@@ -50,7 +44,7 @@ This section is only visible to users with the `company.manage` permission.
 - **Payment due days** — new invoices are given a due date this many days after the
   issue date by default.
 
-This section is only visible to users with the `company.manage` permission.
+This section is only visible to users who may manage company data.
 
 #### Sidebar Accent Colour
 
@@ -58,7 +52,7 @@ Choose from 18 predefined colours for the sidebar background. The selected colou
 effect immediately and is stored per company — different companies can have different
 colours.
 
-This section is only visible to users with the `company.manage` permission.
+This section is only visible to users who may manage company data.
 
 #### SimplePay Credentials
 
@@ -67,8 +61,19 @@ its own merchant ID and secret key. The secret key is stored encrypted and is ne
 displayed — only a "set / not set" indicator is shown. The **Sandbox** toggle keeps the
 payment flow in test mode.
 
-This section is only visible to users with the `simplepay.manage` permission and only when
+This section is only visible to users who may manage SimplePay credentials, and only when
 the SimplePay module is enabled.
+
+#### Sales Group Prefix
+
+A separate section on the page with its own **Save** button — it is not part of the
+Company Data form, so saving that form does not affect it. It only appears when the
+Sales Groups module is enabled.
+
+The prefix is up to 4 uppercase letters (e.g. `BUD`) — the system normalises it to
+uppercase automatically. It forms the first part of every sales group's display name:
+`PREFIX_GroupName`. The prefix cannot be cleared while the company still has sales
+groups; those must be removed first.
 
 #### NAV Online Invoice Credentials
 
@@ -95,8 +100,8 @@ blank when saving keeps the existing value unchanged.
 confirmation via a modal and is only possible when a credential already exists for the target
 environment.
 
-This section is only visible to users with the `invoice.send_nav` permission and only when
-the NAV Online Invoice module is enabled.
+This section is only visible to users who may submit invoices to NAV, and only when the
+NAV Online Invoice module is enabled.
 
 ### Document Series (Settings → Document Series)
 
@@ -106,7 +111,7 @@ Configure the prefix and format for document serial numbers here. The default se
 Serial number format: `PREFIX-YYYYMM-000001` (e.g. `SZ-202407-000001`). Numbering resets
 automatically at the start of each year.
 
-Requires the `document_series.manage` permission.
+Requires permission to manage document serial number ranges.
 
 ---
 
@@ -123,7 +128,7 @@ active**) — invoicing, receipts, partners, products — cannot be toggled and 
 **Enabling / disabling a module:**
 Each module card shows a toggle. If a module has a dependency (e.g. NAV Online Invoice
 requires the invoicing module), the system checks that the dependency is active — if not,
-the toggle fails with a 422 error and shows the name of the missing module. Conversely, if
+the toggle fails with an error message naming the missing module. Conversely, if
 an active module is depended on by another active module, the former cannot be disabled
 until the dependent module is disabled first.
 
@@ -145,9 +150,9 @@ sent to and received from NAV (loaded only on demand, not as part of the list). 
 invoice's own detail page also shows a "NAV submission history" panel with that invoice's
 full chronological history.
 
-This list/panel is only visible to users with the `nav.log.view` permission — a SEPARATE
-permission from `invoice.send_nav` (used for managing NAV credentials), because the log
-contains raw NAV communication and is more sensitive than viewing the invoice itself.
+This list/panel is only visible to users who may view the NAV log — a SEPARATE permission
+from submitting invoices to NAV, because the log contains raw NAV communication and is
+more sensitive than viewing the invoice itself.
 
 ### Custom Fields (Settings → Custom Fields)
 
@@ -155,7 +160,7 @@ Add custom data fields to partners and products. Available types: text, number, 
 yes/no (boolean), pick list (select). For the select type, enter each possible value on
 a separate line.
 
-Custom fields require the `company.manage` permission. Defined fields appear on the
+Managing custom fields requires permission to manage company data. Defined fields appear on the
 partner and product forms, and the data entered there is stored with the respective
 partner or product record.
 
@@ -179,7 +184,7 @@ and delete (DELETE) endpoints, a red-bordered warning modal appears instead of t
 confirmation. It displays the active company name and requires ticking an "I understand —
 this operation is irreversible" checkbox before the Send button becomes active.
 
-Requires the `api_tester.use` permission.
+Requires permission to use the built-in API tester.
 
 ---
 
@@ -225,43 +230,66 @@ is where a job position is selected from the list.
 
 This feature is only available when the **Assets** module is enabled. The **Assets**
 menu item (top of the sidebar) tracks the company's physical assets (e.g. POS
-terminals, phones) — the `asset.view` permission is required to view it.
+terminals, phones) — permission to view assets is required to open it.
 
-**Adding an asset** (`asset.create`): you must provide the serial number and asset
+**Adding an asset** (with permission to create assets): you must provide the serial number and asset
 type; the IMEI is optional. **The name is generated by the system** from the type's
 code and a sequence number (e.g. `DEMO_TEYA_00001`) — this field cannot be edited
 when creating; it appears only after saving.
 
-**Editing** (`asset.edit`): only the status (active / issued / in service /
+**Editing** (with permission to edit assets): only the status (active / issued / in service /
 scrapped), serial number, and IMEI can be changed. The name and asset type are
 permanently fixed after creation.
 
-**Deleting** (`asset.delete`): the asset is permanently removed.
+**Deleting** (with permission to delete assets): the asset is permanently removed.
 
-The **Asset Types** page (Settings → Asset Types, `asset.view` permission) shows
+The **Asset Types** page (Settings → Asset Types, with permission to view assets) shows
 both the global types (available to every company — e.g. Mobile phone, Teya POS
 terminal, Printer) and the types your own company has created. **Adding a new
-type** (`asset.create`) always creates it under your own company — other companies
-cannot see it.
+type** (with permission to create assets) always creates it under your own company —
+other companies cannot see it.
 
 ### Sales Groups (Settings → Sales Groups)
 
-This page is only available when the **Sales Groups** module is enabled and requires the
-`sales_group.view` permission.
+This page is only available when the **Sales Groups** module is enabled and requires
+permission to view sales groups.
 
 Sales groups are scoped to the current company — groups belonging to other companies are
 not visible. Each group's display name is composed of the company prefix and the group
 name: `PREFIX_GroupName` (e.g. `BUD_North`).
 
-**Adding a group** (`sales_group.create`):
+**Adding a group** (with permission to create sales groups):
 The name must be unique within the company (case-insensitive). If no prefix has been
-configured for the company, the system returns a 422 error prompting you to set a prefix
-in Company Settings first.
+configured for the company, the system shows an error prompting you to set a prefix in
+Company Settings first.
 
-**Editing** (`sales_group.edit`): only the group name can be changed; the display name
-updates automatically.
+**Editing** (with permission to edit sales groups): only the group name can be changed;
+the display name updates automatically.
 
-**Deleting** (`sales_group.delete`): the group is permanently removed.
+**Deleting** (with permission to delete sales groups): the group is permanently removed.
+
+#### Managing Group Members
+
+The **Members** section on a group's detail page shows who belongs to the group; the
+heading also displays how many members are currently selected. **Membership is saved
+separately from the group name** — the section has its own **Save membership** button,
+which is only enabled while there are unsaved changes (an "unsaved changes" note appears
+alongside it).
+
+The section has two blocks:
+
+- **Selected members** — a fixed list of the currently selected users, always visible
+  regardless of the search. The **×** button next to a name removes that person from the
+  selection.
+- **Search by name / email** — searches among the company's users; results can be added
+  to the group with checkboxes. The search runs on the server and starts after a short
+  delay while you type, so it stays usable in companies with many users. At most 50
+  results are shown at a time; when that many come back, the interface tells you to
+  narrow the search.
+
+Editing members requires permission to edit sales groups **and** permission to list the
+company's users. If either is missing, the section is read-only — the existing membership
+is still shown, and the interface states which permission is missing.
 
 ### Translations (Settings → Translations)
 
@@ -269,4 +297,4 @@ Interface texts (buttons, labels, error messages, etc.) can be edited in this ed
 across three languages (HU / EN / DE). Changes take effect immediately on the user
 interface.
 
-Requires the `company.manage` permission.
+Requires permission to manage company data.

@@ -28,7 +28,7 @@ Erre kattintva a felület sötét és világos téma között vált.
 ## Audit napló (Beállítások → Audit napló)
 
 Az audit napló rögzíti a rendszerben végzett fontosabb műveletek előzményeit. A napló
-lekérdezéséhez `audit.view` jogosultság szükséges.
+csak az audit napló megtekintésére jogosult felhasználóknak érhető el.
 
 ### Mit tartalmaz egy bejegyzés?
 
@@ -36,7 +36,7 @@ Minden sor a következőket mutatja:
 
 - **Időpont** — mikor történt az esemény
 - **Felhasználó** — ki hajtotta végre
-- **Esemény** — a művelet neve (pl. `invoice.cancel`, `auth.login`, `company.update`)
+- **Esemény** — a művelet neve (pl. `invoice.cancel`, `auth.login`, `company.manage`)
 - **Rekord** — melyik adatbázis-objektumot érintette (pl. `Invoice#42`)
 - **Előző / Új értékek** — mi változott (csak ha az eseményhez van adatváltozás)
 
@@ -59,3 +59,28 @@ Az audit napló segít nyomon követni:
 
 A napló bejegyzései nem törölhetők; a rendszer automatikusan rögzíti őket a vonatkozó
 műveletek végén.
+
+### „Létrehozta / Módosította" lábléc a törzsadat-oldalakon
+
+A teljes audit napló mellett a törzsadat-oldalak alján egy diszkrét lábléc mutatja meg
+ugyanezt a rekord szintjén: **Létrehozta** és **Módosította** — kinek a nevéhez és melyik
+időponthoz köthető az adott rekord. Így a leggyakoribb kérdésre („ki nyúlt ehhez utoljára?")
+nem kell megnyitni az audit naplót.
+
+A lábléc ezeken az oldalakon jelenik meg:
+
+- Cégbeállítások (a cégadat-űrlap alatt — a cég rekordjára vonatkozik, ezért nem az oldal
+  legalján áll, ahol már más szekciók következnek)
+- Partner, Termék, Eszköz adatlap
+- Értékesítő csoport adatlap
+- Felhasználó és Csoport adatlap
+
+Amit láthatsz benne:
+
+- **Név · időpont** — a rekordot ez a felhasználó hozta létre, illetve módosította utoljára.
+- **Rendszer** — a sort nem felhasználó írta, hanem a rendszer (pl. telepítéskori
+  alapadat-feltöltés vagy háttérfolyamat); ilyenkor időpont nem jelenik meg.
+- **—** — a művelet felhasználója már nem létezik a rendszerben; az időpont ilyenkor is
+  látszik.
+
+Új, még nem mentett rekordnál a lábléc egyáltalán nem jelenik meg.

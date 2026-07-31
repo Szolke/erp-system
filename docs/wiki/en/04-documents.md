@@ -43,7 +43,10 @@ The ✕ button on the right of the search field clears the text and resets the l
 **Date filter:** "Date from" and "Date to" fields narrow the list by issue date. The ✕
 next to the date inputs clears the date range.
 
-**Items per page** (per-page selector): 10, 20, 50, or 100.
+**Items per page** (per-page selector): 20, 50, 100, 200, or 500. The selected page size is
+remembered per user and per company, so it still applies the next time you open the list.
+If you open the list from a shared link that carries a page size, that value applies to
+this visit only — it does not overwrite your own saved setting.
 
 ---
 
@@ -88,8 +91,9 @@ it on the fly.
 
 ## Regenerating a PDF
 
-The **Regenerate PDF** button is permission-gated (requires the `invoice.regenerate_pdf` /
-`receipt.regenerate_pdf` permission). After a confirmation prompt:
+The **Regenerate PDF** button is permission-gated: it requires permission to regenerate the
+PDF of an issued invoice or receipt — the two are separate permissions. After a
+confirmation prompt:
 
 - The previous PDF file is archived with a timestamp — it is not deleted.
 - A new PDF is generated using the current template and data.

@@ -45,15 +45,18 @@ export default function GroupListPage() {
   const toast = useToast()
   const [data, setData]         = useState(null)
   const [loading, setLoading]   = useState(true)
-  const [perPage, setPerPage]   = useState(20)
   const [page, setPage]         = useState(1)
   const [showForm, setShowForm] = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
   const [form, setForm]         = useState({ name: '', description: '' })
   const [formErr, setFormErr]   = useState('')
   const [saving, setSaving]     = useState(false)
+  // A lapméret a mentett lista-preferenciából jön (l. useListColumns) — ezért
+  // nincs külön useState rá, és a load() alapértéke is innen származik.
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize } =
+    useListColumns('groups.index', groupColumns, { defaultPageSize: 20 })
 
-  async function load(pp = 20, pg = 1) {
+  async function load(pp = perPage, pg = 1) {
     setLoading(true)
     try {
       const res = await groupsApi.list({ per_page: pp, page: pg })
@@ -62,7 +65,7 @@ export default function GroupListPage() {
   }
 
   function handlePerPage(value) {
-    setPerPage(value); setPage(1)
+    setPageSize(value); setPage(1)
     load(value, 1)
   }
 
@@ -97,7 +100,6 @@ export default function GroupListPage() {
 
   const list = data?.data ?? []
   const canManage = can('group.manage')
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('groups.index', groupColumns)
 
   return (
     <div>

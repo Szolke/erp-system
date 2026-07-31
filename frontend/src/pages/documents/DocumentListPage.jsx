@@ -114,17 +114,24 @@ function renderDocumentCell(key, doc, { t, locale, shortDate }) {
 export default function DocumentListPage() {
   const { can } = useAuth()
   const { t, locale } = useTranslation()
-  const [filters, setFilters] = useUrlFilters(DEFAULTS)
+  const [filters, setFilters, urlKeys] = useUrlFilters(DEFAULTS)
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [openPopover, setOpenPopover] = useState(null)
   const [searchInput, setSearchInput] = useState(filters.search)
   const debounceRef = useRef(null)
-  const { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty } = useListColumns('documents.index', documentColumns)
+  // A lapméret feloldása: URL > mentett preferencia > 20. Az `urlKeys` azért
+  // kell, mert a useUrlFilters a hiányzó kulcsokat a DEFAULTS-ból visszaírja a
+  // URL-be — utána a `filters.per_page` már nem árulná el, hogy megosztott
+  // linkből jött-e vagy csak a default feltöltésből.
+  const { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty, pageSize: perPage, setPageSize } =
+    useListColumns('documents.index', documentColumns, {
+      defaultPageSize: 20,
+      urlPageSize: urlKeys.has('per_page') ? Number(filters.per_page) || null : null,
+    })
 
   const page = Number(filters.page) || 1
-  const perPage = Number(filters.per_page) || 20
 
   async function load() {
     setLoading(true)
@@ -148,7 +155,18 @@ export default function DocumentListPage() {
     }
   }
 
-  useEffect(() => { load() }, [filters.type, filters.status, filters.currency, filters.search, filters.date_from, filters.date_to, filters.per_page, filters.page]) // eslint-disable-line react-hooks/exhaustive-deps
+  // A lapméret-függőség a feloldott `perPage`, NEM a `filters.per_page`: a
+  // mentett preferencia már az első renderben érvényes, így egyetlen (helyes
+  // lapméretű) lekérdezés indul, nem előbb egy default-méretű, majd egy javító.
+  useEffect(() => { load() }, [filters.type, filters.status, filters.currency, filters.search, filters.date_from, filters.date_to, perPage, filters.page]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A címsort utólag hozzáigazítjuk a tényleges lapmérethez, hogy a megosztható
+  // link és a megjelenített lista ne mondjon mást. Csak a `perPage` változására
+  // fut: egy kézzel átírt URL-t (ami nem a selectorból jön) nem ír felül.
+  useEffect(() => {
+    if (String(perPage) !== filters.per_page) setFilters({ per_page: String(perPage) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [perPage])
 
   // Debounce (~400ms): a React state minden leütést megőriz, csak a
   // lekérdezés-indítás késleltetett — karakter emiatt sosem vész el.
@@ -173,7 +191,8 @@ export default function DocumentListPage() {
     setFilters({ ...patch, page: '1' })
   }
   function handlePerPage(value) {
-    setFilters({ per_page: String(value), page: '1' })
+    setPageSize(value) // mentett preferencia (debounce-olt PUT)
+    setFilters({ per_page: String(value), page: '1' }) // megosztható URL
   }
   function handlePageChange(p) {
     setFilters({ page: String(p) })

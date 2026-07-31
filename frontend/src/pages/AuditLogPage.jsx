@@ -35,10 +35,12 @@ export default function AuditLogPage() {
   const [data, setData]       = useState(null)
   const [action, setAction]   = useState('')
   const [loading, setLoading] = useState(true)
-  const [perPage, setPerPage] = useState(50)
   const [page, setPage]       = useState(1)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('audit_logs.index', auditLogColumns)
+  // A lapméret a mentett lista-preferenciából jön (l. useListColumns); az
+  // audit-napló alapértéke a többi listáétól eltérően 50.
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize } =
+    useListColumns('audit_logs.index', auditLogColumns, { defaultPageSize: 50 })
 
   async function load(a, pp, pg) {
     setLoading(true)
@@ -50,10 +52,10 @@ export default function AuditLogPage() {
     }
   }
 
-  useEffect(() => { load('', 50, 1) }, [])
+  useEffect(() => { load('', perPage, 1) }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handlePerPage(value) {
-    setPerPage(value); setPage(1)
+    setPageSize(value); setPage(1)
     load(action, value, 1)
   }
 

@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { useListColumns } from './useListColumns'
+import { useListColumns, resetListColumnsCompanyMemory } from './useListColumns'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
 import { useTranslation } from '../contexts/TranslationContext'
@@ -48,18 +48,28 @@ const REG_WITH_PERMISSION = [
   { key: 'actions', default: true, locked: true },
 ]
 
-function setup(registry, { saved, can } = {}) {
+function setup(registry, { saved, can, options, companyId = 1 } = {}) {
+  mockAuth({ saved, can, companyId })
+  useToast.mockReturnValue(vi.fn())
+  useTranslation.mockReturnValue({ t: (key) => key })
+  return renderHook(() => useListColumns(LIST_KEY, registry, options))
+}
+
+// Cégváltás szimulálásához külön is hívható: a rerender() ezt az új /api/me
+// állapotot fogja látni.
+function mockAuth({ saved, can, companyId = 1 } = {}) {
   useAuth.mockReturnValue({
     can: can ?? (() => true),
     listPreferences: saved === undefined ? {} : { [LIST_KEY]: saved },
+    activeCompanyId: companyId,
   })
-  useToast.mockReturnValue(vi.fn())
-  useTranslation.mockReturnValue({ t: (key) => key })
-  return renderHook(() => useListColumns(LIST_KEY, registry))
 }
 
 beforeEach(() => {
   vi.useFakeTimers()
+  // A hook modul-szintű cég-memóriája túlélné a teszteseteket, és egy korábbi
+  // eset cégváltása hamis "elévülést" okozna a következőben.
+  resetListColumnsCompanyMemory()
   listPreferencesApi.update.mockReset().mockResolvedValue({})
   listPreferencesApi.remove.mockReset().mockResolvedValue({})
 })
@@ -110,6 +120,19 @@ describe('láthatóság-merge (computeVisibleKeys)', () => {
   it('permission-höz kötött oszlop kiesik, ha a usernek nincs joga', () => {
     const { result } = setup(REG_WITH_PERMISSION, { can: (key) => key !== 'secret.view' })
     expect(result.current.allColumns.map((c) => c.key)).not.toContain('secret')
+  })
+
+  it('cégváltáskor a helyben beállított láthatóság is eldobódik, ha egyik cégnek sincs mentett sora', () => {
+    // Ugyanaz a hibaminta, mint a lapméretnél: `saved` mindkét oldalon
+    // undefined, tehát csak az aktív cég azonosítója jelzi a váltást.
+    const { result, rerender } = setup(REG_STANDARD)
+    act(() => result.current.toggle('status'))
+    expect(result.current.isVisible('status')).toBe(true)
+
+    mockAuth({ companyId: 2 })
+    rerender()
+
+    expect(result.current.isVisible('status')).toBe(false)
   })
 
   it('permission-höz kötött oszlop megjelenik, ha a usernek van joga', () => {
@@ -245,7 +268,7 @@ describe('mentés — debounce-olt PUT payload', () => {
     })
   })
 
-  it('megőrzi a mentett page_size/sort mezőket, amiket ez a hook nem kezel', async () => {
+  it('oszlop-kapcsolás nem írja felül a mentett page_size/sort mezőket', async () => {
     const saved = {
       columns: { order: ['name', 'email', 'groups', 'status', 'actions'], visible: ['name', 'email', 'groups', 'actions'] },
       page_size: 50,
@@ -277,5 +300,238 @@ describe('mentés — debounce-olt PUT payload', () => {
 
     const [, payload] = listPreferencesApi.update.mock.calls[0]
     expect(payload.columns.order).toEqual(result.current.allColumns.map((c) => c.key))
+  })
+})
+
+describe('lapméret (page_size)', () => {
+  const PAGED = { defaultPageSize: 20 }
+
+  describe('feloldás: URL > mentett > default', () => {
+    it('mentett érték nélkül a lista defaultja érvényes', () => {
+      const { result } = setup(REG_STANDARD, { options: PAGED })
+      expect(result.current.pageSize).toBe(20)
+    })
+
+    it('a mentett page_size erősebb a lista defaultjánál', () => {
+      const { result } = setup(REG_STANDARD, { saved: { page_size: 100 }, options: PAGED })
+      expect(result.current.pageSize).toBe(100)
+    })
+
+    it('az EXPLICIT URL-beli lapméret erősebb a mentettnél (megosztott link)', () => {
+      const { result } = setup(REG_STANDARD, {
+        saved: { page_size: 100 },
+        options: { defaultPageSize: 20, urlPageSize: 500 },
+      })
+      expect(result.current.pageSize).toBe(500)
+    })
+
+    it('defaultPageSize nélkül (nem lapozó lista) nincs saját lapméret', () => {
+      // A hook ilyenkor csak megőrzi a mentett page_size-t (l. a mentés-blokk
+      // megőrző tesztjét), de nem ad vissza megjeleníthető értéket.
+      const { result } = setup(REG_STANDARD)
+      expect(result.current.pageSize).toBe(null)
+    })
+
+    it('cégváltáskor (új mentett preferencia) a másik cég lapmérete lép életbe', () => {
+      const { result, rerender } = setup(REG_STANDARD, { saved: { page_size: 50 }, options: PAGED })
+      expect(result.current.pageSize).toBe(50)
+
+      mockAuth({ saved: { page_size: 200 }, companyId: 2 })
+      rerender()
+
+      expect(result.current.pageSize).toBe(200)
+    })
+
+    it('cégváltáskor akkor is a defaultra áll, ha EGYIK cégnek sincs mentett sora', () => {
+      // Ilyenkor a `saved` mindkét oldalon undefined, tehát a puszta
+      // referencia-változás nem jelezné a váltást — az előző cégen beállított
+      // lapméret bennragadna a legördülőben.
+      const { result, rerender } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.setPageSize(100))
+      expect(result.current.pageSize).toBe(100)
+
+      mockAuth({ companyId: 2 })
+      rerender()
+
+      expect(result.current.pageSize).toBe(20)
+    })
+
+    it('cégváltáskor a megnyitáskori URL-beli lapméret is elévül', () => {
+      // A listaoldal a tényleges lapméretet visszaírja a címsorba, ezért egy
+      // újratöltés után a saját magunk írta ?per_page=… is "explicitnek"
+      // látszik — ha ez túlélné a cégváltást, a másik cég preferenciája sosem
+      // érvényesülne (ez volt a Bizonylatok listáján tapasztalt hiba).
+      const { result, rerender } = setup(REG_STANDARD, {
+        saved: { page_size: 100 },
+        options: { defaultPageSize: 20, urlPageSize: 100 },
+      })
+      expect(result.current.pageSize).toBe(100)
+
+      mockAuth({ saved: { page_size: 50 }, companyId: 2 })
+      rerender()
+
+      expect(result.current.pageSize).toBe(50)
+    })
+
+    it('cégváltáskor a URL-érték a másik cég mentett sora nélkül is elévül', () => {
+      const { result, rerender } = setup(REG_STANDARD, {
+        saved: { page_size: 100 },
+        options: { defaultPageSize: 20, urlPageSize: 100 },
+      })
+
+      mockAuth({ companyId: 2 })
+      rerender()
+
+      expect(result.current.pageSize).toBe(20)
+    })
+
+    it('cégváltás miatti ÚJRACSATOLÁSKOR is elévül a címsorban maradt lapméret', () => {
+      // A valóságban a cégváltás nem re-renderel, hanem ÚJRACSATOL: a Layout
+      // `<Outlet key={activeCompanyId} />`-je új példányt hoz létre, tehát a
+      // hook refjei elvesznek. A címsor viszont megmarad, benne az előző cég
+      // lapméretével — ezt a mount nem olvashatja megosztott linknek.
+      const first = setup(REG_STANDARD, {
+        saved: { page_size: 100 },
+        options: { defaultPageSize: 20, urlPageSize: 100 },
+      })
+      expect(first.result.current.pageSize).toBe(100)
+      first.unmount()
+
+      const second = setup(REG_STANDARD, {
+        saved: { page_size: 50 },
+        companyId: 2,
+        options: { defaultPageSize: 20, urlPageSize: 100 },
+      })
+
+      expect(second.result.current.pageSize).toBe(50)
+    })
+
+    it('újracsatoláskor a mentett sor nélküli cég is a saját defaultjára áll', () => {
+      const first = setup(REG_STANDARD, {
+        saved: { page_size: 100 },
+        options: { defaultPageSize: 20, urlPageSize: 100 },
+      })
+      first.unmount()
+
+      const second = setup(REG_STANDARD, {
+        companyId: 2,
+        options: { defaultPageSize: 20, urlPageSize: 100 },
+      })
+
+      expect(second.result.current.pageSize).toBe(20)
+    })
+
+    it('UGYANAZON a cégen belüli új mount (navigálás) esetén a URL-érték érvényben marad', () => {
+      // Az elévülés kizárólag a cégváltáshoz kötődik: egy megosztott link
+      // megnyitása a lista elhagyása és visszatérése után is érvényes kérés.
+      const first = setup(REG_STANDARD, { saved: { page_size: 100 }, options: PAGED })
+      first.unmount()
+
+      const second = setup(REG_STANDARD, {
+        saved: { page_size: 100 },
+        options: { defaultPageSize: 20, urlPageSize: 500 },
+      })
+
+      expect(second.result.current.pageSize).toBe(500)
+    })
+
+    it('cégváltás eldobja a még ki nem ment mentést (az már a másik cég sorába íródna)', async () => {
+      const { result, rerender } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.setPageSize(100))
+
+      mockAuth({ companyId: 2 })
+      rerender()
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      expect(listPreferencesApi.update).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('setPageSize — mentés', () => {
+    it('a selector-váltás a mentendő payloadba írja a page_size-t, az oszlopokkal együtt', async () => {
+      const { result } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.setPageSize(100))
+      expect(result.current.pageSize).toBe(100)
+
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+      const [key, payload] = listPreferencesApi.update.mock.calls[0]
+      expect(key).toBe(LIST_KEY)
+      expect(payload.page_size).toBe(100)
+      // A láthatóság/sorrend mentése nem sérülhet: ugyanabba a PUT-ba megy.
+      expect(payload.columns).toEqual({
+        visible: ['name', 'email', 'groups', 'actions'],
+        order: ['name', 'email', 'groups', 'status', 'actions'],
+      })
+    })
+
+    it('a lapméret-váltás után egy oszlop-kapcsolás is az ÚJ lapmérettel ment', async () => {
+      const { result } = setup(REG_STANDARD, { saved: { page_size: 50 }, options: PAGED })
+      act(() => result.current.setPageSize(200))
+      act(() => result.current.toggle('status'))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      const calls = listPreferencesApi.update.mock.calls
+      expect(calls[calls.length - 1][1].page_size).toBe(200)
+    })
+
+    it('URL-ből jövő lapméret esetén az oszlop-kapcsolás NEM írja felül a mentett értéket', async () => {
+      // Egy megosztott link (?per_page=500) csak a nézetet állítja át; a user
+      // saját, mentett lapmérete csak akkor változhat, ha ő maga választ újat.
+      const { result } = setup(REG_STANDARD, {
+        saved: { page_size: 50 },
+        options: { defaultPageSize: 20, urlPageSize: 500 },
+      })
+      act(() => result.current.toggle('status'))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      const [, payload] = listPreferencesApi.update.mock.calls[0]
+      expect(payload.page_size).toBe(50)
+    })
+
+    it('érvénytelen értékre no-op (nem állít állapotot, nem ment)', async () => {
+      const { result } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.setPageSize(0))
+      act(() => result.current.setPageSize('abc'))
+
+      expect(result.current.pageSize).toBe(20)
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+      expect(listPreferencesApi.update).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('reset', () => {
+    it('a lapméretet is visszaviszi a lista defaultjára (a DELETE a page_size-t is törli)', async () => {
+      const { result } = setup(REG_STANDARD, { saved: { page_size: 200 }, options: PAGED })
+      expect(result.current.pageSize).toBe(200)
+
+      await act(async () => { await result.current.reset() })
+
+      expect(result.current.pageSize).toBe(20)
+      expect(listPreferencesApi.remove).toHaveBeenCalledWith(LIST_KEY)
+    })
+
+    it('explicit URL-beli lapméret esetén a reset a URL értékére áll vissza, nem a defaultra', async () => {
+      const { result } = setup(REG_STANDARD, {
+        saved: { page_size: 200 },
+        options: { defaultPageSize: 20, urlPageSize: 100 },
+      })
+
+      await act(async () => { await result.current.reset() })
+
+      expect(result.current.pageSize).toBe(100)
+    })
+
+    it('reset után egy oszlop-kapcsolás már nem küld page_size mezőt', async () => {
+      const { result } = setup(REG_STANDARD, { saved: { page_size: 200 }, options: PAGED })
+      await act(async () => { await result.current.reset() })
+
+      act(() => result.current.toggle('status'))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      const [, payload] = listPreferencesApi.update.mock.calls[0]
+      expect(payload).not.toHaveProperty('page_size')
+    })
   })
 })

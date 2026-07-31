@@ -91,7 +91,7 @@ function renderCell(key, row, { t, locale, hasDateFilter, isOpen, onToggle }) {
  */
 export default function NavSubmissionsPage() {
   const { t, locale } = useTranslation()
-  const [filters, setFilters] = useUrlFilters(DEFAULTS)
+  const [filters, setFilters, urlKeys] = useUrlFilters(DEFAULTS)
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -100,10 +100,16 @@ export default function NavSubmissionsPage() {
   const [expandedId, setExpandedId] = useState(null)
   const [columnsOpen, setColumnsOpen] = useState(false)
   const debounceRef = useRef(null)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('nav_submissions.index', navSubmissionColumns)
+  // A lapméret feloldása: URL > mentett preferencia > 20 (l. DocumentListPage
+  // azonos mintája — az `urlKeys` a defaultból visszaírt és a megosztott linkből
+  // érkező per_page megkülönböztetésére kell).
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize } =
+    useListColumns('nav_submissions.index', navSubmissionColumns, {
+      defaultPageSize: 20,
+      urlPageSize: urlKeys.has('per_page') ? Number(filters.per_page) || null : null,
+    })
 
   const page = Number(filters.page) || 1
-  const perPage = Number(filters.per_page) || 20
   const hasDateFilter = !!(filters.date_from || filters.date_to)
 
   async function load() {
@@ -126,7 +132,13 @@ export default function NavSubmissionsPage() {
     }
   }
 
-  useEffect(() => { load() }, [filters.status, filters.invoice_number, filters.date_from, filters.date_to, filters.per_page, filters.page]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load() }, [filters.status, filters.invoice_number, filters.date_from, filters.date_to, perPage, filters.page]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A címsor hozzáigazítása a tényleges lapmérethez (l. DocumentListPage).
+  useEffect(() => {
+    if (String(perPage) !== filters.per_page) setFilters({ per_page: String(perPage) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [perPage])
 
   useEffect(() => {
     clearTimeout(debounceRef.current)
@@ -147,7 +159,8 @@ export default function NavSubmissionsPage() {
     setFilters({ date_from: dateFrom, date_to: dateTo, page: '1' })
   }
   function handlePerPage(value) {
-    setFilters({ per_page: String(value), page: '1' })
+    setPageSize(value) // mentett preferencia (debounce-olt PUT)
+    setFilters({ per_page: String(value), page: '1' }) // megosztható URL
   }
   function handlePageChange(p) {
     setExpandedId(null)

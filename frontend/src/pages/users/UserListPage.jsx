@@ -64,16 +64,17 @@ export default function UserListPage() {
   const [data, setData]         = useState(null)
   const [search, setSearch]     = useState('')
   const [loading, setLoading]   = useState(true)
-  const [perPage, setPerPage]   = useState(20)
+  // A lapméret a mentett lista-preferenciából jön (l. useListColumns).
   const [page, setPage]         = useState(1)
   const [showForm, setShowForm] = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
   const [form, setForm]         = useState({ name: '', email: '', password: '', job_position_id: null })
   const [formErr, setFormErr]   = useState('')
   const [saving, setSaving]     = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('users.index', userColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize } =
+    useListColumns('users.index', userColumns, { defaultPageSize: 20 })
 
-  async function load(q = '', pp = 20, pg = 1) {
+  async function load(q = '', pp = perPage, pg = 1) {
     setLoading(true)
     try {
       const res = await usersApi.list({ search: q || undefined, per_page: pp, page: pg })
@@ -91,7 +92,7 @@ export default function UserListPage() {
   }
 
   function handlePerPage(value) {
-    setPerPage(value); setPage(1)
+    setPageSize(value); setPage(1)
     load(search, value, 1)
   }
 

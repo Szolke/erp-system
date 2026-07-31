@@ -59,7 +59,7 @@ export default function SalesGroupPage() {
   const [data, setData]         = useState(null)
   const [loading, setLoading]   = useState(true)
   const [prefix, setPrefix]     = useState(null)
-  const [perPage, setPerPage]   = useState(20)
+  // A lapméret a mentett lista-preferenciából jön (l. useListColumns).
   const [page, setPage]         = useState(1)
 
   const [showCreate, setShowCreate] = useState(false)
@@ -75,7 +75,8 @@ export default function SalesGroupPage() {
   const [membersDirty, setMembersDirty] = useState(false)
   const [saving, setSaving]         = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('sales_groups.index', salesGroupColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize } =
+    useListColumns('sales_groups.index', salesGroupColumns, { defaultPageSize: 20 })
 
   async function load(pp = perPage, pg = page) {
     setLoading(true)
@@ -120,7 +121,7 @@ export default function SalesGroupPage() {
   }
 
   function handlePerPage(value) {
-    setPerPage(value)
+    setPageSize(value)
     setPage(1)
     load(value, 1)
   }

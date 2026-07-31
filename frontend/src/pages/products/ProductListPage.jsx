@@ -43,10 +43,11 @@ export default function ProductListPage() {
   const [data, setData]       = useState(null)
   const [search, setSearch]   = useState('')
   const [loading, setLoading] = useState(true)
-  const [perPage, setPerPage] = useState(20)
+  // A lapméret a mentett lista-preferenciából jön (l. useListColumns).
   const [page, setPage]       = useState(1)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty } = useListColumns('products.index', productColumns)
+  const { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty, pageSize: perPage, setPageSize } =
+    useListColumns('products.index', productColumns, { defaultPageSize: 20 })
 
   async function load(s, pp, pg) {
     setLoading(true)
@@ -58,7 +59,7 @@ export default function ProductListPage() {
     }
   }
 
-  useEffect(() => { load('', 20, 1) }, [])
+  useEffect(() => { load('', perPage, 1) }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleDelete(id) {
     if (!confirm(t('common.delete') + '?')) return
@@ -72,7 +73,7 @@ export default function ProductListPage() {
   }
 
   function handlePerPage(value) {
-    setPerPage(value); setPage(1)
+    setPageSize(value); setPage(1)
     load(search, value, 1)
   }
 

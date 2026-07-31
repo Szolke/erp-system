@@ -11,11 +11,20 @@ beforeEach(() => {
 })
 
 describe('PerPageSelector', () => {
-  it('a hat rögzített lapméretet kínálja fel, ebben a sorrendben', () => {
+  it('az öt rögzített lapméretet kínálja fel, ebben a sorrendben', () => {
     render(<PerPageSelector value={20} onChange={vi.fn()} />)
 
     const options = screen.getAllByRole('option').map((o) => o.textContent)
-    expect(options).toEqual(['20', '50', '100', '200', '500', '1000'])
+    expect(options).toEqual(['20', '50', '100', '200', '500'])
+  })
+
+  it('nem kínál a menthető felső határnál (500) nagyobb lapméretet', () => {
+    // A lapméret a user_list_preferences rétegbe is mentődik, ahol a backend
+    // validáció `between:5,500` — egy nagyobb opció 422-vel elszállna.
+    render(<PerPageSelector value={20} onChange={vi.fn()} />)
+
+    const options = screen.getAllByRole('option').map((o) => Number(o.textContent))
+    expect(Math.max(...options)).toBeLessThanOrEqual(500)
   })
 
   it('az aktuális értéket jelöli ki a legördülőben', () => {

@@ -1,4 +1,5 @@
-import { act, renderHook } from '@testing-library/react'
+import { useEffect } from 'react'
+import { act, render, renderHook, screen } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { useUrlFilters } from './useUrlFilters'
@@ -14,8 +15,8 @@ function renderFilters(defaults, initialEntry = '/kimutatasok') {
 
   return renderHook(
     () => {
-      const [filters, setFilters] = useUrlFilters(defaults)
-      return { filters, setFilters, search: useLocation().search }
+      const [filters, setFilters, explicitKeys] = useUrlFilters(defaults)
+      return { filters, setFilters, explicitKeys, search: useLocation().search }
     },
     { wrapper },
   )
@@ -54,6 +55,54 @@ describe('useUrlFilters — induló feltöltés', () => {
 
     expect(params(result.current.search).get('tab')).toBe('ertekesites')
     expect(params(result.current.search).get('from')).toBe('2026-07')
+  })
+})
+
+describe('useUrlFilters — explicit kulcsok a megnyitáskor', () => {
+  // A lapméret-feloldás (URL > mentett preferencia > default) ezen múlik: a
+  // defaultok visszaírása után a `filters` már nem különbözteti meg a
+  // megosztott linkből érkező értéket a default-feltöltéstől.
+  it('csak a URL-ben TÉNYLEGESEN ott álló kulcsokat tartalmazza, a feltöltötteket nem', () => {
+    const { result } = renderFilters({ from: '2026-07', per_page: '20' }, '/lista?from=2026-01')
+
+    expect(result.current.explicitKeys.has('from')).toBe(true)
+    expect(result.current.explicitKeys.has('per_page')).toBe(false)
+  })
+
+  it('a halmaz a későbbi setFilters-írásoktól sem bővül (csak a megnyitás számít)', () => {
+    const { result } = renderFilters({ per_page: '20' })
+
+    act(() => { result.current.setFilters({ per_page: '100' }) })
+
+    expect(result.current.explicitKeys.has('per_page')).toBe(false)
+  })
+})
+
+describe('useUrlFilters — a feltöltéssel egy commitban futó írás', () => {
+  // A lapozó listák mount-ján két írás fut egyszerre: a default-feltöltés és a
+  // mentett lapméret URL-be szinkronizálása. Rögzítjük, mi lesz az eredmény —
+  // a lényeg, hogy a megnyitáskor a URL-ben ÁLLÓ (user által hozott) kulcsok
+  // ne vesszenek el.
+  function PageSizeSyncProbe() {
+    const [filters, setFilters] = useUrlFilters({ type: '', per_page: '20', page: '1' })
+    useEffect(() => {
+      if (filters.per_page !== '100') setFilters({ per_page: '100' })
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+    return <div data-testid="url">{useLocation().search}</div>
+  }
+
+  it('a megosztott linkből hozott kulcsok megmaradnak, a feltöltött üres defaultok elesnek', () => {
+    render(
+      <MemoryRouter initialEntries={['/lista?page=3']}>
+        <PageSizeSyncProbe />
+      </MemoryRouter>,
+    )
+
+    const url = params(screen.getByTestId('url').textContent)
+    expect(url.get('per_page')).toBe('100')
+    expect(url.get('page')).toBe('3')
+    expect(url.has('type')).toBe(false)
   })
 })
 

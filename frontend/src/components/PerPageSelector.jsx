@@ -1,6 +1,10 @@
 import { useTranslation } from '../contexts/TranslationContext'
 
-const OPTIONS = [20, 50, 100, 200, 500, 1000]
+// A felső határ szándékosan 500: a lapméret mostantól a user_list_preferences
+// rétegbe is mentődik, a backend validáció pedig `page_size` mezőre
+// `between:5,500`-at enged (UpdateListPreferenceRequest) — egy 1000-es opció
+// 422-vel elszállna a mentéskor.
+const OPTIONS = [20, 50, 100, 200, 500]
 
 export default function PerPageSelector({ value, onChange }) {
   const { t } = useTranslation()

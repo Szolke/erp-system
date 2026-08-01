@@ -1,27 +1,62 @@
-import hu01 from '@wiki/hu/01-attekintes-bejelentkezes.md?raw'
-import hu02 from '@wiki/hu/02-szamla-kiallitas.md?raw'
-import hu03 from '@wiki/hu/03-nyugta-kiallitas.md?raw'
-import hu04 from '@wiki/hu/04-bizonylatok.md?raw'
-import hu05 from '@wiki/hu/05-fizetesek.md?raw'
-import hu06 from '@wiki/hu/06-beallitasok.md?raw'
-import hu07 from '@wiki/hu/07-felhasznalok-jogosultsagok.md?raw'
-import hu08 from '@wiki/hu/08-egyeb.md?raw'
+// A beépített kézikönyv-nézegető tartalma közvetlenül a `docs/wiki` markdown
+// fájljaiból származik: a `@wiki` alias erre a könyvtárra mutat (a konténerben
+// bind-mounttal, l. compose.yaml: `./docs/wiki:/app/wiki`), a fájlok pedig
+// build-időben, nyersen (`?raw`) kerülnek a bundle-be. Nincs külön becsomagolt
+// másolat, tehát a nézegető és a repóban lévő kézikönyv nem tud tartalmilag
+// szétcsúszni.
+//
+// A betöltés SZÁNDÉKOSAN glob-alapú. A korábbi megoldás fejezetenként egy-egy
+// statikus importot és egy `PAGE_COUNT = 8` konstanst tartalmazott — emiatt a
+// 09/10/11 fejezet csendben kimaradt a nézegetőből, holott a fájlok már ott
+// voltak a repóban. Globbal egy új oldalpár felvételéhez ehhez a fájlhoz nem
+// kell hozzányúlni; a szinkront a mellette lévő index.test.js őrzi.
+const huModules = import.meta.glob('@wiki/hu/*.md', { query: '?raw', import: 'default', eager: true })
+const enModules = import.meta.glob('@wiki/en/*.md', { query: '?raw', import: 'default', eager: true })
 
-import en01 from '@wiki/en/01-overview-login.md?raw'
-import en02 from '@wiki/en/02-issuing-invoice.md?raw'
-import en03 from '@wiki/en/03-issuing-receipt.md?raw'
-import en04 from '@wiki/en/04-documents.md?raw'
-import en05 from '@wiki/en/05-payments.md?raw'
-import en06 from '@wiki/en/06-settings.md?raw'
-import en07 from '@wiki/en/07-users-permissions.md?raw'
-import en08 from '@wiki/en/08-other.md?raw'
+// A wiki konvenciója szerint a HU és EN oldalak PÁRJÁT kizárólag a kétjegyű
+// sorszám-előtag köti össze (a slug fordított: `11-eszkozok.md` ↔ `11-assets.md`).
+const CHAPTER_FILE_RE = /(\d{2})-[^/]*\.md$/
 
-const pages = {
-  hu: [hu01, hu02, hu03, hu04, hu05, hu06, hu07, hu08],
-  en: [en01, en02, en03, en04, en05, en06, en07, en08],
+// A glob kulcs-sorrendje nem része a szerződésnek, ezért a fejezeteket a
+// sorszám-előtag alapján rendezzük. A mintára nem illeszkedő fájlok (pl. egy
+// odakerülő README) kimaradnak — nem fejezetek.
+function collectChapters(modules) {
+  return Object.entries(modules)
+    .map(([path, content]) => {
+      const match = path.match(CHAPTER_FILE_RE)
+      return match ? { number: Number(match[1]), content } : null
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.number - b.number)
 }
 
-export const PAGE_COUNT = 8
+const chapters = {
+  hu: collectChapters(huModules),
+  en: collectChapters(enModules),
+}
+
+const pages = {
+  hu: chapters.hu.map((c) => c.content),
+  en: chapters.en.map((c) => c.content),
+}
+
+// Fejezetszám → 0-alapú index a `pages` tömbben. Nem `sorszám - 1`, mert egy
+// esetleges számozási lyuk így sem tolná el a hivatkozásokat.
+const numberToIndex = {
+  hu: new Map(chapters.hu.map((c, i) => [c.number, i])),
+  en: new Map(chapters.en.map((c, i) => [c.number, i])),
+}
+
+// A magyar a forrásnyelv, ezért az oldalszám onnan jön. A HU/EN darabszám-
+// paritást az index.test.js ellenőrzi — enélkül egy hiányzó fordítás helyén a
+// getPage() csendben az 1. fejezetre esne vissza.
+export const PAGE_COUNT = pages.hu.length
+
+// Az elérhető fejezetszámok (a nézegetőn kívüli ellenőrzésekhez, l. index.test.js)
+export const CHAPTER_NUMBERS = {
+  hu: chapters.hu.map((c) => c.number),
+  en: chapters.en.map((c) => c.number),
+}
 
 export function getPage(locale, index) {
   const localePages = pages[locale] ?? pages.hu
@@ -34,21 +69,12 @@ export function getTitle(content) {
   return match ? match[1] : ''
 }
 
-// Returns chapter slugs to match internal wiki links (e.g. "03-nyugta-kiallitas.md")
-const CHAPTER_FILENAME_PREFIXES = {
-  hu: [
-    '01-attekintes', '02-szamla', '03-nyugta', '04-bizonylatok',
-    '05-fizetesek', '06-beallitasok', '07-felhasznalok', '08-egyeb',
-  ],
-  en: [
-    '01-overview', '02-issuing-invoice', '03-issuing-receipt', '04-documents',
-    '05-payments', '06-settings', '07-users', '08-other',
-  ],
-}
-
 // Given an href like "03-nyugta-kiallitas.md", returns the 0-based chapter index or -1
 export function hrefToChapterIndex(href, locale) {
-  const prefixes = CHAPTER_FILENAME_PREFIXES[locale] ?? CHAPTER_FILENAME_PREFIXES.hu
-  const clean = href.replace(/\.md$/, '').replace(/^.*\//, '')
-  return prefixes.findIndex((p) => clean.startsWith(p))
+  const map = numberToIndex[locale] ?? numberToIndex.hu
+  const filename = href.replace(/^.*\//, '')
+  const match = filename.match(/^(\d{2})-/)
+  if (!match) return -1
+  const index = map.get(Number(match[1]))
+  return index === undefined ? -1 : index
 }

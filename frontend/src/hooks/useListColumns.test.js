@@ -53,8 +53,10 @@ const REG_WITH_PERMISSION = [
 // alatt fut (l. main.jsx) — a kettős render-futás így tesztelhető.
 // A visszaadott `toast` a hook által ténylegesen hívott addToast — a mentési
 // hibaút ezen keresztül ellenőrizhető anélkül, hogy a modul-mockhoz kellene nyúlni.
-function setup(registry, { saved, can, options, companyId = 1, strict = false } = {}) {
-  mockAuth({ saved, can, companyId })
+function setup(registry, { saved, can, options, companyId = 1, strict = false, live = false } = {}) {
+  // `live: true` esetén a hívó már beállította a useAuth-mockot (l. createLiveAuth),
+  // azt itt nem szabad felülírni.
+  if (!live) mockAuth({ saved, can, companyId })
   const toast = vi.fn()
   useToast.mockReturnValue(toast)
   useTranslation.mockReturnValue({ t: (key) => key })
@@ -72,7 +74,43 @@ function mockAuth({ saved, can, companyId = 1 } = {}) {
     can: can ?? (() => true),
     listPreferences: saved === undefined ? {} : { [LIST_KEY]: saved },
     activeCompanyId: companyId,
+    // Ebben a harnessben a context-írás NEM hat vissza a hookra (a `saved` minden
+    // renderen frissen injektált konstans) — az optimista írás átfogó, valódi
+    // esetét a lenti `createLiveAuth` harness fedi.
+    mergeListPreference: vi.fn(),
+    clearListPreference: vi.fn(),
   })
+}
+
+// Élő AuthContext-utánzat: a merge/clear setterek TÉNYLEGESEN írják a megosztott
+// listPreferences objektumot — immutábilisan, ahogy az AuthProvider is (l.
+// AuthContext.test.jsx). Csak így modellezhető a valódi hiba: a mentés a
+// contextbe is átmegy, ezért egy LECSATOLÁS + ÚJRACSATOLÁS (route-váltás oda-vissza)
+// a szűkített oszlophalmazt kapja vissza, nem az /api/me betöltéskori pillanatképét.
+function createLiveAuth({ companyId = 1, initial = {} } = {}) {
+  const store = { listPreferences: initial, companyId }
+
+  const apply = () => {
+    useAuth.mockReturnValue({
+      can: () => true,
+      listPreferences: store.listPreferences,
+      activeCompanyId: store.companyId,
+      mergeListPreference: (key, preferences) => {
+        store.listPreferences = { ...store.listPreferences, [key]: preferences }
+        apply()
+      },
+      clearListPreference: (key) => {
+        if (!(key in store.listPreferences)) return
+        const next = { ...store.listPreferences }
+        delete next[key]
+        store.listPreferences = next
+        apply()
+      },
+    })
+  }
+
+  apply()
+  return store
 }
 
 beforeEach(() => {
@@ -354,6 +392,141 @@ describe('mentési hibaút', () => {
     expect(toast).toHaveBeenCalledWith('columns.save_error', 'error')
     expect(result.current.allColumns.map((c) => c.key)).toEqual(['name', 'email', 'groups', 'status', 'actions'])
     expect(result.current.isDirty).toBe(false)
+  })
+})
+
+describe('perzisztencia lecsatolás után (optimista context-írás)', () => {
+  // Ez a blokk a bejelentett hibát fogja: a mentett preferencia egyetlen olvasási
+  // forrása az /api/me pillanatképe (AuthContext.listPreferences), amit a sikeres
+  // PUT nem frissít. A listáról elnavigálás LECSATOLJA a lapot, tehát visszatéréskor
+  // a hook újra a pillanatképből épül — ha az nem tud a mentésről, a felhasználó
+  // választása helyett a kód szerinti defaultok jönnek vissza.
+  it('a lista elhagyása és visszatérése után a kikapcsolt oszlopok kikapcsolva maradnak', async () => {
+    const store = createLiveAuth() // induláskor NINCS mentett sor — ez a bejelentett eset
+    const first = setup(REG_STANDARD, { live: true })
+    expect(first.result.current.visibleColumns.map((c) => c.key)).toEqual(['name', 'email', 'groups', 'actions'])
+
+    act(() => first.result.current.toggle('email'))
+    act(() => first.result.current.toggle('groups'))
+    // sentinel: a context MÁR a szűkített halmazt tükrözi, még a PUT kiküldése előtt
+    expect(store.listPreferences[LIST_KEY].columns.visible).toEqual(['name', 'actions'])
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+    expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+    expect(store.listPreferences[LIST_KEY].columns.visible).toEqual(['name', 'actions'])
+
+    // navigálás el (Partnerek) és vissza: a listaoldal újracsatolódik
+    first.unmount()
+    const second = setup(REG_STANDARD, { live: true })
+
+    expect(second.result.current.visibleColumns.map((c) => c.key)).toEqual(['name', 'actions'])
+    expect(second.result.current.isVisible('email')).toBe(false)
+    expect(second.result.current.isVisible('groups')).toBe(false)
+  })
+
+  it('a húzással beállított sorrend is túléli az újracsatolást', async () => {
+    createLiveAuth()
+    const first = setup(REG_STANDARD, { live: true })
+    act(() => first.result.current.reorder('email', 'groups'))
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+    first.unmount()
+
+    const second = setup(REG_STANDARD, { live: true })
+    expect(second.result.current.allColumns.map((c) => c.key)).toEqual(['name', 'groups', 'email', 'status', 'actions'])
+  })
+
+  it('a lapméret is túléli az újracsatolást', async () => {
+    createLiveAuth()
+    const PAGED = { defaultPageSize: 20 }
+    const first = setup(REG_STANDARD, { live: true, options: PAGED })
+    act(() => first.result.current.setPageSize(100))
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+    first.unmount()
+
+    const second = setup(REG_STANDARD, { live: true, options: PAGED })
+    expect(second.result.current.pageSize).toBe(100)
+  })
+
+  it('a reset a contextből is törli a sort, így az újracsatolás a defaultokat kapja', async () => {
+    const store = createLiveAuth()
+    const first = setup(REG_STANDARD, { live: true })
+    act(() => first.result.current.toggle('email'))
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+    expect(store.listPreferences).toHaveProperty(LIST_KEY)
+
+    await act(async () => { await first.result.current.reset() })
+    expect(store.listPreferences).not.toHaveProperty(LIST_KEY)
+    first.unmount()
+
+    const second = setup(REG_STANDARD, { live: true })
+    expect(second.result.current.visibleColumns.map((c) => c.key)).toEqual(['name', 'email', 'groups', 'actions'])
+  })
+
+  it('a reset után a lecsatolás nem küld ki a törölt sorba visszaíró PUT-ot', async () => {
+    // A reset a függő mentést eldobja (nem flusheli): egy utána befutó PUT épp az
+    // imént visszaállított defaultot írná felül a reset ELŐTTI állapottal.
+    createLiveAuth()
+    const { result, unmount } = setup(REG_STANDARD, { live: true })
+    act(() => result.current.toggle('email')) // a debounce-ablakon BELÜL marad
+    await act(async () => { await result.current.reset() })
+    unmount()
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+    expect(listPreferencesApi.update).not.toHaveBeenCalled()
+    expect(listPreferencesApi.remove).toHaveBeenCalledWith(LIST_KEY)
+  })
+
+  it('a saját optimista írás NEM inicializálja újra a hookot: URL-beli lapméret mellett is a választott érték marad', async () => {
+    // Regresszió-őr az optimista írás mellékhatására: a context-frissítés
+    // megváltoztatja a `saved` referenciát, és ha ettől lefutna az
+    // újrainicializáló effekt, a feloldás (URL > mentett > default) visszaütné a
+    // felhasználó épp választott lapméretét az URL-ből jövő értékre.
+    createLiveAuth()
+    const { result } = setup(REG_STANDARD, {
+      live: true,
+      options: { defaultPageSize: 20, urlPageSize: 500 },
+    })
+    expect(result.current.pageSize).toBe(500)
+
+    act(() => result.current.setPageSize(100))
+    expect(result.current.pageSize).toBe(100)
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+    expect(result.current.pageSize).toBe(100)
+    expect(listPreferencesApi.update.mock.calls[0][1].page_size).toBe(100)
+  })
+
+  it('az optimista írás nem rendezi át a helyi `visible` halmazt (a toggle-sorrend marad)', async () => {
+    // Ugyanannak a mellékhatásnak a másik fele. KÉT toggle kell hozzá: az első
+    // utáni (kihagyott) újrainicializálás a `computeVisibleKeys`-szel registry-
+    // sorrendbe normalizálná a halmazt, amit már a MÁSODIK toggle payloadja
+    // elárulna — egy toggle önmagában nem mutatná meg, mert a payload a
+    // beütemezéskor rögzített tömbből épül.
+    createLiveAuth()
+    const { result } = setup(REG_STANDARD, { live: true })
+    act(() => result.current.toggle('status'))
+    act(() => result.current.toggle('email'))
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+    const [, payload] = listPreferencesApi.update.mock.calls[0]
+    expect(payload.columns.visible).toEqual(['name', 'groups', 'actions', 'status'])
+  })
+
+  it('egymást követő módosítások a legutolsó állapotot hagyják a contextben', async () => {
+    const store = createLiveAuth()
+    const { result } = setup(REG_STANDARD, { live: true, options: { defaultPageSize: 20 } })
+
+    act(() => result.current.toggle('status'))
+    act(() => result.current.reorder('email', 'groups'))
+    act(() => result.current.setPageSize(50))
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+    const stored = store.listPreferences[LIST_KEY]
+    expect(stored.columns.visible).toContain('status')
+    expect(stored.columns.order).toEqual(['name', 'groups', 'email', 'status', 'actions'])
+    expect(stored.page_size).toBe(50)
+    // a context és a ténylegesen kiküldött payload nem csúszhat szét
+    expect(listPreferencesApi.update.mock.calls[0][1]).toEqual(stored)
   })
 })
 
@@ -791,15 +964,81 @@ describe('lapméret (page_size)', () => {
       expect(payload.columns.visible).toContain('status')
     })
 
-    it('az ablakon belüli lecsatolás eldobja a még ki nem ment lapméret-mentést', async () => {
-      // A lista elhagyása a debounce-ablakon belül: a hook takarító-effektje
-      // törli az időzítőt, különben egy már lecsatolt komponens írna a szerverre.
+    it('az ablakon belüli lecsatolás KIKÜLDI a még ki nem ment mentést (flush)', async () => {
+      // Szándékos viselkedésváltozás: korábban a takarító-effekt `clearTimeout`-tal
+      // ELDOBTA a függő írást, ezért a listát 600 ms-on belül elhagyó felhasználó
+      // beállítása sosem jutott el a szerverig (a képernyőn megmaradt, egy
+      // újratöltés után viszont eltűnt). Most a lecsatolás azonnali, fire-and-forget
+      // PUT-tal üríti a függő mentést.
       const { result, unmount } = setup(REG_STANDARD, { options: PAGED })
       act(() => result.current.setPageSize(100))
+      expect(listPreferencesApi.update).not.toHaveBeenCalled()
+
+      unmount()
+
+      expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+      expect(listPreferencesApi.update.mock.calls[0][1].page_size).toBe(100)
+
+      // a lecsatolt komponens időzítője nem éledhet újra: nincs második PUT
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+      expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+    })
+
+    it('a flush a legutolsó állapotot küldi, oszlopokkal együtt', async () => {
+      const { result, unmount } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.toggle('status'))
+      await act(async () => { await vi.advanceTimersByTimeAsync(300) }) // az ablakon BELÜL
+      act(() => result.current.setPageSize(200))
+      unmount()
+
+      expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+      const [key, payload] = listPreferencesApi.update.mock.calls[0]
+      expect(key).toBe(LIST_KEY)
+      expect(payload.page_size).toBe(200)
+      expect(payload.columns.visible).toContain('status')
+    })
+
+    it('a MÁR elsült debounce után a lecsatolás nem küld duplán', async () => {
+      const { result, unmount } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.setPageSize(100))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+      expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+
+      unmount()
+
+      expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+    })
+
+    it('művelet nélküli lecsatolás egyáltalán nem küld PUT-ot', async () => {
+      const { unmount } = setup(REG_STANDARD, { options: PAGED })
+      unmount()
+
+      expect(listPreferencesApi.update).not.toHaveBeenCalled()
+    })
+
+    it('cégváltás után a lecsatolás sem küldi ki az eldobott mentést', async () => {
+      // A cégváltáskor eldobott írás nem éledhet újra a flushon keresztül — a
+      // szerveren már a MÁSIK cég sorába íródna (a cég-kontextust a session adja).
+      const { result, rerender, unmount } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.setPageSize(100))
+
+      mockAuth({ companyId: 2 })
+      rerender()
       unmount()
       await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
 
       expect(listPreferencesApi.update).not.toHaveBeenCalled()
+    })
+
+    it('a flush hibája is jelzést ad (a mentés a lap elhagyása után sem néma)', async () => {
+      listPreferencesApi.update.mockRejectedValue(new Error('network'))
+      const { result, unmount, toast } = setup(REG_STANDARD, { options: PAGED })
+      act(() => result.current.setPageSize(100))
+
+      unmount()
+      await act(async () => { await vi.advanceTimersByTimeAsync(0) }) // a fire-and-forget promise lefutása
+
+      expect(toast).toHaveBeenCalledWith('columns.save_error', 'error')
     })
   })
 })

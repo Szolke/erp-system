@@ -28,6 +28,18 @@ export function resetListColumnsCompanyMemory() {
  * /api/me válaszából (AuthContext.listPreferences[listKey]) olvassa, a
  * módosítást debounce-olt PUT-tal menti a `user_list_preferences` backendbe.
  *
+ * Optimista context-írás (miért): az /api/me válasza egy munkameneten belül
+ * PILLANATKÉP — a sikeres PUT nem frissíti. Enélkül a listaoldal elhagyása és
+ * visszatérése (a route-váltás LECSATOLJA a lapot, tehát a hook teljes state-je
+ * elvész) az állott pillanatképből építene újra: ha a usernek a belépéskor még
+ * nem volt mentett sora, a most beállított oszlopai helyett a kód szerinti
+ * defaultok jönnének vissza. Ezért minden képernyő-állapotot változtató művelet
+ * a VÁLTOZÁS PILLANATÁBAN visszaírja a kimenő payloadot a contextbe
+ * (`mergeListPreference`), nem a PUT válaszából — a válasz-alapú írás egy
+ * repülő kérés közben tett kattintást ütne vissza az alábbi újrainicializáló
+ * effekten keresztül. A saját írásunkat ezért az effekt referencia szerint
+ * felismeri és átugorja (l. `optimisticRef`).
+ *
  * Merge-logika betöltéskor (miért `order` a kulcs, nem csak `visible`): a
  * mentett `columns.order` a MENTÉSKOR ismert oszlopkulcsok teljes listája
  * (látható ÉS elrejtett is), ezért ebből tudjuk eldönteni, hogy egy, a mentett
@@ -59,7 +71,7 @@ export function resetListColumnsCompanyMemory() {
  */
 export function useListColumns(listKey, registry, options = {}) {
   const { defaultPageSize = null, urlPageSize = null } = options
-  const { can, listPreferences, activeCompanyId } = useAuth()
+  const { can, listPreferences, activeCompanyId, mergeListPreference, clearListPreference } = useAuth()
   const { t } = useTranslation()
   const addToast = useToast()
 
@@ -89,6 +101,14 @@ export function useListColumns(listKey, registry, options = {}) {
   const visibleKeysRef = useRef(visibleKeys)
   const orderedKeysRef = useRef(orderedKeys)
   const debounceRef = useRef(null)
+  // A saját, optimista context-írásunk payloadja (referencia szerint), hogy az
+  // újrainicializáló effekt meg tudja különböztetni a SZERVERRŐL érkező friss
+  // állapottól, és ne írja vissza a helyi state-et a saját írásunkból.
+  const optimisticRef = useRef(saved)
+  // A még KI NEM KÜLDÖTT, a debounce-ablakban várakozó mentés payloadja.
+  // Szándékosan külön él a timer-reftől: a lecsatoláskori flushnak pontosan
+  // tudnia kell, hogy van-e valódi függő írás, vagy a PUT már elindult.
+  const pendingSaveRef = useRef(null)
   const companyRef = useRef(activeCompanyId)
   // A MENTENDŐ lapméret. Szándékosan külön él a megjelenített `pageSize`-tól:
   // egy megosztott link ?per_page=100 értéke a nézetet átállítja, de NEM írja
@@ -115,7 +135,9 @@ export function useListColumns(listKey, registry, options = {}) {
   // vagyis azonos — az effekt nem futna le, és az előző cégen helyben beállított
   // (még csak a debounce-olt PUT-ban élő) érték bennragadna a képernyőn.
   useEffect(() => {
-    if (companyRef.current !== activeCompanyId) {
+    const companyChanged = companyRef.current !== activeCompanyId
+
+    if (companyChanged) {
       // Cégváltás ÚJRACSATOLÁS NÉLKÜL. A jelenlegi Layoutban ez nem fordul elő
       // (l. `<Outlet key={activeCompanyId} />`, ezért van a modul-szintű
       // memória is), de ha a lista egyszer mégis mountolva maradna a váltáson
@@ -126,11 +148,22 @@ export function useListColumns(listKey, registry, options = {}) {
       //  - a megnyitáskori URL-beli lapméret a VÁLTÁS ELŐTTI cég nézetére szólt,
       //    ezért elévül.
       clearTimeout(debounceRef.current)
+      debounceRef.current = null
+      pendingSaveRef.current = null
       companyRef.current = activeCompanyId
       urlPageSizeRef.current = null
     }
 
     savedRef.current = saved
+
+    // A SAJÁT optimista írásunk nem inicializál újra: a helyi state már pontosan
+    // ezt az értéket tükrözi, az újraszámolás viszont mellékhatásokkal járna —
+    // a `visible` tömb sorrendje normalizálódna, egy URL-ből jövő ?per_page
+    // pedig visszaütné a felhasználó épp választott lapméretét. Csak a
+    // szerverről (/api/me: belépés, cégváltás, refreshAuth) érkező, ettől
+    // KÜLÖNBÖZŐ állapot építi újra a hookot.
+    if (!companyChanged && saved === optimisticRef.current) return
+
     setVisibleKeys(computeVisibleKeys(permittedColumns, saved))
     setOrderedKeys(computeOrderedKeys(permittedColumns, saved))
     persistedPageSizeRef.current = saved?.page_size
@@ -138,34 +171,71 @@ export function useListColumns(listKey, registry, options = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listKey, saved, activeCompanyId])
 
-  useEffect(() => () => clearTimeout(debounceRef.current), [])
+  const sendSave = useCallback(async (payload) => {
+    try {
+      await listPreferencesApi.update(listKey, payload)
+    } catch {
+      // A helyi (optimista) állapotot szándékosan NEM görgetjük vissza — a
+      // felhasználó választása a képernyőn érvényben marad, csak a
+      // háttérben történő mentés esett ki; csendes, diszkrét jelzés.
+      addToast(t('columns.save_error'), 'error')
+    }
+  }, [listKey, addToast, t])
+
+  // A lecsatoláskori flush (lentebb) csak egyszer, `[]` függőséggel iratkozik
+  // fel, ezért nem zárhat rá a legfrissebb `sendSave`-re — refen keresztül éri
+  // el. (Ha `sendSave` a takarító-effekt függőségi listájába kerülne, egy
+  // nyelvváltás miatti `t`-csere idő előtti flusht váltana ki.)
+  const sendSaveRef = useRef(sendSave)
+  useEffect(() => { sendSaveRef.current = sendSave }, [sendSave])
+
+  // Lecsatoláskor a FÜGGŐ (még ki nem küldött) mentést nem eldobjuk, hanem
+  // azonnal, fire-and-forget módon kiküldjük: a listát a debounce-ablakon belül
+  // elhagyó felhasználó beállítása különben sosem jutna el a szerverig — a
+  // context ugyan már tükrözné, de egy újratöltés után elveszne. A MÁR ELINDULT
+  // PUT-ot nem ismételjük meg: a timer callbackje kinullázza a `pendingSaveRef`-et,
+  // tehát flushölni csak akkor van mit, ha az ablak még nem telt le.
+  useEffect(() => () => {
+    clearTimeout(debounceRef.current)
+    debounceRef.current = null
+    const pending = pendingSaveRef.current
+    pendingSaveRef.current = null
+    if (pending) sendSaveRef.current(pending)
+  }, [])
 
   const scheduleSave = useCallback((nextVisibleKeys, nextOrderedKeys) => {
     clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(async () => {
-      try {
-        await listPreferencesApi.update(
-          listKey,
-          buildPayload(nextVisibleKeys, nextOrderedKeys, savedRef.current, persistedPageSizeRef.current),
-        )
-      } catch {
-        // A helyi (optimista) állapotot szándékosan NEM görgetjük vissza — a
-        // felhasználó választása a képernyőn érvényben marad, csak a
-        // háttérben történő mentés esett ki; csendes, diszkrét jelzés.
-        addToast(t('columns.save_error'), 'error')
-      }
+
+    const payload = buildPayload(nextVisibleKeys, nextOrderedKeys, savedRef.current, persistedPageSizeRef.current)
+
+    // Optimista context-írás a VÁLTOZÁS pillanatában (l. a hook fejlécét): a
+    // kimenő payloadból, nem a PUT válaszából.
+    optimisticRef.current = payload
+    mergeListPreference(listKey, payload)
+
+    pendingSaveRef.current = payload
+    debounceRef.current = setTimeout(() => {
+      const pending = pendingSaveRef.current
+      pendingSaveRef.current = null
+      debounceRef.current = null
+      sendSaveRef.current(pending)
     }, SAVE_DEBOUNCE_MS)
-  }, [listKey, addToast, t])
+  }, [listKey, mergeListPreference])
 
   const toggle = useCallback((key) => {
     const column = permittedColumns.find((col) => col.key === key)
     if (!column || column.locked) return
 
-    setVisibleKeys((prev) => {
-      const next = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-      scheduleSave(next, orderedKeysRef.current)
-      return next
-    })
+    // A következő állapot a refből (nem setState-updaterből) számolódik: a
+    // `scheduleSave` mostantól a contextbe is ír, egy updater-függvény viszont a
+    // RENDER-fázisban fut (StrictMode alatt kétszer is), ahonnan másik komponens
+    // state-jét frissíteni tilos. A ref azonnali frissítése tartja korrektként
+    // az ugyanabban a tickben induló következő hívást is.
+    const prev = visibleKeysRef.current
+    const next = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    visibleKeysRef.current = next
+    setVisibleKeys(next)
+    scheduleSave(next, orderedKeysRef.current)
   }, [permittedColumns, scheduleSave])
 
   // A `reorder` a sortable (nem-locked) halmazon belüli áthelyezést fejezi ki:
@@ -178,15 +248,16 @@ export function useListColumns(listKey, registry, options = {}) {
     const overColumn = permittedColumns.find((col) => col.key === overKey)
     if (!activeColumn || activeColumn.locked || !overColumn || overColumn.locked) return
 
-    setOrderedKeys((prev) => {
-      const fromIndex = prev.indexOf(activeKey)
-      const toIndex = prev.indexOf(overKey)
-      if (fromIndex === -1 || toIndex === -1) return prev
+    // Refből számolt következő állapot — l. a `toggle` indoklását.
+    const prev = orderedKeysRef.current
+    const fromIndex = prev.indexOf(activeKey)
+    const toIndex = prev.indexOf(overKey)
+    if (fromIndex === -1 || toIndex === -1) return
 
-      const next = enforceLockedPositions(moveKey(prev, fromIndex, toIndex), permittedColumns)
-      scheduleSave(visibleKeysRef.current, next)
-      return next
-    })
+    const next = enforceLockedPositions(moveKey(prev, fromIndex, toIndex), permittedColumns)
+    orderedKeysRef.current = next
+    setOrderedKeys(next)
+    scheduleSave(visibleKeysRef.current, next)
   }, [permittedColumns, scheduleSave])
 
   // Lapméret-váltás a PerPageSelectorból. A láthatóság/sorrend mentési útját
@@ -202,9 +273,25 @@ export function useListColumns(listKey, registry, options = {}) {
   }, [scheduleSave])
 
   const reset = useCallback(async () => {
+    // A függő mentést itt DOBJUK (nem flusheljük): a DELETE úgyis törli az egész
+    // sort, egy utána befutó PUT pedig épp az imént visszaállított defaultot
+    // írná felül a régi értékkel.
     clearTimeout(debounceRef.current)
-    setVisibleKeys(defaultVisibleKeys(permittedColumns))
-    setOrderedKeys(permittedColumns.map((col) => col.key))
+    debounceRef.current = null
+    pendingSaveRef.current = null
+
+    const nextVisible = defaultVisibleKeys(permittedColumns)
+    const nextOrdered = permittedColumns.map((col) => col.key)
+    visibleKeysRef.current = nextVisible
+    orderedKeysRef.current = nextOrdered
+    setVisibleKeys(nextVisible)
+    setOrderedKeys(nextOrdered)
+
+    // A context is a mentés nélküli állapotra áll: a kulcs törlésével egy
+    // későbbi remount a kód szerinti defaultokból épül (ugyanaz, amit az /api/me
+    // is adna a DELETE után).
+    optimisticRef.current = undefined
+    clearListPreference(listKey)
     // A reset a TELJES preferencia-sort törli (DELETE), tehát a mentett
     // lapméret is elvész — a megjelenített értéket ezért vissza kell vinnünk a
     // mentés nélküli feloldásra (URL > lista-default), különben a képernyő és a
@@ -216,7 +303,7 @@ export function useListColumns(listKey, registry, options = {}) {
     } catch {
       addToast(t('columns.save_error'), 'error')
     }
-  }, [listKey, permittedColumns, defaultPageSize, addToast, t])
+  }, [listKey, permittedColumns, defaultPageSize, addToast, t, clearListPreference])
 
   const isVisible = useCallback((key) => visibleKeys.includes(key), [visibleKeys])
 

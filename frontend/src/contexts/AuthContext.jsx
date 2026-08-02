@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { me, login as apiLogin, logout as apiLogout, switchCompany as apiSwitch } from '../api/auth'
 import { useTranslation } from './TranslationContext'
 
@@ -62,8 +62,32 @@ export function AuthProvider({ children }) {
     return permissions.includes(permissionKey)
   }
 
+  // A `listPreferences` egyébként CSAK az /api/me válaszából frissül (fetchMe),
+  // vagyis egy munkameneten belül pillanatkép. A lista-preferenciákat mentő
+  // useListColumns hook ezzel a két setterrel tartja szinkronban a contextet a
+  // képernyővel: enélkül egy sikeres PUT után a listaoldal elhagyása és
+  // visszatérése (remount) az ÁLLOTT pillanatképből építené újra az oszlopokat,
+  // és a felhasználó választása eltűnne. Mindkettő IMMUTÁBILISAN frissít (új
+  // objektum), hogy a context-fogyasztók újrarendereljenek.
+  //
+  // useCallback: a hívó ezeket a saját useCallback-jeinek FÜGGŐSÉGI listájába
+  // teszi, ezért stabil referencia kell (a többi itteni függvénnyel ellentétben,
+  // amiket senki nem tesz dependency arraybe).
+  const mergeListPreference = useCallback((listKey, preferences) => {
+    setListPreferences((prev) => ({ ...prev, [listKey]: preferences }))
+  }, [])
+
+  const clearListPreference = useCallback((listKey) => {
+    setListPreferences((prev) => {
+      if (!(listKey in prev)) return prev // nincs mit törölni — felesleges újrarendert sem okozunk
+      const next = { ...prev }
+      delete next[listKey]
+      return next
+    })
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, companies, activeCompanyId, permissions, listPreferences, loading, login, logout, switchCompany, can, refreshAuth: fetchMe }}>
+    <AuthContext.Provider value={{ user, companies, activeCompanyId, permissions, listPreferences, mergeListPreference, clearListPreference, loading, login, logout, switchCompany, can, refreshAuth: fetchMe }}>
       {children}
     </AuthContext.Provider>
   )

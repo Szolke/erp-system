@@ -18,14 +18,14 @@ vi.mock('../api/auth', () => ({
 }))
 vi.mock('./TranslationContext', () => ({ useTranslation: vi.fn() }))
 
-function meResponse({ permissions = [], isSuperadmin = false, companyId = 1 } = {}) {
+function meResponse({ permissions = [], isSuperadmin = false, companyId = 1, listPreferences = {} } = {}) {
   return {
     data: {
       user: { id: 1, is_superadmin: isSuperadmin, locale: 'hu' },
       companies: [{ id: companyId, name: 'Test Co' }],
       active_company_id: companyId,
       permissions,
-      list_preferences: {},
+      list_preferences: listPreferences,
     },
   }
 }
@@ -116,6 +116,89 @@ describe('betöltetlen/üres állapot — fail-closed', () => {
 
     expect(result.current.can('invoice.view')).toBe(false)
     expect(result.current.user).toBe(null)
+  })
+})
+
+describe('lista-preferenciák — optimista frissítés (mergeListPreference / clearListPreference)', () => {
+  // A `listPreferences` egyébként csak az /api/me válaszából frissülne, ezért egy
+  // sikeres oszlop-mentés után a context állott maradna (l. useListColumns).
+  const DOCS = { columns: { visible: ['number'], order: ['number', 'partner'] } }
+  const PARTNERS = { columns: { visible: ['name', 'email'], order: ['name', 'email'] }, page_size: 50 }
+
+  it('a merge felveszi az új kulcsot, a meglévőket érintetlenül hagyva, ÚJ objektumban', async () => {
+    me.mockResolvedValue(meResponse({ listPreferences: { 'partners.index': PARTNERS } }))
+    const { result } = setup()
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const before = result.current.listPreferences
+
+    act(() => result.current.mergeListPreference('documents.index', DOCS))
+
+    expect(result.current.listPreferences).toEqual({ 'partners.index': PARTNERS, 'documents.index': DOCS })
+    // immutábilis: a korábbi objektum nem módosult, csak új példány készült
+    expect(result.current.listPreferences).not.toBe(before)
+    expect(before).toEqual({ 'partners.index': PARTNERS })
+  })
+
+  it('a merge egy meglévő kulcs értékét teljesen lecseréli (nem mélyen összefésüli)', async () => {
+    me.mockResolvedValue(meResponse({ listPreferences: { 'documents.index': { columns: { visible: ['number', 'partner'], order: ['number', 'partner'] }, page_size: 20 } } }))
+    const { result } = setup()
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => result.current.mergeListPreference('documents.index', DOCS))
+
+    // a régi `page_size: 20` NEM marad ott: a hook mindig teljes payloadot ad át,
+    // ahogy a PUT is teljes upsert a backend oldalán
+    expect(result.current.listPreferences['documents.index']).toEqual(DOCS)
+  })
+
+  it('a clear csak a megadott kulcsot törli', async () => {
+    me.mockResolvedValue(meResponse({ listPreferences: { 'documents.index': DOCS, 'partners.index': PARTNERS } }))
+    const { result } = setup()
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => result.current.clearListPreference('documents.index'))
+
+    expect(result.current.listPreferences).toEqual({ 'partners.index': PARTNERS })
+  })
+
+  it('nem létező kulcs törlése ugyanazt az objektumot hagyja (nincs felesleges újrarender)', async () => {
+    me.mockResolvedValue(meResponse({ listPreferences: { 'partners.index': PARTNERS } }))
+    const { result } = setup()
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const before = result.current.listPreferences
+
+    act(() => result.current.clearListPreference('documents.index'))
+
+    expect(result.current.listPreferences).toBe(before)
+  })
+
+  it('cégváltás után az ÚJ cég /api/me válasza felülírja az optimista értékeket (nincs átszivárgás)', async () => {
+    // Ez a garancia teszi feleslegessé, hogy a setterek cégenként kulcsoljanak:
+    // a `listPreferences` mindig az AKTUÁLIS cég sorait tartalmazza, mert a
+    // switchCompany egy teljes fetchMe()-t futtat.
+    me.mockResolvedValueOnce(meResponse({ companyId: 1, listPreferences: {} }))
+    const { result } = setup()
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => result.current.mergeListPreference('documents.index', DOCS))
+    expect(result.current.listPreferences['documents.index']).toEqual(DOCS)
+
+    switchCompany.mockResolvedValue({})
+    me.mockResolvedValueOnce(meResponse({ companyId: 2, listPreferences: { 'partners.index': PARTNERS } }))
+    await act(async () => { await result.current.switchCompany(2) })
+
+    expect(result.current.listPreferences).toEqual({ 'partners.index': PARTNERS })
+  })
+
+  it('logout üríti a lista-preferenciákat is', async () => {
+    me.mockResolvedValue(meResponse({ listPreferences: { 'documents.index': DOCS } }))
+    logout.mockResolvedValue({})
+    const { result } = setup()
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.logout() })
+
+    expect(result.current.listPreferences).toEqual({})
   })
 })
 

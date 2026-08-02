@@ -10,6 +10,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers'
 import { useTranslation } from '../contexts/TranslationContext'
 import { usePopoverDismiss } from '../utils/usePopoverDismiss'
+import { MIN_VISIBLE_COLUMNS } from '../hooks/useListColumns'
 
 /**
  * Listafüggetlen oszlopválasztó popover — a useListColumns hookkal együtt
@@ -35,6 +36,10 @@ import { usePopoverDismiss } from '../utils/usePopoverDismiss'
  * Bizonylatok oldal `.doc-search-wrap`-je `flex: 1`), így a gomb a sáv JOBB
  * szélére kerülhet — ott a bal-horgonyzás lógna le a képernyő szélén túl.
  *
+ * Minimum-oszlop guard: ha már csak egyetlen oszlop látszik, annak a checkboxa
+ * letiltódik (a küszöböt a hook `MIN_VISIBLE_COLUMNS`-a adja) — a lista nem
+ * üresíthető ki. A húzás ettől függetlenül marad engedélyezett.
+ *
  * Sorrendezés: a `locked` sorok fogantyú NÉLKÜL renderelődnek és NEM részei a
  * sortable halmaznak (a hook úgyis fail-safe kényszeríti vissza a locked
  * pozíciókat, ha valahogy mégis bekerülnének) — a húzás CSAK a fogantyúról
@@ -55,6 +60,12 @@ export default function ColumnPicker({ columns, isVisible, onToggle, onReorder, 
 
   const visibleCount = columns.filter((col) => isVisible(col.key)).length
   const sortableIds = columns.filter((col) => !col.locked).map((col) => col.key)
+
+  // Minimum-oszlop guard (a küszöböt a hook definiálja): ha már csak ennyi
+  // oszlop látszik, a MÉG LÁTHATÓ oszlopok checkboxa letiltódik, hogy a lista
+  // ne üresedhessen ki. A hook a `toggle`-t magát is védi — itt csak azt
+  // előzzük meg, hogy a felhasználó egy néma no-opra kattintson.
+  const atMinimum = visibleCount <= MIN_VISIBLE_COLUMNS
 
   function handleDragEnd(event) {
     const { active, over } = event
@@ -94,6 +105,7 @@ export default function ColumnPicker({ columns, isVisible, onToggle, onReorder, 
                     key={col.key}
                     column={col}
                     checked={isVisible(col.key)}
+                    lastVisible={atMinimum && isVisible(col.key)}
                     onToggle={() => onToggle(col.key)}
                   />
                 ))}
@@ -112,9 +124,20 @@ export default function ColumnPicker({ columns, isVisible, onToggle, onReorder, 
   )
 }
 
-function ColumnPickerRow({ column, checked, onToggle }) {
+function ColumnPickerRow({ column, checked, lastVisible, onToggle }) {
   const { t } = useTranslation()
   const label = t(column.label)
+  // Két, egymástól független ok tilthatja a kikapcsolást: az oszlop `locked`
+  // (soha nem rejthető), vagy ez az utolsó megmaradt látható oszlop. A `locked`
+  // sorral ellentétben az utolsó látható oszlop TOVÁBBRA IS húzható (a
+  // sorrendezését semmi nem indokolja korlátozni), ezért csak a checkbox
+  // tiltódik, a sor `is-locked` stílust nem kap.
+  //
+  // A tooltip mindkét esetben a meglévő `columns.locked_tooltip` ("Ez az oszlop
+  // nem rejthető el") — tényszerűen igaz az utolsó látható oszlopra is. Külön,
+  // az OKOT is magyarázó szöveghez új fordítási kulcs kellene a
+  // TranslationSeederben (backend), ez a kör szándékosan frontend-only.
+  const hideDisabled = column.locked || lastVisible
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column.key,
     disabled: column.locked,
@@ -130,7 +153,7 @@ function ColumnPickerRow({ column, checked, onToggle }) {
       ref={column.locked ? undefined : setNodeRef}
       style={style}
       className={'column-picker-row' + (column.locked ? ' is-locked' : '') + (isDragging ? ' is-dragging' : '')}
-      title={column.locked ? t('columns.locked_tooltip') : undefined}
+      title={hideDisabled ? t('columns.locked_tooltip') : undefined}
     >
       {!column.locked && (
         <button
@@ -148,7 +171,7 @@ function ColumnPickerRow({ column, checked, onToggle }) {
         <input
           type="checkbox"
           checked={checked}
-          disabled={column.locked}
+          disabled={hideDisabled}
           onChange={onToggle}
         />
       </label>

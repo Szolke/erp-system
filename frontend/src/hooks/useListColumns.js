@@ -6,6 +6,21 @@ import { listPreferences as listPreferencesApi } from '../api/listPreferences'
 
 const SAVE_DEBOUNCE_MS = 600
 
+// Minimum-oszlop guard: egy lista soha ne redukálódjon ennél kevesebb látható
+// oszlopra — egy fejléc és sorok nélküli, üres táblázat használhatatlan, és a
+// felhasználó a saját oszlopválasztóján kívül semmiből nem tudná visszaállítani.
+//
+// NINCS kitüntetett "kötelező" oszlop: bármelyik lehet az utolsó megmaradó, a
+// szabály csak a DARABSZÁMRA vonatkozik. A jelenlegi registryk mindegyikében
+// van legalább egy `locked` (eleve elrejthetetlen) oszlop, ezért ez a szabály
+// ma egyetlen listán sem korlátoz — sentinel egy jövőbeli, locked oszlop
+// NÉLKÜLI listára, illetve a nem a ColumnPickeren át keletkező (kézzel, API-n
+// írt) preferenciákra, amiket a backend nem validál.
+//
+// A ColumnPicker ugyanezt a konstanst olvassa a checkbox letiltásához, hogy a
+// küszöb egy helyen legyen definiálva.
+export const MIN_VISIBLE_COLUMNS = 1
+
 // Melyik cég volt aktív, amikor legutóbb egy listaoldal CSATLAKOZOTT.
 //
 // Miért modul-szintű? A `Layout` az `<Outlet key={activeCompanyId} />`-del
@@ -56,6 +71,10 @@ export function resetListColumnsCompanyMemory() {
  * mást mondana (l. `enforceLockedPositions`). Új, a mentés óta bevezetett
  * oszlop a nem-locked halmaz VÉGÉN jelenik meg (determinisztikus, l.
  * `computeOrderedKeys`).
+ *
+ * Minimum-oszlop guard: a láthatóság soha nem eshet `MIN_VISIBLE_COLUMNS` alá —
+ * sem a `toggle`-lel, sem betöltéskor (mentett preferenciából vagy defaultból).
+ * Nincs kitüntetett kötelező oszlop, bármelyik lehet az utolsó megmaradó.
  *
  * Lapméret (`page_size`): opcionális, csak a lapozó listákon. A hívó a
  * `defaultPageSize`-ban adja meg a lista saját alapértékét (jellemzően 20, az
@@ -232,7 +251,15 @@ export function useListColumns(listKey, registry, options = {}) {
     // state-jét frissíteni tilos. A ref azonnali frissítése tartja korrektként
     // az ugyanabban a tickben induló következő hívást is.
     const prev = visibleKeysRef.current
-    const next = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    const hiding = prev.includes(key)
+
+    // Minimum-oszlop guard (l. MIN_VISIBLE_COLUMNS): az utolsó látható oszlop
+    // elrejtése no-op — se helyi állapotot, se mentést nem indít. A ColumnPicker
+    // ilyenkor a checkboxot is letiltja, tehát ez az ág a nem-UI utakra
+    // (programozott hívás, jövőbeli komponens) szóló védelem.
+    if (hiding && prev.length <= MIN_VISIBLE_COLUMNS) return
+
+    const next = hiding ? prev.filter((k) => k !== key) : [...prev, key]
     visibleKeysRef.current = next
     setVisibleKeys(next)
     scheduleSave(next, orderedKeysRef.current)
@@ -339,21 +366,39 @@ function resolvePageSize(urlPageSize, saved, defaultPageSize) {
   return defaultPageSize
 }
 
+// A minimum-oszlop szabály fail-safe alkalmazása a BETÖLTÉSI utakra: a mentett
+// preferencia és a registry defaultjai is adhatnak elvileg üres halmazt (egy
+// API-n át írt preferencia, vagy egy `default`/`locked` jelölés nélküli új
+// registry). Ilyenkor az első engedélyezett oszlop marad látható —
+// determinisztikus, registry-sorrend szerinti választás.
+//
+// Szándékosan CSAK a megjelenítést igazítja, mentést nem indít: a hookban
+// minden PUT felhasználói művelethez kötött (l. `scheduleSave`), egy néma,
+// mountkori írás pedig a felhasználó tudta nélkül módosítaná a szerver sorát.
+// A szerver oldali érték a következő valódi módosításnál javul ki magától.
+function enforceMinimumVisible(visibleKeys, permittedColumns) {
+  if (visibleKeys.length >= MIN_VISIBLE_COLUMNS) return visibleKeys
+  return permittedColumns.slice(0, MIN_VISIBLE_COLUMNS).map((col) => col.key)
+}
+
 function defaultVisibleKeys(permittedColumns) {
-  return permittedColumns.filter((col) => col.default || col.locked).map((col) => col.key)
+  const keys = permittedColumns.filter((col) => col.default || col.locked).map((col) => col.key)
+  return enforceMinimumVisible(keys, permittedColumns)
 }
 
 function computeVisibleKeys(permittedColumns, saved) {
   const savedOrder = saved?.columns?.order ?? null
   const savedVisible = new Set(saved?.columns?.visible ?? [])
 
-  return permittedColumns
+  const keys = permittedColumns
     .filter((col) => {
       if (col.locked) return true
       if (!savedOrder) return col.default
       return savedOrder.includes(col.key) ? savedVisible.has(col.key) : col.default
     })
     .map((col) => col.key)
+
+  return enforceMinimumVisible(keys, permittedColumns)
 }
 
 // A mentett `order`-ből indul (ismert kulcsok, ebben a sorrendben), a végére

@@ -42,6 +42,16 @@ const REG_ALL_LOCKED = [
   { key: 'b', default: true, locked: true },
 ]
 
+// Locked oszlop NÉLKÜLI registry: ma egyetlen valós lista sem ilyen (mindegyik
+// registryben van legalább egy `locked` oszlop), ezért a minimum-oszlop guard
+// csak ezen a fixture-ön mérhető. Pontosan ez a sentinel értelme: ha egyszer
+// bekerül egy locked oszlop nélküli lista, a szabály már készen áll.
+const REG_NO_LOCKED = [
+  { key: 'code', default: true },
+  { key: 'name', default: true },
+  { key: 'note', default: false },
+]
+
 const REG_WITH_PERMISSION = [
   { key: 'name', default: true, locked: true },
   { key: 'email', default: true },
@@ -273,6 +283,76 @@ describe('toggle', () => {
 
     act(() => result.current.toggle('status'))
     expect(result.current.isVisible('status')).toBe(false)
+  })
+})
+
+describe('minimum-oszlop guard (MIN_VISIBLE_COLUMNS)', () => {
+  it('az utolsó látható oszlop nem rejthető el, és mentés sem indul', async () => {
+    // A guard nélkül ez a lista NULLA látható oszlopra redukálódna: nincs benne
+    // locked oszlop, ami eleve elrejthetetlen lenne.
+    const { result } = setup(REG_NO_LOCKED)
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['code', 'name'])
+
+    act(() => result.current.toggle('name'))
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['code'])
+
+    // Az utolsó megmaradt oszlop kikapcsolása no-op — a helyi állapot marad…
+    act(() => result.current.toggle('code'))
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['code'])
+
+    // …és a szerverre sem megy ki róla PUT (csak az előző, jogos toggle-é).
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+    expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+    expect(listPreferencesApi.update.mock.calls[0][1].columns.visible).toEqual(['code'])
+  })
+
+  it('nincs kitüntetett kötelező oszlop: bármelyik lehet az utolsó megmaradó', () => {
+    // Ugyanaz a lista, fordított sorrendben lekapcsolva: itt a 'name' marad
+    // utolsóként, és most az válik elrejthetetlenné.
+    const { result } = setup(REG_NO_LOCKED)
+    act(() => result.current.toggle('code'))
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['name'])
+
+    act(() => result.current.toggle('name'))
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['name'])
+  })
+
+  it('az utolsó oszlop visszakapcsolás után újra elrejthető', () => {
+    // A guard nem "ragad be": amint van másik látható oszlop, a korlátozás megszűnik.
+    const { result } = setup(REG_NO_LOCKED)
+    act(() => result.current.toggle('name'))
+    act(() => result.current.toggle('note'))
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['code', 'note'])
+
+    act(() => result.current.toggle('code'))
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['note'])
+  })
+
+  it('a mindent elrejtő MENTETT preferencia sem üríti ki a listát (betöltési út)', () => {
+    // Ilyen sor ma nem keletkezhet a ColumnPickerből, de közvetlen API-hívással
+    // igen — a backend a `visible` tömböt nem validálja. A fail-safe az első
+    // registry-oszlopot tartja láthatóan.
+    const saved = { columns: { order: ['code', 'name', 'note'], visible: [] } }
+    const { result } = setup(REG_NO_LOCKED, { saved })
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['code'])
+  })
+
+  it('a betöltési fail-safe NEM ír vissza a szerverre', async () => {
+    // A hookban minden PUT felhasználói művelethez kötött; egy néma, mountkori
+    // mentés a felhasználó tudta nélkül módosítaná a mentett sorát.
+    const saved = { columns: { order: ['code', 'name', 'note'], visible: [] } }
+    setup(REG_NO_LOCKED, { saved })
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+    expect(listPreferencesApi.update).not.toHaveBeenCalled()
+  })
+
+  it('locked oszlopot tartalmazó listán a guard nem változtat a viselkedésen', () => {
+    // A jelenlegi 14 registry mindegyike ilyen: a locked oszlop már önmagában
+    // megtartja a minimumot, a kapcsolható oszlopok mind kikapcsolhatók.
+    const { result } = setup(REG_FRONT_ONLY)
+    act(() => result.current.toggle('partner'))
+    expect(result.current.visibleColumns.map((c) => c.key)).toEqual(['number'])
   })
 })
 

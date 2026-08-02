@@ -209,6 +209,56 @@ describe('checkbox — láthatóság toggle', () => {
   })
 })
 
+// A guard küszöbét a hook adja (MIN_VISIBLE_COLUMNS = 1); itt a KOMPONENS
+// oldali következményét ellenőrizzük: az utolsó látható oszlop checkboxa
+// letiltódik. Locked oszlop nélküli registry kell hozzá, mert a valós listák
+// locked oszlopa eleve tartja a minimumot (l. useListColumns.test.js).
+const COLUMNS_NO_LOCKED = [
+  { key: 'code', label: 'Code' },
+  { key: 'name', label: 'Name2' },
+]
+
+describe('minimum-oszlop guard — az utolsó látható oszlop nem kapcsolható ki', () => {
+  it('egyetlen látható oszlopnál annak checkboxa disabled, és kattintásra sem hív toggle-t', async () => {
+    // userEvent (nem fireEvent) — l. a locked checkbox tesztjének indoklását:
+    // a disabled állapotot csak a userEvent ellenőrzi kattintás előtt.
+    const user = userEvent.setup()
+    const { props } = setup({ columns: COLUMNS_NO_LOCKED, isVisible: (key) => key === 'code' })
+
+    const lastVisible = screen.getByRole('checkbox', { name: 'Code' })
+    expect(lastVisible).toBeChecked()
+    expect(lastVisible).toBeDisabled()
+
+    await user.click(lastVisible)
+    expect(props.onToggle).not.toHaveBeenCalled()
+  })
+
+  it('a REJTETT oszlopok checkboxa a minimumon is aktív marad (visszakapcsolhatók)', async () => {
+    const user = userEvent.setup()
+    const { props } = setup({ columns: COLUMNS_NO_LOCKED, isVisible: (key) => key === 'code' })
+
+    const hidden = screen.getByRole('checkbox', { name: 'Name2' })
+    expect(hidden).not.toBeDisabled()
+
+    await user.click(hidden)
+    expect(props.onToggle).toHaveBeenCalledWith('name')
+  })
+
+  it('két látható oszlopnál egyik checkbox sem tiltott', () => {
+    setup({ columns: COLUMNS_NO_LOCKED, isVisible: () => true })
+    expect(screen.getByRole('checkbox', { name: 'Code' })).not.toBeDisabled()
+    expect(screen.getByRole('checkbox', { name: 'Name2' })).not.toBeDisabled()
+  })
+
+  it('az utolsó látható oszlop sora tooltipet kap, de NEM kap is-locked stílust (húzható marad)', () => {
+    setup({ columns: COLUMNS_NO_LOCKED, isVisible: (key) => key === 'code' })
+    const row = screen.getByRole('checkbox', { name: 'Code' }).closest('.column-picker-row')
+    expect(row).toHaveAttribute('title', 'columns.locked_tooltip')
+    expect(row).not.toHaveClass('is-locked')
+    expect(screen.getByRole('button', { name: 'columns.drag_handle Code' })).toBeInTheDocument()
+  })
+})
+
 describe('drag-fogantyú', () => {
   it('nem-locked sorok kapnak fogantyút, értelmes aria-label-lel', () => {
     setup()

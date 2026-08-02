@@ -84,10 +84,25 @@ fi
 
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.5
 
+# A `sail` user UID-ja BUILD-időben dől el (nem futásidejű `usermod`-dal), hogy a
+# konténer alapértelmezett usere nem-root lehessen. Enélkül a `docker compose exec`
+# rootként futna, és root tulajdonú fájlokat írna a bind-mountolt backend/ könyvtárba.
+# Szándékosan itt, a felhasználás előtt deklarálva: a fájl elején állva a fenti
+# (drága, apt-alapú) rétegek cache-ét is érvénytelenítené.
+ARG WWWUSER=1000
+
 RUN userdel -r ubuntu
 RUN groupadd --force -g $WWWGROUP sail
-RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
+RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u $WWWUSER sail
 RUN git config --global --add safe.directory /var/www/html
+RUN gosu sail git config --global --add safe.directory /var/www/html
+
+# Amit korábban az entrypoint intézett futásidőben, rootként: mivel a konténer
+# `sail`-ként indul, ezeknek a könyvtáraknak már a build végén a helyükön és
+# írhatóként kell lenniük.
+RUN mkdir -p /.composer /var/log/supervisor \
+    && chown -R sail:$WWWGROUP /.composer /var/log/supervisor \
+    && chmod -R ugo+rw /.composer
 
 COPY start-container /usr/local/bin/start-container
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -95,5 +110,10 @@ COPY php.ini /etc/php/8.5/cli/conf.d/99-sail.ini
 RUN chmod +x /usr/local/bin/start-container
 
 EXPOSE 80/tcp
+
+# A konténer alapértelmezett usere. Ez az egyetlen olyan pont, ami a
+# `docker compose exec` (az entrypointot MEGKERÜLŐ) útvonalat is nem-rootra állítja.
+# Root-ot igénylő karbantartáshoz explicit `docker compose exec -u root ...` kell.
+USER sail
 
 ENTRYPOINT ["start-container"]

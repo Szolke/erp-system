@@ -5,21 +5,44 @@ if [ "$SUPERVISOR_PHP_USER" != "root" ] && [ "$SUPERVISOR_PHP_USER" != "sail" ];
     exit 1
 fi
 
-if [ ! -z "$WWWUSER" ]; then
-    usermod -u $WWWUSER sail
+# A `sail` user UID-ja build-időben, a WWWUSER build arg alapján dől el, ezért itt
+# futásidőben már nincs teendő. A usermod-ot csak akkor futtatjuk, ha (a) tényleg
+# rootként indultunk (pl. valaki `user: root`-tal indítja a konténert), ÉS (b) a
+# kért UID eltér a beépítettől -- különben a hívás felesleges és amúgy is bukna.
+if [ -n "$WWWUSER" ] && [ "$(id -u)" = "0" ] && [ "$(id -u sail)" != "$WWWUSER" ]; then
+    usermod -u "$WWWUSER" sail
 fi
 
 if [ ! -d /.composer ]; then
     mkdir /.composer
 fi
 
-chmod -R ugo+rw /.composer
+chmod -R ugo+rw /.composer 2>/dev/null || true
+
+# Drift-őr: ha a bind-mountolt köteten olyan fájl van, amit a futó user nem
+# birtokol, az szinte biztosan egy korábbi `docker compose exec -u root` (vagy egy
+# régi, rootként futó image) hagyatéka. Nem javítjuk csendben -- nem-root userként
+# nem is lehetne --, hanem hangosan kiírjuk a pontos helyreállító parancsot.
+# A `-print -quit` az első találatnál megáll, így az indulás nem lassul.
+RUNNING_USER="$(id -un)"
+for DIR in storage bootstrap/cache; do
+    if [ -d "/var/www/html/$DIR" ]; then
+        STRAY="$(find "/var/www/html/$DIR" ! -user "$RUNNING_USER" -print -quit 2>/dev/null)"
+        if [ -n "$STRAY" ]; then
+            echo "[start-container] FIGYELEM: idegen tulajdonu fajl a(z) $DIR alatt (elso talalat: $STRAY)."
+            echo "[start-container] Egyszeri helyreallitas:"
+            echo "[start-container]   docker compose exec -u root laravel.test chown -R $RUNNING_USER:$RUNNING_USER storage bootstrap/cache"
+        fi
+    fi
+done
 
 if [ $# -gt 0 ]; then
-    if [ "$SUPERVISOR_PHP_USER" = "root" ]; then
+    # gosu-ra csak akkor van szükség, ha rootként indultunk és tényleg váltani kell.
+    # A konténer alapértelmezés szerint már `sail`-ként fut (l. Dockerfile: USER sail).
+    if [ "$SUPERVISOR_PHP_USER" = "root" ] || [ "$(id -u)" = "$WWWUSER" ]; then
         exec "$@"
     else
-        exec gosu $WWWUSER "$@"
+        exec gosu "$WWWUSER" "$@"
     fi
 else
     exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

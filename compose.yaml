@@ -4,8 +4,15 @@ services:
             context: './backend/docker/8.5'
             dockerfile: Dockerfile
             args:
-                WWWGROUP: '${WWWGROUP}'
+                WWWGROUP: '${WWWGROUP:-1000}'
+                # A `sail` user UID-ja build-időben dől el, hogy az image
+                # alapértelmezett usere nem-root lehessen (l. Dockerfile: USER sail).
+                WWWUSER: '${WWWUSER:-1000}'
         image: 'sail-8.5/app'
+        # Redundáns az image USER direktívájával, de itt látszik is: a konténer --
+        # és így a `docker compose exec` is -- a host UID/GID-jén fut, ezért a
+        # bind-mountolt backend/ könyvtárba SOHA nem kerül root tulajdonú fájl.
+        user: '${WWWUSER:-1000}:${WWWGROUP:-1000}'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:

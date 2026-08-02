@@ -81,8 +81,15 @@ A szuperadmin-felhasználó **minden jogot automatikusan megkap** — nem szüks
 rendelni, és a deny override sem hat rá. A szuperadmin-felhasználó:
 
 - Látja a **Cégek** menüpontot (új cég létrehozása, váltás).
+- Látja a Beállítások → **Csoportok — összes cég** menüpontot: ez az egyetlen olyan nézet, amely
+  cégváltás nélkül mutat több cég adatait (l. [6. fejezet](06-beallitasok.md)). Ez a jog
+  szuperadmin-kizárólagos: csoporthoz rendeléssel vagy jog-felülírással nem adható meg más
+  felhasználónak.
 - Nem törölhető és nem tiltható le a rendszerből.
 - A felhasználók listáján „Szuperadmin" badge jelöli.
+
+Minden más felületen a szuperadminra is a szokásos cég-hatókör érvényes: a listák és a
+beállítások az éppen kiválasztott cég adatait mutatják.
 
 Az első szuperadmin fiók beállításáról az élesítési útmutató szól; a demo környezetben a
 `test@example.com` / `password` felhasználó szuperadmin.

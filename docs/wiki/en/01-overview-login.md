@@ -93,6 +93,11 @@ drop-down.
 > **Creating companies** — superadmin users can create new companies and assign users to
 > them via the Settings → **Companies** menu item. This menu item is not visible to regular
 > users.
+>
+> **Cross-company visibility** — the company switcher decides which company's data the lists,
+> forms and settings show; for regular users there is no exception to this. Superadmins have a
+> single screen that reaches across companies without switching: Settings → **Groups — all
+> companies** (see [Chapter 6](06-settings.md)).
 
 ---
 

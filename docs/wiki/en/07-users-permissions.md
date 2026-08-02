@@ -80,8 +80,15 @@ A superadmin user **automatically receives every permission** — no group assig
 needed, and deny overrides do not apply. Superadmin users:
 
 - Can see the **Companies** menu item (create companies, switch between them).
+- Can see the Settings → **Groups — all companies** menu item: the only screen that shows data
+  from several companies without switching (see [Chapter 6](06-settings.md)). This permission
+  is superadmin-exclusive: it cannot be handed to another user through group membership or a
+  permission override.
 - Cannot be deleted or deactivated from the system.
 - Are shown with a "Superadmin" badge in the user list.
+
+On every other screen the usual company scope applies to superadmins as well: lists and
+settings show the data of the currently selected company.
 
 For information on setting up the first superadmin account, see the deployment guide. In
 the demo environment, `test@example.com` / `password` is the superadmin account.

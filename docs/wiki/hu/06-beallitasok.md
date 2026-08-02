@@ -238,8 +238,10 @@ törlés — a felső szintű **Eszközök** menüpont adja, l. a [11. fejezet](
 Ez az oldal csak akkor érhető el, ha az **Értékesítő csoportok** modul engedélyezve van, és
 a megtekintéshez az értékesítő csoportok megtekintésének joga szükséges.
 
-Az értékesítő csoportok az érintett céghez kötöttek — más cég csoportjai nem láthatók. Minden
-csoport megjelenítőneve a cég prefixéből és a csoport nevéből áll össze:
+Az értékesítő csoportok céghez kötöttek: ez az oldal mindig az éppen kiválasztott cég
+csoportjait mutatja, más cég csoportjai itt nem érhetők el — sem megtekintésre, sem
+szerkesztésre. (Az egyetlen kivétel a szuperadmin cégek közötti áttekintő nézete, l. lentebb.)
+Minden csoport megjelenítőneve a cég prefixéből és a csoport nevéből áll össze:
 `PREFIX_CsoportNév` (pl. `BUD_Észak`).
 
 **Új csoport hozzáadása** (a csoportok létrehozásának jogával):
@@ -273,6 +275,27 @@ A tagok szerkesztéséhez a csoportok szerkesztésének joga **és** a céges fe
 listázási joga is szükséges. Ha bármelyik hiányzik, a szakasz csak megtekintésre áll
 rendelkezésre — ilyenkor a meglévő tagság látszik, és a felület megírja, melyik jogosultság
 hiányzik.
+
+#### Csoportok — összes cég (szuperadmin)
+
+Szuperadmin-felhasználóknál a Beállítások almenüben egy második menüpont is megjelenik:
+**Csoportok — összes cég**. Ez egy áttekintő nézet, amely cégenként csoportosítva sorolja fel
+az összes cég értékesítő csoportjait és azok tagjait — cégváltás nélkül. A menüpont kizárólag
+szuperadminnak látszik: ez a jogosultság csoporthoz rendeléssel vagy jog-felülírással sem
+adható meg más felhasználónak.
+
+Szuperadminként innen **bármelyik cégben** létrehozható, átnevezhető és törölhető csoport. Új
+csoportnál a **Cél cég** legördülőben kell megadni, melyik céghez kerüljön. Két feltételre
+érdemes figyelni:
+
+- a cél cégnél be kell legyen állítva az értékesítő csoport prefix — enélkül a mentés
+  elutasításra kerül (a cégválasztó a prefix hiányát külön jelzi is);
+- a cél cégnél engedélyezve kell legyen az Értékesítő csoportok modul — ezt a cégválasztó nem
+  mutatja, ezért kikapcsolt modul esetén csak a mentés ad hibaüzenetet.
+
+**A tagság szerkesztése ezen az oldalon nem lehetséges** — az továbbra is cégenként, a fenti
+Értékesítő csoportok oldalon történik, mindig az éppen kiválasztott cégre. Az áttekintő nézet
+a tagokat csak megjeleníti.
 
 ### Fordítások (Beállítások → Fordítások)
 

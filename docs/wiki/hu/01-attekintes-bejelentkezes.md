@@ -90,6 +90,11 @@ Ha csak egy céghez tartozol, a cégváltó helyett a cég neve jelenik meg szö
 > **Cégek létrehozása** — szuperadmin-felhasználók a Beállítások → **Cégek** menüpontban hozhatnak
 > létre új cégeket és rendelhetnek hozzájuk felhasználókat. Ez a menüpont normál felhasználóknak
 > nem látható.
+>
+> **Cégek közötti rálátás** — a cégváltó dönti el, melyik cég adatait mutatják a listák, űrlapok és
+> beállítások; normál felhasználónál ez alól nincs kivétel. Szuperadminnak egyetlen helyen van
+> cégváltás nélküli, cégek közötti nézete: a Beállítások → **Csoportok — összes cég** oldalon
+> (l. [6. fejezet](06-beallitasok.md)).
 
 ---
 

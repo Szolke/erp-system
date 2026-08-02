@@ -249,8 +249,10 @@ under the top-level **Assets** menu item, see [Chapter 11](11-assets.md).
 This page is only available when the **Sales Groups** module is enabled and requires
 permission to view sales groups.
 
-Sales groups are scoped to the current company — groups belonging to other companies are
-not visible. Each group's display name is composed of the company prefix and the group
+Sales groups are scoped to a company: this page always shows the groups of the currently
+selected company, and groups belonging to other companies cannot be reached here — neither
+for viewing nor for editing. (The only exception is the superadmin cross-company overview,
+see below.) Each group's display name is composed of the company prefix and the group
 name: `PREFIX_GroupName` (e.g. `BUD_North`).
 
 **Adding a group** (with permission to create sales groups):
@@ -285,6 +287,26 @@ The section has two blocks:
 Editing members requires permission to edit sales groups **and** permission to list the
 company's users. If either is missing, the section is read-only — the existing membership
 is still shown, and the interface states which permission is missing.
+
+#### Groups — All Companies (superadmin)
+
+Superadmin users see a second menu item in the Settings submenu: **Groups — all companies**.
+This is an overview screen listing every company's sales groups and their members, grouped by
+company, without switching companies. The menu item is visible to superadmins only: this
+permission cannot be handed to anyone else through group membership or a permission override.
+
+As a superadmin you can create, rename and delete groups **in any company** from here. When
+adding a group, the **Target company** drop-down determines which company it belongs to. Two
+conditions are worth keeping in mind:
+
+- the target company must have a sales group prefix configured — without it the save is
+  rejected (the company selector also flags a missing prefix);
+- the Sales Groups module must be enabled for the target company — the selector does not show
+  this, so with the module disabled only the save reports the error.
+
+**Membership cannot be edited on this page** — that still happens per company, on the Sales
+Groups page above, always for the currently selected company. The overview only displays
+members.
 
 ### Translations (Settings → Translations)
 

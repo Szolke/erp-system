@@ -118,7 +118,7 @@ endpoints:
         name: type
         description: ''
         required: true
-        example: service
+        example: product
         type: string
         enumValues:
           - product
@@ -186,7 +186,7 @@ endpoints:
       name: 'n'
       description: 'Eius et animi quos velit et.'
       unit: v
-      type: service
+      type: product
       vat_rate_id: 16
       base_price: 39
       base_currency: gzm
@@ -343,7 +343,7 @@ endpoints:
         name: type
         description: ''
         required: true
-        example: service
+        example: product
         type: string
         enumValues:
           - product
@@ -389,7 +389,7 @@ endpoints:
         name: is_active
         description: ''
         required: false
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -411,11 +411,11 @@ endpoints:
       name: 'n'
       description: 'Eius et animi quos velit et.'
       unit: v
-      type: service
+      type: product
       vat_rate_id: 16
       base_price: 39
       base_currency: gzm
-      is_active: false
+      is_active: true
     fileParameters: []
     responses: []
     responseFields: []

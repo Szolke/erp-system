@@ -108,7 +108,7 @@ endpoints:
         name: issue_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-07-30T12:55:57'
+        example: '2026-08-02T15:17:37'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -119,7 +119,7 @@ endpoints:
         name: fulfillment_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-07-30T12:55:57'
+        example: '2026-08-02T15:17:37'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -130,7 +130,7 @@ endpoints:
         name: due_date
         description: 'Must be a valid date. Must be a date after or equal to <code>issue_date</code>.'
         required: true
-        example: '2052-08-22'
+        example: '2052-08-25'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -261,9 +261,9 @@ endpoints:
     cleanBodyParameters:
       partner_id: 16
       payment_method_id: 16
-      issue_date: '2026-07-30T12:55:57'
-      fulfillment_date: '2026-07-30T12:55:57'
-      due_date: '2052-08-22'
+      issue_date: '2026-08-02T15:17:37'
+      fulfillment_date: '2026-08-02T15:17:37'
+      due_date: '2052-08-25'
       currency: ngz
       exchange_rate: 77
       notes: architecto
@@ -315,14 +315,14 @@ endpoints:
         name: id
         description: 'The ID of the invoice.'
         required: true
-        example: 1
+        example: 8
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 1
+      id: 8
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -375,14 +375,14 @@ endpoints:
         name: invoice_id
         description: 'The ID of the invoice.'
         required: true
-        example: 1
+        example: 8
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      invoice_id: 1
+      invoice_id: 8
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -426,14 +426,14 @@ endpoints:
         name: invoice_id
         description: 'The ID of the invoice.'
         required: true
-        example: 1
+        example: 8
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      invoice_id: 1
+      invoice_id: 8
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -486,14 +486,14 @@ endpoints:
         name: invoice_id
         description: 'The ID of the invoice.'
         required: true
-        example: 1
+        example: 8
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      invoice_id: 1
+      invoice_id: 8
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

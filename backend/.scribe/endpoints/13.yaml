@@ -74,7 +74,7 @@ endpoints:
         name: type
         description: ''
         required: true
-        example: supplier
+        example: both
         type: string
         enumValues:
           - customer
@@ -531,7 +531,7 @@ endpoints:
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      type: supplier
+      type: both
       name: b
       tax_number: 'n'
       eu_tax_number: g
@@ -657,7 +657,7 @@ endpoints:
         name: type
         description: ''
         required: true
-        example: customer
+        example: supplier
         type: string
         enumValues:
           - customer
@@ -1114,7 +1114,7 @@ endpoints:
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      type: customer
+      type: supplier
       name: b
       tax_number: 'n'
       eu_tax_number: g

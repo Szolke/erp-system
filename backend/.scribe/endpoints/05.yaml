@@ -111,14 +111,14 @@ endpoints:
         name: enabled
         description: ''
         required: true
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      enabled: true
+      enabled: false
     fileParameters: []
     responses: []
     responseFields: []

@@ -14,6 +14,12 @@ description: |-
   mintája (külön report.export jog) itt szándékosan NEM került bevezetésre,
   mert a bizonylatlista-export nem indokol finomabb, a megtekintéstől
   elválasztott jogosultsági szintet, amíg ezt külön igény nem kéri.
+
+  Rendezés: a `sort_by`/`sort_dir` query-paraméter WHITELISTELT (l. a lenti
+  SORTABLE_COLUMNS + App\Support\ListSort), ismeretlen érték esetén az eddigi
+  alapértelmezésre (kelt szerint csökkenő) esik vissza. A rendezés az EGYESÍTETT
+  (union) származtatott táblán fut, tehát a company-scope (BelongsToCompany
+  global scope az union AL-lekérdezéseiben) érintetlen marad.
 endpoints:
   -
     custom: []
@@ -38,6 +44,12 @@ endpoints:
         mintája (külön report.export jog) itt szándékosan NEM került bevezetésre,
         mert a bizonylatlista-export nem indokol finomabb, a megtekintéstől
         elválasztott jogosultsági szintet, amíg ezt külön igény nem kéri.
+
+        Rendezés: a `sort_by`/`sort_dir` query-paraméter WHITELISTELT (l. a lenti
+        SORTABLE_COLUMNS + App\Support\ListSort), ismeretlen érték esetén az eddigi
+        alapértelmezésre (kelt szerint csökkenő) esik vissza. A rendezés az EGYESÍTETT
+        (union) származtatott táblán fut, tehát a company-scope (BelongsToCompany
+        global scope az union AL-lekérdezéseiben) érintetlen marad.
       subgroup: ''
       subgroupDescription: ''
       title: ''
@@ -96,6 +108,12 @@ endpoints:
         mintája (külön report.export jog) itt szándékosan NEM került bevezetésre,
         mert a bizonylatlista-export nem indokol finomabb, a megtekintéstől
         elválasztott jogosultsági szintet, amíg ezt külön igény nem kéri.
+
+        Rendezés: a `sort_by`/`sort_dir` query-paraméter WHITELISTELT (l. a lenti
+        SORTABLE_COLUMNS + App\Support\ListSort), ismeretlen érték esetén az eddigi
+        alapértelmezésre (kelt szerint csökkenő) esik vissza. A rendezés az EGYESÍTETT
+        (union) származtatott táblán fut, tehát a company-scope (BelongsToCompany
+        global scope az union AL-lekérdezéseiben) érintetlen marad.
       subgroup: ''
       subgroupDescription: ''
       title: |-

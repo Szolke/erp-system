@@ -66,7 +66,7 @@ endpoints:
         name: date_basis
         description: ''
         required: false
-        example: issue
+        example: fulfillment
         type: string
         enumValues:
           - fulfillment
@@ -126,7 +126,7 @@ endpoints:
     cleanBodyParameters:
       from: 4255-93
       to: 4255-93
-      date_basis: issue
+      date_basis: fulfillment
       granularity: day
       partner_id: 16
       status: open
@@ -243,7 +243,7 @@ endpoints:
         name: order_by
         description: ''
         required: false
-        example: quantity
+        example: revenue
         type: string
         enumValues:
           - revenue
@@ -257,7 +257,7 @@ endpoints:
       date_basis: fulfillment
       limit: 17
       offset: 8
-      order_by: quantity
+      order_by: revenue
     fileParameters: []
     responses:
       -
@@ -313,7 +313,7 @@ endpoints:
         name: as_of
         description: 'Must be a valid date in the format <code>Y-m-d</code>.'
         required: false
-        example: '2026-07-30'
+        example: '2026-08-02'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -331,7 +331,7 @@ endpoints:
         nullable: true
         deprecated: false
     cleanBodyParameters:
-      as_of: '2026-07-30'
+      as_of: '2026-08-02'
       partner_id: 16
     fileParameters: []
     responses:

@@ -108,7 +108,7 @@ endpoints:
         name: sandbox
         description: ''
         required: true
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -128,7 +128,7 @@ endpoints:
     cleanBodyParameters:
       merchant_id: b
       secret_key: 'n'
-      sandbox: true
+      sandbox: false
       is_active: true
     fileParameters: []
     responses: []

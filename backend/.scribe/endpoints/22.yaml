@@ -96,7 +96,7 @@ endpoints:
         name: issue_date
         description: 'Must be a valid date.'
         required: true
-        example: '2026-07-30T12:55:58'
+        example: '2026-08-02T15:17:37'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -107,7 +107,7 @@ endpoints:
         name: fulfillment_date
         description: 'Must be a valid date.'
         required: false
-        example: '2026-07-30T12:55:58'
+        example: '2026-08-02T15:17:37'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -205,8 +205,8 @@ endpoints:
     cleanBodyParameters:
       partner_id: 16
       payment_method_id: 16
-      issue_date: '2026-07-30T12:55:58'
-      fulfillment_date: '2026-07-30T12:55:58'
+      issue_date: '2026-08-02T15:17:37'
+      fulfillment_date: '2026-08-02T15:17:37'
       currency: ngz
       exchange_rate: 77
       items:

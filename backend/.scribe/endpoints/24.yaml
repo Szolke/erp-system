@@ -106,7 +106,7 @@ endpoints:
         name: active
         description: ''
         required: false
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -136,7 +136,7 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       global: true
-      active: false
+      active: true
       sort_order: 27
       name: 'n'
     fileParameters: []
@@ -198,7 +198,7 @@ endpoints:
         name: active
         description: ''
         required: false
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -227,7 +227,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      active: false
+      active: true
       sort_order: 27
       name: 'n'
     fileParameters: []

@@ -699,7 +699,7 @@ a hozzá tartozó kísérletek darabszáma (l. NavSubmissionLogGroupedResource).
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: July 30, 2026</li>
+        <li>Last updated: August 2, 2026</li>
     </ul>
 </div>
 
@@ -1033,7 +1033,7 @@ by SimplePayIpnController instead.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/invoices/1/payments" \
+    --get "http://localhost/api/invoices/8/payments" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1041,7 +1041,7 @@ by SimplePayIpnController instead.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/1/payments"
+    "http://localhost/api/invoices/8/payments"
 );
 
 const headers = {
@@ -1167,10 +1167,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="GETapi-invoices--invoice_id--payments"
-               value="1"
+               value="8"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>1</code></p>
+<p>The ID of the invoice. Example: <code>8</code></p>
             </div>
                     </form>
 
@@ -1188,14 +1188,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/invoices/1/payments" \
+    "http://localhost/api/invoices/8/payments" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
     \"payment_method_id\": 16,
     \"amount\": 39,
-    \"paid_at\": \"2026-07-30T12:55:58\",
+    \"paid_at\": \"2026-08-02T15:17:37\",
     \"reference\": \"g\"
 }"
 </code></pre></div>
@@ -1203,7 +1203,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/1/payments"
+    "http://localhost/api/invoices/8/payments"
 );
 
 const headers = {
@@ -1215,7 +1215,7 @@ const headers = {
 let body = {
     "payment_method_id": 16,
     "amount": 39,
-    "paid_at": "2026-07-30T12:55:58",
+    "paid_at": "2026-08-02T15:17:37",
     "reference": "g"
 };
 
@@ -1320,10 +1320,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="POSTapi-invoices--invoice_id--payments"
-               value="1"
+               value="8"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>1</code></p>
+<p>The ID of the invoice. Example: <code>8</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -1357,10 +1357,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="paid_at"                data-endpoint="POSTapi-invoices--invoice_id--payments"
-               value="2026-07-30T12:55:58"
+               value="2026-08-02T15:17:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-30T12:55:58</code></p>
+<p>Must be a valid date. Example: <code>2026-08-02T15:17:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>reference</code></b>&nbsp;&nbsp;
@@ -1390,6 +1390,11 @@ invoice.view/receipt.view (ugyanaz, mint a listáé) — a Kimutatások-modul
 mintája (külön report.export jog) itt szándékosan NEM került bevezetésre,
 mert a bizonylatlista-export nem indokol finomabb, a megtekintéstől
 elválasztott jogosultsági szintet, amíg ezt külön igény nem kéri.</p>
+<p>Rendezés: a <code>sort_by</code>/<code>sort_dir</code> query-paraméter WHITELISTELT (l. a lenti
+SORTABLE_COLUMNS + App\Support\ListSort), ismeretlen érték esetén az eddigi
+alapértelmezésre (kelt szerint csökkenő) esik vissza. A rendezés az EGYESÍTETT
+(union) származtatott táblán fut, tehát a company-scope (BelongsToCompany
+global scope az union AL-lekérdezéseiben) érintetlen marad.</p>
 
                                 <h2 id="bizonylatok-GETapi-documents">GET api/documents</h2>
 
@@ -1843,7 +1848,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Accept: application/json" \
     --data "{
     \"prefix\": \"bngzmiyvdljnikhw\",
-    \"reset_yearly\": true
+    \"reset_yearly\": false
 }"
 </code></pre></div>
 
@@ -1861,7 +1866,7 @@ const headers = {
 
 let body = {
     "prefix": "bngzmiyvdljnikhw",
-    "reset_yearly": true
+    "reset_yearly": false
 };
 
 fetch(url, {
@@ -2003,7 +2008,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
         </form>
 
@@ -3126,7 +3131,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/groups/1/members/2" \
+    "http://localhost/api/groups/1/members/38" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -3134,7 +3139,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/groups/1/members/2"
+    "http://localhost/api/groups/1/members/38"
 );
 
 const headers = {
@@ -3256,10 +3261,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="user_id"                data-endpoint="DELETEapi-groups--group_id--members--user_id-"
-               value="2"
+               value="38"
                data-component="url">
     <br>
-<p>The ID of the user. Example: <code>2</code></p>
+<p>The ID of the user. Example: <code>38</code></p>
             </div>
                     </form>
 
@@ -4197,7 +4202,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
-    --form "logo=@/tmp/php92eqlthpb98k8czX7LU" </code></pre></div>
+    --form "logo=@/tmp/phpdnsplq3rld1b5UT8bDu" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -4318,7 +4323,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/php92eqlthpb98k8czX7LU</code></p>
+<p>Must be an image. Must not be greater than 2048 kilobytes. Example: <code>/tmp/phpdnsplq3rld1b5UT8bDu</code></p>
         </div>
         </form>
 
@@ -5483,7 +5488,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"options\": [
         \"n\"
     ],
-    \"is_required\": false,
+    \"is_required\": true,
     \"sort_order\": 84,
     \"is_active\": true
 }"
@@ -5507,7 +5512,7 @@ let body = {
     "options": [
         "n"
     ],
-    "is_required": false,
+    "is_required": true,
     "sort_order": 84,
     "is_active": true
 };
@@ -5677,7 +5682,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>sort_order</code></b>&nbsp;&nbsp;
@@ -6730,7 +6735,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/users/2/password" \
+    "http://localhost/api/users/38/password" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -6742,7 +6747,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/2/password"
+    "http://localhost/api/users/38/password"
 );
 
 const headers = {
@@ -6856,10 +6861,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="user_id"                data-endpoint="PUTapi-users--user_id--password"
-               value="2"
+               value="38"
                data-component="url">
     <br>
-<p>The ID of the user. Example: <code>2</code></p>
+<p>The ID of the user. Example: <code>38</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -7495,7 +7500,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"serial_number\": \"b\",
     \"imei\": \"n\",
     \"asset_type_id\": 16,
-    \"status\": \"service\"
+    \"status\": \"active\"
 }"
 </code></pre></div>
 
@@ -7515,7 +7520,7 @@ let body = {
     "serial_number": "b",
     "imei": "n",
     "asset_type_id": 16,
-    "status": "service"
+    "status": "active"
 };
 
 fetch(url, {
@@ -7655,10 +7660,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="status"                data-endpoint="POSTapi-assets"
-               value="service"
+               value="active"
                data-component="body">
     <br>
-<p>Example: <code>service</code></p>
+<p>Example: <code>active</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>active</code></li> <li><code>issued</code></li> <li><code>service</code></li> <li><code>scrapped</code></li></ul>
         </div>
@@ -7840,7 +7845,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"serial_number\": \"b\",
     \"imei\": \"n\",
-    \"status\": \"issued\"
+    \"status\": \"active\"
 }"
 </code></pre></div>
 
@@ -7859,7 +7864,7 @@ const headers = {
 let body = {
     "serial_number": "b",
     "imei": "n",
-    "status": "issued"
+    "status": "active"
 };
 
 fetch(url, {
@@ -8004,10 +8009,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="status"                data-endpoint="PUTapi-assets--id-"
-               value="issued"
+               value="active"
                data-component="body">
     <br>
-<p>Example: <code>issued</code></p>
+<p>Example: <code>active</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>active</code></li> <li><code>issued</code></li> <li><code>service</code></li> <li><code>scrapped</code></li></ul>
         </div>
@@ -8502,7 +8507,7 @@ asset_type_id-mintáját követve). Example: <code>16</code></p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/users/2" \
+    --get "http://localhost/api/users/38" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -8510,7 +8515,7 @@ asset_type_id-mintáját követve). Example: <code>16</code></p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/2"
+    "http://localhost/api/users/38"
 );
 
 const headers = {
@@ -8636,10 +8641,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-users--id-"
-               value="2"
+               value="38"
                data-component="url">
     <br>
-<p>The ID of the user. Example: <code>2</code></p>
+<p>The ID of the user. Example: <code>38</code></p>
             </div>
                     </form>
 
@@ -8657,13 +8662,13 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/users/2" \
+    "http://localhost/api/users/38" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
     \"name\": \"b\",
-    \"is_active\": true,
+    \"is_active\": false,
     \"job_position_id\": 16
 }"
 </code></pre></div>
@@ -8671,7 +8676,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/2"
+    "http://localhost/api/users/38"
 );
 
 const headers = {
@@ -8682,7 +8687,7 @@ const headers = {
 
 let body = {
     "name": "b",
-    "is_active": true,
+    "is_active": false,
     "job_position_id": 16
 };
 
@@ -8791,10 +8796,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="PUTapi-users--id-"
-               value="2"
+               value="38"
                data-component="url">
     <br>
-<p>The ID of the user. Example: <code>2</code></p>
+<p>The ID of the user. Example: <code>38</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -8829,7 +8834,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
@@ -8875,7 +8880,7 @@ változatlanul küldi vissza ugyanazt az ID-t. Example: <code>16</code></p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/users/2" \
+    "http://localhost/api/users/38" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -8883,7 +8888,7 @@ változatlanul küldi vissza ugyanazt az ID-t. Example: <code>16</code></p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/2"
+    "http://localhost/api/users/38"
 );
 
 const headers = {
@@ -8993,10 +8998,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="DELETEapi-users--id-"
-               value="2"
+               value="38"
                data-component="url">
     <br>
-<p>The ID of the user. Example: <code>2</code></p>
+<p>The ID of the user. Example: <code>38</code></p>
             </div>
                     </form>
 
@@ -9014,13 +9019,13 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://localhost/api/users/2/overrides" \
+    "http://localhost/api/users/38/overrides" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
     \"overrides\": [
-        \"deny\"
+        \"allow\"
     ]
 }"
 </code></pre></div>
@@ -9028,7 +9033,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/2/overrides"
+    "http://localhost/api/users/38/overrides"
 );
 
 const headers = {
@@ -9039,7 +9044,7 @@ const headers = {
 
 let body = {
     "overrides": [
-        "deny"
+        "allow"
     ]
 };
 
@@ -9144,10 +9149,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="user_id"                data-endpoint="PUTapi-users--user_id--overrides"
-               value="2"
+               value="38"
                data-component="url">
     <br>
-<p>The ID of the user. Example: <code>2</code></p>
+<p>The ID of the user. Example: <code>38</code></p>
             </div>
                             <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
         <div style=" padding-left: 28px;  clear: unset;">
@@ -9182,7 +9187,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/users/2/companies" \
+    --get "http://localhost/api/users/38/companies" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -9190,7 +9195,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/2/companies"
+    "http://localhost/api/users/38/companies"
 );
 
 const headers = {
@@ -9316,10 +9321,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="user_id"                data-endpoint="GETapi-users--user_id--companies"
-               value="2"
+               value="38"
                data-component="url">
     <br>
-<p>The ID of the user. Example: <code>2</code></p>
+<p>The ID of the user. Example: <code>38</code></p>
             </div>
                     </form>
 
@@ -9337,7 +9342,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/users/2/companies/6" \
+    "http://localhost/api/users/38/companies/6" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -9345,7 +9350,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/2/companies/6"
+    "http://localhost/api/users/38/companies/6"
 );
 
 const headers = {
@@ -9455,10 +9460,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="user_id"                data-endpoint="POSTapi-users--user_id--companies--company_id-"
-               value="2"
+               value="38"
                data-component="url">
     <br>
-<p>The ID of the user. Example: <code>2</code></p>
+<p>The ID of the user. Example: <code>38</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>company_id</code></b>&nbsp;&nbsp;
@@ -9488,7 +9493,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/users/2/companies/6" \
+    "http://localhost/api/users/38/companies/6" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -9496,7 +9501,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/2/companies/6"
+    "http://localhost/api/users/38/companies/6"
 );
 
 const headers = {
@@ -9606,10 +9611,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="user_id"                data-endpoint="DELETEapi-users--user_id--companies--company_id-"
-               value="2"
+               value="38"
                data-component="url">
     <br>
-<p>The ID of the user. Example: <code>2</code></p>
+<p>The ID of the user. Example: <code>38</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>company_id</code></b>&nbsp;&nbsp;
@@ -9640,7 +9645,7 @@ Normál user: csak saját tokenjeinek listája.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/users/2/tokens" \
+    --get "http://localhost/api/users/38/tokens" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -9648,7 +9653,7 @@ Normál user: csak saját tokenjeinek listája.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/2/tokens"
+    "http://localhost/api/users/38/tokens"
 );
 
 const headers = {
@@ -9774,10 +9779,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="user_id"                data-endpoint="GETapi-users--user_id--tokens"
-               value="2"
+               value="38"
                data-component="url">
     <br>
-<p>The ID of the user. Example: <code>2</code></p>
+<p>The ID of the user. Example: <code>38</code></p>
             </div>
                     </form>
 
@@ -9798,7 +9803,7 @@ Normál user: csak saját tokenjét törölheti.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/users/2/tokens/architecto" \
+    "http://localhost/api/users/38/tokens/architecto" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -9806,7 +9811,7 @@ Normál user: csak saját tokenjét törölheti.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/users/2/tokens/architecto"
+    "http://localhost/api/users/38/tokens/architecto"
 );
 
 const headers = {
@@ -9916,10 +9921,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="user_id"                data-endpoint="DELETEapi-users--user_id--tokens--tokenId-"
-               value="2"
+               value="38"
                data-component="url">
     <br>
-<p>The ID of the user. Example: <code>2</code></p>
+<p>The ID of the user. Example: <code>38</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>tokenId</code></b>&nbsp;&nbsp;
@@ -11048,7 +11053,7 @@ hívás magától AuthorizationException-t (403) dob.</p>
     --data "{
     \"from\": \"4255-93\",
     \"to\": \"4255-93\",
-    \"date_basis\": \"issue\",
+    \"date_basis\": \"fulfillment\",
     \"granularity\": \"day\",
     \"partner_id\": 16,
     \"status\": \"open\",
@@ -11071,7 +11076,7 @@ const headers = {
 let body = {
     "from": "4255-93",
     "to": "4255-93",
-    "date_basis": "issue",
+    "date_basis": "fulfillment",
     "granularity": "day",
     "partner_id": 16,
     "status": "open",
@@ -11219,10 +11224,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_basis"                data-endpoint="GETapi-reports-invoices"
-               value="issue"
+               value="fulfillment"
                data-component="body">
     <br>
-<p>Example: <code>issue</code></p>
+<p>Example: <code>fulfillment</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>fulfillment</code></li> <li><code>issue</code></li></ul>
         </div>
@@ -11314,7 +11319,7 @@ Must be one of:
     \"date_basis\": \"fulfillment\",
     \"limit\": 17,
     \"offset\": 8,
-    \"order_by\": \"quantity\"
+    \"order_by\": \"revenue\"
 }"
 </code></pre></div>
 
@@ -11336,7 +11341,7 @@ let body = {
     "date_basis": "fulfillment",
     "limit": 17,
     "offset": 8,
-    "order_by": "quantity"
+    "order_by": "revenue"
 };
 
 fetch(url, {
@@ -11518,10 +11523,10 @@ Must be one of:
  &nbsp;
                 <input type="text" style="display: none"
                               name="order_by"                data-endpoint="GETapi-reports-products"
-               value="quantity"
+               value="revenue"
                data-component="body">
     <br>
-<p>Example: <code>quantity</code></p>
+<p>Example: <code>revenue</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>revenue</code></li> <li><code>quantity</code></li></ul>
         </div>
@@ -11546,7 +11551,7 @@ Must be one of:
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"as_of\": \"2026-07-30\",
+    \"as_of\": \"2026-08-02\",
     \"partner_id\": 16
 }"
 </code></pre></div>
@@ -11564,7 +11569,7 @@ const headers = {
 };
 
 let body = {
-    "as_of": "2026-07-30",
+    "as_of": "2026-08-02",
     "partner_id": 16
 };
 
@@ -11685,10 +11690,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="as_of"                data-endpoint="GETapi-reports-receivables-aging"
-               value="2026-07-30"
+               value="2026-08-02"
                data-component="body">
     <br>
-<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-07-30</code></p>
+<p>Must be a valid date in the format <code>Y-m-d</code>. Example: <code>2026-08-02</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>partner_id</code></b>&nbsp;&nbsp;
@@ -12658,7 +12663,7 @@ műveletek erre a companyId-re futnak.</p>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"enabled\": true
+    \"enabled\": false
 }"
 </code></pre></div>
 
@@ -12675,7 +12680,7 @@ const headers = {
 };
 
 let body = {
-    "enabled": true
+    "enabled": false
 };
 
 fetch(url, {
@@ -12805,7 +12810,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
         </form>
 
@@ -12980,7 +12985,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Accept: application/json" \
     --data "{
     \"global\": true,
-    \"active\": false,
+    \"active\": true,
     \"sort_order\": 27,
     \"name\": \"n\"
 }"
@@ -13000,7 +13005,7 @@ const headers = {
 
 let body = {
     "global": true,
-    "active": false,
+    "active": true,
     "sort_order": 27,
     "name": "n"
 };
@@ -13141,7 +13146,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>sort_order</code></b>&nbsp;&nbsp;
@@ -13188,7 +13193,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"active\": false,
+    \"active\": true,
     \"sort_order\": 27,
     \"name\": \"n\"
 }"
@@ -13207,7 +13212,7 @@ const headers = {
 };
 
 let body = {
-    "active": false,
+    "active": true,
     "sort_order": 27,
     "name": "n"
 };
@@ -13343,7 +13348,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>sort_order</code></b>&nbsp;&nbsp;
@@ -13828,7 +13833,7 @@ on a new record all four secret fields are required.</p>
     --header "Accept: application/json" \
     --data "{
     \"nav_tax_number\": \"bn\",
-    \"is_active\": true
+    \"is_active\": false
 }"
 </code></pre></div>
 
@@ -13846,7 +13851,7 @@ const headers = {
 
 let body = {
     "nav_tax_number": "bn",
-    "is_active": true
+    "is_active": false
 };
 
 fetch(url, {
@@ -14036,7 +14041,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
         </form>
 
@@ -14355,7 +14360,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"tax_number\": \"56425593\",
     \"mode\": \"test\",
     \"base_url_override\": \"n\",
-    \"send_empty_reports\": true
+    \"send_empty_reports\": false
 }"
 </code></pre></div>
 
@@ -14379,7 +14384,7 @@ let body = {
     "tax_number": "56425593",
     "mode": "test",
     "base_url_override": "n",
-    "send_empty_reports": true
+    "send_empty_reports": false
 };
 
 fetch(url, {
@@ -14582,7 +14587,7 @@ Must be one of:
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
         </form>
 
@@ -14764,9 +14769,9 @@ Must be one of:
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"date_from\": \"2026-07-30T12:55:58\",
-    \"date_to\": \"2026-07-30T12:55:58\",
-    \"status\": \"sending\"
+    \"date_from\": \"2026-08-02T15:17:37\",
+    \"date_to\": \"2026-08-02T15:17:37\",
+    \"status\": \"accepted\"
 }"
 </code></pre></div>
 
@@ -14783,9 +14788,9 @@ const headers = {
 };
 
 let body = {
-    "date_from": "2026-07-30T12:55:58",
-    "date_to": "2026-07-30T12:55:58",
-    "status": "sending"
+    "date_from": "2026-08-02T15:17:37",
+    "date_to": "2026-08-02T15:17:37",
+    "status": "accepted"
 };
 
 fetch(url, {
@@ -14905,10 +14910,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_from"                data-endpoint="GETapi-enyugta-reports"
-               value="2026-07-30T12:55:58"
+               value="2026-08-02T15:17:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-30T12:55:58</code></p>
+<p>Must be a valid date. Example: <code>2026-08-02T15:17:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>date_to</code></b>&nbsp;&nbsp;
@@ -14917,10 +14922,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="date_to"                data-endpoint="GETapi-enyugta-reports"
-               value="2026-07-30T12:55:58"
+               value="2026-08-02T15:17:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-30T12:55:58</code></p>
+<p>Must be a valid date. Example: <code>2026-08-02T15:17:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
@@ -14929,10 +14934,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="status"                data-endpoint="GETapi-enyugta-reports"
-               value="sending"
+               value="accepted"
                data-component="body">
     <br>
-<p>Example: <code>sending</code></p>
+<p>Example: <code>accepted</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>draft</code></li> <li><code>ready</code></li> <li><code>sending</code></li> <li><code>accepted</code></li> <li><code>rejected</code></li></ul>
         </div>
@@ -15584,7 +15589,7 @@ kötelező az assertBelongsToCurrentCompany().</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/invoices/1/nav-submissions" \
+    --get "http://localhost/api/invoices/8/nav-submissions" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -15592,7 +15597,7 @@ kötelező az assertBelongsToCurrentCompany().</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/1/nav-submissions"
+    "http://localhost/api/invoices/8/nav-submissions"
 );
 
 const headers = {
@@ -15718,10 +15723,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="GETapi-invoices--invoice_id--nav-submissions"
-               value="1"
+               value="8"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>1</code></p>
+<p>The ID of the invoice. Example: <code>8</code></p>
             </div>
                     </form>
 
@@ -15892,8 +15897,8 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"partner_id\": 16,
     \"payment_method_id\": 16,
-    \"issue_date\": \"2026-07-30T12:55:58\",
-    \"fulfillment_date\": \"2026-07-30T12:55:58\",
+    \"issue_date\": \"2026-08-02T15:17:37\",
+    \"fulfillment_date\": \"2026-08-02T15:17:37\",
     \"currency\": \"ngz\",
     \"exchange_rate\": 77,
     \"items\": [
@@ -15923,8 +15928,8 @@ const headers = {
 let body = {
     "partner_id": 16,
     "payment_method_id": 16,
-    "issue_date": "2026-07-30T12:55:58",
-    "fulfillment_date": "2026-07-30T12:55:58",
+    "issue_date": "2026-08-02T15:17:37",
+    "fulfillment_date": "2026-08-02T15:17:37",
     "currency": "ngz",
     "exchange_rate": 77,
     "items": [
@@ -16063,10 +16068,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="issue_date"                data-endpoint="POSTapi-receipts"
-               value="2026-07-30T12:55:58"
+               value="2026-08-02T15:17:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-30T12:55:58</code></p>
+<p>Must be a valid date. Example: <code>2026-08-02T15:17:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>fulfillment_date</code></b>&nbsp;&nbsp;
@@ -16075,10 +16080,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="fulfillment_date"                data-endpoint="POSTapi-receipts"
-               value="2026-07-30T12:55:58"
+               value="2026-08-02T15:17:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-30T12:55:58</code></p>
+<p>Must be a valid date. Example: <code>2026-08-02T15:17:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>currency</code></b>&nbsp;&nbsp;
@@ -17376,7 +17381,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"type\": \"supplier\",
+    \"type\": \"both\",
     \"name\": \"b\",
     \"tax_number\": \"n\",
     \"eu_tax_number\": \"g\",
@@ -17410,7 +17415,7 @@ const headers = {
 };
 
 let body = {
-    "type": "supplier",
+    "type": "both",
     "name": "b",
     "tax_number": "n",
     "eu_tax_number": "g",
@@ -17531,10 +17536,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="type"                data-endpoint="POSTapi-partners"
-               value="supplier"
+               value="both"
                data-component="body">
     <br>
-<p>Example: <code>supplier</code></p>
+<p>Example: <code>both</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>customer</code></li> <li><code>supplier</code></li> <li><code>both</code></li></ul>
         </div>
@@ -17942,7 +17947,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"type\": \"customer\",
+    \"type\": \"supplier\",
     \"name\": \"b\",
     \"tax_number\": \"n\",
     \"eu_tax_number\": \"g\",
@@ -17976,7 +17981,7 @@ const headers = {
 };
 
 let body = {
-    "type": "customer",
+    "type": "supplier",
     "name": "b",
     "tax_number": "n",
     "eu_tax_number": "g",
@@ -18114,10 +18119,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="type"                data-endpoint="PUTapi-partners--id-"
-               value="customer"
+               value="supplier"
                data-component="body">
     <br>
-<p>Example: <code>customer</code></p>
+<p>Example: <code>supplier</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>customer</code></li> <li><code>supplier</code></li> <li><code>both</code></li></ul>
         </div>
@@ -18657,7 +18662,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"merchant_id\": \"b\",
     \"secret_key\": \"n\",
-    \"sandbox\": true,
+    \"sandbox\": false,
     \"is_active\": true
 }"
 </code></pre></div>
@@ -18677,7 +18682,7 @@ const headers = {
 let body = {
     "merchant_id": "b",
     "secret_key": "n",
-    "sandbox": true,
+    "sandbox": false,
     "is_active": true
 };
 
@@ -18832,7 +18837,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>is_active</code></b>&nbsp;&nbsp;
@@ -19015,7 +19020,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/invoices/1/simplepay" \
+    "http://localhost/api/invoices/8/simplepay" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -19023,7 +19028,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/1/simplepay"
+    "http://localhost/api/invoices/8/simplepay"
 );
 
 const headers = {
@@ -19133,10 +19138,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="POSTapi-invoices--invoice_id--simplepay"
-               value="1"
+               value="8"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>1</code></p>
+<p>The ID of the invoice. Example: <code>8</code></p>
             </div>
                     </form>
 
@@ -19156,7 +19161,7 @@ No IPN is expected for refunds (VERIFY against sandbox before production).</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/invoices/1/simplepay-refund" \
+    "http://localhost/api/invoices/8/simplepay-refund" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -19164,7 +19169,7 @@ No IPN is expected for refunds (VERIFY against sandbox before production).</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/1/simplepay-refund"
+    "http://localhost/api/invoices/8/simplepay-refund"
 );
 
 const headers = {
@@ -19274,10 +19279,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="POSTapi-invoices--invoice_id--simplepay-refund"
-               value="1"
+               value="8"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>1</code></p>
+<p>The ID of the invoice. Example: <code>8</code></p>
             </div>
                     </form>
 
@@ -19450,9 +19455,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --data "{
     \"partner_id\": 16,
     \"payment_method_id\": 16,
-    \"issue_date\": \"2026-07-30T12:55:57\",
-    \"fulfillment_date\": \"2026-07-30T12:55:57\",
-    \"due_date\": \"2052-08-22\",
+    \"issue_date\": \"2026-08-02T15:17:37\",
+    \"fulfillment_date\": \"2026-08-02T15:17:37\",
+    \"due_date\": \"2052-08-25\",
     \"currency\": \"ngz\",
     \"exchange_rate\": 77,
     \"notes\": \"architecto\",
@@ -19485,9 +19490,9 @@ const headers = {
 let body = {
     "partner_id": 16,
     "payment_method_id": 16,
-    "issue_date": "2026-07-30T12:55:57",
-    "fulfillment_date": "2026-07-30T12:55:57",
-    "due_date": "2052-08-22",
+    "issue_date": "2026-08-02T15:17:37",
+    "fulfillment_date": "2026-08-02T15:17:37",
+    "due_date": "2052-08-25",
     "currency": "ngz",
     "exchange_rate": 77,
     "notes": "architecto",
@@ -19629,10 +19634,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="issue_date"                data-endpoint="POSTapi-invoices"
-               value="2026-07-30T12:55:57"
+               value="2026-08-02T15:17:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-30T12:55:57</code></p>
+<p>Must be a valid date. Example: <code>2026-08-02T15:17:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>fulfillment_date</code></b>&nbsp;&nbsp;
@@ -19641,10 +19646,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="fulfillment_date"                data-endpoint="POSTapi-invoices"
-               value="2026-07-30T12:55:57"
+               value="2026-08-02T15:17:37"
                data-component="body">
     <br>
-<p>Must be a valid date. Example: <code>2026-07-30T12:55:57</code></p>
+<p>Must be a valid date. Example: <code>2026-08-02T15:17:37</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>due_date</code></b>&nbsp;&nbsp;
@@ -19653,10 +19658,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="due_date"                data-endpoint="POSTapi-invoices"
-               value="2052-08-22"
+               value="2052-08-25"
                data-component="body">
     <br>
-<p>Must be a valid date. Must be a date after or equal to <code>issue_date</code>. Example: <code>2052-08-22</code></p>
+<p>Must be a valid date. Must be a date after or equal to <code>issue_date</code>. Example: <code>2052-08-25</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>currency</code></b>&nbsp;&nbsp;
@@ -19806,7 +19811,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/invoices/1" \
+    --get "http://localhost/api/invoices/8" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -19814,7 +19819,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/1"
+    "http://localhost/api/invoices/8"
 );
 
 const headers = {
@@ -19940,10 +19945,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-invoices--id-"
-               value="1"
+               value="8"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>1</code></p>
+<p>The ID of the invoice. Example: <code>8</code></p>
             </div>
                     </form>
 
@@ -19961,7 +19966,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/invoices/1/cancel" \
+    "http://localhost/api/invoices/8/cancel" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -19969,7 +19974,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/1/cancel"
+    "http://localhost/api/invoices/8/cancel"
 );
 
 const headers = {
@@ -20079,10 +20084,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="POSTapi-invoices--invoice_id--cancel"
-               value="1"
+               value="8"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>1</code></p>
+<p>The ID of the invoice. Example: <code>8</code></p>
             </div>
                     </form>
 
@@ -20100,7 +20105,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/invoices/1/pdf" \
+    --get "http://localhost/api/invoices/8/pdf" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -20108,7 +20113,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/1/pdf"
+    "http://localhost/api/invoices/8/pdf"
 );
 
 const headers = {
@@ -20234,10 +20239,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="GETapi-invoices--invoice_id--pdf"
-               value="1"
+               value="8"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>1</code></p>
+<p>The ID of the invoice. Example: <code>8</code></p>
             </div>
                     </form>
 
@@ -20255,7 +20260,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/invoices/1/regenerate-pdf" \
+    "http://localhost/api/invoices/8/regenerate-pdf" \
     --header "Authorization: Bearer 6g43cv8PD1aE5beadkZfhV6" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -20263,7 +20268,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/invoices/1/regenerate-pdf"
+    "http://localhost/api/invoices/8/regenerate-pdf"
 );
 
 const headers = {
@@ -20373,10 +20378,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="invoice_id"                data-endpoint="POSTapi-invoices--invoice_id--regenerate-pdf"
-               value="1"
+               value="8"
                data-component="url">
     <br>
-<p>The ID of the invoice. Example: <code>1</code></p>
+<p>The ID of the invoice. Example: <code>8</code></p>
             </div>
                     </form>
 
@@ -20549,7 +20554,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"name\": \"n\",
     \"description\": \"Eius et animi quos velit et.\",
     \"unit\": \"v\",
-    \"type\": \"service\",
+    \"type\": \"product\",
     \"vat_rate_id\": 16,
     \"base_price\": 39,
     \"base_currency\": \"gzm\",
@@ -20574,7 +20579,7 @@ let body = {
     "name": "n",
     "description": "Eius et animi quos velit et.",
     "unit": "v",
-    "type": "service",
+    "type": "product",
     "vat_rate_id": 16,
     "base_price": 39,
     "base_currency": "gzm",
@@ -20730,10 +20735,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="type"                data-endpoint="POSTapi-products"
-               value="service"
+               value="product"
                data-component="body">
     <br>
-<p>Example: <code>service</code></p>
+<p>Example: <code>product</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>product</code></li> <li><code>service</code></li></ul>
         </div>
@@ -20987,11 +20992,11 @@ You can check the Dev Tools console for debugging information.</code></pre>
     \"name\": \"n\",
     \"description\": \"Eius et animi quos velit et.\",
     \"unit\": \"v\",
-    \"type\": \"service\",
+    \"type\": \"product\",
     \"vat_rate_id\": 16,
     \"base_price\": 39,
     \"base_currency\": \"gzm\",
-    \"is_active\": false
+    \"is_active\": true
 }"
 </code></pre></div>
 
@@ -21012,11 +21017,11 @@ let body = {
     "name": "n",
     "description": "Eius et animi quos velit et.",
     "unit": "v",
-    "type": "service",
+    "type": "product",
     "vat_rate_id": 16,
     "base_price": 39,
     "base_currency": "gzm",
-    "is_active": false
+    "is_active": true
 };
 
 fetch(url, {
@@ -21185,10 +21190,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="type"                data-endpoint="PUTapi-products--id-"
-               value="service"
+               value="product"
                data-component="body">
     <br>
-<p>Example: <code>service</code></p>
+<p>Example: <code>product</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>product</code></li> <li><code>service</code></li></ul>
         </div>
@@ -21248,7 +21253,7 @@ Must be one of:
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>false</code></p>
+<p>Example: <code>true</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>custom_fields</code></b>&nbsp;&nbsp;

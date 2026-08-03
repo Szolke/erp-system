@@ -300,6 +300,7 @@ export default function DocumentListPage() {
           <DateRangePicker
             unit="day"
             align="right"
+            clearable
             from={filters.date_from}
             to={filters.date_to}
             onApply={handleDateRangeApply}

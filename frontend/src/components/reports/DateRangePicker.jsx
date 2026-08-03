@@ -64,8 +64,12 @@ function formatRangeLabel(locale, from, to, unit, placeholder) {
  * navigáció (év-lépés vs. hónap-lépés) tér el a két mód közt.
  * A lekérdezés csak "Alkalmaz"-ra fut — a rácson kattintgatás önmagában
  * csak a helyi piszkozat-állapotot módosítja, amíg meg nem erősítik.
+ *
+ * A `clearable` OPT-IN: csak ott kapcsolandó be, ahol az üres tartomány
+ * érvényes állapot (Bizonylatok — alapból nincs dátumszűrés). A Kimutatások
+ * oldalon szándékosan kimarad, ott mindig kell egy vizsgált időszak.
  */
-export default function DateRangePicker({ from, to, onApply, open, onOpenChange, id, unit = 'month', placeholder, align = 'left' }) {
+export default function DateRangePicker({ from, to, onApply, open, onOpenChange, id, unit = 'month', placeholder, align = 'left', clearable = false }) {
   const { t, locale } = useTranslation()
   const containerRef = useRef(null)
   const triggerRef = useRef(null)
@@ -133,6 +137,21 @@ export default function DateRangePicker({ from, to, onApply, open, onOpenChange,
     if (draftFrom !== null) {
       onApply(rangeLo(), rangeHi())
     }
+    onOpenChange(false)
+    triggerRef.current?.focus()
+  }
+
+  /**
+   * Szűrő törlése: üres tartományt "alkalmaz", vagyis ugyanazon az `onApply`
+   * csatornán jelzi a hívónak, hogy nincs többé dátumszűrés. Csak `clearable`
+   * módban érhető el — ahol az üres tartomány értelmetlen lenne (Kimutatások,
+   * ott mindig kell egy vizsgált időszak), a gomb meg sem jelenik.
+   */
+  function handleClear() {
+    setDraftFrom(null)
+    setDraftTo(null)
+    setSelecting(false)
+    onApply('', '')
     onOpenChange(false)
     triggerRef.current?.focus()
   }
@@ -236,6 +255,16 @@ export default function DateRangePicker({ from, to, onApply, open, onOpenChange,
             {renderGrid(rightCursor, setRightCursor, t('reports.range_end'))}
           </div>
           <div className="fc-popover-footer">
+            {clearable && (
+              <button
+                type="button"
+                className="fc-clear-all fc-daterange-clear"
+                onClick={handleClear}
+                disabled={!from && !to}
+              >
+                {t('reports.clear_range')}
+              </button>
+            )}
             <button type="button" className="btn btn-secondary btn-sm" onClick={handleCancel}>{t('common.cancel')}</button>
             <button type="button" className="btn btn-primary btn-sm" onClick={handleApply}>{t('reports.apply')}</button>
           </div>

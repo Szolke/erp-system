@@ -527,6 +527,7 @@ class TranslationSeeder extends Seeder
             ['reports', 'next_month',               'Következő hónap',                      'Next month',                           'Nächster Monat'],
             ['reports', 'quick_label',              'Gyors:',                               'Quick:',                               'Schnell:'],
             ['reports', 'clear_all',                'Összes törlése',                       'Clear all',                            'Alle löschen'],
+            ['reports', 'clear_range',              'Szűrő törlése',                        'Clear filter',                         'Filter löschen'],
             ['reports', 'remove_filter',            '{name} szűrő eltávolítása',            'Remove {name} filter',                'Filter „{name}“ entfernen'],
             ['reports', 'updated_now',              'most',                                 'just now',                             'gerade eben'],
             ['reports', 'updated_minutes_ago',      '{minutes} perce',                      '{minutes} min ago',                   'vor {minutes} Min.'],

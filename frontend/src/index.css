@@ -352,7 +352,17 @@ input[type="checkbox"], input[type="radio"] { width: auto; }
 .fc-daterange-month.is-endpoint { background: var(--color-primary); color: #fff; font-weight: 600; }
 .fc-popover-footer { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--color-border); padding-top: 12px; }
 
+/* A "Szűrő törlése" a lábléc BAL szélére kerül, elkülönítve a Mégse/Alkalmaz
+   párostól — nem ugyanaz a művelet-osztály. */
+.fc-popover-footer .fc-daterange-clear { margin-right: auto; align-self: center; }
+
 /* Nap-rács (Bizonylatok napi pontosságú tartomány-választója, unit="day") */
+/* A napi rácsok szélesebbek (7 nap-oszlop 3 hónap-oszlop helyett), ezért a
+   panel is szélesebb kell legyen: 260 + 16 gap + 260 = 536 px rács, plusz a
+   2×14 px panel-padding = 564 px. A közös 560 px-es panelbe ez NEM fér bele
+   (border-box: 532 px a belső hely), és a flex-sor a flex-basis alapján tördel,
+   így a `min-width` sem tartaná egy sorban — a két rács egymás alá csúszna. */
+.fc-daterange-panel--day { width: min(600px, 92vw); }
 .fc-daterange-panel--day .fc-daterange-grid { flex-basis: 260px; }
 .fc-daterange-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 2px; }
 .fc-daterange-weekdays span { text-align: center; font-size: 10px; color: var(--color-muted); text-transform: uppercase; }

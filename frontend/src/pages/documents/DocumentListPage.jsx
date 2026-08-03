@@ -12,6 +12,7 @@ import DocumentFiltersPopover from '../../components/documents/DocumentFiltersPo
 import NewDocumentButton from '../../components/documents/NewDocumentButton'
 import ExportButton from '../../components/ExportButton'
 import ColumnPicker from '../../components/ColumnPicker'
+import SortableColumnHeader from '../../components/SortableColumnHeader'
 import { useListColumns } from '../../hooks/useListColumns'
 import { documentColumns } from '../../columns/documents'
 import { useUrlFilters } from '../../utils/useUrlFilters'
@@ -125,11 +126,13 @@ export default function DocumentListPage() {
   // kell, mert a useUrlFilters a hiányzó kulcsokat a DEFAULTS-ból visszaírja a
   // URL-be — utána a `filters.per_page` már nem árulná el, hogy megosztott
   // linkből jött-e vagy csak a default feltöltésből.
-  const { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty, pageSize: perPage, setPageSize } =
-    useListColumns('documents.index', documentColumns, {
-      defaultPageSize: 20,
-      urlPageSize: urlKeys.has('per_page') ? Number(filters.per_page) || null : null,
-    })
+  const {
+    allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty,
+    pageSize: perPage, setPageSize, sort, toggleSort,
+  } = useListColumns('documents.index', documentColumns, {
+    defaultPageSize: 20,
+    urlPageSize: urlKeys.has('per_page') ? Number(filters.per_page) || null : null,
+  })
 
   const page = Number(filters.page) || 1
 
@@ -144,6 +147,10 @@ export default function DocumentListPage() {
         search: filters.search || undefined,
         date_from: filters.date_from || undefined,
         date_to: filters.date_to || undefined,
+        // Rendezés: a mentett preferenciából (nincs saját rendezés → a végpont a
+        // saját alapértelmezését adja, l. DocumentController::SORTABLE_COLUMNS).
+        sort_by: sort?.by,
+        sort_dir: sort?.dir,
         per_page: perPage,
         page,
       })
@@ -158,7 +165,7 @@ export default function DocumentListPage() {
   // A lapméret-függőség a feloldott `perPage`, NEM a `filters.per_page`: a
   // mentett preferencia már az első renderben érvényes, így egyetlen (helyes
   // lapméretű) lekérdezés indul, nem előbb egy default-méretű, majd egy javító.
-  useEffect(() => { load() }, [filters.type, filters.status, filters.currency, filters.search, filters.date_from, filters.date_to, perPage, filters.page]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load() }, [filters.type, filters.status, filters.currency, filters.search, filters.date_from, filters.date_to, perPage, sort, filters.page]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A címsort utólag hozzáigazítjuk a tényleges lapmérethez, hogy a megosztható
   // link és a megjelenített lista ne mondjon mást. Csak a `perPage` változására
@@ -197,6 +204,13 @@ export default function DocumentListPage() {
   function handlePageChange(p) {
     setFilters({ page: String(p) })
   }
+  // Rendezésváltáskor vissza az első oldalra: a 4. oldalon állva egy új
+  // rendezés után a felhasználó a lista ELEJÉT várja, nem a 4. oldalnyi
+  // találatot egy teljesen más sorrendből.
+  function handleSort(key) {
+    toggleSort(key)
+    setFilters({ page: '1' })
+  }
   function clearAllFilters() {
     setSearchInput('')
     setFilters({ type: '', status: '', currency: '', search: '', date_from: '', date_to: '', page: '1' })
@@ -227,6 +241,10 @@ export default function DocumentListPage() {
     search: filters.search || undefined,
     date_from: filters.date_from || undefined,
     date_to: filters.date_to || undefined,
+    // A CSV a képernyőn látott sorrendben jöjjön (a végpont ugyanazt a
+    // whitelistelt rendezést alkalmazza, mint a lista).
+    sort_by: sort?.by,
+    sort_dir: sort?.dir,
   }
   const exportFilename = (filters.date_from && filters.date_to)
     ? `bizonylatok-${filters.date_from}-${filters.date_to}.csv`
@@ -354,7 +372,17 @@ export default function DocumentListPage() {
             <thead>
               <tr>
                 {visibleColumns.map((col) => (
-                  <th key={col.key} scope="col" className={col.align === 'right' ? 'text-right' : undefined}>{t(col.label)}</th>
+                  col.sortable ? (
+                    <SortableColumnHeader
+                      key={col.key}
+                      label={t(col.label)}
+                      align={col.align}
+                      direction={sort?.by === col.key ? sort.dir : null}
+                      onSort={() => handleSort(col.key)}
+                    />
+                  ) : (
+                    <th key={col.key} scope="col" className={col.align === 'right' ? 'text-right' : undefined}>{t(col.label)}</th>
+                  )
                 ))}
               </tr>
             </thead>

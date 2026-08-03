@@ -470,6 +470,20 @@ input[type="checkbox"], input[type="radio"] { width: auto; }
 .doc-table-wrap { overflow-x: auto; }
 .fc-card table.doc-table { border: none; border-radius: 0; margin: 0; border-top: 1px solid var(--color-border); table-layout: fixed; width: 100%; }
 .doc-table th, .doc-table td { padding: 10px 20px; }
+/* Rendezhető oszlopfejléc (SortableColumnHeader). A gomb a teljes fejléc-cellát
+   kitölti, hogy a kattintható terület a fejléc egészére kiterjedjen; a `font`/
+   `color` öröklése tartja meg a th tipográfiáját (kis, nagybetűs, muted). A
+   semleges (nem aktív) ikon halványan MINDIG látszik — enélkül semmi nem
+   árulná el, hogy a fejléc egyáltalán kattintható. */
+.sortable-th { display: flex; align-items: center; gap: 4px; width: 100%; padding: 0; border: none; background: none; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; text-align: left; cursor: pointer; }
+.sortable-th--right { justify-content: flex-end; }
+.sortable-th > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sortable-th-icon { flex-shrink: 0; opacity: .3; }
+.sortable-th:hover { color: var(--color-text); }
+.sortable-th:hover .sortable-th-icon { opacity: .6; }
+.sortable-th.is-active { color: var(--color-text); }
+.sortable-th.is-active .sortable-th-icon { opacity: 1; color: var(--color-primary); }
+
 .doc-subline { font-size: 11px; color: var(--color-muted); margin-top: 2px; }
 .doc-currency-marker { color: var(--color-accent-text); font-weight: 600; }
 .doc-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

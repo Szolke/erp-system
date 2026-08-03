@@ -76,6 +76,25 @@ export function resetListColumnsCompanyMemory() {
  * sem a `toggle`-lel, sem betöltéskor (mentett preferenciából vagy defaultból).
  * Nincs kitüntetett kötelező oszlop, bármelyik lehet az utolsó megmaradó.
  *
+ * Rendezés (`sort`): opcionális, csak azokon a listákon él, ahol a registry
+ * `sortable: true`-val jelölt oszlopot tartalmaz. Alakja `{ by, dir }`, ahol a
+ * `by` egy registry-oszlopkulcs, a `dir` pedig `'asc'`/`'desc'` — ugyanaz a
+ * séma, amit a backend `UpdateListPreferenceRequest` `sort.by`/`sort.dir`-ként
+ * eleve validál. `null`, ha a lista a szerver szerinti ALAPÉRTELMEZETT
+ * rendezésén áll; ilyenkor a mezőt nem is küldjük ki (a végpont paraméter
+ * nélkül úgyis az alapértelmezését adja).
+ *
+ * A `sort` szándékosan NEM kerül a címsorba (szemben a `page_size`-zal): a
+ * jelenlegi konvencióban a URL a SZŰRÉST hordozza (mit lát a másik fél), a
+ * mentett preferencia pedig a NÉZETET (hogyan látja) — az oszlopválasztás sem
+ * URL-ben él. Ha egyszer megosztható rendezés is kell, a `page_size`
+ * feloldási mintája (URL > mentett > default, cégváltáskor elévülő URL-érték)
+ * változtatás nélkül ráhúzható.
+ *
+ * A NEM rendezhető listák viselkedése változatlan: ott a hook a mentett `sort`
+ * mezőt továbbra is csak NYERSEN megőrzi (l. `persistedSortRef`), nem
+ * értelmezi és nem írja felül.
+ *
  * Lapméret (`page_size`): opcionális, csak a lapozó listákon. A hívó a
  * `defaultPageSize`-ban adja meg a lista saját alapértékét (jellemzően 20, az
  * audit-naplón 50), az `urlPageSize`-ban pedig a URL-ben EXPLICIT módon
@@ -85,7 +104,7 @@ export function resetListColumnsCompanyMemory() {
  * cégváltáskor ELÉVÜL — l. `lastMountedCompanyId`.
  *
  * @param {string} listKey
- * @param {Array<{key: string, default?: boolean, locked?: boolean, permission?: string}>} registry
+ * @param {Array<{key: string, default?: boolean, locked?: boolean, permission?: string, sortable?: boolean, sortInitialDir?: 'asc'|'desc'}>} registry
  * @param {{defaultPageSize?: number|null, urlPageSize?: number|null}} [options]
  */
 export function useListColumns(listKey, registry, options = {}) {
@@ -116,7 +135,7 @@ export function useListColumns(listKey, registry, options = {}) {
   const [visibleKeys, setVisibleKeys] = useState(() => computeVisibleKeys(permittedColumns, saved))
   const [orderedKeys, setOrderedKeys] = useState(() => computeOrderedKeys(permittedColumns, saved))
   const [pageSize, setPageSizeState] = useState(() => resolvePageSize(urlPageSizeRef.current, saved, defaultPageSize))
-  const savedRef = useRef(saved)
+  const [sort, setSortState] = useState(() => normalizeSort(saved?.sort, permittedColumns))
   const visibleKeysRef = useRef(visibleKeys)
   const orderedKeysRef = useRef(orderedKeys)
   const debounceRef = useRef(null)
@@ -133,6 +152,15 @@ export function useListColumns(listKey, registry, options = {}) {
   // egy megosztott link ?per_page=100 értéke a nézetet átállítja, de NEM írja
   // felül a user mentett preferenciáját egy későbbi oszlop-kapcsolgatáskor.
   const persistedPageSizeRef = useRef(saved?.page_size)
+  // A MENTENDŐ rendezés — NYERSEN, ahogy a szerveren áll. Azért nem a
+  // normalizált `sort` állapotot mentjük vissza, mert a rendezés-UI nélküli
+  // listákon (a 14-ből 13) a mentett érték ismeretlen alakú is lehet: ott a
+  // korábbi "csak őrizd meg, ne értelmezd" viselkedés marad érvényben. A
+  // `setSort` ezt a refet írja felül a saját, érvényes `{by, dir}`-jével.
+  const persistedSortRef = useRef(saved?.sort)
+  // A normalizált, KÉPERNYŐN érvényes rendezés — szinkron, hogy az ugyanabban a
+  // tickben induló következő `toggleSort` már a friss állapotot lássa (l. `toggle`).
+  const sortRef = useRef(sort)
 
   useEffect(() => { visibleKeysRef.current = visibleKeys }, [visibleKeys])
   useEffect(() => { orderedKeysRef.current = orderedKeys }, [orderedKeys])
@@ -173,8 +201,6 @@ export function useListColumns(listKey, registry, options = {}) {
       urlPageSizeRef.current = null
     }
 
-    savedRef.current = saved
-
     // A SAJÁT optimista írásunk nem inicializál újra: a helyi state már pontosan
     // ezt az értéket tükrözi, az újraszámolás viszont mellékhatásokkal járna —
     // a `visible` tömb sorrendje normalizálódna, egy URL-ből jövő ?per_page
@@ -187,6 +213,9 @@ export function useListColumns(listKey, registry, options = {}) {
     setOrderedKeys(computeOrderedKeys(permittedColumns, saved))
     persistedPageSizeRef.current = saved?.page_size
     setPageSizeState(resolvePageSize(urlPageSizeRef.current, saved, defaultPageSize))
+    persistedSortRef.current = saved?.sort
+    sortRef.current = normalizeSort(saved?.sort, permittedColumns)
+    setSortState(sortRef.current)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listKey, saved, activeCompanyId])
 
@@ -225,7 +254,7 @@ export function useListColumns(listKey, registry, options = {}) {
   const scheduleSave = useCallback((nextVisibleKeys, nextOrderedKeys) => {
     clearTimeout(debounceRef.current)
 
-    const payload = buildPayload(nextVisibleKeys, nextOrderedKeys, savedRef.current, persistedPageSizeRef.current)
+    const payload = buildPayload(nextVisibleKeys, nextOrderedKeys, persistedPageSizeRef.current, persistedSortRef.current)
 
     // Optimista context-írás a VÁLTOZÁS pillanatában (l. a hook fejlécét): a
     // kimenő payloadból, nem a PUT válaszából.
@@ -299,6 +328,61 @@ export function useListColumns(listKey, registry, options = {}) {
     scheduleSave(visibleKeysRef.current, orderedKeysRef.current)
   }, [scheduleSave])
 
+  // Rendezés beállítása. A láthatóság/sorrend/lapméret mentési útját nem bontja
+  // meg: ugyanabba a debounce-olt PUT-ba (ugyanabba a `preferences` jsonb-be)
+  // kerül, csak a `sort` mezőbe.
+  //
+  // `by === null` → vissza a szerver szerinti ALAPÉRTELMEZETT rendezésre: a mező
+  // ilyenkor kimarad a payloadból, nem `null`-ként megy ki (a backend
+  // `sometimes|array` szabálya egy null-t úgyis eldobna, a kihagyás viszont
+  // egyértelműen azt jelenti, hogy "nincs saját rendezés").
+  const setSort = useCallback((by, dir) => {
+    if (by == null) {
+      persistedSortRef.current = undefined
+      sortRef.current = null
+      setSortState(null)
+      scheduleSave(visibleKeysRef.current, orderedKeysRef.current)
+      return
+    }
+
+    // Csak létező, rendezhetőnek jelölt oszlopra állhatunk — így egy elgépelt
+    // vagy időközben megszűnt kulcs nem kerülhet be a mentett preferenciába
+    // (a backend a kulcs LÉTEZÉSÉT szándékosan nem validálja).
+    const column = permittedColumns.find((col) => col.key === by)
+    if (!column || !column.sortable) return
+
+    const next = { by, dir: dir === 'desc' ? 'desc' : 'asc' }
+    persistedSortRef.current = next
+    sortRef.current = next
+    setSortState(next)
+    scheduleSave(visibleKeysRef.current, orderedKeysRef.current)
+  }, [permittedColumns, scheduleSave])
+
+  // Egy oszlopfejlécre kattintás hatása. A HÁROM állapotú ciklus (növekvő →
+  // csökkenő → alapértelmezett) szándékos: a listáknak van értelmes
+  // alapértelmezett rendezésük (a bizonylatoknál kelt szerint csökkenő), amit
+  // egy kétállapotú kapcsolóval már sehogy nem lehetne visszakapni — csak az
+  // oszlopválasztó "Alapértelmezett visszaállítása" gombjával, ami viszont az
+  // oszlopokat és a lapméretet is eldobná.
+  //
+  // A ciklus a HOOKBAN él (nem a fejléc-komponensben), ugyanazon az elven, mint
+  // a `reorder`: a komponens csak az interakciót jelenti, a szabályt a hook
+  // ismeri — így a későbbi, több listára kiterjesztett körben egy helyen marad.
+  const toggleSort = useCallback((key) => {
+    const column = permittedColumns.find((col) => col.key === key)
+    if (!column?.sortable) return
+
+    // Első kattintás iránya oszloponként állítható (`sortInitialDir`): dátumnál
+    // és összegnél a "legnagyobb/legfrissebb elöl" a várt elsődleges nézet,
+    // szövegnél az ábécésorrend.
+    const initialDir = column.sortInitialDir === 'desc' ? 'desc' : 'asc'
+    const current = sortRef.current
+
+    if (!current || current.by !== key) return setSort(key, initialDir)
+    if (current.dir === initialDir) return setSort(key, initialDir === 'asc' ? 'desc' : 'asc')
+    return setSort(null)
+  }, [permittedColumns, setSort])
+
   const reset = useCallback(async () => {
     // A függő mentést itt DOBJUK (nem flusheljük): a DELETE úgyis törli az egész
     // sort, egy utána befutó PUT pedig épp az imént visszaállított defaultot
@@ -325,6 +409,11 @@ export function useListColumns(listKey, registry, options = {}) {
     // szerver állapota szétcsúszna a következő újratöltésig.
     persistedPageSizeRef.current = undefined
     setPageSizeState(resolvePageSize(urlPageSizeRef.current, null, defaultPageSize))
+    // Ugyanez a rendezésre: a DELETE a `sort` mezőt is elviszi, tehát a nézet a
+    // szerver szerinti alapértelmezett rendezésre áll vissza.
+    persistedSortRef.current = undefined
+    sortRef.current = null
+    setSortState(null)
     try {
       await listPreferencesApi.remove(listKey)
     } catch {
@@ -351,10 +440,27 @@ export function useListColumns(listKey, registry, options = {}) {
     const defaultOrder = permittedColumns.map((col) => col.key)
     const orderDirty = orderedKeys.length !== defaultOrder.length || orderedKeys.some((k, i) => k !== defaultOrder[i])
 
-    return visibilityDirty || orderDirty
-  }, [permittedColumns, visibleKeys, orderedKeys])
+    // A saját rendezés is "piszkos" állapot: enélkül a felhasználó egy tisztán
+    // rendezés-módosítás után letiltott visszaállító gombot látna.
+    return visibilityDirty || orderDirty || sort !== null
+  }, [permittedColumns, visibleKeys, orderedKeys, sort])
 
-  return { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty, pageSize, setPageSize }
+  return { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty, pageSize, setPageSize, sort, setSort, toggleSort }
+}
+
+// A mentett `sort` értelmezése: csak a `{ by, dir }` alakú, LÉTEZŐ és
+// rendezhetőnek jelölt oszlopra mutató érték számít. Minden más (hiányzó,
+// ismeretlen kulcs, régi/idegen alak) `null` — ilyenkor a lista a szerver
+// szerinti alapértelmezett rendezésen áll. A nyers értéket ez NEM dobja el, azt
+// a `persistedSortRef` őrzi tovább.
+function normalizeSort(raw, permittedColumns) {
+  if (!raw || typeof raw !== 'object' || typeof raw.by !== 'string') return null
+  if (raw.dir !== 'asc' && raw.dir !== 'desc') return null
+
+  const column = permittedColumns.find((col) => col.key === raw.by)
+  if (!column?.sortable) return null
+
+  return { by: raw.by, dir: raw.dir }
 }
 
 // URL > mentett preferencia > lista-default. A URL azért erősebb, mert egy
@@ -448,7 +554,7 @@ function moveKey(keys, fromIndex, toIndex) {
   return next
 }
 
-function buildPayload(visibleKeys, orderedKeys, saved, pageSize) {
+function buildPayload(visibleKeys, orderedKeys, pageSize, sort) {
   const payload = {
     columns: {
       visible: visibleKeys,
@@ -456,11 +562,11 @@ function buildPayload(visibleKeys, orderedKeys, saved, pageSize) {
     },
   }
   // A PUT teljes upsert, ezért a nem ezen a hívási úton keletkező mezőket is
-  // vissza kell küldeni. A `pageSize` a mentendő lapméret (induláskor a mentett
-  // érték, setPageSize után az új) — ha nincs ilyen, a mező kimarad. A `sort`-ot
-  // ez a fázis még nem kezeli, azt változatlanul őrizzük meg.
+  // vissza kell küldeni. A `pageSize` a mentendő lapméret, a `sort` a mentendő
+  // rendezés (induláskor a mentett érték, setPageSize/setSort után az új) — ha
+  // valamelyik nincs, az a mező egyszerűen kimarad.
   if (pageSize !== undefined) payload.page_size = pageSize
-  if (saved?.sort !== undefined) payload.sort = saved.sort
+  if (sort !== undefined) payload.sort = sort
 
   return payload
 }

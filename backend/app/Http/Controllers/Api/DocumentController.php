@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\Receipt;
 use App\Support\HufConversion;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -26,6 +27,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * mintája (külön report.export jog) itt szándékosan NEM került bevezetésre,
  * mert a bizonylatlista-export nem indokol finomabb, a megtekintéstől
  * elválasztott jogosultsági szintet, amíg ezt külön igény nem kéri.
+ *
+ * Rendezés: a `sort_by`/`sort_dir` query-paraméter WHITELISTELT (l. a lenti
+ * SORTABLE_COLUMNS + App\Support\ListSort), ismeretlen érték esetén az eddigi
+ * alapértelmezésre (kelt szerint csökkenő) esik vissza. A rendezés az EGYESÍTETT
+ * (union) származtatott táblán fut, tehát a company-scope (BelongsToCompany
+ * global scope az union AL-lekérdezéseiben) érintetlen marad.
  */
 class DocumentController extends Controller
 {
@@ -39,6 +46,45 @@ class DocumentController extends Controller
         'receipt' => 'Nyugta',
         'receipt_storno' => 'Sztornó nyugta',
     ];
+
+    /**
+     * Rendezhető oszlopok: a FRONTEND oszlopkulcsa (l. frontend/src/columns/documents.js)
+     * => az egyesített (union) származtatott tábla oszlopa. Kizárólag ezek az
+     * ÉRTÉKEK kerülhetnek ORDER BY-ba — a kérés csak a kulcsot választhatja ki
+     * (l. ListSort osztály-docblock).
+     *
+     * A `status` a SZÁRMAZTATOTT `display_status`-ra rendez, a `type` pedig a
+     * `document_type`-ra: mindkettő ábécésorrendben, nem "jelentés" szerint —
+     * ez a listanézet célja szempontjából (azonos típusú/állapotú sorok
+     * egymás mellé kerüljenek) elegendő.
+     */
+    private const SORTABLE_COLUMNS = [
+        'number'             => 'document_number',
+        'type'               => 'document_type',
+        'partner'            => 'partner_name',
+        'partner_tax_number' => 'partner_tax_number',
+        'issue_date'         => 'issue_date',
+        'fulfillment_date'   => 'fulfillment_date',
+        'due_date'           => 'due_date',
+        'net_total'          => 'net_total',
+        'vat_total'          => 'vat_total',
+        'gross'              => 'gross_total',
+        'gross_huf'          => 'gross_total_huf',
+        'currency'           => 'currency',
+        'payment_status'     => 'payment_status',
+        'status'             => 'display_status',
+    ];
+
+    /** Az eddigi (rendezés-paraméter nélküli) viselkedés: kelt szerint csökkenő. */
+    private const DEFAULT_SORT_KEY = 'issue_date';
+
+    /**
+     * Stabilizáló másodlagos szempontok — az eddigi alapértelmezés farka. Az
+     * `id` az union két ága között nem egyedi (számla és nyugta id-je ütközhet),
+     * ezért ez nem TELJES rendezési determinizmus, csak az eddigivel azonos
+     * mértékű stabilizálás a lapozáshoz.
+     */
+    private const SORT_TIE_BREAKERS = ['issue_date DESC', 'id DESC'];
 
     private const DISPLAY_STATUS_LABELS = [
         'paid' => 'Fizetve',
@@ -79,9 +125,10 @@ class DocumentController extends Controller
             $bindings
         );
 
-        $offset = ($page - 1) * $perPage;
-        $rows   = DB::select(
-            "SELECT * FROM ({$unionSql}) AS d ORDER BY issue_date DESC, id DESC LIMIT {$perPage} OFFSET {$offset}",
+        $offset  = ($page - 1) * $perPage;
+        $orderBy = $this->orderBySql($request);
+        $rows    = DB::select(
+            "SELECT * FROM ({$unionSql}) AS d ORDER BY {$orderBy} LIMIT {$perPage} OFFSET {$offset}",
             $bindings
         );
 
@@ -112,9 +159,14 @@ class DocumentController extends Controller
         [$canInvoice, $canReceipt] = $this->authorizeAccess($request);
         [$unionSql, $bindings] = $this->buildUnionSql($request, $canInvoice, $canReceipt);
 
+        // Az export ugyanazt a rendezést kapja, mint a lista: a felhasználó a
+        // képernyőn látott sorrendben várja a CSV-t is. Paraméter nélkül ez az
+        // eddigi (kelt szerint csökkenő) sorrend.
+        $orderBy = $this->orderBySql($request);
+
         $rows = $unionSql === null
             ? []
-            : DB::select("SELECT * FROM ({$unionSql}) AS d ORDER BY issue_date DESC, id DESC", $bindings);
+            : DB::select("SELECT * FROM ({$unionSql}) AS d ORDER BY {$orderBy}", $bindings);
 
         $dateFrom = $request->string('date_from')->trim()->value();
         $dateTo   = $request->string('date_to')->trim()->value();
@@ -149,6 +201,17 @@ class DocumentController extends Controller
             }
             fclose($handle);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * A kérésből feloldott, whitelistelt ORDER BY-töredék az egyesített
+     * származtatott táblához. Egyetlen belépési pont az index() és az export()
+     * számára, hogy a két végpont rendezése ne csúszhasson szét.
+     */
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY)
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     /** Ha se invoice.view, se receipt.view: 403 (Gate-en keresztül, l. authorize()). */

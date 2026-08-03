@@ -52,6 +52,16 @@ const REG_NO_LOCKED = [
   { key: 'note', default: false },
 ]
 
+// Rendezhető registry a Bizonylatok listájának mintájára: vegyesen alapból
+// növekvő (szöveges) és alapból csökkenő (dátum/összeg) első irányú oszlopok,
+// plusz egy szándékosan NEM rendezhető oszlop.
+const REG_SORTABLE = [
+  { key: 'number', default: true, locked: true, sortable: true },
+  { key: 'partner', default: true, sortable: true },
+  { key: 'issue_date', default: true, sortable: true, sortInitialDir: 'desc' },
+  { key: 'note', default: false },
+]
+
 const REG_WITH_PERMISSION = [
   { key: 'name', default: true, locked: true },
   { key: 'email', default: true },
@@ -1119,6 +1129,245 @@ describe('lapméret (page_size)', () => {
       await act(async () => { await vi.advanceTimersByTimeAsync(0) }) // a fire-and-forget promise lefutása
 
       expect(toast).toHaveBeenCalledWith('columns.save_error', 'error')
+    })
+  })
+})
+
+describe('rendezés (sort)', () => {
+  describe('betöltés a mentett preferenciából', () => {
+    it('mentett sort nélkül nincs saját rendezés (a végpont alapértelmezése érvényes)', () => {
+      const { result } = setup(REG_SORTABLE)
+      expect(result.current.sort).toBe(null)
+    })
+
+    it('az érvényes mentett {by, dir} visszaáll', () => {
+      const { result } = setup(REG_SORTABLE, { saved: { sort: { by: 'partner', dir: 'desc' } } })
+      expect(result.current.sort).toEqual({ by: 'partner', dir: 'desc' })
+    })
+
+    it('ismeretlen oszlopkulcsra mutató mentés nem lép életbe', () => {
+      // A backend a kulcs LÉTEZÉSÉT nem validálja (l. UpdateListPreferenceRequest),
+      // ezért egy azóta megszűnt oszlopra mutató mentés a frontendre marad.
+      const { result } = setup(REG_SORTABLE, { saved: { sort: { by: 'megszunt_oszlop', dir: 'asc' } } })
+      expect(result.current.sort).toBe(null)
+    })
+
+    it('nem rendezhetőnek jelölt oszlopra mutató mentés nem lép életbe', () => {
+      const { result } = setup(REG_SORTABLE, { saved: { sort: { by: 'note', dir: 'asc' } } })
+      expect(result.current.sort).toBe(null)
+    })
+
+    it('érvénytelen irányú mentés nem lép életbe', () => {
+      const { result } = setup(REG_SORTABLE, { saved: { sort: { by: 'partner', dir: 'oldalra' } } })
+      expect(result.current.sort).toBe(null)
+    })
+
+    it('idegen alakú (nem {by, dir}) mentés nem lép életbe', () => {
+      const { result } = setup(REG_SORTABLE, { saved: { sort: '-created_at' } })
+      expect(result.current.sort).toBe(null)
+    })
+
+    it('a jog nélküli oszlopra mutató mentés nem lép életbe', () => {
+      const registry = [
+        { key: 'name', default: true, locked: true, sortable: true },
+        { key: 'secret', default: true, permission: 'secret.view', sortable: true },
+      ]
+      const { result } = setup(registry, {
+        saved: { sort: { by: 'secret', dir: 'asc' } },
+        can: (perm) => perm !== 'secret.view',
+      })
+      expect(result.current.sort).toBe(null)
+    })
+  })
+
+  describe('setSort', () => {
+    it('beállítja a rendezést és mentést indít', async () => {
+      const { result } = setup(REG_SORTABLE)
+      act(() => result.current.setSort('partner', 'desc'))
+
+      expect(result.current.sort).toEqual({ by: 'partner', dir: 'desc' })
+
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+      const [, payload] = listPreferencesApi.update.mock.calls[0]
+      expect(payload.sort).toEqual({ by: 'partner', dir: 'desc' })
+    })
+
+    it('a rendezés az oszlopokkal EGY payloadban megy ki (nem külön PUT)', async () => {
+      const { result } = setup(REG_SORTABLE)
+      act(() => result.current.setSort('partner', 'asc'))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      expect(listPreferencesApi.update).toHaveBeenCalledTimes(1)
+      const [, payload] = listPreferencesApi.update.mock.calls[0]
+      expect(payload.columns.visible).toEqual(['number', 'partner', 'issue_date'])
+      expect(payload.sort).toEqual({ by: 'partner', dir: 'asc' })
+    })
+
+    it('ismeretlen vagy nem rendezhető oszlopra nem áll át, és nem is ment', async () => {
+      const { result } = setup(REG_SORTABLE)
+      act(() => result.current.setSort('note', 'asc'))
+      act(() => result.current.setSort('nincs_ilyen', 'asc'))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      expect(result.current.sort).toBe(null)
+      expect(listPreferencesApi.update).not.toHaveBeenCalled()
+    })
+
+    it('érvénytelen irány növekvőre normalizálódik', () => {
+      const { result } = setup(REG_SORTABLE)
+      act(() => result.current.setSort('partner', 'oldalra'))
+      expect(result.current.sort).toEqual({ by: 'partner', dir: 'asc' })
+    })
+
+    it('setSort(null) törli a rendezést, és a payloadból is kimarad a mező', async () => {
+      const { result } = setup(REG_SORTABLE, { saved: { sort: { by: 'partner', dir: 'asc' } } })
+      act(() => result.current.setSort(null))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      expect(result.current.sort).toBe(null)
+      const [, payload] = listPreferencesApi.update.mock.calls[0]
+      expect(payload).not.toHaveProperty('sort')
+    })
+
+    it('a rendezés nem írja felül a mentett oszlop-sorrendet és lapméretet', async () => {
+      const { result } = setup(REG_SORTABLE, {
+        saved: {
+          columns: { order: ['number', 'issue_date', 'partner', 'note'], visible: ['number', 'issue_date'] },
+          page_size: 50,
+        },
+        options: { defaultPageSize: 20 },
+      })
+      act(() => result.current.setSort('partner', 'asc'))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      const [, payload] = listPreferencesApi.update.mock.calls[0]
+      expect(payload.page_size).toBe(50)
+      expect(payload.columns.order).toEqual(['number', 'issue_date', 'partner', 'note'])
+      expect(payload.columns.visible).toEqual(['number', 'issue_date'])
+    })
+  })
+
+  describe('toggleSort — háromállapotú ciklus', () => {
+    it('szöveges oszlop: növekvő → csökkenő → alapértelmezett', () => {
+      const { result } = setup(REG_SORTABLE)
+
+      act(() => result.current.toggleSort('partner'))
+      expect(result.current.sort).toEqual({ by: 'partner', dir: 'asc' })
+
+      act(() => result.current.toggleSort('partner'))
+      expect(result.current.sort).toEqual({ by: 'partner', dir: 'desc' })
+
+      act(() => result.current.toggleSort('partner'))
+      expect(result.current.sort).toBe(null)
+    })
+
+    it('sortInitialDir: "desc" oszlop csökkenővel indul, majd növekvő, majd alapértelmezett', () => {
+      const { result } = setup(REG_SORTABLE)
+
+      act(() => result.current.toggleSort('issue_date'))
+      expect(result.current.sort).toEqual({ by: 'issue_date', dir: 'desc' })
+
+      act(() => result.current.toggleSort('issue_date'))
+      expect(result.current.sort).toEqual({ by: 'issue_date', dir: 'asc' })
+
+      act(() => result.current.toggleSort('issue_date'))
+      expect(result.current.sort).toBe(null)
+    })
+
+    it('MÁSIK oszlopra váltva a ciklus elölről indul, nem folytatódik', () => {
+      const { result } = setup(REG_SORTABLE)
+
+      act(() => result.current.toggleSort('partner'))
+      act(() => result.current.toggleSort('partner')) // partner/desc
+      act(() => result.current.toggleSort('issue_date'))
+
+      expect(result.current.sort).toEqual({ by: 'issue_date', dir: 'desc' })
+    })
+
+    it('locked oszlop is rendezhető, ha sortable (a rejthetőség és a rendezés független)', () => {
+      const { result } = setup(REG_SORTABLE)
+      act(() => result.current.toggleSort('number'))
+      expect(result.current.sort).toEqual({ by: 'number', dir: 'asc' })
+    })
+
+    it('nem rendezhető oszlopon a kattintás no-op', () => {
+      const { result } = setup(REG_SORTABLE)
+      act(() => result.current.toggleSort('note'))
+      expect(result.current.sort).toBe(null)
+    })
+
+    it('két, egy tickben leadott kattintás is helyesen lépteti a ciklust', () => {
+      // A ciklus a `sortRef`-ből számol (nem a renderelt state-ből), ezért egy
+      // gyors dupla kattintás sem "ragadhat be" az első lépésnél.
+      const { result } = setup(REG_SORTABLE)
+      act(() => {
+        result.current.toggleSort('partner')
+        result.current.toggleSort('partner')
+      })
+      expect(result.current.sort).toEqual({ by: 'partner', dir: 'desc' })
+    })
+  })
+
+  describe('kölcsönhatás a többi funkcióval', () => {
+    it('rendezés-módosítás után a visszaállító gomb aktív (isDirty)', () => {
+      const { result } = setup(REG_SORTABLE)
+      expect(result.current.isDirty).toBe(false)
+
+      act(() => result.current.toggleSort('partner'))
+      expect(result.current.isDirty).toBe(true)
+    })
+
+    it('oszlop-kapcsolás megőrzi a mentett rendezést', async () => {
+      const { result } = setup(REG_SORTABLE, { saved: { sort: { by: 'partner', dir: 'desc' } } })
+      act(() => result.current.toggle('note'))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      const [, payload] = listPreferencesApi.update.mock.calls[0]
+      expect(payload.sort).toEqual({ by: 'partner', dir: 'desc' })
+    })
+
+    it('a rendezés túléli a lecsatolást (optimista context-írás)', async () => {
+      createLiveAuth()
+      const first = setup(REG_SORTABLE, { live: true })
+      act(() => first.result.current.toggleSort('partner'))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+      first.unmount()
+
+      const second = setup(REG_SORTABLE, { live: true })
+      expect(second.result.current.sort).toEqual({ by: 'partner', dir: 'asc' })
+    })
+
+    it('a reset a rendezést is visszaállítja az alapértelmezettre', async () => {
+      const { result } = setup(REG_SORTABLE, { saved: { sort: { by: 'partner', dir: 'desc' } } })
+      expect(result.current.sort).toEqual({ by: 'partner', dir: 'desc' })
+
+      await act(async () => { await result.current.reset() })
+
+      expect(result.current.sort).toBe(null)
+      expect(listPreferencesApi.remove).toHaveBeenCalledWith(LIST_KEY)
+    })
+
+    it('cégváltáskor a másik cég rendezése lép életbe', () => {
+      const { result, rerender } = setup(REG_SORTABLE, { saved: { sort: { by: 'partner', dir: 'asc' } } })
+      expect(result.current.sort).toEqual({ by: 'partner', dir: 'asc' })
+
+      mockAuth({ saved: { sort: { by: 'issue_date', dir: 'desc' } }, companyId: 2 })
+      rerender()
+
+      expect(result.current.sort).toEqual({ by: 'issue_date', dir: 'desc' })
+    })
+
+    it('rendezés-UI NÉLKÜLI listán a mentett sort mező érintetlenül megmarad', async () => {
+      // A 14 listából 13 ilyen: nincs `sortable` oszlopa, ezért a hook a mentett
+      // értéket nem értelmezi, csak visszaküldi — ez az eddigi viselkedés.
+      const { result } = setup(REG_STANDARD, { saved: { sort: { by: 'barmi', dir: 'asc' } } })
+      expect(result.current.sort).toBe(null)
+
+      act(() => result.current.toggle('status'))
+      await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+
+      const [, payload] = listPreferencesApi.update.mock.calls[0]
+      expect(payload.sort).toEqual({ by: 'barmi', dir: 'asc' })
     })
   })
 })

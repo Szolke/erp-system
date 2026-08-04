@@ -215,16 +215,15 @@ sorban; a `docs/CHANGELOG.md` frissítése külön, a `docs-sync` skill-lel esed
 >   a helyességi (árva pivot-sorok takarítása, `61d24c8`), a cross-company szerkesztés
 >   BACKEND+FRONTEND szinten (`f036921`, `8269639`), és a tagválasztó UX nagy
 >   user-bázisnál (`82cb984`). Ez a szakasz ezzel kiürült.
-> - **Oszlopválasztó / rendezés** — a `sort` UI a pilot (Bizonylatok) listán KÉSZ; a
->   backend whitelist a maradék 13 listán is KÉSZ (`26c58b0`, `LISTSORT-1`). **NYITOTT:**
->   a `SortableColumnHeader`/`useListColumns` frontend-bekötés erre a 13 listára + a
->   felhasználói E2E végigjátszás — ez a következő, még el nem kezdett kör. A 2026-08-02-i
->   perzisztencia-javítás (`80adb4c`) böngészőben végig van játszva, tehát ott nincs
->   nyitott kézi teszt. A „jövőbeli kör" / „ha a termékigény felmerül" jelöléssel
->   halasztott egyéb bővítések is maradtak. **ÚJ tétel a 2026-08-02-i körből:** nincs
->   **minimum-oszlop guard** — a `locked` oszlopokon kívül minden kikapcsolható, egy
->   lista egyetlen oszlopra redukálható. Szándékosan kimaradt a javítás hatóköréből,
->   Szolke döntésére vár (l. lentebb).
+> - ~~**Oszlopválasztó / rendezés**~~ — **KÉSZ:** a `sort` UI a pilot (Bizonylatok) listán,
+>   a backend whitelist a maradék 13 listán (`26c58b0`, `LISTSORT-1`), és a
+>   `SortableColumnHeader`/`useListColumns` frontend-bekötés erre a 13 listára is (`1b7cd05`,
+>   `LISTSORT-3`) — a felhasználói E2E végigjátszás mind a 13 listán megtörtént. A
+>   2026-08-02-i perzisztencia-javítás (`80adb4c`) böngészőben végig van játszva, tehát ott
+>   sincs nyitott kézi teszt. A „jövőbeli kör" / „ha a termékigény felmerül" jelöléssel
+>   halasztott egyéb bővítések maradtak nyitva, de ezek nem „vedd fel és csináld" jellegűek.
+>   A **minimum-oszlop guard** tétel (a `locked` oszlopokon kívül minden kikapcsolható, egy
+>   lista egyetlen oszlopra redukálható volt) szintén LEZÁRULT (`a1fd3d1`).
 > - ~~**Kézikönyv-adósság (3 új tétel)**~~ — **ELAVULT PREMISSZA, TÖRÖLVE (2026-08-02).** Ez a
 >   sor a 2026-07-31-i és 2026-08-01-i körök után benne maradt, holott a lentebbi
 >   „Kézikönyv-adósság" szakasz mind a hármat LEZÁRTKÉNT vezeti (`1bdf6e1` ×2, `64a3957`).
@@ -238,8 +237,8 @@ sorban; a `docs/CHANGELOG.md` frissítése külön, a `docs-sync` skill-lel esed
 > - **Frontend automatizált tesztelés** — technikailag azonnal folytatható, de a szakasz
 >   maga jelzi, hogy a 3 kör után **csökkenő hozamú**.
 >
-> Egyik tétel sincs KÖVETKEZŐ LÉPÉS-ként megjelölve; a maradék három (Oszlopválasztó,
-> Sandbox-tesztelés, Frontend automatizált tesztelés) közötti sorrend Szolke döntése.
+> Egyik tétel sincs KÖVETKEZŐ LÉPÉS-ként megjelölve; a maradék kettő (Sandbox-tesztelés,
+> Frontend automatizált tesztelés) közötti sorrend Szolke döntése.
 
 ### Értékesítő csoportok — 3. fázis (a 2. fázis nyitva hagyott tételei)
 

@@ -8,6 +8,7 @@ use App\Http\Resources\AssetTypeResource;
 use App\Models\AssetType;
 use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 
 /**
@@ -19,13 +20,33 @@ use Illuminate\Http\Request;
  */
 class AssetTypeController extends Controller
 {
+    /** Rendezhető oszlopok (l. App\Support\ListSort). A `scope` egy KÓDBAN
+     *  rögzített logikai kifejezés (nem kérésből jövő oszlopnév), tehát
+     *  biztonságosan whitelistelhető: globális (company_id IS NULL) vs.
+     *  céges tétel. */
+    private const SORTABLE_COLUMNS = [
+        'code'  => 'code',
+        'name'  => 'name',
+        'scope' => '(company_id IS NULL)',
+    ];
+
+    private const DEFAULT_SORT_KEY = 'code';
+
+    private const SORT_TIE_BREAKERS = ['id ASC'];
+
     public function index(Request $request)
     {
         $this->authorize('asset.view');
 
-        $types = AssetType::query()->orderBy('code')->get();
+        $types = AssetType::query()->orderByRaw($this->orderBySql($request))->get();
 
         return AssetTypeResource::collection($types);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY, 'asc')
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     public function store(StoreAssetTypeRequest $request, CurrentCompany $currentCompany, AuditLogger $auditLogger)

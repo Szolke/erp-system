@@ -9,12 +9,27 @@ use App\Http\Requests\UpdatePartnerRequest;
 use App\Http\Resources\PartnerResource;
 use App\Models\Partner;
 use App\Services\AuditLogger;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 
 /** @group Partnerek */
 class PartnerController extends Controller
 {
     use EnforcesCompanyScope;
+
+    /** Rendezhető oszlopok (l. App\Support\ListSort). A `city` a `billing_city`
+     *  oszlopra rendez — a partnerlistán a szállítási cím nem jelenik meg. */
+    private const SORTABLE_COLUMNS = [
+        'name'       => 'name',
+        'tax_number' => 'tax_number',
+        'type'       => 'type',
+        'city'       => 'billing_city',
+        'email'      => 'email',
+    ];
+
+    private const DEFAULT_SORT_KEY = 'name';
+
+    private const SORT_TIE_BREAKERS = ['id ASC'];
 
     public function index(Request $request)
     {
@@ -26,10 +41,16 @@ class PartnerController extends Controller
                 $query->where(fn ($q) => $q->where('name', 'ilike', "%{$search}%")
                     ->orWhere('tax_number', 'ilike', "%{$search}%"));
             })
-            ->orderBy('name')
+            ->orderByRaw($this->orderBySql($request))
             ->paginate($this->perPage($request));
 
         return PartnerResource::collection($partners);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY, 'asc')
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     public function store(StorePartnerRequest $request, AuditLogger $auditLogger)

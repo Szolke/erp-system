@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Services\AuditLogger;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 
 /** @group Termékek */
@@ -16,21 +17,49 @@ class ProductController extends Controller
 {
     use EnforcesCompanyScope;
 
+    /**
+     * Rendezhető oszlopok (l. App\Support\ListSort). A `vat_rate` a
+     * kapcsolt `vat_rates.name`-re rendez, ezért a lekérdezés MINDIG joinolja
+     * a vat_rates táblát — ugyanaz a minta, mint a DocumentController union
+     * ágaiban a partners join, hogy a rendezés ne igényeljen feltételes
+     * join-építést.
+     */
+    private const SORTABLE_COLUMNS = [
+        'sku'        => 'products.sku',
+        'name'       => 'products.name',
+        'unit'       => 'products.unit',
+        'base_price' => 'products.base_price',
+        'type'       => 'products.type',
+        'vat_rate'   => 'vat_rates.name',
+    ];
+
+    private const DEFAULT_SORT_KEY = 'name';
+
+    private const SORT_TIE_BREAKERS = ['products.id ASC'];
+
     public function index(Request $request)
     {
         $this->authorize('product.view');
 
         $products = Product::query()
+            ->leftJoin('vat_rates', 'vat_rates.id', '=', 'products.vat_rate_id')
+            ->select('products.*')
             ->with('vatRate')
             ->when($request->string('search')->trim()->isNotEmpty(), function ($query) use ($request) {
                 $search = $request->string('search')->trim()->value();
-                $query->where(fn ($q) => $q->where('name', 'ilike', "%{$search}%")
-                    ->orWhere('sku', 'ilike', "%{$search}%"));
+                $query->where(fn ($q) => $q->where('products.name', 'ilike', "%{$search}%")
+                    ->orWhere('products.sku', 'ilike', "%{$search}%"));
             })
-            ->orderBy('name')
+            ->orderByRaw($this->orderBySql($request))
             ->paginate($this->perPage($request));
 
         return ProductResource::collection($products);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY, 'asc')
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     public function store(StoreProductRequest $request, AuditLogger $auditLogger)

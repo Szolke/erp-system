@@ -11,6 +11,7 @@ use App\Http\Resources\NavSubmissionLogResource;
 use App\Models\Invoice;
 use App\Models\NavSubmissionLog;
 use App\Support\CurrentCompany;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 
 /**
@@ -32,6 +33,31 @@ class NavSubmissionLogController extends Controller
         NavStatus::Rejected->value,
         NavStatus::NeedsAttention->value,
     ];
+
+    /**
+     * Rendezhető oszlopok (l. App\Support\ListSort). Az `invoice`/`partner`/
+     * `status` a joinolt invoices/partners táblákra rendez — ehhez az
+     * index() lekérdezése MINDIG joinolja mindkettőt (a `with([...])` marad
+     * a Resource hidratálásához, a join csak az ORDER BY-hoz kell). MINDEN
+     * oszlop qualifikált (`tábla.oszlop`), mert a join után az `id`/
+     * `created_at`/`status` különben ambiguous lenne a három tábla között.
+     *
+     * Az `attempts` (kísérletek száma) SZÁNDÉKOSAN NEM whitelistelt: ezt az
+     * index() a lapozott eredményen FUTTATOTT, külön PHP-oldali lekérdezéssel
+     * tölti fel (l. `$attemptCounts` lent) — a lapozás előtt nem áll
+     * rendelkezésre SQL-oszlopként, egy ismeretlen kulcsként a defaultra esik
+     * vissza.
+     */
+    private const SORTABLE_COLUMNS = [
+        'invoice' => 'invoices.invoice_number',
+        'partner' => 'partners.name',
+        'status'  => 'invoices.nav_status',
+        'latest'  => 'nav_submission_logs.created_at',
+    ];
+
+    private const DEFAULT_SORT_KEY = 'latest';
+
+    private const SORT_TIE_BREAKERS = ['nav_submission_logs.id DESC'];
 
     /**
      * Egy adott számla NAV-beküldési előzményei, időrendben — nyers XML nélkül.
@@ -104,8 +130,10 @@ class NavSubmissionLogController extends Controller
             ->joinSub($latestPerInvoice, 'latest_per_invoice', fn ($join) => $join->on(
                 'nav_submission_logs.id', '=', 'latest_per_invoice.id'
             ))
+            ->join('invoices', 'invoices.id', '=', 'nav_submission_logs.invoice_id')
+            ->leftJoin('partners', 'partners.id', '=', 'invoices.partner_id')
             ->with(['invoice:id,invoice_number,nav_status,partner_id', 'invoice.partner:id,name'])
-            ->orderByDesc('nav_submission_logs.created_at')
+            ->orderByRaw($this->orderBySql($request))
             ->paginate($this->perPage($request, 50), ['nav_submission_logs.*']);
 
         $attemptCounts = (clone $filtered)
@@ -119,6 +147,12 @@ class NavSubmissionLogController extends Controller
         });
 
         return NavSubmissionLogGroupedResource::collection($logs);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY)
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     /**

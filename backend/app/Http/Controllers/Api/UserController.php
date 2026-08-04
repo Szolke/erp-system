@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\UserPermissionOverride;
 use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
@@ -18,6 +19,20 @@ use Illuminate\Validation\Rules\Password;
 /** @group Felhasználók */
 class UserController extends Controller
 {
+    /** Rendezhető oszlopok (l. App\Support\ListSort). A `groups` egy
+     *  kollekció (a felhasználó RBAC-csoportjainak neve) — nincs egyetlen
+     *  oszlopra visszavezethető rendezési szempontja, szándékosan NEM
+     *  whitelistelt. */
+    private const SORTABLE_COLUMNS = [
+        'name'   => 'name',
+        'email'  => 'email',
+        'status' => 'is_active',
+    ];
+
+    private const DEFAULT_SORT_KEY = 'name';
+
+    private const SORT_TIE_BREAKERS = ['id ASC'];
+
     public function __construct(private CurrentCompany $currentCompany) {}
 
     public function index(Request $request)
@@ -30,10 +45,16 @@ class UserController extends Controller
                 $s = $request->string('search')->trim()->value();
                 $q->where(fn ($q2) => $q2->where('name', 'ilike', "%{$s}%")->orWhere('email', 'ilike', "%{$s}%"));
             })
-            ->orderBy('name')
+            ->orderByRaw($this->orderBySql($request))
             ->paginate($this->perPage($request));
 
         return response()->json($users);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY, 'asc')
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     public function store(Request $request, AuditLogger $auditLogger)

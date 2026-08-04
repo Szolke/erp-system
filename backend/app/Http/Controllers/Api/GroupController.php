@@ -9,6 +9,7 @@ use App\Models\Permission;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -17,6 +18,21 @@ class GroupController extends Controller
 {
     use EnforcesCompanyScope;
 
+    /** Rendezhető oszlopok (l. App\Support\ListSort). `members`/`permissions`
+     *  a withCount() által generált `users_count`/`permissions_count`
+     *  SELECT-aliasra rendez — PostgreSQL az ORDER BY-ban látja a SELECT
+     *  aliasokat, nem kell külön join. */
+    private const SORTABLE_COLUMNS = [
+        'name'        => 'name',
+        'description' => 'description',
+        'members'     => 'users_count',
+        'permissions' => 'permissions_count',
+    ];
+
+    private const DEFAULT_SORT_KEY = 'name';
+
+    private const SORT_TIE_BREAKERS = ['id ASC'];
+
     public function __construct(private CurrentCompany $currentCompany) {}
 
     public function index(Request $request)
@@ -24,10 +40,16 @@ class GroupController extends Controller
         $this->authorize('group.view');
 
         $groups = Group::withCount(['users', 'permissions'])
-            ->orderBy('name')
+            ->orderByRaw($this->orderBySql($request))
             ->paginate($this->perPage($request));
 
         return response()->json($groups);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY, 'asc')
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     public function store(Request $request, AuditLogger $auditLogger)

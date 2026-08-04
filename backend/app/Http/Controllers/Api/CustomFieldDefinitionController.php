@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\EnforcesCompanyScope;
 use App\Http\Controllers\Controller;
 use App\Models\CustomFieldDefinition;
 use App\Support\CurrentCompany;
+use App\Support\ListSort;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -14,6 +15,24 @@ use Illuminate\Validation\Rule;
 class CustomFieldDefinitionController extends Controller
 {
     use EnforcesCompanyScope;
+
+    /** Rendezhető oszlopok (l. App\Support\ListSort). `required`/`active` a
+     *  `is_required`/`is_active` oszlopokra rendez. A `sort_order` nem
+     *  frontend-oszlop (nincs fejléce), de whitelistelt marad az
+     *  ALAPÉRTELMEZETT rendezéshez — ez a katalógus saját, kézzel
+     *  beállított sorrendje. */
+    private const SORTABLE_COLUMNS = [
+        'key'         => 'key',
+        'label'       => 'label',
+        'type'        => 'type',
+        'required'    => 'is_required',
+        'active'      => 'is_active',
+        'sort_order'  => 'sort_order',
+    ];
+
+    private const DEFAULT_SORT_KEY = 'sort_order';
+
+    private const SORT_TIE_BREAKERS = ['entity_type ASC', 'id ASC'];
 
     /**
      * GET /api/custom-fields?entity_type=partner
@@ -25,12 +44,16 @@ class CustomFieldDefinitionController extends Controller
 
         $definitions = CustomFieldDefinition::query()
             ->when($request->filled('entity_type'), fn ($q) => $q->where('entity_type', $request->entity_type))
-            ->orderBy('entity_type')
-            ->orderBy('sort_order')
-            ->orderBy('id')
+            ->orderByRaw($this->orderBySql($request))
             ->get();
 
         return response()->json(['data' => $definitions]);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY, 'asc')
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     /** POST /api/custom-fields */

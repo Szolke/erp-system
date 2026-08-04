@@ -13,12 +13,31 @@ use App\Models\Company;
 use App\Services\AssetService;
 use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 
 /** @group Eszközök */
 class AssetController extends Controller
 {
     use EnforcesCompanyScope;
+
+    /**
+     * Rendezhető oszlopok (l. App\Support\ListSort). Az `asset_type` a
+     * kapcsolt `asset_types.name`-re rendez, ezért a lekérdezés MINDIG
+     * joinolja az asset_types táblát (a `with('assetType')` marad a
+     * Resource hidratálásához).
+     */
+    private const SORTABLE_COLUMNS = [
+        'name'          => 'assets.name',
+        'serial_number' => 'assets.serial_number',
+        'imei'          => 'assets.imei',
+        'status'        => 'assets.status',
+        'asset_type'    => 'asset_types.name',
+    ];
+
+    private const DEFAULT_SORT_KEY = 'name';
+
+    private const SORT_TIE_BREAKERS = ['assets.id ASC'];
 
     public function __construct(private AssetService $assetService) {}
 
@@ -27,17 +46,25 @@ class AssetController extends Controller
         $this->authorize('asset.view');
 
         $assets = Asset::query()
+            ->leftJoin('asset_types', 'asset_types.id', '=', 'assets.asset_type_id')
+            ->select('assets.*')
             ->with('assetType')
             ->when($request->string('search')->trim()->isNotEmpty(), function ($query) use ($request) {
                 $search = $request->string('search')->trim()->value();
-                $query->where(fn ($q) => $q->where('name', 'ilike', "%{$search}%")
-                    ->orWhere('serial_number', 'ilike', "%{$search}%")
-                    ->orWhere('imei', 'ilike', "%{$search}%"));
+                $query->where(fn ($q) => $q->where('assets.name', 'ilike', "%{$search}%")
+                    ->orWhere('assets.serial_number', 'ilike', "%{$search}%")
+                    ->orWhere('assets.imei', 'ilike', "%{$search}%"));
             })
-            ->orderBy('name')
+            ->orderByRaw($this->orderBySql($request))
             ->paginate($this->perPage($request));
 
         return AssetResource::collection($assets);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY, 'asc')
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     public function store(StoreAssetRequest $request, CurrentCompany $currentCompany, AuditLogger $auditLogger)

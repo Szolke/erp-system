@@ -10,6 +10,7 @@ use App\Http\Resources\JobPositionResource;
 use App\Models\JobPosition;
 use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 
 /**
@@ -26,6 +27,19 @@ class JobPositionController extends Controller
 {
     use EnforcesCompanyScope;
 
+    /** Rendezhető oszlopok (l. App\Support\ListSort). A `scope` az AssetType
+     *  mintáját követi: globális (company_id IS NULL) vs. céges tétel. */
+    private const SORTABLE_COLUMNS = [
+        'name'       => 'name',
+        'scope'      => '(company_id IS NULL)',
+        'status'     => 'active',
+        'sort_order' => 'sort_order',
+    ];
+
+    private const DEFAULT_SORT_KEY = 'sort_order';
+
+    private const SORT_TIE_BREAKERS = ['name ASC', 'id ASC'];
+
     public function index(Request $request)
     {
         // A selector (user-űrlap) csak az aktív listát látja, jog nélkül.
@@ -37,11 +51,16 @@ class JobPositionController extends Controller
 
         $jobPositions = JobPosition::query()
             ->when(! $includeInactive, fn ($q) => $q->where('active', true))
-            ->orderBy('sort_order')
-            ->orderBy('name')
+            ->orderByRaw($this->orderBySql($request))
             ->get();
 
         return JobPositionResource::collection($jobPositions);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY, 'asc')
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     public function store(StoreJobPositionRequest $request, CurrentCompany $currentCompany, AuditLogger $auditLogger)

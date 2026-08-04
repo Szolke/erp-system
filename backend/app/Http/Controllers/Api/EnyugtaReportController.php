@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ReceiptReportResource;
 use App\Models\ReceiptReport;
 use App\Support\CurrentCompany;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -21,6 +22,21 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class EnyugtaReportController extends Controller
 {
     use EnforcesCompanyScope;
+
+    /** Rendezhető oszlopok (l. App\Support\ListSort). A `gross_total` a
+     *  `total_gross` oszlopra rendez (a frontend-kulcs a bizonylatlista
+     *  `gross`/`gross_huf` mintáját követi, nem az DB-oszlopnevet). */
+    private const SORTABLE_COLUMNS = [
+        'report_date'   => 'report_date',
+        'type'          => 'type',
+        'status'        => 'status',
+        'receipt_count' => 'receipt_count',
+        'gross_total'   => 'total_gross',
+    ];
+
+    private const DEFAULT_SORT_KEY = 'report_date';
+
+    private const SORT_TIE_BREAKERS = ['id DESC'];
 
     /** GET /api/enyugta/reports — lista, szűrhető dátumtartományra és státuszra. */
     public function index(Request $request, CurrentCompany $currentCompany)
@@ -37,11 +53,16 @@ class EnyugtaReportController extends Controller
             ->when($filters['date_from'] ?? null, fn ($q, $v) => $q->where('report_date', '>=', $v))
             ->when($filters['date_to'] ?? null, fn ($q, $v) => $q->where('report_date', '<=', $v))
             ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
-            ->orderByDesc('report_date')
-            ->orderByDesc('id')
+            ->orderByRaw($this->orderBySql($request))
             ->get();
 
         return ReceiptReportResource::collection($reports);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY)
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     /** GET /api/enyugta/reports/{report} — részletek, kategóriánkénti sorokkal. */

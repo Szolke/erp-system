@@ -12,6 +12,7 @@ use App\Models\Company;
 use App\Models\DocumentSeries;
 use App\Services\AuditLogger;
 use App\Support\CurrentCompany;
+use App\Support\ListSort;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -25,16 +26,36 @@ use Illuminate\Support\Facades\Storage;
  */
 class CompanyController extends Controller
 {
+    /** Rendezhető oszlopok (l. App\Support\ListSort). A `users_count` a
+     *  withCount() SELECT-aliasára rendez. */
+    private const SORTABLE_COLUMNS = [
+        'name'        => 'name',
+        'tax_number'  => 'tax_number',
+        'city'        => 'city',
+        'users_count' => 'users_count',
+        'status'      => 'is_active',
+    ];
+
+    private const DEFAULT_SORT_KEY = 'name';
+
+    private const SORT_TIE_BREAKERS = ['id ASC'];
+
     /** GET /api/companies — az összes cég listája (csak szuperadmin) */
     public function index(Request $request)
     {
         abort_unless($request->user()->is_superadmin, 403);
 
         $companies = Company::withCount('users')
-            ->orderBy('name')
+            ->orderByRaw($this->orderBySql($request))
             ->paginate(50);
 
         return CompanyResource::collection($companies);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY, 'asc')
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     /** POST /api/companies — új cég létrehozása (csak szuperadmin) */

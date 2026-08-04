@@ -11,6 +11,7 @@ use App\Http\Requests\UpdateSalesGroupRequest;
 use App\Http\Resources\SalesGroupResource;
 use App\Models\SalesGroup;
 use App\Services\AuditLogger;
+use App\Support\ListSort;
 use Illuminate\Http\Request;
 
 /** @group Értékesítő csoportok */
@@ -18,15 +19,44 @@ class SalesGroupController extends Controller
 {
     use EnforcesCompanyScope, ManagesSalesGroups;
 
+    /**
+     * Rendezhető oszlopok (l. App\Support\ListSort). A `display_name` a
+     * SalesGroupResource::toArray()-ben számolt értéket tükrözi (cég
+     * `group_prefix` + `_` + név, prefix nélkül csak a név) — ezért a
+     * lekérdezés MINDIG joinolja a companies táblát (ugyanaz a "join
+     * feltétel nélkül is jelen van" minta, mint a DocumentController union
+     * ágainak partners joinja), a `with('company')` marad a Resource
+     * hidratálásához.
+     */
+    private const SORTABLE_COLUMNS = [
+        'name' => 'sales_groups.name',
+        'display_name' => "(CASE WHEN companies.group_prefix IS NOT NULL
+            THEN companies.group_prefix || '_' || sales_groups.name
+            ELSE sales_groups.name END)",
+    ];
+
+    private const DEFAULT_SORT_KEY = 'name';
+
+    private const SORT_TIE_BREAKERS = ['sales_groups.id ASC'];
+
     public function index(Request $request)
     {
         $this->authorize('sales_group.view');
 
-        $groups = SalesGroup::with('company')
-            ->orderBy('name')
+        $groups = SalesGroup::query()
+            ->leftJoin('companies', 'companies.id', '=', 'sales_groups.company_id')
+            ->select('sales_groups.*')
+            ->with('company')
+            ->orderByRaw($this->orderBySql($request))
             ->paginate($this->perPage($request));
 
         return SalesGroupResource::collection($groups);
+    }
+
+    private function orderBySql(Request $request): string
+    {
+        return ListSort::fromRequest($request, self::SORTABLE_COLUMNS, self::DEFAULT_SORT_KEY, 'asc')
+            ->toOrderBySql(self::SORT_TIE_BREAKERS);
     }
 
     public function store(StoreSalesGroupRequest $request, AuditLogger $auditLogger)

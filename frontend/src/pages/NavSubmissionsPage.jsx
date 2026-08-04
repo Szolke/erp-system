@@ -222,9 +222,14 @@ export default function NavSubmissionsPage() {
             />
           </div>
 
+          {/* `clearable`: a dátumszűrés itt OPCIONÁLIS (a DEFAULTS üres
+              tartománnyal indul), és a státusz-fülek mellett nincs chip-sor,
+              ami a beállított időszakot elvehetné — enélkül a felhasználó nem
+              tudná visszavenni a szűrést (l. DocumentListPage azonos mintája). */}
           <DateRangePicker
             unit="day"
             align="right"
+            clearable
             from={filters.date_from}
             to={filters.date_to}
             onApply={handleDateRangeApply}

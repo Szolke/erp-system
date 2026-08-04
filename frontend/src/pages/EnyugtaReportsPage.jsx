@@ -155,9 +155,14 @@ export default function EnyugtaReportsPage() {
             ))}
           </select>
 
+          {/* `clearable`: a dátumszűrés itt OPCIONÁLIS (a DEFAULTS üres
+              tartománnyal indul) — az állapot-legördülő nullázható az "Összes
+              állapot" tétellel, a dátumtartomány viszont enélkül nem lenne
+              visszavehető (l. DocumentListPage azonos mintája). */}
           <DateRangePicker
             unit="day"
             align="left"
+            clearable
             from={filters.date_from}
             to={filters.date_to}
             onApply={handleDateRangeApply}

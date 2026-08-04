@@ -343,7 +343,7 @@ Index: `UNIQUE (company_id, LOWER(name))` — funkcionális PostgreSQL expressio
 - Modul bekapcsolt → prefix kötelező (`companies.group_prefix NOT NULL`) a csoport létrehozása előtt (422 ha hiányzik)
 - Prefix `PUT /api/company`-on nem állítható NULL-ra, amíg van sales_groups sor (422)
 - Prefix megváltoztatható (csak törlés tilos, ha van csoport)
-- 2. fázisban (nem most): `sales_group_user` pivot (user_id, company_id, sales_group_id)
+- `sales_group_user` pivot (`sales_group_id`, `user_id`) — tagság-kezelés kész (2. fázis, `5e50ad0`). Szándékosan NINCS `company_id` a pivoton: a cég-hovatartozás a `sales_groups.company_id`-n keresztül egyértelmű (a `BelongsToCompany` globális scope ott szűr), egy denormalizált pivot-oszlop csak egy második, elszivárogható igazságforrás lenne. A cross-company (superadmin) olvasás a `SalesGroup` reláción nyit `withoutGlobalScope('company')`-t, nem a pivoton; az írás oldali same-company garanciát a `SyncSalesGroupUsersRequest` adja (a `user_ids` minden eleme a `company_user` pivoton keresztül igazoltan az aktuális cég felhasználója).
 
 ---
 

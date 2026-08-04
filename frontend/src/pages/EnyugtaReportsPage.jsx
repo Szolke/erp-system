@@ -7,6 +7,7 @@ import { useTranslation } from '../contexts/TranslationContext'
 import { EnyugtaReportStatusBadge, EnyugtaReportTypeBadge } from '../components/StatusBadge'
 import DateRangePicker from '../components/reports/DateRangePicker'
 import ColumnPicker from '../components/ColumnPicker'
+import SortableColumnHeader from '../components/SortableColumnHeader'
 import { useListColumns } from '../hooks/useListColumns'
 import { enyugtaReportColumns } from '../columns/enyugtaReports'
 import { useUrlFilters } from '../utils/useUrlFilters'
@@ -71,14 +72,17 @@ export default function EnyugtaReportsPage() {
   const [error, setError] = useState(null) // null | 'forbidden' | 'generic'
   const [openPopover, setOpenPopover] = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('enyugta_reports.index', enyugtaReportColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, sort, toggleSort } =
+    useListColumns('enyugta_reports.index', enyugtaReportColumns)
 
   // D4: diszkrét tájékoztató, ha az elmúlt 30 napban a cégnek egy nyugtája
   // sincs — a meglévő GET /api/documents (type=receipt) végpontból
   // származtatva, nincs hozzá új backend-végpont.
   const [noRecentReceipts, setNoRecentReceipts] = useState(false)
 
-  useEffect(() => { load() }, [filters.date_from, filters.date_to, filters.status]) // eslint-disable-line react-hooks/exhaustive-deps
+  // A lista nem lapoz, ezért a rendezésváltás egyszerűen újratölt (nincs
+  // oldalszám, amit vissza kellene állítani).
+  useEffect(() => { load() }, [filters.date_from, filters.date_to, filters.status, sort]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { checkRecentReceipts() }, [])
 
   async function load() {
@@ -89,6 +93,11 @@ export default function EnyugtaReportsPage() {
         date_from: filters.date_from || undefined,
         date_to: filters.date_to || undefined,
         status: filters.status || undefined,
+        // Rendezés: a mentett preferenciából (nincs saját rendezés → a végpont a
+        // saját alapértelmezését adja, l.
+        // EnyugtaReportController::SORTABLE_COLUMNS).
+        sort_by: sort?.by,
+        sort_dir: sort?.dir,
       })
       setReports(res.data.data)
     } catch (err) {
@@ -184,7 +193,17 @@ export default function EnyugtaReportsPage() {
               <thead>
                 <tr>
                   {visibleColumns.map((col) => (
-                    <th key={col.key} scope="col" className={col.align === 'right' ? 'text-right' : undefined}>{t(col.label)}</th>
+                    col.sortable ? (
+                      <SortableColumnHeader
+                        key={col.key}
+                        label={t(col.label)}
+                        align={col.align}
+                        direction={sort?.by === col.key ? sort.dir : null}
+                        onSort={() => toggleSort(col.key)}
+                      />
+                    ) : (
+                      <th key={col.key} scope="col" className={col.align === 'right' ? 'text-right' : undefined}>{t(col.label)}</th>
+                    )
                   ))}
                 </tr>
               </thead>

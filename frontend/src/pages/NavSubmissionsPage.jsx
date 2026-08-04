@@ -9,6 +9,7 @@ import Pagination from '../components/Pagination'
 import DateRangePicker from '../components/reports/DateRangePicker'
 import NavSubmissionDetail from '../components/nav/NavSubmissionDetail'
 import ColumnPicker from '../components/ColumnPicker'
+import SortableColumnHeader from '../components/SortableColumnHeader'
 import { useListColumns } from '../hooks/useListColumns'
 import { navSubmissionColumns } from '../columns/navSubmissions'
 import { useUrlFilters } from '../utils/useUrlFilters'
@@ -103,7 +104,7 @@ export default function NavSubmissionsPage() {
   // A lapméret feloldása: URL > mentett preferencia > 20 (l. DocumentListPage
   // azonos mintája — az `urlKeys` a defaultból visszaírt és a megosztott linkből
   // érkező per_page megkülönböztetésére kell).
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize } =
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize, sort, toggleSort } =
     useListColumns('nav_submissions.index', navSubmissionColumns, {
       defaultPageSize: 20,
       urlPageSize: urlKeys.has('per_page') ? Number(filters.per_page) || null : null,
@@ -121,6 +122,11 @@ export default function NavSubmissionsPage() {
         invoice_number: filters.invoice_number || undefined,
         date_from: filters.date_from || undefined,
         date_to: filters.date_to || undefined,
+        // Rendezés: a mentett preferenciából (nincs saját rendezés → a végpont a
+        // saját alapértelmezését adja, l.
+        // NavSubmissionLogController::SORTABLE_COLUMNS).
+        sort_by: sort?.by,
+        sort_dir: sort?.dir,
         per_page: perPage,
         page,
       })
@@ -132,7 +138,7 @@ export default function NavSubmissionsPage() {
     }
   }
 
-  useEffect(() => { load() }, [filters.status, filters.invoice_number, filters.date_from, filters.date_to, perPage, filters.page]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load() }, [filters.status, filters.invoice_number, filters.date_from, filters.date_to, perPage, sort, filters.page]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A címsor hozzáigazítása a tényleges lapmérethez (l. DocumentListPage).
   useEffect(() => {
@@ -165,6 +171,14 @@ export default function NavSubmissionsPage() {
   function handlePageChange(p) {
     setExpandedId(null)
     setFilters({ page: String(p) })
+  }
+  // Rendezésváltáskor vissza az első oldalra (l. DocumentListPage), és a
+  // kinyitott részletsor bezárása: a sorrend átrendeződik, a nyitott panel
+  // különben egy másik sor alatt maradna.
+  function handleSort(key) {
+    setExpandedId(null)
+    toggleSort(key)
+    setFilters({ page: '1' })
   }
   function toggleExpanded(logId) {
     setExpandedId((prev) => (prev === logId ? null : logId))
@@ -250,7 +264,17 @@ export default function NavSubmissionsPage() {
               <thead>
                 <tr>
                   {visibleColumns.map((col) => (
-                    <th key={col.key} scope="col">{t(col.label)}</th>
+                    col.sortable ? (
+                      <SortableColumnHeader
+                        key={col.key}
+                        label={t(col.label)}
+                        align={col.align}
+                        direction={sort?.by === col.key ? sort.dir : null}
+                        onSort={() => handleSort(col.key)}
+                      />
+                    ) : (
+                      <th key={col.key} scope="col">{t(col.label)}</th>
+                    )
                   ))}
                 </tr>
               </thead>

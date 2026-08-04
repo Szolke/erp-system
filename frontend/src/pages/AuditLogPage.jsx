@@ -3,6 +3,7 @@ import { company as companyApi } from '../api/company'
 import PerPageSelector from '../components/PerPageSelector'
 import Pagination from '../components/Pagination'
 import ColumnPicker from '../components/ColumnPicker'
+import SortableColumnHeader from '../components/SortableColumnHeader'
 import { useListColumns } from '../hooks/useListColumns'
 import { auditLogColumns } from '../columns/auditLogs'
 import { useTranslation } from '../contexts/TranslationContext'
@@ -39,20 +40,26 @@ export default function AuditLogPage() {
   const [columnsOpen, setColumnsOpen] = useState(false)
   // A lapméret a mentett lista-preferenciából jön (l. useListColumns); az
   // audit-napló alapértéke a többi listáétól eltérően 50.
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize } =
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize, sort, toggleSort } =
     useListColumns('audit_logs.index', auditLogColumns, { defaultPageSize: 50 })
 
   async function load(a, pp, pg) {
     setLoading(true)
     try {
-      const res = await companyApi.auditLogs({ action: a || undefined, per_page: pp, page: pg })
+      // Rendezés: a mentett preferenciából (nincs saját rendezés → a végpont a
+      // saját alapértelmezését adja, l. AuditLogController::SORTABLE_COLUMNS).
+      const res = await companyApi.auditLogs({
+        action: a || undefined, sort_by: sort?.by, sort_dir: sort?.dir, per_page: pp, page: pg,
+      })
       setData(res.data)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { load('', perPage, 1) }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // Ez egyben a MOUNT-effekt is: az első lekérdezés már a mentett rendezéssel
+  // indul. Rendezésváltáskor vissza az első oldalra (l. DocumentListPage).
+  useEffect(() => { setPage(1); load(action, perPage, 1) }, [sort]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handlePerPage(value) {
     setPageSize(value); setPage(1)
@@ -76,7 +83,17 @@ export default function AuditLogPage() {
           <thead>
             <tr>
               {visibleColumns.map((col) => (
-                <th key={col.key}>{t(col.label)}</th>
+                col.sortable ? (
+                  <SortableColumnHeader
+                    key={col.key}
+                    label={t(col.label)}
+                    align={col.align}
+                    direction={sort?.by === col.key ? sort.dir : null}
+                    onSort={() => toggleSort(col.key)}
+                  />
+                ) : (
+                  <th key={col.key}>{t(col.label)}</th>
+                )
               ))}
             </tr>
           </thead>

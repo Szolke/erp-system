@@ -7,6 +7,7 @@ import { companies as companiesApi } from '../../api/company'
 import { users as usersApi } from '../../api/users'
 import client from '../../api/client'
 import ColumnPicker from '../../components/ColumnPicker'
+import SortableColumnHeader from '../../components/SortableColumnHeader'
 import { useListColumns } from '../../hooks/useListColumns'
 import { companyColumns } from '../../columns/companies'
 
@@ -77,7 +78,8 @@ export default function CompanyListPage() {
   const [saving, setSaving]     = useState(false)
   const [switching, setSwitching] = useState(null)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('companies.index', companyColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, sort, toggleSort } =
+    useListColumns('companies.index', companyColumns)
 
   // Users modal state
   const [usersModal, setUsersModal]         = useState(null)   // aktuálisan nyitott company obj
@@ -89,12 +91,16 @@ export default function CompanyListPage() {
   async function load() {
     setLoading(true)
     try {
-      const res = await companiesApi.list()
+      // Rendezés: a mentett preferenciából (nincs saját rendezés → a végpont a
+      // saját alapértelmezését adja, l. CompanyController::SORTABLE_COLUMNS).
+      const res = await companiesApi.list({ sort_by: sort?.by, sort_dir: sort?.dir })
       setData(res.data)
     } finally { setLoading(false) }
   }
 
-  useEffect(() => { load() }, [])
+  // Ez egyben a MOUNT-effekt is: az első lekérdezés már a mentett rendezéssel
+  // indul. A lista nem lapoz, ezért itt nincs oldalszám-visszaállítás.
+  useEffect(() => { load() }, [sort]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function setField(e) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -259,7 +265,17 @@ export default function CompanyListPage() {
           <thead>
             <tr>
               {visibleColumns.map((col) => (
-                <th key={col.key}>{t(col.label)}</th>
+                col.sortable ? (
+                  <SortableColumnHeader
+                    key={col.key}
+                    label={t(col.label)}
+                    align={col.align}
+                    direction={sort?.by === col.key ? sort.dir : null}
+                    onSort={() => toggleSort(col.key)}
+                  />
+                ) : (
+                  <th key={col.key}>{t(col.label)}</th>
+                )
               ))}
             </tr>
           </thead>

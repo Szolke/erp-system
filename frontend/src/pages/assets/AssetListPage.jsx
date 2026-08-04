@@ -8,6 +8,7 @@ import { AssetStatusBadge } from '../../components/StatusBadge'
 import PerPageSelector from '../../components/PerPageSelector'
 import Pagination from '../../components/Pagination'
 import ColumnPicker from '../../components/ColumnPicker'
+import SortableColumnHeader from '../../components/SortableColumnHeader'
 import { useListColumns } from '../../hooks/useListColumns'
 import { assetColumns } from '../../columns/assets'
 
@@ -45,20 +46,26 @@ export default function AssetListPage() {
   // A lapméret a mentett lista-preferenciából jön (l. useListColumns).
   const [page, setPage]       = useState(1)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty, pageSize: perPage, setPageSize } =
+  const { allColumns, visibleColumns, isVisible, toggle, reorder, reset, isDirty, pageSize: perPage, setPageSize, sort, toggleSort } =
     useListColumns('assets.index', assetColumns, { defaultPageSize: 20 })
 
   async function load(s, pp, pg) {
     setLoading(true)
     try {
-      const res = await assets.list({ search: s || undefined, per_page: pp, page: pg })
+      // Rendezés: a mentett preferenciából (nincs saját rendezés → a végpont a
+      // saját alapértelmezését adja, l. AssetController::SORTABLE_COLUMNS).
+      const res = await assets.list({
+        search: s || undefined, sort_by: sort?.by, sort_dir: sort?.dir, per_page: pp, page: pg,
+      })
       setData(res.data)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { load('', perPage, 1) }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // Ez egyben a MOUNT-effekt is: az első lekérdezés már a mentett rendezéssel
+  // indul. Rendezésváltáskor vissza az első oldalra (l. DocumentListPage).
+  useEffect(() => { setPage(1); load(search, perPage, 1) }, [sort]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleDelete(asset) {
     if (!confirm(`${t('common.delete')}: ${asset.name}?`)) return
@@ -96,7 +103,17 @@ export default function AssetListPage() {
           <thead>
             <tr>
               {visibleColumns.map((col) => (
-                <th key={col.key}>{t(col.label)}</th>
+                col.sortable ? (
+                  <SortableColumnHeader
+                    key={col.key}
+                    label={t(col.label)}
+                    align={col.align}
+                    direction={sort?.by === col.key ? sort.dir : null}
+                    onSort={() => toggleSort(col.key)}
+                  />
+                ) : (
+                  <th key={col.key}>{t(col.label)}</th>
+                )
               ))}
             </tr>
           </thead>

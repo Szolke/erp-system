@@ -6,6 +6,7 @@ import { users as usersApi } from '../../api/users'
 import PerPageSelector from '../../components/PerPageSelector'
 import Pagination from '../../components/Pagination'
 import ColumnPicker from '../../components/ColumnPicker'
+import SortableColumnHeader from '../../components/SortableColumnHeader'
 import { useListColumns } from '../../hooks/useListColumns'
 import { userColumns } from '../../columns/users'
 import JobPositionSelect from '../../components/JobPositionSelect'
@@ -71,18 +72,24 @@ export default function UserListPage() {
   const [form, setForm]         = useState({ name: '', email: '', password: '', job_position_id: null })
   const [formErr, setFormErr]   = useState('')
   const [saving, setSaving]     = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize } =
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize, sort, toggleSort } =
     useListColumns('users.index', userColumns, { defaultPageSize: 20 })
 
   async function load(q = '', pp = perPage, pg = 1) {
     setLoading(true)
     try {
-      const res = await usersApi.list({ search: q || undefined, per_page: pp, page: pg })
+      // Rendezés: a mentett preferenciából (nincs saját rendezés → a végpont a
+      // saját alapértelmezését adja, l. UserController::SORTABLE_COLUMNS).
+      const res = await usersApi.list({
+        search: q || undefined, sort_by: sort?.by, sort_dir: sort?.dir, per_page: pp, page: pg,
+      })
       setData(res.data)
     } finally { setLoading(false) }
   }
 
-  useEffect(() => { load() }, [])
+  // Ez egyben a MOUNT-effekt is: az első lekérdezés már a mentett rendezéssel
+  // indul. Rendezésváltáskor vissza az első oldalra (l. DocumentListPage).
+  useEffect(() => { setPage(1); load(search, perPage, 1) }, [sort]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSearch(e) {
     const v = e.target.value
@@ -193,7 +200,17 @@ export default function UserListPage() {
           <thead>
             <tr>
               {visibleColumns.map((col) => (
-                <th key={col.key}>{t(col.label)}</th>
+                col.sortable ? (
+                  <SortableColumnHeader
+                    key={col.key}
+                    label={t(col.label)}
+                    align={col.align}
+                    direction={sort?.by === col.key ? sort.dir : null}
+                    onSort={() => toggleSort(col.key)}
+                  />
+                ) : (
+                  <th key={col.key}>{t(col.label)}</th>
+                )
               ))}
             </tr>
           </thead>

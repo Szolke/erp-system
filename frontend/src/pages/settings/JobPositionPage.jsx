@@ -4,6 +4,7 @@ import { useTranslation } from '../../contexts/TranslationContext'
 import { useToast } from '../../contexts/ToastContext'
 import { jobPositions as jpApi } from '../../api/jobPositions'
 import ColumnPicker from '../../components/ColumnPicker'
+import SortableColumnHeader from '../../components/SortableColumnHeader'
 import { useListColumns } from '../../hooks/useListColumns'
 import { jobPositionColumns } from '../../columns/jobPositions'
 
@@ -121,19 +122,29 @@ export default function JobPositionPage() {
   const [editId, setEditId]         = useState(null)
   const [saving, setSaving]         = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty } = useListColumns('job_positions.index', jobPositionColumns)
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, sort, toggleSort } =
+    useListColumns('job_positions.index', jobPositionColumns)
 
   async function load() {
     setLoading(true)
     try {
-      const res = await jpApi.list(canManage ? { all: 1 } : undefined)
+      // Rendezés: a mentett preferenciából (nincs saját rendezés → a végpont a
+      // saját alapértelmezését adja, l. JobPositionController::SORTABLE_COLUMNS).
+      // Az `all` az inaktív munkaköröket is behozza — ez a rendezéstől független.
+      const res = await jpApi.list({
+        ...(canManage ? { all: 1 } : {}),
+        sort_by: sort?.by,
+        sort_dir: sort?.dir,
+      })
       setList(res.data.data ?? [])
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // Ez egyben a MOUNT-effekt is: az első lekérdezés már a mentett rendezéssel
+  // indul. A lista nem lapoz, ezért itt nincs oldalszám-visszaállítás.
+  useEffect(() => { load() }, [sort]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleCreate(payload) {
     setSaving(true)
@@ -211,7 +222,17 @@ export default function JobPositionPage() {
           <thead>
             <tr>
               {visibleColumns.map((col) => (
-                <th key={col.key}>{t(col.label)}</th>
+                col.sortable ? (
+                  <SortableColumnHeader
+                    key={col.key}
+                    label={t(col.label)}
+                    align={col.align}
+                    direction={sort?.by === col.key ? sort.dir : null}
+                    onSort={() => toggleSort(col.key)}
+                  />
+                ) : (
+                  <th key={col.key}>{t(col.label)}</th>
+                )
               ))}
             </tr>
           </thead>

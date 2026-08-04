@@ -6,6 +6,7 @@ import { groups as groupsApi } from '../../api/groups'
 import PerPageSelector from '../../components/PerPageSelector'
 import Pagination from '../../components/Pagination'
 import ColumnPicker from '../../components/ColumnPicker'
+import SortableColumnHeader from '../../components/SortableColumnHeader'
 import { useListColumns } from '../../hooks/useListColumns'
 import { groupColumns } from '../../columns/groups'
 import { useToast } from '../../contexts/ToastContext'
@@ -53,13 +54,15 @@ export default function GroupListPage() {
   const [saving, setSaving]     = useState(false)
   // A lapméret a mentett lista-preferenciából jön (l. useListColumns) — ezért
   // nincs külön useState rá, és a load() alapértéke is innen származik.
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize } =
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize, sort, toggleSort } =
     useListColumns('groups.index', groupColumns, { defaultPageSize: 20 })
 
   async function load(pp = perPage, pg = 1) {
     setLoading(true)
     try {
-      const res = await groupsApi.list({ per_page: pp, page: pg })
+      // Rendezés: a mentett preferenciából (nincs saját rendezés → a végpont a
+      // saját alapértelmezését adja, l. GroupController::SORTABLE_COLUMNS).
+      const res = await groupsApi.list({ sort_by: sort?.by, sort_dir: sort?.dir, per_page: pp, page: pg })
       setData(res.data)
     } finally { setLoading(false) }
   }
@@ -69,7 +72,9 @@ export default function GroupListPage() {
     load(value, 1)
   }
 
-  useEffect(() => { load() }, [])
+  // Ez egyben a MOUNT-effekt is: az első lekérdezés már a mentett rendezéssel
+  // indul. Rendezésváltáskor vissza az első oldalra (l. DocumentListPage).
+  useEffect(() => { setPage(1); load(perPage, 1) }, [sort]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleCreate(e) {
     e.preventDefault()
@@ -147,7 +152,17 @@ export default function GroupListPage() {
           <thead>
             <tr>
               {visibleColumns.map((col) => (
-                <th key={col.key}>{t(col.label)}</th>
+                col.sortable ? (
+                  <SortableColumnHeader
+                    key={col.key}
+                    label={t(col.label)}
+                    align={col.align}
+                    direction={sort?.by === col.key ? sort.dir : null}
+                    onSort={() => toggleSort(col.key)}
+                  />
+                ) : (
+                  <th key={col.key}>{t(col.label)}</th>
+                )
               ))}
             </tr>
           </thead>

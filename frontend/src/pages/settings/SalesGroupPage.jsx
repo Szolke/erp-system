@@ -8,6 +8,7 @@ import { company as companyApi } from '../../api/company'
 import Pagination from '../../components/Pagination'
 import PerPageSelector from '../../components/PerPageSelector'
 import ColumnPicker from '../../components/ColumnPicker'
+import SortableColumnHeader from '../../components/SortableColumnHeader'
 import BlameFooter from '../../components/BlameFooter'
 import SalesGroupForm from '../../components/SalesGroupForm'
 import SalesGroupMembersSection from '../../components/SalesGroupMembersSection'
@@ -75,14 +76,16 @@ export default function SalesGroupPage() {
   const [membersDirty, setMembersDirty] = useState(false)
   const [saving, setSaving]         = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize } =
+  const { allColumns, visibleColumns, isVisible, toggle: toggleColumn, reorder, reset: resetColumns, isDirty, pageSize: perPage, setPageSize, sort, toggleSort } =
     useListColumns('sales_groups.index', salesGroupColumns, { defaultPageSize: 20 })
 
   async function load(pp = perPage, pg = page) {
     setLoading(true)
     try {
       const [sgRes, compRes] = await Promise.all([
-        sgApi.list({ per_page: pp, page: pg }),
+        // Rendezés: a mentett preferenciából (nincs saját rendezés → a végpont a
+        // saját alapértelmezését adja, l. SalesGroupController::SORTABLE_COLUMNS).
+        sgApi.list({ sort_by: sort?.by, sort_dir: sort?.dir, per_page: pp, page: pg }),
         companyApi.get(),
       ])
       setData(sgRes.data)
@@ -92,7 +95,9 @@ export default function SalesGroupPage() {
     }
   }
 
-  useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // Ez egyben a MOUNT-effekt is: az első lekérdezés már a mentett rendezéssel
+  // indul. Rendezésváltáskor vissza az első oldalra (l. DocumentListPage).
+  useEffect(() => { setPage(1); load(perPage, 1) }, [sort]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Szerkesztés megnyitása: a blame-adatot a detail-végpontról kérjük.
   // A válasz beírása előtt ellenőrizzük, hogy még mindig ugyanaz a sor van-e
@@ -220,7 +225,17 @@ export default function SalesGroupPage() {
           <thead>
             <tr>
               {visibleColumns.map((col) => (
-                <th key={col.key}>{t(col.label)}</th>
+                col.sortable ? (
+                  <SortableColumnHeader
+                    key={col.key}
+                    label={t(col.label)}
+                    align={col.align}
+                    direction={sort?.by === col.key ? sort.dir : null}
+                    onSort={() => toggleSort(col.key)}
+                  />
+                ) : (
+                  <th key={col.key}>{t(col.label)}</th>
+                )
               ))}
             </tr>
           </thead>

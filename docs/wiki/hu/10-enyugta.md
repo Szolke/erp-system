@@ -21,9 +21,16 @@ jelentést manuálisan nem lehet (és nem is kell) indítani.
 
 ## A jelentések listája
 
-A „NAV eNyugta — Jelentések" oldal szűrhető dátumtartományra és állapotra. A táblázat
-oszlopai (testreszabhatók, ugyanúgy, mint a Bizonylatok listájánál, az „Oszlopok" gombbal):
-nap, típus, állapot, nyugtaszám, bruttó összeg.
+A „NAV eNyugta — Jelentések" oldal szűrhető dátumtartományra és állapotra. A
+dátumtartományt a **Dátum-tartomány** gomb naptár-panelje állítja be, a kijelölés pedig az
+**Alkalmaz** gombra lép életbe. A panel alján, a bal oldalon lévő **Szűrő törlése** gombbal
+a dátumszűrés meg is szüntethető, ha újra a teljes időszakot szeretnéd látni.
+
+A táblázat oszlopai (testreszabhatók, ugyanúgy, mint a Bizonylatok listájánál, az „Oszlopok"
+gombbal): nap, típus, állapot, nyugtaszám, bruttó összeg. A lista **rendezhető is**: a
+rendezhető oszlopok fejlécére kattintva a szokásos három állapot (növekvő → csökkenő →
+alapértelmezett) között vált a sorrend, a Bizonylatoknál megismert módon
+([4. fejezet](04-bizonylatok.md)).
 
 > Az állapot-szűrő öt lehetőséget kínál (Piszkozat, Kész, Beküldés alatt, Elfogadva,
 > Elutasítva), de mivel a tényleges NAV-beküldés ma nem érhető el, a jelentések piszkozat

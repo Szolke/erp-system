@@ -28,6 +28,10 @@ beállítható — mindkettő ugyanúgy működik, mint a Bizonylatok listáján
 cégenként megjegyzi. A **Név** és a **Műveletek** oszlop rögzített: nem kapcsolható ki és
 nem is húzható át máshova.
 
+A lista **rendezhető is**: a rendezhető oszlopok fejlécére kattintva a szokásos három
+állapot (növekvő → csökkenő → alapértelmezett) között vált a sorrend, ugyanott leírt módon.
+A választott rendezést a rendszer az oszlopokkal együtt megjegyzi.
+
 A lista fölötti keresőmező egyszerre keres a **névben, a gyári számban és az IMEI-ben** —
 elég egy részletet beírni, nem kell a teljes azonosító. A találatok száma a táblázat alatt
 látszik („Összesen: N db"), alatta a lapozó.

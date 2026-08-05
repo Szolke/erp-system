@@ -29,6 +29,10 @@ can be set as well — both work the same way as on the Documents list
 company. The **Name** and **Actions** columns are locked: they cannot be hidden and cannot
 be dragged to a different position.
 
+The list **can also be sorted**: clicking a sortable column header cycles through the usual
+three states (ascending → descending → default), as described in the same chapter. Your
+chosen sorting is remembered along with the columns.
+
 The search box above the list searches the **name, the serial number and the IMEI** at the
 same time — a fragment is enough, you don't have to type the full identifier. The number of
 matches appears below the table ("Total: N pcs"), with the pager underneath.

@@ -25,6 +25,10 @@ A csoport egy névvel ellátott jogosultság-csomag. Például: „Pénzügy" cs
 számla/nyugta/fizetés-kezelési jogokat, a „Törzsadatkezelő" csoport a partner/termék/cég
 jogokat.
 
+A csoportok listáján az oszlopok a Bizonylatoknál megismert módon testreszabhatók az
+**Oszlopok** gombbal, és a rendezhető oszlopfejlécekre kattintva a lista rendezhető is
+([4. fejezet](04-bizonylatok.md)).
+
 A csoport részletes oldalán:
 
 - Bejelölhető, hogy a csoport melyik jogosultságokat kapja (modulonként csoportosítva).
@@ -34,7 +38,10 @@ A csoport részletes oldalán:
 
 ## Felhasználók (Beállítások → Felhasználók)
 
-A felhasználók listáján látható minden aktív felhasználó, csoporttagságaikkal.
+A felhasználók listáján látható minden aktív felhasználó, csoporttagságaikkal. Az oszlopok
+itt is testreszabhatók az **Oszlopok** gombbal, és a rendezhető oszlopfejlécekre kattintva a
+lista rendezhető ([4. fejezet](04-bizonylatok.md)) — a **Csoportok** oszlop kivételével,
+amely több csoport nevét fűzi össze, ezért nem rendezhető.
 
 ### Csoporttagság módosítása
 

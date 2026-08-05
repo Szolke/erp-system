@@ -17,6 +17,34 @@ user and per company — switching companies shows that company's own column pre
 
 Click a document number to open its detail page.
 
+### Sorting with the Column Headers
+
+The header of a sortable column is a clickable button with a small arrow icon next to its
+label. Clicking the header cycles the sorting through **three states**:
+
+1. **First click** — the list is sorted by that column.
+2. **Second click** — the same column, in the opposite direction.
+3. **Third click** — back to the list's default sorting (on Documents, issue date
+   descending).
+
+The direction of the first click depends on the column type: text columns start ascending
+(alphabetical), while date, amount, and count columns start descending — so the most recent
+or the largest value comes first. The icon shows the current state: an up arrow means
+ascending, a down arrow descending, and a double (up-down) arrow means this column is not
+being sorted on.
+
+Only one column can be sorted at a time: clicking another header drops the previous sorting.
+**Not every column is sortable** — where the content does not come from a single database
+field (e.g. the Groups column on the user list, or the Before/After values in the audit log),
+the header stays plain text and is not clickable.
+
+Sorting applies to the whole result set, not just the page you are looking at, which is why
+changing it returns the list to page one. Your chosen sorting is remembered per user and per
+company — just like the columns and the page size — so it still applies the next time you
+open the list. Sorting is, however, **not part of a shareable link**: if you send someone the
+list's address, they see their own saved sorting. The column picker's **Reset to default**
+button also resets the sorting.
+
 ---
 
 ## Filters and Search
@@ -40,8 +68,18 @@ Only the type buttons for which the user has the required permission are shown.
 **Search:** text entered in the search box filters by document number and partner name.
 The ✕ button on the right of the search field clears the text and resets the list.
 
-**Date filter:** "Date from" and "Date to" fields narrow the list by issue date. The ✕
-next to the date inputs clears the date range.
+**Date filter:** the **Date range** button (with a calendar icon) in the filter row opens a
+calendar panel that narrows the list by issue date. The panel shows two months side by side:
+the first click marks the start of the range, the second the end (if the second date is
+earlier, the two are swapped). The selection only takes effect when you press **Apply** —
+clicking around the calendar does not filter the list on its own, and **Cancel** discards the
+selection in progress. Once a range is set, the button's label shows it instead of the "Date
+range" placeholder.
+
+The **Clear filter** button at the bottom left of the panel removes the date range condition;
+it stays disabled while no range is set. (The status and currency filters, by contrast, are
+removed from the chip row above the list using the ✕ button — the date range is deliberately
+not shown as a chip.)
 
 **Items per page** (per-page selector): 20, 50, 100, 200, or 500. The selected page size is
 remembered per user and per company, so it still applies the next time you open the list.

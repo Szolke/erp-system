@@ -45,6 +45,10 @@ Each row shows:
 
 These columns can be customised too: the **Columns** button above the list — the same
 way as on the Documents page — lets you show/hide and reorder the individual columns.
+The list **can also be sorted**: clicking a sortable column header cycles through the usual
+three states (ascending → descending → default), exactly as on the Documents list
+([Chapter 4](04-documents.md)). The **Record** and **Before / After values** columns are not
+sortable, because their content is not built from a single database field.
 
 ### Filtering
 

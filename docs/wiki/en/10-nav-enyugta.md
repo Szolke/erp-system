@@ -27,9 +27,15 @@ exist; a new report cannot (and does not need to) be triggered manually.
 
 ## The Reports List
 
-The "NAV eNyugta — Jelentések" page is filterable by date range and status. The table
-columns (customisable the same way as the Documents list, via the Columns button): day,
-type, status, receipt count, gross total.
+The "NAV eNyugta — Jelentések" page is filterable by date range and status. The date range
+is set in the calendar panel behind the **Date range** button, and the selection takes effect
+when you press **Apply**. The **Clear filter** button at the bottom left of the panel removes
+the date filtering again, if you want to see the full period.
+
+The table columns (customisable the same way as the Documents list, via the Columns button):
+day, type, status, receipt count, gross total. The list **can also be sorted**: clicking a
+sortable column header cycles through the usual three states (ascending → descending →
+default), the same way as on the Documents list ([Chapter 4](04-documents.md)).
 
 > The status filter offers five options (Piszkozat / Kész / Beküldés alatt / Elfogadva /
 > Elutasítva — Draft / Ready / Sending / Accepted / Rejected), but since actual NAV

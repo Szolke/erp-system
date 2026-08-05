@@ -18,6 +18,35 @@ oszlop-preferenciáját mutatja.
 
 A bizonylat sorszámára kattintva megnyílik a részletes oldal.
 
+### Rendezés az oszlopfejlécekkel
+
+A rendezhető oszlopok fejléce kattintható gomb, a felirat mellett egy kis nyíl-ikonnal. A
+fejlécre kattintva a rendezés **három állapot között** vált körbe:
+
+1. **Első kattintás** — a lista az adott oszlop szerint rendeződik.
+2. **Második kattintás** — ugyanaz az oszlop, de fordított irányban.
+3. **Harmadik kattintás** — vissza a lista alapértelmezett rendezésére (a Bizonylatoknál ez
+   a kelt szerint csökkenő sorrend).
+
+Az első kattintás iránya oszloptípustól függ: szöveges oszlopnál növekvő (ábécésorrend),
+dátum-, összeg- és darabszám-oszlopnál csökkenő — vagyis a legfrissebb, illetve a legnagyobb
+érték kerül előre. Az ikon mutatja az aktuális állapotot: felfelé mutató nyíl a növekvő,
+lefelé mutató a csökkenő rendezést jelenti, a kettős (fel-le) nyíl pedig azt, hogy ezen az
+oszlopon nincs rendezés.
+
+Egyszerre mindig egy oszlop szerint lehet rendezni: egy másik fejlécre kattintva az előző
+rendezés megszűnik. **Nem minden oszlop rendezhető** — ahol a tartalom nem egyetlen
+adatbázis-mezőből származik (pl. a felhasználók listáján a Csoportok oszlop, az audit
+naplóban az Előző/Új értékek), ott a fejléc sima szöveg marad, nem kattintható.
+
+A rendezés a teljes találati halmazra vonatkozik, nem csak az éppen látott oldalra, ezért
+rendezésváltáskor a lista visszaugrik az első oldalra. A választott rendezést a rendszer — az
+oszlopokhoz és a lapmérethez hasonlóan — felhasználónként és cégenként megjegyzi, tehát a
+lista legközelebbi megnyitásakor is érvényben lesz. A rendezés viszont **nem része a
+megosztható linknek**: ha valakinek elküldöd a lista címét, ő a saját mentett rendezését
+látja. Az oszlopválasztó **Alapértelmezett visszaállítása** gombja a rendezést is
+visszaállítja.
+
 ---
 
 ## Szűrők és keresés
@@ -41,8 +70,18 @@ Csak azok a típusgombok láthatók, amelyekhez a felhasználónak van jogosults
 **Keresés:** a keresőmezőbe beírt szöveg a bizonylat száma és a partner neve szerint szűr.
 A keresőmező jobb szélén lévő ✕ gomb törli a szöveget és visszaállítja a listát.
 
-**Dátumszűrő:** „Dátumtól" és „Dátumig" mezők a kiállítás dátuma szerint szűkítik a listát.
-A szűrők jobb szélén megjelenő ✕ törli a dátumtartomány-feltételt.
+**Dátumszűrő:** a szűrősorban lévő **Dátum-tartomány** gomb (naptár ikonnal) nyit egy
+naptár-panelt, amely a kiállítás dátuma szerint szűkíti a listát. A panelen két hónap
+naptára látszik egymás mellett: az első kattintás a tartomány kezdetét, a második a végét
+jelöli ki (ha a második korábbi dátumra esik, a rendszer felcseréli a kettőt). A kijelölés
+csak az **Alkalmaz** gombra lép életbe — a naptáron kattintgatás önmagában még nem szűri a
+listát, a **Mégsem** gomb pedig eldobja a megkezdett kijelölést. Ha van érvényes tartomány,
+a gomb felirata azt mutatja a „Dátum-tartomány" felirat helyett.
+
+A panel alján, a bal oldalon lévő **Szűrő törlése** gomb szünteti meg a
+dátumtartomány-feltételt; ez a gomb inaktív, amíg nincs beállított tartomány. (A státusz- és
+deviza-szűrő ezzel szemben a lista fölött megjelenő címke-sorból, az ✕ gombbal távolítható
+el — a dátumtartomány szándékosan nem kerül be ebbe a címke-sorba.)
 
 **Oldalanként megjelenítendő elemek száma** (per-page választó): 20, 50, 100, 200 vagy 500.
 A kiválasztott lapméretet a rendszer felhasználónként és cégenként megjegyzi, így a lista

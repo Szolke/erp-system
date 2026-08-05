@@ -42,6 +42,11 @@ Minden sor a következőket mutatja:
 
 Az oszlopok itt is testre szabhatók: a lista feletti **Oszlopok** gombbal — a
 Bizonylatoknál megismert módon — az egyes oszlopok ki-/bekapcsolhatók és átrendezhetők.
+A lista **rendezhető is**: a rendezhető oszlopok fejlécére kattintva a szokásos három
+állapot (növekvő → csökkenő → alapértelmezett) között vált a sorrend, ugyanúgy, mint a
+Bizonylatok listáján ([4. fejezet](04-bizonylatok.md)). A **Rekord**, valamint az
+**Előző/Új értékek** oszlop nem rendezhető, mert tartalmuk nem egyetlen adatbázis-mezőből
+áll össze.
 
 ### Szűrés
 

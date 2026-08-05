@@ -146,6 +146,13 @@ kapott nyers adat is megtekinthető (csak ekkor töltődik be, nem a lista rész
 saját részletező oldalán is megjelenik egy „NAV beküldési előzmények" panel, ami az adott
 számla teljes, időrendi történetét mutatja.
 
+A napló **dátumtartományra is szűkíthető**: a lista feletti **Dátum-tartomány** gomb egy
+naptár-panelt nyit, a kijelölés az **Alkalmaz** gombra lép életbe, a panel alján, a bal
+oldalon lévő **Szűrő törlése** gombbal pedig a dátumszűrés meg is szüntethető. Az oszlopok a
+Bizonylatoknál megismert módon testreszabhatók az **Oszlopok** gombbal, és a rendezhető
+oszlopfejlécekre kattintva a lista rendezhető is ([4. fejezet](04-bizonylatok.md)) — a
+**Kísérletek** oszlop kivételével, amelynek értékét a rendszer utólag számolja ki.
+
 Ez a lista/panel csak a NAV-napló megtekintésére jogosult felhasználóknak látható. Ez KÜLÖN
 jogosultság a NAV felé történő beküldéstől, mert a napló nyers NAV-kommunikációt tartalmaz,
 érzékenyebb, mint maga a számla megtekintése.

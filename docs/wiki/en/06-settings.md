@@ -150,6 +150,13 @@ sent to and received from NAV (loaded only on demand, not as part of the list). 
 invoice's own detail page also shows a "NAV submission history" panel with that invoice's
 full chronological history.
 
+The log can also be **narrowed to a date range**: the **Date range** button above the list
+opens a calendar panel, the selection takes effect when you press **Apply**, and the **Clear
+filter** button at the bottom left of the panel removes the date filtering again. The columns
+can be customised with the **Columns** button the same way as on the Documents page, and the
+list can be sorted by clicking a sortable column header ([Chapter 4](04-documents.md)) — with
+the exception of the **Attempts** column, whose value the system computes afterwards.
+
 This list/panel is only visible to users who may view the NAV log — a SEPARATE permission
 from submitting invoices to NAV, because the log contains raw NAV communication and is
 more sensitive than viewing the invoice itself.

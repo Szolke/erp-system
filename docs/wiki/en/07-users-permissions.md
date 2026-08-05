@@ -25,6 +25,10 @@ A group is a named permission bundle. For example, a "Finance" group might hold
 invoice/receipt/payment permissions, while a "Data Manager" group holds
 partner/product/company/user/group permissions.
 
+On the group list, the columns can be customised with the **Columns** button the same way as
+on the Documents page, and the list can be sorted by clicking a sortable column header
+([Chapter 4](04-documents.md)).
+
 On a group's detail page:
 
 - Check boxes select which permissions the group holds (organised by module).
@@ -34,7 +38,10 @@ On a group's detail page:
 
 ## Users (Settings → Users)
 
-The user list shows all active users with their group memberships.
+The user list shows all active users with their group memberships. Here too the columns can
+be customised with the **Columns** button, and the list can be sorted by clicking a sortable
+column header ([Chapter 4](04-documents.md)) — with the exception of the **Groups** column,
+which joins several group names together and is therefore not sortable.
 
 ### Managing Group Membership
 

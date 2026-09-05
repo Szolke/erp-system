@@ -233,12 +233,17 @@ sorban; a `docs/CHANGELOG.md` frissítése külön, a `docs-sync` skill-lel esed
 >   összefoglaló az, amit az induló munkamenetek olvasnak. A 2026-08-02-i kör ehelyett egy
 >   valódi, addig nem rögzített drift-et javított (superadmin cross-company láthatóság,
 >   l. „Utolsó frissítés").
+> - **NAV eNyugta — 3. fázis (XML-builder + tényleges beküldés)** — TUDATOSAN
+>   HALASZTVA (2026-09-05). Az 1., 2. és 4. fázis KÉSZ; a 3. azért áll, mert a
+>   NAV-spec munkaanyag és az éles indulás körül is változott (legutóbb 2026-09-02).
+>   Részletek: a lentebbi „NAV eNyugta — 3. fázis” szakasz.
 > - **Sandbox-tesztelés (SimplePay / NAV)** — valódi hitelesítők nélkül BLOKKOLT.
 > - **Frontend automatizált tesztelés** — technikailag azonnal folytatható, de a szakasz
 >   maga jelzi, hogy a 3 kör után **csökkenő hozamú**.
 >
-> Egyik tétel sincs KÖVETKEZŐ LÉPÉS-ként megjelölve; a maradék kettő (Sandbox-tesztelés,
-> Frontend automatizált tesztelés) közötti sorrend Szolke döntése.
+> Egyik tétel sincs KÖVETKEZŐ LÉPÉS-ként megjelölve; a maradék három (NAV eNyugta
+> 3. fázis, Sandbox-tesztelés, Frontend automatizált tesztelés) közötti sorrend
+> Szolke döntése.
 
 ### Értékesítő csoportok — 3. fázis (a 2. fázis nyitva hagyott tételei)
 
@@ -336,6 +341,60 @@ naplóban ténylegesen megjelenő ÉRTÉKEK — ezeket idézni kell, nem felolda
 átfed (`invoice.cancel` mindkettőben létezik), ezért kulcs-irtás előtt mindig el kell
 dönteni, melyikről van szó: leíró szövegben álló jogosultság-hivatkozás → feloldandó,
 felületen megjelenő érték → marad.
+
+### NAV eNyugta — 3. fázis (XML-builder + tényleges beküldés): SPEC-STABILIZÁLÁSRA VÁR
+
+Az 1., 2. és 4. fázis KÉSZ (`270e93a`, `f9dc621`, `b790471`) — modul, hitelesítő-kezelés,
+üzemmód, ÁFA-kategória cache, napi összesítő aggregáció, nyugta-zárolás, korrekciós
+logika, CSV-export és a teljes frontend UI (`/settings/enyugta`, `/enyugta/reports`).
+**NYITOTT: kizárólag az XML-builder és a tényleges NAV HTTP-beküldés.**
+
+**Spec-státusz — ellenőrizve 2026-09-05**, a `nav-gov-hu/eRECEIPT` repó nyers fájljai
+alapján (teljes klón + `git log`, nem összefoglalt forrásból):
+
+- A repó README-je szerint a közzétett dokumentáció kifejezetten **munkaanyag**,
+  tartalma a fejlesztői visszajelzések és a notifikációs eljárás alapján még változhat.
+- **Aktuális verziók** (a minket érintő `receipt_datareport` ág):
+  - dokumentum: **v1.3** — `docs/specification/NAV_Nyugta_adatszolgaltatas_IF_specifikacio_v1.3.pdf`
+  - XSD: **v1.1.1** — `xsd/1.1/receipt_datareport/receipt-if-schema-v1.1.1.xsd`
+
+**A `docs/nav-enyugta-spec-jegyzetek.md` ELAVULT — de a saját idejében helyes volt.**
+A jegyzet az `a372dbe` commitot rögzíti (repo-dátum 2026-07-10, letöltés 2026-07-20)
+dokumentum v1.0 / XSD v1.0 verzióval; ez a commit ma is ellenőrizhető a történetben,
+és akkor tényleg az volt a legfrissebb. Azóta két kiadás jött:
+
+| repo-dátum | commit | dokumentum | `receipt_datareport` XSD |
+|---|---|---|---|
+| 2026-07-10 | `a372dbe` (a jegyzet alapja) | v1.0 | v1.0 |
+| 2026-08-27 | `1c97827`, `1ffe9af` | v1.2 | v1.1 |
+| 2026-08-31 | `508bf85` | **v1.3** | **v1.1.1** |
+
+A repó utolsó commitja **2026-09-02** (`1062e52`, elírás-javítás a v1.3 PDF-ben).
+A jegyzet tehát **2 dokumentum- és 2 XSD-verzióval van lemaradva** — a 3. fázis
+megkezdése előtt a felderítést újra kell futtatni. (Megjegyzés: IF-specifikációból
+v1.1 PDF nem létezik, a sor v1.0 → v1.2 → v1.3.)
+
+**Nem tévesztendő össze:** a repóban szerepel `ePenztargep_fejlesztoi_dokumentacio_v1.5.pdf`
+(és angol párja, `e-Cash_Register_Developer_Documentation_English_v1.5.pdf`) — ez az
+**e-pénztárgép** fejlesztői dokumentáció, NEM a nyugtaadat-szolgáltatás M2M interfésze.
+A jegyzet ezt az ágat tudatosan hatókörön kívül hagyta; a `v1.5` verziószám erre
+vonatkozik, nem a mi specifikációnkra.
+
+**Határidők:** az éles kötelezettség **2026.09.01-től él** — ma 2026-09-05, tehát
+**már fut** —, a szankciómentes átállási időszak **2026.12.31-ig** tart.
+
+**DÖNTÉS (2026-09-05):** a 3. fázist egyelőre **NEM kezdjük el**, amíg a séma nem
+stabilizálódik, vagy amíg a 2026.12.31-i határidő közelebb nem kerül. Addig csak a
+repót követjük verzióváltásért. A döntést erősíti, hogy a spec **az éles indulás körül
+is aktívan változott** (2026-08-27, 08-31, 09-01, 09-02) — egy most megírt XML-builder
+nagy eséllyel azonnal elavulna. A kapcsolódó modul a NAV Online Számla 3.0 integráció
+mellé kerül; az auth-modell már ennek megfelelően épült (külön
+`company_enyugta_credentials` tábla + `POST /api/settings/enyugta/copy-from-nav`).
+
+**Technikai blokkolók (a halasztási döntéstől függetlenül is fennállnak):**
+
+- a `requestSignature` konkatenációs képletét a spec nem dokumentálja (l. 1. fázis);
+- nincs publikus bázis-URL, a sandbox elérhetősége megerősítetlen.
 
 ### Sandbox-tesztelés (valódi hitelesítők szükségesek, élesítés előtt)
 

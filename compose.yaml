@@ -16,8 +16,8 @@ services:
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
-            - '${APP_PORT:-80}:80'
-            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+            - '127.0.0.1:${APP_PORT:-80}:80'
+            - '127.0.0.1:${VITE_PORT:-5173}:${VITE_PORT:-5173}'
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
@@ -35,7 +35,7 @@ services:
     pgsql:
         image: 'postgres:18-alpine'
         ports:
-            - '${FORWARD_DB_PORT:-5432}:5432'
+            - '127.0.0.1:${FORWARD_DB_PORT:-5432}:5432'
         environment:
             PGPASSWORD: '${DB_PASSWORD:-secret}'
             POSTGRES_DB: '${DB_DATABASE}'
@@ -54,7 +54,7 @@ services:
     redis:
         image: 'redis:alpine'
         ports:
-            - '${FORWARD_REDIS_PORT:-6379}:6379'
+            - '127.0.0.1:${FORWARD_REDIS_PORT:-6379}:6379'
         volumes:
             - 'sail-redis:/data'
         networks:
@@ -71,7 +71,7 @@ services:
         working_dir: /app
         command: sh -c "npm install && npm run dev -- --host"
         ports:
-            - '5174:5173'
+            - '127.0.0.1:5174:5173'
         volumes:
             - './frontend:/app'
             - './docs/wiki:/app/wiki'

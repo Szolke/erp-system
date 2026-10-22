@@ -25,7 +25,7 @@
 - SOHA ne dolgozz vagy hozz létre fájlokat a `/mnt/c/` vagy Windows-os elérési úton.
 - A host `npm` a Windows-oldali Node telepítésre mutat (`/mnt/c/...` alatt) — natív Linux útvonalon EISDIR/EPERM hibával elszáll. Ezért MINDEN frontend npm-műveletet (telepítés, csomag hozzáadása, build) a `frontend` konténerben futtass: `docker compose exec frontend npm install <csomag>`. Ez nem preferencia, hanem környezeti kényszer.
 - Docker Compose alapú (`compose.yaml` a gyökérben): `laravel.test`, `pgsql` (PostgreSQL 18), `redis`, frontend szolgáltatások.
-- A compose-projekt a repó GYÖKERÉBŐL fut. A `./vendor/bin/sail` a `backend/` alkönyvtárból nem indul ("Sail is not running") — a gyökérből futtasd, vagy használd a `docker compose exec laravel.test php artisan ...` formát.
+- A compose-projekt a repó GYÖKERÉBŐL fut. A `backend/` alkönyvtárból indított `docker compose` és `./vendor/bin/sail` is a gyökér `compose.yaml`-t oldja fel (a Compose felfelé keresi a projektfájlt), mióta az elavult `backend/compose.yaml` törölve van — a kanonikus használat viszont továbbra is a gyökérből: `docker compose exec laravel.test php artisan ...`, vagy a gyökérből `./vendor/bin/sail ...`.
 - A `laravel.test` konténer NEM-ROOTKÉNT fut (`sail`, a host UID/GID-jén — l. `compose.yaml` `user:` + Dockerfile `USER sail`), ezért a `docker compose exec laravel.test php artisan ...` forma is `sail`-ként fut, és nem hagy root tulajdonú fájlt a bind-mountolt `backend/` alatt. Root-ot igénylő karbantartáshoz EXPLICIT kell kérni: `docker compose exec -u root laravel.test ...`.
 - Backend: http://localhost
 - Frontend: http://localhost:5174

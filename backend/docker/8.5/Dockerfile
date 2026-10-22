@@ -74,6 +74,11 @@ RUN apt-get update && apt-get upgrade -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# A build elbukik PHP2Shell-érintett PHP-n (CVE-2026-109618/109619).
+# Szinkronban tartandó a scripts/dev-up.sh MIN_PHP értékével.
+ARG PHP_MIN_VERSION=8.5.12
+RUN php -r 'if (version_compare(PHP_VERSION, getenv("PHP_MIN_VERSION"), "<")) { fwrite(STDERR, "PHP " . PHP_VERSION . " < " . getenv("PHP_MIN_VERSION") . " (PHP2Shell)\n"); exit(1); }'
+
 RUN if [ -n "$PHP_EXTENSIONS" ]; then \
     apt-get update \
     && apt-get install -y $(for ext in $PHP_EXTENSIONS; do echo "php8.5-$ext"; done) \
